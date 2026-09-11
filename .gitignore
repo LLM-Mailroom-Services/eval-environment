@@ -7,9 +7,12 @@ build/
 dist/
 
 # Eval artifacts (append-only logs are regenerable; run dirs are local)
-data/experiments/
+data/
 reports/
 hf_cache/
+*.db
+*.db-wal
+*.db-shm
 
 # Env & secrets
 .env

@@ -21,7 +21,7 @@ import json
 import os
 import tempfile
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
 import structlog
 
@@ -53,7 +53,39 @@ TASK_SPECIALIST: dict[str, str] = {
     "insurance_claims": "insurance_claims_specialist",
 }
 
+# Calibration task names alias the eval node behaviors (same node, decision-
+# focused scoring). retry probes the extract node; classify probes classify.
+_CALIBRATION_ALIAS: dict[str, str] = {
+    "classify": "classification",
+    "judge": "judge_arbiter",
+    "retry": "__extract__",
+    "intake": "intake",
+    "boss": "boss",
+    "arbiter": "arbiter",
+    "archivist": "archivist",
+}
+
+
+def _canonical_task(task: str) -> str:
+    """Map calibration task names onto the node behaviors they probe."""
+    if task in _CALIBRATION_ALIAS:
+        aliased = _CALIBRATION_ALIAS[task]
+        if aliased == "__extract__":
+            return task  # retry keeps its own extract-based path below
+        return aliased
+    return task
+
 _BASE_DIR_STACK: list[str] = []
+
+
+def drain_daemons(seconds: float = 1.0) -> None:
+    """Let off-path daemon threads (relations scan, echo dispatch) finish
+    their DB writes while MAILROOM_BASE_DIR still points at the isolated
+    temp dir — otherwise they land writes in the restored (real) base dir
+    after the run exits."""
+    import time as _time
+
+    _time.sleep(max(0.0, seconds))
 
 
 class Isolation:
@@ -63,13 +95,13 @@ class Isolation:
         self._prev: str | None = None
         self._tmp: tempfile.TemporaryDirectory | None = None
 
-    def __enter__(self) -> "Isolation":
+    def __enter__(self) -> Self:
         self._prev = os.environ.get("MAILROOM_BASE_DIR")
         self._tmp = tempfile.TemporaryDirectory(prefix="mailroom-evals-")
         os.environ["MAILROOM_BASE_DIR"] = self._tmp.name
         return self
 
-    def __exit__(self, *args: Any) -> None:
+    def __exit__(self, *args: object) -> None:
         if self._prev is not None:
             os.environ["MAILROOM_BASE_DIR"] = self._prev
         else:
@@ -129,10 +161,15 @@ def install_mocks() -> None:
 
 
 def _write_case_text(case: dict[str, Any], base_dir: Path) -> Path:
-    """Materialize the case text as a file (nodes read from disk)."""
+    """Materialize the case text as a file (nodes read from disk).
+
+    Corpus filenames may carry path separators (e.g. Enron thread paths) —
+    flatten them so the case file always lands directly in the inbox.
+    """
     inbox = base_dir / "inbox"
     inbox.mkdir(parents=True, exist_ok=True)
-    filename = str(case.get("filename") or "case.txt")
+    raw_name = str(case.get("filename") or "case.txt")
+    filename = raw_name.replace("/", "_").replace("\\", "_").strip() or "case.txt"
     path = inbox / filename
     path.write_text(str(case.get("text") or ""), encoding="utf-8")
     return path
@@ -173,6 +210,35 @@ def build_state(case: dict[str, Any], *, doc_type: str | None = None) -> dict[st
 def _invoke_node(task: str, case: dict[str, Any]) -> dict[str, Any]:
     from graph import build_graph as bg
 
+    task = _canonical_task(task)
+    if task == "pipeline_chain":
+        # Full 13-node graph, one document end-to-end (isolated base dir).
+        from graph.build_graph import reset_compiled_graph, run_pipeline
+
+        base_dir = Path(os.environ["MAILROOM_BASE_DIR"])
+        file_path = _write_case_text(case, base_dir)
+        ground_truth = None
+        if case.get("expected_doc_class"):
+            ground_truth = {"expected": case.get("expected_doc_class")}
+            if case.get("expected_subclass"):
+                ground_truth["expected_subclass"] = case.get("expected_subclass")
+        try:
+            result = run_pipeline(
+                file_path,
+                matter_id=str(case.get("row", {}).get("matter_id") or "EVAL"),
+                ground_truth=ground_truth,
+            )
+        finally:
+            reset_compiled_graph()
+        return {
+            "stage": result.get("stage"),
+            "doc_type": result.get("doc_type"),
+            "extracted_data": result.get("extracted_data"),
+            "classification_confidence": result.get("classification_confidence"),
+            "extraction_confidence": result.get("extraction_confidence"),
+            "review_decision": result.get("review_decision"),
+            "error_message": result.get("error_message"),
+        }
     if task == "intake":
         update = bg.intake_node(build_state(case))
         return _intake_result(case, update)
@@ -219,6 +285,15 @@ def _invoke_node(task: str, case: dict[str, Any]) -> dict[str, Any]:
         state["conflict_detected"] = True
         update = bg.boss_escalation_node(state)
         return {"decision": update.get("review_decision")}
+    if task == "retry":
+        # Retry calibration probes the extract node on failure-shaped fixtures.
+        state = build_state(case, doc_type=case.get("expected_doc_class"))
+        update = bg.extract_node(state)
+        return {
+            "extracted_data": update.get("extracted_data"),
+            "extraction_confidence": update.get("extraction_confidence"),
+            "doc_type": update.get("doc_type", state.get("doc_type")),
+        }
     if task == "archivist":
         from pipeline.bins import archive_dir, manifests_dir
 
@@ -255,9 +330,34 @@ def _intake_result(case: dict[str, Any], update: dict[str, Any]) -> dict[str, An
     }
 
 
+def _specialist_for_class(doc_class: str) -> str | None:
+    return {
+        "contract": "contracts_specialist",
+        "merger_agreement": "contracts_specialist",
+        "corporate_record": "corporate_records_specialist",
+        "correspondence": "correspondence_specialist",
+        "compliance_filing": "compliance_specialist",
+        "insurance_claim": "insurance_claims_specialist",
+    }.get(doc_class)
+
+
 def _invoke_agent(task: str, case: dict[str, Any]) -> dict[str, Any]:
     text = str(case.get("text") or "")
     doc_class = str(case.get("expected_doc_class") or "")
+    task = _canonical_task(task)
+    if task == "retry":
+        # Retry calibration probes the specialist on failure-shaped fixtures.
+        specialist = TASK_SPECIALIST.get(_specialist_for_class(doc_class), "contracts_specialist")
+        import importlib
+
+        mod_name, cls_name = _SPECIALIST_CLASSES[specialist]
+        cls = getattr(importlib.import_module(mod_name), cls_name)
+        result = cls().extract(text)
+        return {
+            "extracted_data": result,
+            "extraction_confidence": result.get("confidence") if isinstance(result, dict) else None,
+            "doc_type": doc_class,
+        }
     if task == "intake":
         from agents.intake import IntakeAgent
 

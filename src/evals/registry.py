@@ -61,7 +61,7 @@ PILOT_TASKS: tuple[TaskSpec, ...] = tuple(
         spec.name,
         "pilot",
         spec.node_name,
-        "pilot" if spec.name != "pipeline_chain" else "pilot",
+        "pilot",
         spec.scorer,
         f"[pilot] {spec.description}",
         spec.supports_agent_mode,

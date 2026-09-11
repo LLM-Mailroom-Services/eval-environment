@@ -12,17 +12,15 @@ a run; they log warnings and surface in ``flush_health``.
 
 from __future__ import annotations
 
-import json
 import time
+from datetime import UTC
 from pathlib import Path
 from typing import Any
 
 import structlog
 
-from . import experiment_log
+from . import experiment_log, scoring, tracing
 from . import invoke as invoke_mod
-from . import scoring
-from . import tracing
 from .cases import load_cases
 from .registry import TaskSpec, get_task
 
@@ -91,6 +89,7 @@ def run_task(
     run_dir: Path | None = None,
     dry_run: bool = False,
     pilot: bool = False,
+    resume_run_id: str | None = None,
 ) -> RunResult:
     """Execute one task. Returns the run summary + per-case rows."""
     spec = get_task(task_id)
@@ -109,11 +108,20 @@ def run_task(
         subset = f"pilot-preset({subset})"
     else:
         cases, dataset_prov = load_cases(subset, sample=sample, seed=seed, n=n)
+
+    # Resume: skip cases already recorded in a previous (interrupted) run and
+    # append to that run's case file instead of starting a new run id.
+    prior_ids: set[str] = set()
+    if resume_run_id:
+        prior = experiment_log.load_cases(resume_run_id)
+        prior_ids = {row.get("case_id") for row in prior if row.get("case_id")}
+        cases = [case for case in cases if case["id"] not in prior_ids]
+        run_dir = run_dir or (experiment_log.experiments_dir() / resume_run_id)
     if dry_run:
         cases = cases[:1]
 
     summary: dict[str, Any] = {
-        "run_id": experiment_log.new_run_id(spec.family, spec.name),
+        "run_id": resume_run_id or experiment_log.new_run_id(spec.family, spec.name),
         "family": spec.family,
         "task": spec.name,
         "invoke": invoke_mode,
@@ -129,6 +137,8 @@ def run_task(
             "n": n,
             "dry_run": dry_run,
             "scorer": spec.scorer,
+            "resumed_from": resume_run_id,
+            "skipped_already_run": len(prior_ids),
         },
         "dataset": {
             **dataset_prov,
@@ -151,6 +161,10 @@ def run_task(
                     mock=mock, model=model, prompt_version=prompt_version,
                     summary=summary,
                 )
+                # Off-path writes (relations daemon, async-deferred audit/catalog
+                # coroutines) must land inside the isolated base dir — drain
+                # before the env is restored, for every task.
+                invoke_mod.drain_daemons(1.0 if spec.name == "pipeline_chain" else 0.5)
     except Exception as exc:
         error = f"{type(exc).__name__}: {exc}"
         logger.exception("evals_run_failed", task=spec.task_id)
@@ -176,9 +190,9 @@ def run_task(
 
 def _calibration_block(spec: TaskSpec, case_rows: list[dict[str, Any]]) -> dict[str, Any]:
     """Run the node's calibration analyzer over the case rows + write the report."""
-    from datetime import datetime, timezone
+    from datetime import datetime
 
-    from .calibration import archivist, arbiter, boss, classify, intake, judge, retry
+    from .calibration import arbiter, archivist, boss, classify, intake, judge, retry
 
     analyzers = {
         "calibration_classify": classify,
@@ -197,7 +211,7 @@ def _calibration_block(spec: TaskSpec, case_rows: list[dict[str, Any]]) -> dict[
     except Exception:
         logger.exception("calibration_analyze_failed", task=spec.task_id)
         return {"error": "analyzer failed — see logs"}
-    analysis["generated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    analysis["generated_at"] = datetime.now(UTC).isoformat(timespec="seconds")
     analysis["n_cases"] = len(case_rows)
     analysis["errors"] = sum(1 for r in case_rows if r.get("error"))
     try:

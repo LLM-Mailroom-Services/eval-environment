@@ -10,9 +10,11 @@ from __future__ import annotations
 
 import json
 import random
-from datetime import datetime, timezone
+from collections.abc import Callable
+from datetime import UTC, datetime
+from itertools import pairwise
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 import structlog
 
@@ -25,7 +27,7 @@ BIN_EDGES: tuple[float, ...] = (0.0, 0.5, 0.7, 0.8, 0.9, 0.95, 1.0)
 def bin_label(confidence: float | None) -> str:
     if confidence is None:
         return "none"
-    for lo, hi in zip(BIN_EDGES, BIN_EDGES[1:]):
+    for lo, hi in pairwise(BIN_EDGES):
         if lo <= confidence < hi or (hi == 1.0 and confidence <= 1.0 and confidence >= lo):
             return f"{lo:.2f}-{hi:.2f}"
     return "none"
@@ -47,7 +49,7 @@ def reliability_table(
         n, hits = bins.get(label, (0, 0))
         bins[label] = (n + 1, hits + int(bool(correct)))
     out = []
-    for label in [f"{lo:.2f}-{hi:.2f}" for lo, hi in zip(BIN_EDGES, BIN_EDGES[1:])]:
+    for label in [f"{lo:.2f}-{hi:.2f}" for lo, hi in pairwise(BIN_EDGES)]:
         if label in bins:
             n, hits = bins[label]
             out.append({"bin": label, "n": n, "accuracy": round(hits / n, 4)})
@@ -143,7 +145,7 @@ def write_report(
     report_dir: Path | None = None,
 ) -> tuple[Path, Path]:
     """Write the calibration JSON+MD report; returns (json_path, md_path)."""
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     base = (report_dir or Path("reports") / "calibration" / task) / stamp
     base.mkdir(parents=True, exist_ok=True)
     json_path = base / "report.json"

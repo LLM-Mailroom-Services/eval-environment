@@ -18,7 +18,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -53,7 +53,7 @@ _SUMMARY_KEYS = (
 
 
 def utc_now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 def jsonl_path() -> Path:
@@ -73,12 +73,12 @@ def git_snapshot() -> dict[str, Any]:
     try:
         commit = subprocess.run(
             ["git", "rev-parse", "--short", "HEAD"],
-            capture_output=True, text=True, timeout=10,
+            capture_output=True, text=True, timeout=10, check=False,
         ).stdout.strip()
         dirty = bool(
             subprocess.run(
                 ["git", "status", "--porcelain"],
-                capture_output=True, text=True, timeout=10,
+                capture_output=True, text=True, timeout=10, check=False,
             ).stdout.strip()
         )
         return {"commit": commit or None, "dirty": dirty}
@@ -87,7 +87,7 @@ def git_snapshot() -> dict[str, Any]:
 
 
 def new_run_id(family: str, task: str) -> str:
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     return f"{stamp}-{family}-{task}"
 
 
@@ -314,4 +314,23 @@ def write_markdown(path: Path | None = None) -> Path:
     target = path or md_path()
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(render_full_log(), encoding="utf-8")
+    return target
+
+
+def export_run(run_id: str, fmt: str = "csv", path: Path | None = None) -> Path | None:
+    """Export one run's case rows as csv/parquet (pandas round-trip)."""
+    rows = load_cases(run_id)
+    if not rows:
+        return None
+    import pandas as pd
+
+    frame = pd.json_normalize(rows, sep=".")
+    if fmt == "parquet":
+        target = path or (experiments_dir() / run_id / "cases.parquet")
+        frame.to_parquet(target, index=False)
+    elif fmt == "csv":
+        target = path or (experiments_dir() / run_id / "cases.csv")
+        frame.to_csv(target, index=False)
+    else:
+        raise ValueError(f"unknown export format {fmt!r} (csv|parquet)")
     return target

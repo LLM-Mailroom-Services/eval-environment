@@ -21,8 +21,9 @@ Tracing failures log warnings and never fail a run.
 from __future__ import annotations
 
 import os
+from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import Any, Iterator
+from typing import Any, Self
 
 import structlog
 
@@ -110,16 +111,16 @@ def _curate_case_input(case: dict[str, Any]) -> dict[str, Any]:
 class _NoopSpan:
     name = ""
 
-    def set_output(self, output: dict[str, Any]) -> "Any":
+    def set_output(self, output: dict[str, Any]) -> Any:
         return self
 
-    def set_metrics(self, metrics: dict[str, float]) -> "Any":
+    def set_metrics(self, metrics: dict[str, float]) -> Any:
         return self
 
-    def __enter__(self) -> "_NoopSpan":
+    def __enter__(self) -> Self:
         return self
 
-    def __exit__(self, *args: Any) -> None:
+    def __exit__(self, *args: object) -> None:
         pass
 
 

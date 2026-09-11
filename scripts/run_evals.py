@@ -25,12 +25,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from pipeline.env import load_env  # noqa: E402
+from pipeline.env import load_env
 
 load_env()
 
-from evals.registry import list_tasks  # noqa: E402
-from evals.runner import run_task  # noqa: E402
+from evals.registry import list_tasks
+from evals.runner import run_task
 
 
 def main() -> int:
@@ -50,6 +50,10 @@ def main() -> int:
     parser.add_argument("--prompt-version", default=None, help="prompt version tag for iteration A/Bs")
     parser.add_argument("--concurrency", type=int, default=1)
     parser.add_argument("--dry-run", action="store_true", help="load + invoke one case only")
+    parser.add_argument("--resume", default=None, metavar="RUN_ID",
+                        help="resume an interrupted run: skip its recorded cases, append to its log")
+    parser.add_argument("--export", choices=("csv", "parquet"), default=None, metavar="FMT",
+                        help="export the run's case rows to cases.csv/.parquet")
     parser.add_argument("--json", action="store_true", help="print the run summary as JSON")
     args = parser.parse_args()
 
@@ -77,7 +81,14 @@ def main() -> int:
             concurrency=args.concurrency,
             dry_run=args.dry_run,
             pilot=args.task.startswith("pilot:"),
+            resume_run_id=args.resume,
         )
+        if args.export:
+            from evals import experiment_log
+
+            exported = experiment_log.export_run(result.run_id, args.export)
+            if exported:
+                print(f"  exported: {exported}")
         summary = result.summary
         if args.json:
             print(json.dumps(summary, indent=2, default=str))

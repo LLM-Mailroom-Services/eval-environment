@@ -117,9 +117,7 @@ def _expected_fields(row: dict[str, Any]) -> dict[str, Any]:
                 fields[key] = value
     for key in ("cuad_clause_labels", "maud_clause_labels"):
         value = row.get(key)
-        if isinstance(value, list) and value:
-            fields[key] = value
-        elif isinstance(value, str) and value.strip():
+        if isinstance(value, list) and value or isinstance(value, str) and value.strip():
             fields[key] = value
     return fields
 
@@ -190,7 +188,12 @@ def _rows_for_config(config: str) -> list[dict[str, Any]]:
 
 
 def _rows_for_family_corpus(alias: str) -> list[dict[str, Any]]:
-    """Rows from a family corpus (pilot/cuad/enron/claims) via the corpora registry."""
+    """Rows from a family corpus (pilot/cuad/enron/claims) via the corpora registry.
+
+    Family corpora split labels (``ground_truth``) from text (``default``) the
+    same way the main corpus does — join on ``filename`` when both configs
+    exist; fall back to whichever loads.
+    """
     slug = _SUBSET_CORPUS[alias]
     corp = resolve_corpus(slug)
     rows: list[dict[str, Any]] = []
@@ -198,15 +201,27 @@ def _rows_for_family_corpus(alias: str) -> list[dict[str, Any]]:
         try:
             frame, _prov = load_config_frame(corp["id"], "ground_truth", split=split)
         except Exception:
-            try:
-                frame, _prov = load_config_frame(corp["id"], "default", split=split)
-            except Exception:
-                continue
-        for raw in frame.to_dict(orient="records"):
-            row = adapt_hub_row(raw, corp)
-            row.setdefault("expected", corp.get("default_class") or row.get("expected"))
-            rows.append(row)
-    return rows
+            frame = None
+        try:
+            blind, _bprov = load_config_frame(corp["id"], "default", split=split)
+        except Exception:
+            blind = None
+        if frame is None and blind is None:
+            continue
+        if frame is not None and blind is not None and "doc_text" in blind.columns:
+            text_cols = [c for c in blind.columns if c not in ("filename",)]
+            merged = frame.merge(
+                blind[["filename", *text_cols]], on="filename", how="left", validate="one_to_one"
+            )
+            rows.extend(merged.to_dict(orient="records"))
+        else:
+            rows.extend((frame if frame is not None else blind).to_dict(orient="records"))
+    out: list[dict[str, Any]] = []
+    for raw in rows:
+        row = adapt_hub_row(raw, corp)
+        row.setdefault("expected", corp.get("default_class") or row.get("expected"))
+        out.append(row)
+    return out
 
 
 def stratified_sample(rows: list[dict[str, Any]], n: int, *, seed: int, by: str = "expected") -> list[dict[str, Any]]:
@@ -217,8 +232,8 @@ def stratified_sample(rows: list[dict[str, Any]], n: int, *, seed: int, by: str 
     for row in rows:
         strata.setdefault(str(row.get(by) or ""), []).append(row)
     rng = random.Random(seed)
-    for key in strata:
-        rng.shuffle(strata[key])
+    for key, bucket in strata.items():
+        rng.shuffle(bucket)
     keys = sorted(strata)
     out: list[dict[str, Any]] = []
     i = 0

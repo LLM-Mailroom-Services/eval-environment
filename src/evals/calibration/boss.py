@@ -9,8 +9,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from . import base
-
 
 def analyze(rows: list[dict[str, Any]]) -> dict[str, Any]:
     decisions: dict[str, int] = {}

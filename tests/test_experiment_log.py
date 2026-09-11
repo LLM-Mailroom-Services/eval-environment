@@ -7,6 +7,8 @@ from evals import experiment_log
 
 def _summary() -> dict:
     return {
+        "schema_version": experiment_log.SCHEMA_VERSION,
+        "record_kind": "run_summary",
         "run_id": experiment_log.new_run_id("eval", "classification"),
         "family": "eval",
         "task": "classification",

@@ -31,7 +31,7 @@ def _p95(values: list[float]) -> float | None:
     if not values:
         return None
     ordered = sorted(values)
-    idx = max(0, min(len(ordered) - 1, int(round(0.95 * (len(ordered) - 1)))))
+    idx = max(0, min(len(ordered) - 1, round(0.95 * (len(ordered) - 1))))
     return round(ordered[idx], 1)
 
 
@@ -69,7 +69,7 @@ def score_extraction(doc_class: str, predicted: dict, expected: dict) -> dict[st
     if not expected:
         return {"overall_score": None, "n_expected_fields": 0}
     try:
-        from observability.field_scoring import get_field_types
+        from llm_dojo_scoring.field_scoring import get_field_types
         from observability.suite_scoring import score_with_suite
 
         result, extras = score_with_suite(
@@ -142,6 +142,7 @@ def score_intake(result: dict[str, Any], case: dict[str, Any]) -> dict[str, Any]
         "no_truncation": int(len(cleaned) >= len(original) * 0.98),
         "messy_flag": int(bool(looks_messy(original))),
         "triage_class": triage.get("primary_doc_class"),
+        "triage_agrees": None,
     }
     expected_class = case.get("expected_doc_class")
     if expected_class and triage.get("primary_doc_class"):
@@ -195,7 +196,7 @@ def score_arbiter(prediction: dict[str, Any], case: dict[str, Any]) -> dict[str,
         scored["decision_agrees"] = int(
             scored["decision"] == outcome_map.get(str(expected_outcome).strip().lower(), "")
         )
-    return out
+    return scored
 
 
 def score_pipeline(result: dict[str, Any], case: dict[str, Any]) -> dict[str, Any]:
@@ -254,16 +255,27 @@ def summarize_performance(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def summarize_scores(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    """Mean over every numeric score_* key present in the case rows."""
+    """Mean over every numeric score key present in the case rows.
+
+    Rows may carry scores nested under ``scores`` (runner shape) or flat.
+    """
+    def scores_of(row: dict[str, Any]) -> dict[str, Any]:
+        nested = row.get("scores")
+        return {**nested, **{k: v for k, v in row.items() if k != "scores"}} if isinstance(nested, dict) else row
+
     keys: set[str] = set()
     for row in rows:
-        keys.update(k for k in row if k.startswith(("class_", "subclass_", "overall_", "judge_", "decision_", "stage_", "archived_", "audit_", "sha256_", "triage_", "no_truncation", "messy_", "cuad_", "maud_", "key_")))
+        keys.update(
+            k for k, v in scores_of(row).items()
+            if isinstance(v, (int, float)) and not isinstance(v, bool)
+            and (k.startswith(("class_", "subclass_", "overall_", "judge_", "decision_", "stage_", "archived_", "audit_", "sha256_", "triage_", "no_truncation", "messy_", "cuad_", "maud_", "key_")) or k.endswith(("_correct", "_valid", "_agrees", "_ok")))
+        )
     out: dict[str, Any] = {"n": len(rows)}
     for key in sorted(keys):
         values = [
-            float(r[key])
+            float(scores_of(r)[key])
             for r in rows
-            if isinstance(r.get(key), (int, float)) and not isinstance(r.get(key), bool)
+            if isinstance(scores_of(r).get(key), (int, float)) and not isinstance(scores_of(r).get(key), bool)
         ]
         mean = _mean(values)
         if mean is not None:

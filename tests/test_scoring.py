@@ -11,8 +11,9 @@ def test_classification_gold():
 
 
 def test_classification_alias_match():
-    scored = scoring.score_classification("merger_agreement", "merger agreement")
-    assert scored["class_correct"] == 1
+    # classes_match is exact-normalized (lowercase) — MAUD is not CUAD.
+    assert scoring.score_classification("contract", "Contract")["class_correct"] == 1
+    assert scoring.score_classification("merger_agreement", "contract")["class_correct"] == 0
 
 
 def test_classification_miss():

@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "mailroom-evals experiment record (v1)",
+  "oneOf": [
+    { "$ref": "#/$defs/run_summary" },
+    { "$ref": "#/$defs/case" }
+  ],
+  "$defs": {
+    "run_summary": {
+      "type": "object",
+      "required": ["schema_version", "record_kind", "run_id", "family", "task", "mode", "started_at", "finished_at", "dataset", "metrics"],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "record_kind": { "const": "run_summary" },
+        "run_id": { "type": "string" },
+        "family": { "enum": ["eval", "pilot", "calibration"] },
+        "task": { "type": "string" },
+        "invoke": { "enum": ["node", "agent", null] },
+        "mode": { "enum": ["mock", "real"] },
+        "model": { "type": ["string", "null"] },
+        "prompt_version": { "type": ["string", "null"] },
+        "trace_backend": { "enum": ["braintrust", "phoenix", "none", null] },
+        "trace_ids": { "type": ["object", "null"] },
+        "dataset": {
+          "type": "object",
+          "properties": {
+            "repo": { "type": "string" },
+            "config": { "type": ["string", "null"] },
+            "split": { "type": ["string", "null"] },
+            "revision": { "type": ["string", "null"] },
+            "subset": { "type": ["string", "null"] },
+            "n_selected": { "type": "integer" },
+            "n_total": { "type": "integer" },
+            "seed": { "type": ["integer", "null"] }
+          }
+        },
+        "git": {
+          "type": "object",
+          "properties": {
+            "commit": { "type": ["string", "null"] },
+            "dirty": { "type": ["boolean", "null"] }
+          }
+        },
+        "started_at": { "type": "string" },
+        "finished_at": { "type": "string" },
+        "duration_s": { "type": ["number", "null"] },
+        "params": { "type": "object" },
+        "metrics": { "type": "object" },
+        "performance": { "type": "object" },
+        "calibration": { "type": ["object", "null"] },
+        "cases_ref": { "type": ["string", "null"] },
+        "cases_embedded": { "type": "array" },
+        "error": { "type": ["string", "null"] }
+      }
+    },
+    "case": {
+      "type": "object",
+      "required": ["schema_version", "record_kind", "run_id", "case_id"],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "record_kind": { "const": "case" },
+        "run_id": { "type": "string" },
+        "case_id": { "type": "string" },
+        "filename": { "type": ["string", "null"] },
+        "expected_doc_class": { "type": ["string", "null"] },
+        "expected_subclass": { "type": ["string", "null"] },
+        "prediction": { "type": ["object", "null"] },
+        "scores": { "type": "object" },
+        "latency_ms": { "type": ["number", "null"] },
+        "tokens": { "type": ["object", "null"] },
+        "cost_usd": { "type": ["number", "null"] },
+        "trace": { "type": ["object", "null"] },
+        "error": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

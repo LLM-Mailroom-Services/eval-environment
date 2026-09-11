@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+build/
+dist/
+
+# Eval artifacts (append-only logs are regenerable; run dirs are local)
+data/experiments/
+reports/
+hf_cache/
+
+# Env & secrets
+.env
+*.key
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

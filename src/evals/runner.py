@@ -43,6 +43,10 @@ class RunResult:
 
 
 def _score_case(task: str, scorer: str, case: dict[str, Any], prediction: dict[str, Any]) -> dict[str, Any]:
+    # Calibration tasks alias their eval node's scorer (same node, decision-
+    # focused analysis downstream in evals.calibration.*) — the per-case
+    # score surface is the node's own.
+    scorer = _CALIBRATION_SCORER_ALIAS.get(scorer, scorer)
     doc_class = str(case.get("expected_doc_class") or "")
     if scorer == "intake":
         return scoring.score_intake(prediction, case)
@@ -74,6 +78,18 @@ def _score_case(task: str, scorer: str, case: dict[str, Any], prediction: dict[s
     if scorer == "pipeline":
         return scoring.score_pipeline(prediction, case)
     return {}
+
+
+# Calibration scorer names → the eval scorer they reuse per case.
+_CALIBRATION_SCORER_ALIAS: dict[str, str] = {
+    "calibration_classify": "classification",
+    "calibration_judge": "judge",
+    "calibration_arbiter": "arbiter",
+    "calibration_retry": "extraction",
+    "calibration_boss": "boss",
+    "calibration_intake": "intake",
+    "calibration_archivist": "archivist",
+}
 
 
 def run_task(

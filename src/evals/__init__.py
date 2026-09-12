@@ -20,4 +20,4 @@ from dotenv import load_dotenv
 # win; must NOT set OBSERVABILITY_PROVIDER / MAILROOM_BASE_DIR (runner-owned).
 load_dotenv(dotenv_path=Path(__file__).resolve().parents[2] / ".env", override=False)
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"

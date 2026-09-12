@@ -108,17 +108,43 @@ def _truthy(value: Any) -> bool | None:
 
 
 def _expected_fields(row: dict[str, Any]) -> dict[str, Any]:
-    """Non-empty GT fields for the row's class (insurance today; extensible)."""
+    """Non-empty GT fields for the row's class, in the pipeline's canonical
+    scoring shape (the suite expects flattened ``cuad_clauses`` /
+    ``maud_clauses`` lists, not the raw Hub label JSON — a perfect prediction
+    scores 0.0 against the raw shape)."""
     fields: dict[str, Any] = {}
     if str(row.get("expected") or "") == "insurance_claim":
         for key in INSURANCE_GT_FIELDS:
             value = row.get(key)
             if value is not None and str(value).strip() != "":
                 fields[key] = value
+    labels = {}
     for key in ("cuad_clause_labels", "maud_clause_labels"):
         value = row.get(key)
         if isinstance(value, list) and value or isinstance(value, str) and value.strip():
-            fields[key] = value
+            labels[key] = value
+    # The pipeline's own GT catalog maps subclass → canonical field tokens
+    # (corporate_record → record_type; contract/merger subclass → family
+    # tokens) — class-labeled rows without field GT still get a scorable
+    # expected_fields surface.
+    if not fields and not labels:
+        try:
+            from observability.extraction_gt import catalog_expected_fields
+
+            fields.update(catalog_expected_fields({**row, "expected": row.get("expected"), "expected_subclass": row.get("expected_subclass")}))
+        except Exception:
+            pass
+    if labels:
+        try:
+            from observability.extraction_gt import catalog_expected_fields
+
+            fields.update(catalog_expected_fields({**row, **labels}))
+        except Exception:
+            fields.update(labels)  # fail open: raw labels still better than nothing
+    # The raw label JSON is source material only — the scoring surface is the
+    # flattened shape (the suite scores unknown fields as 0).
+    for key in ("cuad_clause_labels", "maud_clause_labels"):
+        fields.pop(key, None)
     return fields
 
 

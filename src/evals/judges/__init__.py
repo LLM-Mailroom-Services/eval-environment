@@ -80,16 +80,35 @@ def _judge_client(model: str | None):
 
 def _call_judge(client: Any, model: str, system_prompt: str, user_prompt: str) -> dict[str, Any]:
     """One structured judge call (JSON object out; retry handled upstream)."""
-    response = client.chat.completions.create(
-        model=model,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-        response_format={"type": "json_object"},
-        temperature=0.1,
-    )
+    user_payload = f"{user_prompt}\n\nRespond with a single JSON object."
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_payload},
+            ],
+            response_format={"type": "json_object"},
+            temperature=0.1,
+        )
+    except Exception:
+        # Some providers require the literal word "json" in the prompt for
+        # response_format=json_object — the payload above satisfies it, but
+        # hard-fail-soft: retry once without the response_format constraint
+        # and parse defensively.
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": system_prompt + "\nReply with ONLY a JSON object."},
+                {"role": "user", "content": user_payload},
+            ],
+            temperature=0.1,
+        )
     content = response.choices[0].message.content or "{}"
+    content = content.strip()
+    if content.startswith("```"):
+        content = content.strip("`")
+        content = content.removeprefix("json")
     return json.loads(content)
 
 

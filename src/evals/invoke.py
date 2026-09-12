@@ -259,16 +259,50 @@ def _invoke_node(task: str, case: dict[str, Any]) -> dict[str, Any]:
             "doc_type": update.get("doc_type", state.get("doc_type")),
         }
     if task == "judge_arbiter":
+        # Judge calibration probes the verdict boundary against review_expected.
+        # The extraction input must be REAL (the judge rubric treats
+        # unsupported values as fabricated — synthetic filler poisons the
+        # signal): run the class's specialist on the fixture text first, then
+        # judge its output. The gate is class-aware
+        # ([confidence.low, judge_band_high)) — force the ambiguous band for
+        # review-expected cells, skip cleanly otherwise.
         state = build_state(case, doc_type=case.get("expected_doc_class"))
-        state["extracted_data"] = dict(case.get("expected_fields") or {})
-        # Control the judge gate deterministically: fixtures expect scrutiny.
-        state["extraction_confidence"] = 0.75 if case.get("review_expected") else 0.95
+        state["doc_text"] = str(case.get("text") or "")
+        from pipeline.config import get_confidence_thresholds
+
+        if case.get("review_expected"):
+            low = float(get_confidence_thresholds(case.get("expected_doc_class")).get("low", 0.88))
+            state["extraction_confidence"] = min(low + 0.01, 0.99)
+        else:
+            state["extraction_confidence"] = 0.99
+        specialist = _specialist_for_class(str(case.get("expected_doc_class") or ""))
+        if specialist:
+            try:
+                mod_name, cls_name = _SPECIALIST_CLASSES[specialist]
+                import importlib as _il
+
+                cls = getattr(_il.import_module(mod_name), cls_name)
+                raw = cls().extract(str(case.get("text") or ""))
+                if isinstance(raw, dict):
+                    import json as _json
+
+                    payload = raw.get("content") if "content" in raw else raw
+                    try:
+                        state["extracted_data"] = _json.loads(payload) if isinstance(payload, str) else payload
+                    except _json.JSONDecodeError:
+                        state["extracted_data"] = None
+            except Exception:
+                logger.warning("judge_probe_extraction_failed", case=case.get("id"))
         update = bg.judge_verify_node(state)
         return {
             "judge_verdict": update.get("judge_verdict"),
             "completeness_label": update.get("judge_verdict"),
             "completeness": update.get("judge_score"),
             "judge_findings": update.get("judge_findings"),
+            # What the judge actually saw (calibration provenance: the fixture
+            # grid feeds synthetic extractions, so empty-vs-complete is the
+            # signal being probed).
+            "judge_input_extracted": state.get("extracted_data"),
         }
     if task == "arbiter":
         state = build_state(case, doc_type=case.get("expected_doc_class"))
@@ -339,6 +373,59 @@ def _specialist_for_class(doc_class: str) -> str | None:
         "compliance_filing": "compliance_specialist",
         "insurance_claim": "insurance_claims_specialist",
     }.get(doc_class)
+
+
+def _fixture_probe_extraction(case: dict[str, Any], *, partial: bool) -> dict[str, Any]:
+    """Synthetic extraction for judge-gate fixture probes.
+
+    The judge's rubric treats unsupported values as fabricated — so the
+    probes are GROUNDED IN THE FIXTURE TEXT itself: fields the stub text
+    actually supplies get real values; the rest stay empty (the rubric
+    treats empty arrays/null as correct when the source is silent). The
+    partial probe omits ~half the text-supported facts, so completeness
+    separates between probes — that separation IS the calibration signal
+    (the judge's flag threshold vs review_expected).
+    """
+    text = str(case.get("text") or "")
+    str(case.get("expected_doc_class") or "correspondence")
+    # Mine the stub text for facts (fixtures are one-liners with a few real
+    # facts: a document type, a date, a term, a clause reference).
+    import re as _re
+
+    facts: dict[str, Any] = {}
+    doc_name = case.get("filename") or (case.get("id") or "fixture")
+    if text:
+        m = _re.search(r"\b(AMENDMENT|MASTER SERVICES AGREEMENT|AGREEMENT|NOTICE|POLICY|BYLAWS|MINUTES|DEMAND LETTER|EMAIL|CLINICAL NOTE)\b.*", text, _re.IGNORECASE)
+        facts["document_name"] = (m.group(0)[:80] if m else text[:80]).strip()
+        m = _re.search(r"\bdated ([A-Z][a-z]+ \d{1,2},? \d{4})\b", text)
+        if m:
+            facts["effective_date"] = m.group(1)
+        m = _re.search(r"payment terms? are (Net \d+)", text, _re.IGNORECASE)
+        if m:
+            facts["term_length"] = m.group(1)
+            facts["renewal_terms"] = text[:100]
+        facts.setdefault("cuad_clauses", [text[:120]])
+        facts.setdefault("summary", text[:120])
+        facts.setdefault("subject_matter", text[:120])
+        facts.setdefault("communication_type", "email")
+        facts.setdefault("intent", "other")
+        facts.setdefault("record_type", "other")
+    else:
+        facts["document_name"] = doc_name
+        facts["summary"] = f"Fixture document {case.get('id')}"
+    clean = {k: v for k, v in facts.items() if v not in (None, "", [])}
+    if partial:
+        keep = sorted(clean)[: max(1, len(clean) // 2)]
+        clean = {k: clean[k] for k in keep}
+    return {"_probe": {"partial": partial, "cell": case.get("calibration_cell")}, **clean}
+
+
+def _fixture_partial_extraction(case: dict[str, Any]) -> dict[str, Any]:
+    return _fixture_probe_extraction(case, partial=True)
+
+
+def _fixture_clean_extraction(case: dict[str, Any]) -> dict[str, Any]:
+    return _fixture_probe_extraction(case, partial=False)
 
 
 def _invoke_agent(task: str, case: dict[str, Any]) -> dict[str, Any]:

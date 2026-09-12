@@ -3,6 +3,42 @@
 All notable changes to mailroom-evals are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.0] — 2026-09-12
+
+Real-mode preflight complete: full baseline sweep, calibration sweep, live judges.
+
+### Added
+
+- **Real baseline sweep** — all 12 `eval:*` tasks on real LLM calls
+  (qwen/qwen3.7-flash via OpenRouter, 25 cases/task, seed 42): intake
+  triage 1.0, classification 0.96, boss 1.0, pipeline_chain 1.0,
+  insurance_claims 0.726, corporate_records 0.655, correspondence 0.58,
+  contracts 0.566, merger_agreement 0.45, judge_agrees 0.2 / arbiter
+  decision_agrees 0.333 (fixture-boundary tasks — agreement CIs recorded).
+  Total spend $0.23.
+- **Real calibration sweep** — all 7 `calibration:*` tasks with analyzers +
+  REPORT-ONLY threshold recommendations (review_gate 0.05, retry_trigger
+  0.25, judge_flag_max_completeness 0.05 @ F2 0.65).
+- **Live post-hoc judges** — real LLM judging of baseline runs
+  (classification 0.93, contracts verdict 1.0, merger_agreement verdict
+  0.36); judge client hardened (json-in-prompt fallback + fence stripping).
+- **Judge calibration realism** — judge probes now run the real class
+  specialist (extract → judge chain) instead of empty/synthetic input;
+  gate forced into the class's ambiguous band for review-expected cells.
+
+### Fixed
+
+- **GT scoring surface** — `evals.cases` now emits the pipeline's canonical
+  flattened shape (`cuad_clauses`/`maud_clauses` via
+  `observability.extraction_gt.catalog_expected_fields`) instead of raw Hub
+  label JSON, which the suite scored as 0 (a perfect prediction scored 0.0).
+- **Calibration scorers** — `calibration_*` scorer names had no `_score_case`
+  branch (every calibration case scored empty → all-zero sweeps); aliased to
+  their eval node scorers.
+- **Performance totals** — `summarize_performance` reads the rows' nested
+  `tokens`/`cost_usd` shape (flat-key reads always yielded 0); per-case cost
+  derives the model from usage; run `model` = dominant by_agent model.
+
 ## [0.2.0] — 2026-09-12
 
 Prompt lineage, essential-sink scoring, and the full post-hoc suite.

@@ -137,6 +137,44 @@ def _prompts() -> dict:
     }
 
 
+def _agents() -> list[dict]:
+    """The agent catalog: every evaluated node → the pipeline agents behind
+    it, the tasks that evaluate it, and the models observed per agent across
+    the log (from run performance.by_agent blocks)."""
+    from evals.registry import AGENT_CATALOG, list_tasks
+
+    models_seen: dict[str, set] = {}
+    for run in elog.load_runs():
+        for agent, slot in ((run.get("performance") or {}).get("by_agent") or {}).items():
+            models_seen.setdefault(agent, set()).update(slot.get("models") or [])
+
+    tasks_by_node: dict[str, list] = {}
+    for t in list_tasks():
+        tasks_by_node.setdefault(t.node_name, []).append(t.task_id)
+
+    catalog = []
+    for node, meta in AGENT_CATALOG.items():
+        for agent in meta["agents"]:
+            catalog.append({
+                "agent": agent,
+                "node": node,
+                "role": meta["role"],
+                "llm": meta["llm"],
+                "evaluated_by": tasks_by_node.get(node, []),
+                "models_seen": sorted(models_seen.get(agent, [])),
+            })
+        if not meta["agents"]:
+            catalog.append({
+                "agent": f"(procedural) {node}",
+                "node": node,
+                "role": meta["role"],
+                "llm": False,
+                "evaluated_by": tasks_by_node.get(node, []),
+                "models_seen": [],
+            })
+    return catalog
+
+
 def _tasks() -> list[dict]:
     return [
         {
@@ -229,6 +267,7 @@ def build_snapshot() -> dict:
         "health": _health(raw_runs),
         "environment": {
             "tasks": _tasks(),
+            "agents": _agents(),
             "corpus": _corpus(),
             "prompts": _prompts(),
             "inventory": _inventory(),

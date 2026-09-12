@@ -9,6 +9,15 @@ Prompt lineage, essential-sink scoring, and the full post-hoc suite.
 
 ### Added
 
+- **Per-agent performance attribution** — the pipeline usage accumulator
+  (`pipeline.limits.record_usage`) now records the calling agent; every case
+  row carries `agent_usage` (per-agent calls/tokens/models) and every run
+  summary `performance.by_agent` with estimated cost (sorted by spend).
+  `AGENT_CATALOG` (registry.py) maps every evaluated node to its agents
+  (26 LLM agents + procedural nodes); the experiment log renders a
+  per-agent performance table per run; the site snapshot catalogs agents
+  (node, role, evaluated-by tasks, models seen) and the viewer renders
+  per-agent tables on run detail + an agent catalog on the environment page.
 - **Vercel viewer & dashboard** (`web/` + `vercel.json`) — zero-dependency
   static site deployed via the GitHub integration: run-result viewer
   (dashboard / runs / run detail with per-case tables and expected→predicted
@@ -61,7 +70,11 @@ Prompt lineage, essential-sink scoring, and the full post-hoc suite.
 
 ### Changed
 
-- Test suite grown to 73 tests (prompt lineage, judging, analysis, site snapshot).
+- Test suite grown to 124 tests (prompt lineage, judging, analysis, site
+  snapshot, invoke/pilot/registry, scoring essentials, CLI smoke,
+  per-agent performance).
+- `run_evals.py` validates `--mock`/`--real` exclusivity and unknown task ids
+  (clean `parser.error` instead of a traceback).
 - Sink spans now carry essential metrics only (full scores remain in the log).
 
 ## [0.1.0] — 2026-09-11

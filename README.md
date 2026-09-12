@@ -419,6 +419,21 @@ Every case records **performance** regardless of family:
 | `tokens_prompt_total` / `tokens_completion_total` | via the pipeline's run accumulator (`pipeline.limits.record_usage`) |
 | `cost_usd_est` | estimated per-case cost when the model's pricing is registered |
 
+**Per-agent attribution** — the accumulator records the calling agent, so
+every case row carries `agent_usage` (`{agent: {calls, prompt_tokens,
+completion_tokens, total, models}}`) and every run summary aggregates it into
+`performance.by_agent` with estimated cost per agent, sorted by spend. The
+catalog of which agents sit behind which evaluated node is `AGENT_CATALOG`
+(`evals/registry.py`) — e.g. `classify-document` → `sorter` +
+`sorter_reviewer`, `extract-fields` → the five specialists,
+`archive-document` → procedural (no LLM spend). Reporting surfaces:
+
+- experiment log (`reports/experiment_log.md`): a **Per-agent performance**
+  table per run;
+- site snapshot + viewer: per-agent table on every run-detail page and an
+  agent catalog (node, role, evaluated-by tasks, models seen) on the
+  Environment page.
+
 ## Operations
 
 ### Configuration
@@ -494,7 +509,7 @@ eval-environment/
 │   ├── freeze_prompts.py              # freeze the lineage + drift check
 │   ├── prompt_engineer.py             # GEPA DRAFT tool (one surgical mutation per iteration)
 │   └── render_experiment_log.py       # rebuild/validate the markdown log
-├── tests/                             # hermetic pytest suite (70 tests)
+├── tests/                             # hermetic pytest suite (124 tests)
 ├── .opencode/skills/                  # project skills (router + specialties)
 └── .opencode/agents/                  # subagents (runner, corpus, traces, calibration, log, GEPA)
 ```

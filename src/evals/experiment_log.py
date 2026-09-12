@@ -250,8 +250,27 @@ def render_run_md(summary: dict[str, Any]) -> str:
     lines += _table(["Metric", "Value"], sorted((summary.get("metrics") or {}).items()))
     perf = summary.get("performance") or {}
     if perf:
+        by_agent = perf.get("by_agent") or {}
+        flat = {k: v for k, v in perf.items() if k != "by_agent"}
         lines += ["", "### Performance", ""]
-        lines += _table(["Metric", "Value"], sorted(perf.items()))
+        lines += _table(["Metric", "Value"], sorted(flat.items()))
+        if by_agent:
+            lines += ["", "### Per-agent performance", ""]
+            lines += _table(
+                ["agent", "calls", "prompt_tokens", "completion_tokens", "total_tokens", "cost_usd_est", "models"],
+                [
+                    [
+                        agent,
+                        slot.get("calls"),
+                        slot.get("prompt_tokens"),
+                        slot.get("completion_tokens"),
+                        slot.get("total_tokens"),
+                        slot.get("cost_usd_est"),
+                        ", ".join(slot.get("models") or []) or "—",
+                    ]
+                    for agent, slot in by_agent.items()
+                ],
+            )
     cal = summary.get("calibration") or {}
     if cal:
         lines += ["", "### Calibration", ""]

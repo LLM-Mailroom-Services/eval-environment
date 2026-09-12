@@ -42,6 +42,11 @@ specialty skill:
    complete span-metric surface; the full suite is post-hoc
    (`scripts/score_run.py`, `scripts/compare_runs.py`) — never re-add
    full-score forwarding to spans.
+9. **Per-agent performance is cataloged.** Every case row carries
+   `agent_usage` (per-agent calls/tokens/models) and every run summary
+   `performance.by_agent` with estimated cost — sourced from the pipeline
+   usage accumulator (`pipeline.limits.record_usage(..., agent=...)`).
+   `AGENT_CATALOG` (registry.py) maps every evaluated node to its agents.
 9. **Frozen lineage is immutable.** Never edit `src/evals/prompts/frozen_v1.py`
    or `prompts/*.md` by hand; mutations append via
    `evals.prompts.mutations.apply_mutation` (four gates, one rule per A/B).
@@ -70,7 +75,7 @@ uv run python scripts/freeze_prompts.py --check      # prompt lineage drift chec
 uv run python scripts/export_site_snapshot.py        # refresh the Vercel viewer snapshot
 uv run python scripts/export_site_snapshot.py --check  # exit 1 if snapshot is stale
 node scripts/viewer_smoke.js                         # headless viewer regression check (needs node)
-uv run pytest tests/ -q                              # hermetic test suite (73 tests)
+uv run pytest tests/ -q                              # hermetic test suite (124 tests)
 uv run python scripts/render_experiment_log.py --validate
 uv run python scripts/render_experiment_log.py       # rebuild markdown
 ```

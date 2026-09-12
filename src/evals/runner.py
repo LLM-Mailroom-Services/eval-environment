@@ -429,6 +429,9 @@ def _execute_cases(
                     "total": perf["total_tokens"],
                 },
                 "cost_usd": perf["cost_usd_est"],
+                # per-agent token/call attribution for this case (the
+                # accumulator's by_agent map — every agent that fired)
+                "agent_usage": _agent_usage(),
                 "error": error,
             }
         )
@@ -446,3 +449,15 @@ def _last_usage() -> dict[str, Any] | None:
         return dict(usage) if usage and usage.get("total") else None
     except Exception:
         return None
+
+
+def _agent_usage() -> dict[str, Any]:
+    """Per-agent usage for the current case (the accumulator's by_agent map,
+    with the ``unattributed`` bucket kept only when it is the sole content)."""
+    usage = _last_usage() or {}
+    by_agent = usage.get("by_agent") or {}
+    if not by_agent:
+        return {}
+    if set(by_agent) == {"unattributed"}:
+        return {}  # nothing agent-attributed to report
+    return {agent: slot for agent, slot in by_agent.items()}

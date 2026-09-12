@@ -63,6 +63,15 @@ def main() -> int:
     parser.add_argument("--json", action="store_true", help="print the run summary as JSON")
     args = parser.parse_args()
 
+    if args.mock and args.real:
+        parser.error("--mock and --real are mutually exclusive")
+    if args.task and args.task != "all" and not args.list:
+        from evals.registry import get_task
+
+        try:
+            get_task(args.task)
+        except Exception:
+            parser.error(f"unknown task {args.task!r} (see --list)")
     if args.list or not args.task:
         print("Registered tasks:")
         for spec in list_tasks():

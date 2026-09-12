@@ -294,13 +294,62 @@ def summarize_performance(rows: list[dict[str, Any]]) -> dict[str, Any]:
     prompt = sum(int(r.get("prompt_tokens") or 0) for r in rows)
     completion = sum(int(r.get("completion_tokens") or 0) for r in rows)
     costs = [r["cost_usd_est"] for r in rows if isinstance(r.get("cost_usd_est"), (int, float))]
-    return {
+    summary = {
         "latency_ms_mean": _mean([float(v) for v in latencies]),
         "latency_ms_p95": _p95([float(v) for v in latencies]),
         "tokens_prompt_total": prompt,
         "tokens_completion_total": completion,
         "cost_usd_est_total": round(sum(costs), 6) if costs else None,
     }
+    by_agent = summarize_agent_usage([r.get("agent_usage") for r in rows if r.get("agent_usage")])
+    if by_agent:
+        summary["by_agent"] = by_agent
+    return summary
+
+
+def cost_for(prompt_tokens: int, completion_tokens: int, model: str | None) -> float | None:
+    """Estimated USD cost for a token bundle (None when unpriceable)."""
+    if not model or not (prompt_tokens or completion_tokens):
+        return None
+    try:
+        from llm_dojo_scoring.cost import estimate_cost
+
+        cost = estimate_cost(prompt_tokens, completion_tokens, model)
+        return round(float(cost), 6) if isinstance(cost, (int, float)) else None
+    except Exception:
+        return None
+
+
+def summarize_agent_usage(per_case_agent_usage: list[Any]) -> dict[str, dict[str, Any]]:
+    """Aggregate per-case ``by_agent`` usage maps into a run-level catalog.
+
+    Each per-case map is ``{agent: {calls, prompt_tokens, completion_tokens,
+    total, models}}`` (the pipeline usage accumulator's per-agent shape).
+    The aggregate adds estimated cost per agent (first model wins for
+    pricing when an agent mixes models) and sorts agents by total spend.
+    """
+    agents: dict[str, dict[str, Any]] = {}
+    for case_usage in per_case_agent_usage:
+        if not isinstance(case_usage, dict):
+            continue
+        for agent, slot in case_usage.items():
+            if not isinstance(slot, dict):
+                continue
+            entry = agents.setdefault(
+                agent,
+                {"calls": 0, "prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0, "models": []},
+            )
+            entry["calls"] += int(slot.get("calls") or 0)
+            entry["prompt_tokens"] += int(slot.get("prompt_tokens") or 0)
+            entry["completion_tokens"] += int(slot.get("completion_tokens") or 0)
+            entry["total_tokens"] += int(slot.get("total") or slot.get("total_tokens") or 0)
+            for model in slot.get("models") or []:
+                if model and model not in entry["models"]:
+                    entry["models"].append(model)
+    for agent, entry in agents.items():
+        model = entry["models"][0] if entry["models"] else None
+        entry["cost_usd_est"] = cost_for(entry["prompt_tokens"], entry["completion_tokens"], model)
+    return dict(sorted(agents.items(), key=lambda kv: -kv[1]["total_tokens"]))
 
 
 def summarize_scores(rows: list[dict[str, Any]]) -> dict[str, Any]:

@@ -553,6 +553,18 @@ function viewRun(runId) {
         "</dl></div>" +
         "</div>" +
 
+        (perf.by_agent ? '<div class="card mb16"><h3>Per-agent performance <span class="badge dim mono">' + Object.keys(perf.by_agent).length + ' agents</span></h3>' +
+            '<div class="tbl-wrap"><table><thead><tr><th>agent</th><th>calls</th><th>prompt tok</th><th>completion tok</th><th>total tok</th><th>cost est.</th><th>models</th></tr></thead><tbody>' +
+            Object.entries(perf.by_agent).map(([agent, s]) =>
+                "<tr><td class=\"mono\">" + esc(agent) + "</td>" +
+                '<td class="num">' + fmtNum(s.calls) + "</td>" +
+                '<td class="num">' + fmtNum(s.prompt_tokens) + "</td>" +
+                '<td class="num">' + fmtNum(s.completion_tokens) + "</td>" +
+                '<td class="num">' + fmtNum(s.total_tokens) + "</td>" +
+                '<td class="num">' + (s.cost_usd_est != null ? "$" + s.cost_usd_est.toFixed(4) : "—") + "</td>" +
+                "<td>" + (s.models || []).map(m => '<span class="tag">' + esc(m) + "</span>").join(" ") + "</td></tr>").join("") +
+            "</tbody></table></div></div>" : "") +
+
         confusion +
 
         '<div class="card"><h3>Cases <span class="badge dim mono">' + visibleCases.length + (run.n_cases > cases.length ? " of " + run.n_cases + " in snapshot (capped)" : "") + '</span>' +
@@ -888,6 +900,16 @@ function viewEnvironment() {
         '<div class="card"><h3>Subagents <span class="badge dim mono">' + inv.subagents.length + "</span></h3>" +
         inv.subagents.map(s => '<span class="tag">' + esc(s) + "</span>").join("") + "</div>" +
         "</div>" +
+        '<div class="card mb16"><h3>Agent catalog <span class="badge dim mono">' + (DATA.environment.agents || []).length + ' agents across evaluated nodes</span></h3>' +
+        '<div class="tbl-wrap"><table><thead><tr><th>agent</th><th>node</th><th>role</th><th>llm</th><th>evaluated by</th><th>models seen</th></tr></thead><tbody>' +
+        (DATA.environment.agents || []).map(a =>
+            "<tr><td class=\"mono\">" + esc(a.agent) + "</td>" +
+            '<td class="mono" style="color:var(--text-muted)">' + esc(a.node) + "</td>" +
+            "<td>" + esc(a.role) + "</td>" +
+            "<td>" + (a.llm ? badge("green", "llm") : badge("dim", "procedural")) + "</td>" +
+            "<td>" + a.evaluated_by.map(t => '<span class="tag">' + esc(t) + "</span>").join(" ") + "</td>" +
+            "<td>" + (a.models_seen || []).map(m => '<span class="tag">' + esc(m) + "</span>").join(" ") + ((a.models_seen || []).length ? "" : "—") + "</td></tr>").join("") +
+        "</tbody></table></div></div>" +
         '<div class="card"><h3>Non-negotiables</h3><dl class="kv" style="grid-template-columns:1fr">' +
         ["Every run logs — including failures and mock runs.",
          "Pin the corpus — revision " + DATA.environment.corpus.revision.slice(0, 12) + ", join on filename.",

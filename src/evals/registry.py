@@ -10,6 +10,7 @@ runner (``evals.runner``) executes any spec; task modules under
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -89,6 +90,73 @@ CALIBRATION_TASKS: tuple[TaskSpec, ...] = (
 ALL_TASKS: dict[str, TaskSpec] = {
     spec.task_id: spec for spec in (*EVAL_TASKS, *PILOT_TASKS, *CALIBRATION_TASKS)
 }
+
+
+# AGENT_CATALOG — every evaluated pipeline node mapped to the LLM agent(s)
+# behind it (``agent_name`` in the pipeline's agent classes). This is the
+# cataloging spine for per-agent performance: run summaries carry
+# ``performance.by_agent`` keyed by these names, the experiment log renders
+# a per-agent table, and the site viewer catalogs agents on the environment
+# page. ``llm: false`` nodes are procedural (no token spend to attribute).
+AGENT_CATALOG: dict[str, dict[str, Any]] = {
+    "intake-document": {
+        "role": "Intake / triage",
+        "agents": ["intake", "image_extractor", "pdf_transcriber"],
+        "llm": True,
+    },
+    "classify-document": {
+        "role": "Document classification",
+        "agents": ["sorter", "sorter_reviewer"],
+        "llm": True,
+    },
+    "extract-fields": {
+        "role": "Specialist extraction",
+        "agents": [
+            "contracts_specialist",
+            "corporate_records_specialist",
+            "correspondence_specialist",
+            "compliance_specialist",
+            "insurance_claims_specialist",
+        ],
+        "llm": True,
+    },
+    "judge-verify": {
+        "role": "Completeness judging",
+        "agents": ["judge"],
+        "llm": True,
+    },
+    "arbitrate-verdict": {
+        "role": "Verdict arbitration",
+        "agents": ["arbiter"],
+        "llm": True,
+    },
+    "adjudicate-conflict": {
+        "role": "Conflict adjudication",
+        "agents": ["boss"],
+        "llm": True,
+    },
+    "archive-document": {
+        "role": "Archival conformance",
+        "agents": [],
+        "llm": False,
+    },
+    "document-pipeline": {
+        "role": "Full 13-node chain",
+        "agents": [
+            "intake", "image_extractor", "pdf_transcriber", "sorter",
+            "sorter_reviewer", "contracts_specialist",
+            "corporate_records_specialist", "correspondence_specialist",
+            "compliance_specialist", "insurance_claims_specialist",
+            "judge", "arbiter", "boss",
+        ],
+        "llm": True,
+    },
+}
+
+
+def agents_for_node(node_name: str) -> dict[str, Any]:
+    """The agent catalog entry for a node (empty dict when unknown)."""
+    return AGENT_CATALOG.get(node_name, {})
 
 
 def get_task(task_id: str) -> TaskSpec:

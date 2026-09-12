@@ -1,11 +1,11 @@
 {
  "schema": "eval-site-snapshot",
  "version": 1,
- "generated_at": "2026-09-12T03:03:32+00:00",
+ "generated_at": "2026-09-12T05:16:51+00:00",
  "health": {
   "log_valid": true,
   "log_problems": [],
-  "log_records": 66,
+  "log_records": 68,
   "lineage_drift_free": true,
   "lineage_detail": {
    "ok": true,
@@ -424,6 +424,363 @@
     "tags": []
    }
   ],
+  "agents": [
+   {
+    "agent": "intake",
+    "node": "intake-document",
+    "role": "Intake / triage",
+    "llm": true,
+    "evaluated_by": [
+     "calibration:intake",
+     "eval:intake",
+     "pilot:intake"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "image_extractor",
+    "node": "intake-document",
+    "role": "Intake / triage",
+    "llm": true,
+    "evaluated_by": [
+     "calibration:intake",
+     "eval:intake",
+     "pilot:intake"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "pdf_transcriber",
+    "node": "intake-document",
+    "role": "Intake / triage",
+    "llm": true,
+    "evaluated_by": [
+     "calibration:intake",
+     "eval:intake",
+     "pilot:intake"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "sorter",
+    "node": "classify-document",
+    "role": "Document classification",
+    "llm": true,
+    "evaluated_by": [
+     "calibration:classify",
+     "eval:classification",
+     "pilot:classification"
+    ],
+    "models_seen": [
+     "qwen/qwen3.7-flash"
+    ]
+   },
+   {
+    "agent": "sorter_reviewer",
+    "node": "classify-document",
+    "role": "Document classification",
+    "llm": true,
+    "evaluated_by": [
+     "calibration:classify",
+     "eval:classification",
+     "pilot:classification"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "contracts_specialist",
+    "node": "extract-fields",
+    "role": "Specialist extraction",
+    "llm": true,
+    "evaluated_by": [
+     "calibration:retry",
+     "eval:contracts",
+     "eval:corporate_records",
+     "eval:correspondence",
+     "eval:insurance_claims",
+     "eval:merger_agreement",
+     "pilot:contracts",
+     "pilot:corporate_records",
+     "pilot:correspondence",
+     "pilot:insurance_claims",
+     "pilot:merger_agreement"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "corporate_records_specialist",
+    "node": "extract-fields",
+    "role": "Specialist extraction",
+    "llm": true,
+    "evaluated_by": [
+     "calibration:retry",
+     "eval:contracts",
+     "eval:corporate_records",
+     "eval:correspondence",
+     "eval:insurance_claims",
+     "eval:merger_agreement",
+     "pilot:contracts",
+     "pilot:corporate_records",
+     "pilot:correspondence",
+     "pilot:insurance_claims",
+     "pilot:merger_agreement"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "correspondence_specialist",
+    "node": "extract-fields",
+    "role": "Specialist extraction",
+    "llm": true,
+    "evaluated_by": [
+     "calibration:retry",
+     "eval:contracts",
+     "eval:corporate_records",
+     "eval:correspondence",
+     "eval:insurance_claims",
+     "eval:merger_agreement",
+     "pilot:contracts",
+     "pilot:corporate_records",
+     "pilot:correspondence",
+     "pilot:insurance_claims",
+     "pilot:merger_agreement"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "compliance_specialist",
+    "node": "extract-fields",
+    "role": "Specialist extraction",
+    "llm": true,
+    "evaluated_by": [
+     "calibration:retry",
+     "eval:contracts",
+     "eval:corporate_records",
+     "eval:correspondence",
+     "eval:insurance_claims",
+     "eval:merger_agreement",
+     "pilot:contracts",
+     "pilot:corporate_records",
+     "pilot:correspondence",
+     "pilot:insurance_claims",
+     "pilot:merger_agreement"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "insurance_claims_specialist",
+    "node": "extract-fields",
+    "role": "Specialist extraction",
+    "llm": true,
+    "evaluated_by": [
+     "calibration:retry",
+     "eval:contracts",
+     "eval:corporate_records",
+     "eval:correspondence",
+     "eval:insurance_claims",
+     "eval:merger_agreement",
+     "pilot:contracts",
+     "pilot:corporate_records",
+     "pilot:correspondence",
+     "pilot:insurance_claims",
+     "pilot:merger_agreement"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "judge",
+    "node": "judge-verify",
+    "role": "Completeness judging",
+    "llm": true,
+    "evaluated_by": [
+     "calibration:judge",
+     "eval:judge_arbiter",
+     "pilot:judge_arbiter"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "arbiter",
+    "node": "arbitrate-verdict",
+    "role": "Verdict arbitration",
+    "llm": true,
+    "evaluated_by": [
+     "calibration:arbiter",
+     "eval:arbiter",
+     "pilot:arbiter"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "boss",
+    "node": "adjudicate-conflict",
+    "role": "Conflict adjudication",
+    "llm": true,
+    "evaluated_by": [
+     "calibration:boss",
+     "eval:boss",
+     "pilot:boss"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "(procedural) archive-document",
+    "node": "archive-document",
+    "role": "Archival conformance",
+    "llm": false,
+    "evaluated_by": [
+     "calibration:archivist",
+     "eval:archivist",
+     "pilot:archivist"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "intake",
+    "node": "document-pipeline",
+    "role": "Full 13-node chain",
+    "llm": true,
+    "evaluated_by": [
+     "eval:pipeline_chain",
+     "pilot:pipeline_chain"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "image_extractor",
+    "node": "document-pipeline",
+    "role": "Full 13-node chain",
+    "llm": true,
+    "evaluated_by": [
+     "eval:pipeline_chain",
+     "pilot:pipeline_chain"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "pdf_transcriber",
+    "node": "document-pipeline",
+    "role": "Full 13-node chain",
+    "llm": true,
+    "evaluated_by": [
+     "eval:pipeline_chain",
+     "pilot:pipeline_chain"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "sorter",
+    "node": "document-pipeline",
+    "role": "Full 13-node chain",
+    "llm": true,
+    "evaluated_by": [
+     "eval:pipeline_chain",
+     "pilot:pipeline_chain"
+    ],
+    "models_seen": [
+     "qwen/qwen3.7-flash"
+    ]
+   },
+   {
+    "agent": "sorter_reviewer",
+    "node": "document-pipeline",
+    "role": "Full 13-node chain",
+    "llm": true,
+    "evaluated_by": [
+     "eval:pipeline_chain",
+     "pilot:pipeline_chain"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "contracts_specialist",
+    "node": "document-pipeline",
+    "role": "Full 13-node chain",
+    "llm": true,
+    "evaluated_by": [
+     "eval:pipeline_chain",
+     "pilot:pipeline_chain"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "corporate_records_specialist",
+    "node": "document-pipeline",
+    "role": "Full 13-node chain",
+    "llm": true,
+    "evaluated_by": [
+     "eval:pipeline_chain",
+     "pilot:pipeline_chain"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "correspondence_specialist",
+    "node": "document-pipeline",
+    "role": "Full 13-node chain",
+    "llm": true,
+    "evaluated_by": [
+     "eval:pipeline_chain",
+     "pilot:pipeline_chain"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "compliance_specialist",
+    "node": "document-pipeline",
+    "role": "Full 13-node chain",
+    "llm": true,
+    "evaluated_by": [
+     "eval:pipeline_chain",
+     "pilot:pipeline_chain"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "insurance_claims_specialist",
+    "node": "document-pipeline",
+    "role": "Full 13-node chain",
+    "llm": true,
+    "evaluated_by": [
+     "eval:pipeline_chain",
+     "pilot:pipeline_chain"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "judge",
+    "node": "document-pipeline",
+    "role": "Full 13-node chain",
+    "llm": true,
+    "evaluated_by": [
+     "eval:pipeline_chain",
+     "pilot:pipeline_chain"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "arbiter",
+    "node": "document-pipeline",
+    "role": "Full 13-node chain",
+    "llm": true,
+    "evaluated_by": [
+     "eval:pipeline_chain",
+     "pilot:pipeline_chain"
+    ],
+    "models_seen": []
+   },
+   {
+    "agent": "boss",
+    "node": "document-pipeline",
+    "role": "Full 13-node chain",
+    "llm": true,
+    "evaluated_by": [
+     "eval:pipeline_chain",
+     "pilot:pipeline_chain"
+    ],
+    "models_seen": []
+   }
+  ],
   "corpus": {
    "repo": "Lucius-Morningstar/mailroom-corpus",
    "revision": "eafe1ab4c0d330d8f9c7a5fb254155e75d290828",
@@ -589,24 +946,34 @@
     "experiment_record.v1",
     "experiment_record.v2"
    ],
-   "test_count": 73
+   "test_count": 124
   }
  },
  "totals": {
-  "total_runs": 66,
+  "total_runs": 68,
   "by_family": {
-   "eval": 56,
+   "eval": 58,
    "pilot": 7,
    "calibration": 3
   },
   "by_mode": {
-   "mock": 66
+   "mock": 68
   },
   "by_day": {
    "2026-09-11": 40,
-   "2026-09-12": 26
+   "2026-09-12": 28
   },
   "by_task": {
+   "classification": {
+    "runs": 14,
+    "latest": {
+     "run_id": "20260912T050633Z-eval-classification",
+     "started_at": "2026-09-12T05:06:33+00:00",
+     "mode": "mock",
+     "headline": 0.0,
+     "n_cases": 2
+    }
+   },
    "pipeline_chain": {
     "runs": 7,
     "latest": {
@@ -687,16 +1054,6 @@
      "n_cases": 2
     }
    },
-   "classification": {
-    "runs": 12,
-    "latest": {
-     "run_id": "20260912T024007Z-eval-classification",
-     "started_at": "2026-09-12T02:40:07+00:00",
-     "mode": "mock",
-     "headline": 0.0,
-     "n_cases": 2
-    }
-   },
    "boss": {
     "runs": 7,
     "latest": {
@@ -750,6 +1107,122 @@
   }
  },
  "runs": [
+  {
+   "run_id": "20260912T050633Z-eval-classification",
+   "family": "eval",
+   "task": "classification",
+   "invoke": "node",
+   "mode": "mock",
+   "model": null,
+   "prompt_version": null,
+   "prompt_lineage": "frozen",
+   "prompt_source": "frozen",
+   "trace_backend": "none",
+   "started_at": "2026-09-12T05:06:33+00:00",
+   "finished_at": "2026-09-12T05:06:33+00:00",
+   "duration_s": 3.7,
+   "error": null,
+   "metrics": {
+    "n": 2,
+    "class_accuracy": 0.0,
+    "subclass_accuracy": 0.0,
+    "errors": 0
+   },
+   "performance": {
+    "latency_ms_mean": 89.6,
+    "latency_ms_p95": 171.9,
+    "tokens_prompt_total": 0,
+    "tokens_completion_total": 0,
+    "cost_usd_est_total": null,
+    "by_agent": {
+     "sorter": {
+      "calls": 6,
+      "prompt_tokens": 720,
+      "completion_tokens": 360,
+      "total_tokens": 1080,
+      "models": [
+       "qwen/qwen3.7-flash"
+      ],
+      "cost_usd_est": 6.8e-05
+     }
+    }
+   },
+   "dataset": {
+    "subset_spec": {
+     "kind": "full",
+     "value": null
+    },
+    "repo": "Lucius-Morningstar/mailroom-corpus",
+    "revision": "eafe1ab4c0d330d8f9c7a5fb254155e75d290828",
+    "config": "ground_truth",
+    "split": "train",
+    "n_total": 1792,
+    "n_selected": 2,
+    "sample": null,
+    "seed": 42,
+    "subset": "full"
+   },
+   "git": {
+    "commit": "a74d41e",
+    "dirty": true
+   },
+   "schema_version": 2,
+   "calibration": null,
+   "headline": 0.0,
+   "n_cases": 2
+  },
+  {
+   "run_id": "20260912T044321Z-eval-classification",
+   "family": "eval",
+   "task": "classification",
+   "invoke": "node",
+   "mode": "mock",
+   "model": null,
+   "prompt_version": null,
+   "prompt_lineage": "frozen",
+   "prompt_source": "frozen",
+   "trace_backend": "none",
+   "started_at": "2026-09-12T04:43:21+00:00",
+   "finished_at": "2026-09-12T04:43:22+00:00",
+   "duration_s": 3.0,
+   "error": null,
+   "metrics": {
+    "n": 2,
+    "class_accuracy": 0.0,
+    "subclass_accuracy": 0.0,
+    "errors": 0
+   },
+   "performance": {
+    "latency_ms_mean": 66.25,
+    "latency_ms_p95": 124.4,
+    "tokens_prompt_total": 0,
+    "tokens_completion_total": 0,
+    "cost_usd_est_total": null
+   },
+   "dataset": {
+    "subset_spec": {
+     "kind": "full",
+     "value": null
+    },
+    "repo": "Lucius-Morningstar/mailroom-corpus",
+    "revision": "eafe1ab4c0d330d8f9c7a5fb254155e75d290828",
+    "config": "ground_truth",
+    "split": "train",
+    "n_total": 1792,
+    "n_selected": 2,
+    "sample": null,
+    "seed": 42,
+    "subset": "full"
+   },
+   "git": {
+    "commit": "183ebae",
+    "dirty": true
+   },
+   "schema_version": 2,
+   "calibration": null,
+   "headline": 0.0,
+   "n_cases": 2
+  },
   {
    "run_id": "20260912T024020Z-eval-pipeline_chain",
    "family": "eval",
@@ -4855,6 +5328,106 @@
   }
  ],
  "cases": {
+  "20260912T050633Z-eval-classification": [
+   {
+    "case_id": "corpus:ground_truth:train:0001062993-15-000198_s1011515_ex3z2.htm",
+    "filename": "0001062993-15-000198_s1011515_ex3z2.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "powers_of_attorney",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "36f27f8ee4d0c696abedb8f678f184003d0f9d98c108da814db0b006a72ce438",
+    "scores": {
+     "predicted_doc_class": "contract",
+     "expected_doc_class": "corporate_record",
+     "class_correct": 0,
+     "predicted_subclass": "other",
+     "expected_subclass": "powers_of_attorney",
+     "subclass_correct": 0
+    },
+    "latency_ms": 171.9,
+    "prediction": {
+     "doc_type": "contract",
+     "contract_subtype": "other",
+     "doc_subclass": "other",
+     "confidence": 0.99
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001078782-12-001347_s1_ex3z2.htm",
+    "filename": "0001078782-12-001347_s1_ex3z2.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "articles_of_incorporation",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "1af4d8ce4b9ee69b095a4fd54337d19d628bf477928a59e21d7211fe4b4c83bb",
+    "scores": {
+     "predicted_doc_class": "contract",
+     "expected_doc_class": "corporate_record",
+     "class_correct": 0,
+     "predicted_subclass": "other",
+     "expected_subclass": "articles_of_incorporation",
+     "subclass_correct": 0
+    },
+    "latency_ms": 7.3,
+    "prediction": {
+     "doc_type": "contract",
+     "contract_subtype": "other",
+     "doc_subclass": "other",
+     "confidence": 0.99
+    }
+   }
+  ],
+  "20260912T044321Z-eval-classification": [
+   {
+    "case_id": "corpus:ground_truth:train:0001062993-15-000198_s1011515_ex3z2.htm",
+    "filename": "0001062993-15-000198_s1011515_ex3z2.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "powers_of_attorney",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "36f27f8ee4d0c696abedb8f678f184003d0f9d98c108da814db0b006a72ce438",
+    "scores": {
+     "predicted_doc_class": "contract",
+     "expected_doc_class": "corporate_record",
+     "class_correct": 0,
+     "predicted_subclass": "other",
+     "expected_subclass": "powers_of_attorney",
+     "subclass_correct": 0
+    },
+    "latency_ms": 124.4,
+    "prediction": {
+     "doc_type": "contract",
+     "contract_subtype": "other",
+     "doc_subclass": "other",
+     "confidence": 0.99
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001078782-12-001347_s1_ex3z2.htm",
+    "filename": "0001078782-12-001347_s1_ex3z2.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "articles_of_incorporation",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "1af4d8ce4b9ee69b095a4fd54337d19d628bf477928a59e21d7211fe4b4c83bb",
+    "scores": {
+     "predicted_doc_class": "contract",
+     "expected_doc_class": "corporate_record",
+     "class_correct": 0,
+     "predicted_subclass": "other",
+     "expected_subclass": "articles_of_incorporation",
+     "subclass_correct": 0
+    },
+    "latency_ms": 8.1,
+    "prediction": {
+     "doc_type": "contract",
+     "contract_subtype": "other",
+     "doc_subclass": "other",
+     "confidence": 0.99
+    }
+   }
+  ],
   "20260912T024020Z-eval-pipeline_chain": [
    {
     "case_id": "corpus:Lucius-Morningstar/docclass-pilot:train+test:0001062993-15-000198_s1011515_ex3z2.htm",

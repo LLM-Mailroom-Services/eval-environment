@@ -111,10 +111,15 @@ def main() -> int:
         else:
             metrics = summary.get("metrics") or {}
             perf = summary.get("performance") or {}
+            by_agent = perf.get("by_agent") or {}
+            top = next(iter(by_agent), None)
             print(
                 f"{summary['run_id']}: n={metrics.get('n')} errors={metrics.get('errors')} "
                 f"latency_ms_mean={perf.get('latency_ms_mean')} "
                 f"tokens={perf.get('tokens_prompt_total')}+{perf.get('tokens_completion_total')}"
+                + (f" cost=${perf['cost_usd_est_total']:.6f}" if perf.get("cost_usd_est_total") is not None else "")
+                + (f" model={summary.get('model')}" if summary.get("model") else "")
+                + (f" top_agent={top}({by_agent[top]['calls']} calls)" if top else "")
             )
             calibration = summary.get("calibration") or {}
             if calibration.get("report_paths"):

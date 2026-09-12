@@ -1,11 +1,11 @@
 {
  "schema": "eval-site-snapshot",
  "version": 1,
- "generated_at": "2026-09-12T05:16:51+00:00",
+ "generated_at": "2026-09-12T11:53:09+00:00",
  "health": {
   "log_valid": true,
   "log_problems": [],
-  "log_records": 68,
+  "log_records": 71,
   "lineage_drift_free": true,
   "lineage_detail": {
    "ok": true,
@@ -950,28 +950,29 @@
   }
  },
  "totals": {
-  "total_runs": 68,
+  "total_runs": 71,
   "by_family": {
-   "eval": 58,
+   "eval": 61,
    "pilot": 7,
    "calibration": 3
   },
   "by_mode": {
+   "real": 3,
    "mock": 68
   },
   "by_day": {
    "2026-09-11": 40,
-   "2026-09-12": 28
+   "2026-09-12": 31
   },
   "by_task": {
    "classification": {
-    "runs": 14,
+    "runs": 17,
     "latest": {
-     "run_id": "20260912T050633Z-eval-classification",
-     "started_at": "2026-09-12T05:06:33+00:00",
-     "mode": "mock",
-     "headline": 0.0,
-     "n_cases": 2
+     "run_id": "20260912T115139Z-eval-classification",
+     "started_at": "2026-09-12T11:51:39+00:00",
+     "mode": "real",
+     "headline": 1.0,
+     "n_cases": 3
     }
    },
    "pipeline_chain": {
@@ -1107,6 +1108,198 @@
   }
  },
  "runs": [
+  {
+   "run_id": "20260912T115139Z-eval-classification",
+   "family": "eval",
+   "task": "classification",
+   "invoke": "node",
+   "mode": "real",
+   "model": "qwen/qwen3.7-flash",
+   "prompt_version": null,
+   "prompt_lineage": "frozen",
+   "prompt_source": "frozen",
+   "trace_backend": "braintrust",
+   "started_at": "2026-09-12T11:51:39+00:00",
+   "finished_at": "2026-09-12T11:51:50+00:00",
+   "duration_s": 13.8,
+   "error": null,
+   "metrics": {
+    "n": 3,
+    "class_accuracy": 1.0,
+    "subclass_accuracy": 0.6667,
+    "errors": 0
+   },
+   "performance": {
+    "latency_ms_mean": 3081.2333,
+    "latency_ms_p95": 3703.6,
+    "tokens_prompt_total": 20940,
+    "tokens_completion_total": 404,
+    "cost_usd_est_total": 0.000681,
+    "by_agent": {
+     "sorter": {
+      "calls": 3,
+      "prompt_tokens": 20940,
+      "completion_tokens": 404,
+      "total_tokens": 21344,
+      "models": [
+       "qwen/qwen3.7-flash"
+      ],
+      "cost_usd_est": 0.000681
+     }
+    }
+   },
+   "dataset": {
+    "subset_spec": {
+     "kind": "full",
+     "value": null
+    },
+    "repo": "Lucius-Morningstar/mailroom-corpus",
+    "revision": "eafe1ab4c0d330d8f9c7a5fb254155e75d290828",
+    "config": "ground_truth",
+    "split": "train",
+    "n_total": 1792,
+    "n_selected": 3,
+    "sample": 3,
+    "seed": 42,
+    "subset": "full"
+   },
+   "git": {
+    "commit": "8f97991",
+    "dirty": true
+   },
+   "schema_version": 2,
+   "calibration": null,
+   "headline": 1.0,
+   "n_cases": 3
+  },
+  {
+   "run_id": "20260912T115114Z-eval-classification",
+   "family": "eval",
+   "task": "classification",
+   "invoke": "node",
+   "mode": "real",
+   "model": "qwen/qwen3.7-flash",
+   "prompt_version": null,
+   "prompt_lineage": "frozen",
+   "prompt_source": "frozen",
+   "trace_backend": "braintrust",
+   "started_at": "2026-09-12T11:51:14+00:00",
+   "finished_at": "2026-09-12T11:51:24+00:00",
+   "duration_s": 13.6,
+   "error": null,
+   "metrics": {
+    "n": 3,
+    "class_accuracy": 1.0,
+    "subclass_accuracy": 0.6667,
+    "errors": 0
+   },
+   "performance": {
+    "latency_ms_mean": 2625.3333,
+    "latency_ms_p95": 3241.4,
+    "tokens_prompt_total": 20940,
+    "tokens_completion_total": 355,
+    "cost_usd_est_total": null,
+    "by_agent": {
+     "sorter": {
+      "calls": 3,
+      "prompt_tokens": 20940,
+      "completion_tokens": 355,
+      "total_tokens": 21295,
+      "models": [
+       "qwen/qwen3.7-flash"
+      ],
+      "cost_usd_est": 0.000674
+     }
+    }
+   },
+   "dataset": {
+    "subset_spec": {
+     "kind": "full",
+     "value": null
+    },
+    "repo": "Lucius-Morningstar/mailroom-corpus",
+    "revision": "eafe1ab4c0d330d8f9c7a5fb254155e75d290828",
+    "config": "ground_truth",
+    "split": "train",
+    "n_total": 1792,
+    "n_selected": 3,
+    "sample": 3,
+    "seed": 42,
+    "subset": "full"
+   },
+   "git": {
+    "commit": "8f97991",
+    "dirty": true
+   },
+   "schema_version": 2,
+   "calibration": null,
+   "headline": 1.0,
+   "n_cases": 3
+  },
+  {
+   "run_id": "20260912T115002Z-eval-classification",
+   "family": "eval",
+   "task": "classification",
+   "invoke": "node",
+   "mode": "real",
+   "model": null,
+   "prompt_version": null,
+   "prompt_lineage": "frozen",
+   "prompt_source": "frozen",
+   "trace_backend": "braintrust",
+   "started_at": "2026-09-12T11:50:02+00:00",
+   "finished_at": "2026-09-12T11:50:13+00:00",
+   "duration_s": 13.8,
+   "error": null,
+   "metrics": {
+    "n": 3,
+    "class_accuracy": 1.0,
+    "subclass_accuracy": 0.6667,
+    "errors": 0
+   },
+   "performance": {
+    "latency_ms_mean": 3080.1333,
+    "latency_ms_p95": 3304.1,
+    "tokens_prompt_total": 0,
+    "tokens_completion_total": 0,
+    "cost_usd_est_total": null,
+    "by_agent": {
+     "sorter": {
+      "calls": 3,
+      "prompt_tokens": 20940,
+      "completion_tokens": 425,
+      "total_tokens": 21365,
+      "models": [
+       "qwen/qwen3.7-flash"
+      ],
+      "cost_usd_est": 0.000683
+     }
+    }
+   },
+   "dataset": {
+    "subset_spec": {
+     "kind": "full",
+     "value": null
+    },
+    "repo": "Lucius-Morningstar/mailroom-corpus",
+    "revision": "eafe1ab4c0d330d8f9c7a5fb254155e75d290828",
+    "config": "ground_truth",
+    "split": "train",
+    "n_total": 1792,
+    "n_selected": 3,
+    "sample": 3,
+    "seed": 42,
+    "subset": "full"
+   },
+   "git": {
+    "commit": "8f97991",
+    "dirty": false
+   },
+   "schema_version": 2,
+   "calibration": null,
+   "headline": 1.0,
+   "n_cases": 3
+  },
   {
    "run_id": "20260912T050633Z-eval-classification",
    "family": "eval",
@@ -5328,6 +5521,228 @@
   }
  ],
  "cases": {
+  "20260912T115139Z-eval-classification": [
+   {
+    "case_id": "corpus:ground_truth:train:benson-r/sent_items/14.",
+    "filename": "benson-r/sent_items/14.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "meeting_request",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "109317e3691073753384941781a3f819edb5350ef0f2fc86a1ef75a3d6e2fe5f",
+    "scores": {
+     "predicted_doc_class": "correspondence",
+     "expected_doc_class": "correspondence",
+     "class_correct": 1,
+     "predicted_subclass": "email",
+     "expected_subclass": "meeting_request",
+     "subclass_correct": 0
+    },
+    "latency_ms": 2986.8,
+    "prediction": {
+     "doc_type": "correspondence",
+     "contract_subtype": null,
+     "doc_subclass": "email",
+     "confidence": 0.95
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:inpatient:196941177015208:1.txt",
+    "filename": "inpatient:196941177015208:1.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "inpatient",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "fda01bf124c206f00594ee82287db91a289ab7af007dc31598870175bcdecd8b",
+    "scores": {
+     "predicted_doc_class": "insurance_claim",
+     "expected_doc_class": "insurance_claim",
+     "class_correct": 1,
+     "predicted_subclass": "inpatient",
+     "expected_subclass": "inpatient",
+     "subclass_correct": 1
+    },
+    "latency_ms": 2553.3,
+    "prediction": {
+     "doc_type": "insurance_claim",
+     "contract_subtype": null,
+     "doc_subclass": "inpatient",
+     "confidence": 1.0
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:inpatient:196981177017964:1.txt",
+    "filename": "inpatient:196981177017964:1.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "inpatient",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "ffa8f0ea0cbe5d3a43be77ed1883a1d4718230b762db5af5aa9b2f15426acd9c",
+    "scores": {
+     "predicted_doc_class": "insurance_claim",
+     "expected_doc_class": "insurance_claim",
+     "class_correct": 1,
+     "predicted_subclass": "inpatient",
+     "expected_subclass": "inpatient",
+     "subclass_correct": 1
+    },
+    "latency_ms": 3703.6,
+    "prediction": {
+     "doc_type": "insurance_claim",
+     "contract_subtype": null,
+     "doc_subclass": "inpatient",
+     "confidence": 0.95
+    }
+   }
+  ],
+  "20260912T115114Z-eval-classification": [
+   {
+    "case_id": "corpus:ground_truth:train:benson-r/sent_items/14.",
+    "filename": "benson-r/sent_items/14.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "meeting_request",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "109317e3691073753384941781a3f819edb5350ef0f2fc86a1ef75a3d6e2fe5f",
+    "scores": {
+     "predicted_doc_class": "correspondence",
+     "expected_doc_class": "correspondence",
+     "class_correct": 1,
+     "predicted_subclass": "email",
+     "expected_subclass": "meeting_request",
+     "subclass_correct": 0
+    },
+    "latency_ms": 3241.4,
+    "prediction": {
+     "doc_type": "correspondence",
+     "contract_subtype": null,
+     "doc_subclass": "email",
+     "confidence": 0.95
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:inpatient:196941177015208:1.txt",
+    "filename": "inpatient:196941177015208:1.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "inpatient",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "fda01bf124c206f00594ee82287db91a289ab7af007dc31598870175bcdecd8b",
+    "scores": {
+     "predicted_doc_class": "insurance_claim",
+     "expected_doc_class": "insurance_claim",
+     "class_correct": 1,
+     "predicted_subclass": "inpatient",
+     "expected_subclass": "inpatient",
+     "subclass_correct": 1
+    },
+    "latency_ms": 2397.0,
+    "prediction": {
+     "doc_type": "insurance_claim",
+     "contract_subtype": null,
+     "doc_subclass": "inpatient",
+     "confidence": 1.0
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:inpatient:196981177017964:1.txt",
+    "filename": "inpatient:196981177017964:1.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "inpatient",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "ffa8f0ea0cbe5d3a43be77ed1883a1d4718230b762db5af5aa9b2f15426acd9c",
+    "scores": {
+     "predicted_doc_class": "insurance_claim",
+     "expected_doc_class": "insurance_claim",
+     "class_correct": 1,
+     "predicted_subclass": "inpatient",
+     "expected_subclass": "inpatient",
+     "subclass_correct": 1
+    },
+    "latency_ms": 2237.6,
+    "prediction": {
+     "doc_type": "insurance_claim",
+     "contract_subtype": null,
+     "doc_subclass": "inpatient",
+     "confidence": 1.0
+    }
+   }
+  ],
+  "20260912T115002Z-eval-classification": [
+   {
+    "case_id": "corpus:ground_truth:train:benson-r/sent_items/14.",
+    "filename": "benson-r/sent_items/14.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "meeting_request",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "109317e3691073753384941781a3f819edb5350ef0f2fc86a1ef75a3d6e2fe5f",
+    "scores": {
+     "predicted_doc_class": "correspondence",
+     "expected_doc_class": "correspondence",
+     "class_correct": 1,
+     "predicted_subclass": "email",
+     "expected_subclass": "meeting_request",
+     "subclass_correct": 0
+    },
+    "latency_ms": 3154.4,
+    "prediction": {
+     "doc_type": "correspondence",
+     "contract_subtype": null,
+     "doc_subclass": "email",
+     "confidence": 0.95
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:inpatient:196941177015208:1.txt",
+    "filename": "inpatient:196941177015208:1.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "inpatient",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "fda01bf124c206f00594ee82287db91a289ab7af007dc31598870175bcdecd8b",
+    "scores": {
+     "predicted_doc_class": "insurance_claim",
+     "expected_doc_class": "insurance_claim",
+     "class_correct": 1,
+     "predicted_subclass": "inpatient",
+     "expected_subclass": "inpatient",
+     "subclass_correct": 1
+    },
+    "latency_ms": 2781.9,
+    "prediction": {
+     "doc_type": "insurance_claim",
+     "contract_subtype": null,
+     "doc_subclass": "inpatient",
+     "confidence": 0.95
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:inpatient:196981177017964:1.txt",
+    "filename": "inpatient:196981177017964:1.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "inpatient",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "ffa8f0ea0cbe5d3a43be77ed1883a1d4718230b762db5af5aa9b2f15426acd9c",
+    "scores": {
+     "predicted_doc_class": "insurance_claim",
+     "expected_doc_class": "insurance_claim",
+     "class_correct": 1,
+     "predicted_subclass": "inpatient",
+     "expected_subclass": "inpatient",
+     "subclass_correct": 1
+    },
+    "latency_ms": 3304.1,
+    "prediction": {
+     "doc_type": "insurance_claim",
+     "contract_subtype": null,
+     "doc_subclass": "inpatient",
+     "confidence": 0.95
+    }
+   }
+  ],
   "20260912T050633Z-eval-classification": [
    {
     "case_id": "corpus:ground_truth:train:0001062993-15-000198_s1011515_ex3z2.htm",

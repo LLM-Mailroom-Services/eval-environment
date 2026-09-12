@@ -207,6 +207,16 @@ def run_task(
     summary["error"] = error
     summary["metrics"] = scoring.summarize_scores(case_rows) if case_rows else {"n": 0, "errors": 0}
     summary["performance"] = scoring.summarize_performance(case_rows) if case_rows else {}
+    if not summary["model"]:
+        # Provenance: the model that actually dominated the run's token spend
+        # (agent models resolve per-agent from the pipeline taxonomy).
+        by_agent = (summary["performance"] or {}).get("by_agent") or {}
+        dominant = max(
+            by_agent.items(),
+            key=lambda kv: kv[1].get("total_tokens") or 0,
+            default=(None, {}),
+        )[0]
+        summary["model"] = ((by_agent.get(dominant) or {}).get("models") or [None])[0]
     summary["trace_ids"] = _trace_ids(backend)
     summary["pipeline_git"] = _pipeline_git()
     summary["prompts_snapshot_path"] = _write_prompts_snapshot(summary, run_dir)
@@ -400,7 +410,11 @@ def _execute_cases(
             latency = timer.ms()
             scores = {} if error else _score_case(spec.name, spec.scorer, case, prediction)
             usage = _last_usage()
-            perf = scoring.performance_row(latency, usage, model)
+            case_model = model or next(
+                (m for slot in (usage or {}).get("by_agent", {}).values() for m in slot.get("models", [])),
+                None,
+            )
+            perf = scoring.performance_row(latency, usage, case_model)
             span.set_output({"scores": scores, "error": error})
             # Sinks carry ESSENTIAL scores only — the full set lives in the
             # experiment log's case rows (post-hoc suite scores everything).

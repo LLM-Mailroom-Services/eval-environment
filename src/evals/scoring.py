@@ -291,9 +291,14 @@ def performance_row(latency_ms: float, usage: dict[str, Any] | None, model: str 
 
 def summarize_performance(rows: list[dict[str, Any]]) -> dict[str, Any]:
     latencies = [r["latency_ms"] for r in rows if isinstance(r.get("latency_ms"), (int, float))]
-    prompt = sum(int(r.get("prompt_tokens") or 0) for r in rows)
-    completion = sum(int(r.get("completion_tokens") or 0) for r in rows)
-    costs = [r["cost_usd_est"] for r in rows if isinstance(r.get("cost_usd_est"), (int, float))]
+    prompt = sum(int(_row_tokens(r, "prompt")) for r in rows)
+    completion = sum(int(_row_tokens(r, "completion")) for r in rows)
+    costs = [
+        r.get(cost_key)
+        for r in rows
+        for cost_key in ("cost_usd", "cost_usd_est")
+        if isinstance(r.get(cost_key), (int, float))
+    ]
     summary = {
         "latency_ms_mean": _mean([float(v) for v in latencies]),
         "latency_ms_p95": _p95([float(v) for v in latencies]),
@@ -305,6 +310,16 @@ def summarize_performance(rows: list[dict[str, Any]]) -> dict[str, Any]:
     if by_agent:
         summary["by_agent"] = by_agent
     return summary
+
+
+def _row_tokens(row: dict[str, Any], which: str) -> float:
+    """Token count from a case row — nested ``tokens`` dict or flat key."""
+    tokens = row.get("tokens")
+    if isinstance(tokens, dict):
+        value = tokens.get(which)
+        if isinstance(value, (int, float)):
+            return value
+    return row.get(f"{which}_tokens") or 0
 
 
 def cost_for(prompt_tokens: int, completion_tokens: int, model: str | None) -> float | None:

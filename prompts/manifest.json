@@ -1,0 +1,99 @@
+{
+  "lineage_id": "mailroom-evals-v1",
+  "frozen_version": 1,
+  "frozen_at": "2026-09-12T02:30:36+00:00",
+  "pipeline_git_commit": "073d3a01096e535bbf33eb002b04bc19a36e8f63",
+  "derivation": "llm-mailroom DOCCLASS_PROMPT_VERSIONS (pure-appended docclass variants of live production templates) + intake production template + Langfuse pipeline evaluator rubrics",
+  "versions": {
+    "sorter_v1": {
+      "source_kind": "docclass",
+      "source_key": "sorter_docclass_v0",
+      "sha256": "73c07682471122604c8174853640b74b84b1b425f4dd3c8014ca08c7c4ab5028",
+      "chars": 20207
+    },
+    "contracts_specialist_v1": {
+      "source_kind": "docclass",
+      "source_key": "contracts_specialist_docclass_v0",
+      "sha256": "76327b411a731fd94643a04268f1bd44d8a2dcc70a59b1a0715585fc762af4d2",
+      "chars": 38128
+    },
+    "corporate_records_specialist_v1": {
+      "source_kind": "docclass",
+      "source_key": "corporate_records_specialist_docclass_v0",
+      "sha256": "f2849f20a1f8d00a5aff4c23268cc298dda5db97a418fda8c555c184cd2f8c75",
+      "chars": 5673
+    },
+    "correspondence_specialist_v1": {
+      "source_kind": "docclass",
+      "source_key": "correspondence_specialist_docclass_v0",
+      "sha256": "a9d4ff002107da99cb866a4b50b1646b1e68190abca1914e4075d569ebdc66d8",
+      "chars": 5908
+    },
+    "compliance_specialist_v1": {
+      "source_kind": "docclass",
+      "source_key": "compliance_specialist_docclass_v0",
+      "sha256": "6d465574f38ecf7d2fbf2f9bce483f1ba5b56397992889529b5d17e47a6337b1",
+      "chars": 5513
+    },
+    "insurance_claims_specialist_v1": {
+      "source_kind": "docclass",
+      "source_key": "insurance_claims_specialist_docclass_v0",
+      "sha256": "3877dbc4f4ba28ba75cfd349bea2e8a3b403ee1b6e1b2c3b889c47024310be71",
+      "chars": 6374
+    },
+    "sorter_reviewer_v1": {
+      "source_kind": "docclass",
+      "source_key": "reviewer_docclass_v0",
+      "sha256": "8cf7367fd69372a4327a4f05bfab91e2df46aacb1670cc2bff20e93dc25b5faa",
+      "chars": 5292
+    },
+    "arbiter_v1": {
+      "source_kind": "docclass",
+      "source_key": "arbiter_docclass_v0",
+      "sha256": "d72ea55b40372319a304aa70605fcf4380d50b397bca4b8d4a7503fe4caa0948",
+      "chars": 5023
+    },
+    "boss_v1": {
+      "source_kind": "docclass",
+      "source_key": "boss_docclass_v0",
+      "sha256": "94485c79cf2cae45cea3aa93c16f4880cd8ebc82bcde8fd39d725b0302ea87e1",
+      "chars": 4905
+    },
+    "judge_v1": {
+      "source_kind": "docclass",
+      "source_key": "judge_docclass_v0",
+      "sha256": "c653ff3bde15230570c38c27112acc40221582a839aabe46a09f37f9ed0f1100",
+      "chars": 4978
+    },
+    "judge-classification_v1": {
+      "source_kind": "docclass",
+      "source_key": "judge_classification_docclass_v0",
+      "sha256": "2c2b3f57688d370d87bc825159573e11c62d5fc64699f709ad2436a5c887ce37",
+      "chars": 5562
+    },
+    "judge-correctness_v1": {
+      "source_kind": "docclass",
+      "source_key": "judge_correctness_docclass_v0",
+      "sha256": "beb05a6bd4cdfb146970251b0677138f0b837a2a644d3d548c4ff5cc3deacdca",
+      "chars": 4230
+    },
+    "intake_v1": {
+      "source_kind": "production",
+      "source_key": "INTAKE_SYSTEM_PROMPT",
+      "sha256": "e57c5d1a0e7f66ca25e369c6377ac855b6e5932a7126bc5bd9f963ec0bd8e139",
+      "chars": 2196
+    },
+    "pipeline_verdict_v1": {
+      "source_kind": "evaluator",
+      "source_key": "PIPELINE_PROMPT",
+      "sha256": "50e54bc1a58924d0387d2372f77d70012367f09b290662d03754286d562d6164",
+      "chars": 5856
+    },
+    "pipeline_quality_v1": {
+      "source_kind": "evaluator",
+      "source_key": "QUALITY_PROMPT",
+      "sha256": "e8eab7af550f59141db00e76475dea65f7fdcdcad0dda7bcd79a6bd294e86752",
+      "chars": 1671
+    }
+  }
+}

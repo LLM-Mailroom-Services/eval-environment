@@ -12,6 +12,8 @@ a run; they log warnings and surface in ``flush_health``.
 
 from __future__ import annotations
 
+import json
+import subprocess
 import time
 from datetime import UTC
 from pathlib import Path
@@ -22,6 +24,7 @@ import structlog
 from . import experiment_log, scoring, tracing
 from . import invoke as invoke_mod
 from .cases import load_cases
+from .prompts import registry as prompts_registry
 from .registry import TaskSpec, get_task
 
 logger = structlog.get_logger(__name__)
@@ -85,6 +88,7 @@ def run_task(
     trace_backend: str | None = None,
     model: str | None = None,
     prompt_version: str | None = None,
+    prompt_source: str = "frozen",
     concurrency: int = 1,
     run_dir: Path | None = None,
     dry_run: bool = False,
@@ -109,6 +113,29 @@ def run_task(
     else:
         cases, dataset_prov = load_cases(subset, sample=sample, seed=seed, n=n)
 
+    # Prompt lineage: resolve + inject BEFORE any agent instantiation.
+    # Default = the frozen mailroom-evals-v1 seed; --prompt-version pins an
+    # explicit key; --prompt-source live-docclass|production opts out.
+    prompt_keys: dict[str, str] = {}
+    prompt_overrides: dict[str, str] = {}
+    if prompt_version:
+        from .prompts.lineage import resolve
+
+        resolved = resolve(prompt_version)
+        role = prompt_version.rsplit("_v", 1)[0]
+        prompt_overrides[role] = resolved.key
+        if resolved.lineage not in ("frozen", "mutation"):
+            prompt_source = "live-docclass" if resolved.lineage == "live-docclass" else prompt_source
+    prompt_keys = prompts_registry.activate(prompt_source, prompt_overrides)
+    prompt_snapshot = prompts_registry.resolved_snapshot(prompt_keys)
+    prompt_lineage = (
+        "mutation" if any(v["lineage"] == "mutation" for v in prompt_snapshot.values())
+        else prompt_source
+    )
+    # Injection stays active for the whole run (mock AND real): with
+    # Braintrust/Phoenix as the provider, get_managed_prompt resolves the
+    # local fallback path — exactly what activate() patched.
+
     # Resume: skip cases already recorded in a previous (interrupted) run and
     # append to that run's case file instead of starting a new run id.
     prior_ids: set[str] = set()
@@ -127,7 +154,10 @@ def run_task(
         "invoke": invoke_mode,
         "mode": "mock" if mock else "real",
         "model": model or DEFAULT_MODEL,
-        "prompt_version": prompt_version,
+        "prompt_version": prompt_version or (prompt_keys.get(spec.name.split(":")[0]) if prompt_keys else None),
+        "prompt_lineage": prompt_lineage,
+        "prompt_source": prompt_source,
+        "prompt_versions": prompt_snapshot,
         "trace_backend": backend,
         "started_at": experiment_log.utc_now(),
         "params": {
@@ -169,6 +199,7 @@ def run_task(
         error = f"{type(exc).__name__}: {exc}"
         logger.exception("evals_run_failed", task=spec.task_id)
     finally:
+        prompts_registry.deactivate()
         tracing.flush(backend)
 
     summary["finished_at"] = experiment_log.utc_now()
@@ -177,8 +208,24 @@ def run_task(
     summary["metrics"] = scoring.summarize_scores(case_rows) if case_rows else {"n": 0, "errors": 0}
     summary["performance"] = scoring.summarize_performance(case_rows) if case_rows else {}
     summary["trace_ids"] = _trace_ids(backend)
+    summary["pipeline_git"] = _pipeline_git()
+    summary["prompts_snapshot_path"] = _write_prompts_snapshot(summary, run_dir)
     if spec.family == "calibration" and not error:
         summary["calibration"] = _calibration_block(spec, case_rows)
+
+    # Run-level rollup span: the sink's per-run dashboard entry (essential
+    # aggregates only). Emitted even on run error, so the sink shows the run.
+    with tracing.run_span(backend, run_meta={**run_meta_stub(spec, summary)}) as span:
+        span.set_output({
+            "metrics": {k: summary["metrics"].get(k) for k in _essential_keys(spec)},
+            "performance": {"latency_ms_mean": summary["performance"].get("latency_ms_mean")},
+            "error": error,
+        })
+        span.set_metrics({
+            **scoring.essential_rollup(spec.scorer, case_rows),
+            **({"ece": summary["calibration"]["ece"]}
+               if isinstance(summary.get("calibration"), dict) and isinstance(summary["calibration"].get("ece"), (int, float)) else {}),
+        })
 
     written = experiment_log.write_run(summary, case_rows, run_dir=run_dir)
     try:
@@ -186,6 +233,69 @@ def run_task(
     except Exception:
         logger.warning("evals_markdown_render_failed", exc_info=True)
     return RunResult(written, case_rows)
+
+
+def _essential_keys(spec: TaskSpec) -> list[str]:
+    return list(scoring.ESSENTIAL_SCORES.get(spec.scorer, ()))
+
+
+def _pipeline_git() -> str | None:
+    """The llm-mailroom package's git commit (prompt provenance anchor)."""
+    try:
+        import pipeline
+
+        pipeline_root = Path(pipeline.__file__).resolve().parents[2]
+        out = subprocess.run(
+            ["git", "-C", str(pipeline_root), "rev-parse", "HEAD"],
+            capture_output=True, text=True, timeout=10, check=False,
+        )
+        return out.stdout.strip() or None
+    except Exception:
+        return None
+
+
+def _write_prompts_snapshot(summary: dict[str, Any], run_dir: Path | None) -> str | None:
+    """Persist the exact rendered prompts used by this run (reproducibility
+    without any prompt-management service)."""
+    try:
+        from .prompts.lineage import resolve
+
+        target_dir = run_dir or (experiment_log.experiments_dir() / summary["run_id"])
+        target_dir.mkdir(parents=True, exist_ok=True)
+        snapshot: dict[str, Any] = {
+            "run_id": summary["run_id"],
+            "prompt_lineage": summary.get("prompt_lineage"),
+            "prompt_source": summary.get("prompt_source"),
+            "pipeline_git": summary.get("pipeline_git"),
+            "prompts": {},
+        }
+        for role, meta in (summary.get("prompt_versions") or {}).items():
+            version = resolve(meta["key"])
+            snapshot["prompts"][role] = {**meta, "text": version.text}
+        path = target_dir / "prompts_snapshot.json"
+        path.write_text(json.dumps(snapshot, indent=2, default=str), encoding="utf-8")
+        return str(path)
+    except Exception:
+        logger.warning("evals_prompts_snapshot_failed", exc_info=True)
+        return None
+
+
+def run_meta_stub(spec: TaskSpec, summary: dict[str, Any]) -> dict[str, Any]:
+    """Run-level metadata for the rollup span (mirrors per-case run_meta)."""
+    return {
+        "run_id": summary["run_id"],
+        "task": spec.task_id,
+        "family": spec.family,
+        "invoke": summary["invoke"],
+        "mode": summary["mode"],
+        "model": summary["model"] or "pipeline-default",
+        "prompt_version": summary["prompt_version"],
+        "prompt_lineage": summary.get("prompt_lineage"),
+        "dataset.config": summary["dataset"].get("config"),
+        "dataset.split": summary["dataset"].get("split"),
+        "subset": summary["dataset"].get("subset"),
+        "tags": [spec.family, spec.name, summary["mode"], "run-rollup"],
+    }
 
 
 def _calibration_block(spec: TaskSpec, case_rows: list[dict[str, Any]]) -> dict[str, Any]:
@@ -263,7 +373,8 @@ def _execute_cases(
         "invoke": invoke_mode,
         "mode": summary["mode"],
         "model": model or summary["model"] or "pipeline-default",
-        "prompt_version": prompt_version,
+        "prompt_version": summary.get("prompt_version"),
+        "prompt_lineage": summary.get("prompt_lineage"),
         "dataset.config": summary["dataset"].get("config"),
         "dataset.split": summary["dataset"].get("split"),
         "dataset.revision": summary["dataset"].get("revision"),
@@ -291,7 +402,9 @@ def _execute_cases(
             usage = _last_usage()
             perf = scoring.performance_row(latency, usage, model)
             span.set_output({"scores": scores, "error": error})
-            span.set_metrics({k: v for k, v in scores.items() if isinstance(v, (int, float))})
+            # Sinks carry ESSENTIAL scores only — the full set lives in the
+            # experiment log's case rows (post-hoc suite scores everything).
+            span.set_metrics(scoring.essential_metrics(spec.scorer, scores))
         rows.append(
             {
                 "case_id": case.get("id"),
@@ -304,6 +417,9 @@ def _execute_cases(
                 "fixture_cell": case.get("calibration_cell"),
                 "fixture_outcome": case.get("arbiter_outcome"),
                 "failure_stage": case.get("failure_stage"),
+                # sha256 of the exact text judged — enables verified post-hoc
+                # text re-load from the pinned corpus (lean logs, full fidelity).
+                "doc_text_sha256": scoring.sha256_text(str(case.get("text") or "")),
                 "prediction": prediction or None,
                 "scores": scores,
                 "latency_ms": perf["latency_ms"],

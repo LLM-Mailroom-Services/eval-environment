@@ -47,7 +47,13 @@ def main() -> int:
     parser.add_argument("--real", action="store_true", help="real LLM (OPENROUTER_API_KEY)")
     parser.add_argument("--trace-backend", choices=("auto", "braintrust", "phoenix", "none"), default=None)
     parser.add_argument("--model", default=None, help="model override recorded in the log")
-    parser.add_argument("--prompt-version", default=None, help="prompt version tag for iteration A/Bs")
+    parser.add_argument("--prompt-version", default=None,
+                        help="pin an explicit prompt version key (frozen/mutation/live lineage)")
+    parser.add_argument("--prompt-source", choices=("frozen", "live-docclass", "production"),
+                        default="frozen",
+                        help="prompt lineage source for this run (default: frozen mailroom-evals-v1)")
+    parser.add_argument("--judge-model", default=None,
+                        help="judge model for post-hoc scoring (default: taxonomy judge mapping)")
     parser.add_argument("--concurrency", type=int, default=1)
     parser.add_argument("--dry-run", action="store_true", help="load + invoke one case only")
     parser.add_argument("--resume", default=None, metavar="RUN_ID",
@@ -78,6 +84,7 @@ def main() -> int:
             trace_backend=args.trace_backend,
             model=args.model,
             prompt_version=args.prompt_version,
+            prompt_source=args.prompt_source,
             concurrency=args.concurrency,
             dry_run=args.dry_run,
             pilot=args.task.startswith("pilot:"),

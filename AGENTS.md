@@ -15,6 +15,7 @@ specialty skill:
 - **calibration** — the fixtures grid + per-node calibration methodology
 - **pipeline-internals** — node fns, `DocumentState` construction, isolation rules
 - **eval-engineering** — how to design and register a NEW task
+- **prompt-lineage** — the frozen v1 snapshot, injection choke points, GEPA gates
 
 ## Non-negotiables
 
@@ -34,6 +35,14 @@ specialty skill:
 7. **History is append-only.** Never edit old experiment-log records; add a
    follow-up record. Schema changes bump `schema_version` + update
    `schemas/` + the experiment-log skill in the same commit.
+8. **Sinks score essentials only.** `ESSENTIAL_SCORES` (scoring.py) is the
+   complete span-metric surface; the full suite is post-hoc
+   (`scripts/score_run.py`, `scripts/compare_runs.py`) — never re-add
+   full-score forwarding to spans.
+9. **Frozen lineage is immutable.** Never edit `src/evals/prompts/frozen_v1.py`
+   or `prompts/*.md` by hand; mutations append via
+   `evals.prompts.mutations.apply_mutation` (four gates, one rule per A/B).
+   Drift-check with `scripts/freeze_prompts.py --check`.
 
 ## Commands
 
@@ -47,7 +56,12 @@ uv run python scripts/run_evals.py --task calibration:classify --real
 uv run python scripts/run_evals.py --task eval:insurance_claims --real \
     --subset class:insurance_claim --sample 25 --seed 42
 uv run python scripts/run_evals.py --task <id> --resume <run_id>     # continue an interrupted run
-uv run pytest tests/ -q                              # hermetic test suite (49 tests)
+uv run python scripts/score_run.py --run-id <run_id> --recompute     # post-hoc deterministic re-score
+uv run python scripts/score_run.py --run-id <run_id> --judge verdict,quality --mock  # local judges
+uv run python scripts/score_run.py --run-id <run_id> --export-failures data/manifests/x.jsonl  # GEPA OBSERVE
+uv run python scripts/compare_runs.py --a <run_a> --b <run_b> --md reports/comparisons/  # A/B + CIs
+uv run python scripts/freeze_prompts.py --check      # prompt lineage drift check
+uv run pytest tests/ -q                              # hermetic test suite (70 tests)
 uv run python scripts/render_experiment_log.py --validate
 uv run python scripts/render_experiment_log.py       # rebuild markdown
 ```
@@ -74,6 +88,7 @@ not export them in shells or `.env`.
 - **trace-auditor** — post-run trace verification against the checklist
 - **calibration-analyst** — turns calibration reports into threshold recommendations
 - **experiment-log-sync** — validates/renders/compares the experiment log
+- **prompt-engineer** — GEPA iteration loop over the frozen lineage (see also PROMPT_ENGINEER_GEPA_PROVENANCE.md)
 
 ## Adding a task
 

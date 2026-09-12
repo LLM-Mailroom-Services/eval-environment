@@ -22,7 +22,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 JSONL_ENV = "EXPERIMENT_LOG_PATH"
 MD_ENV = "EXPERIMENT_LOG_MD_PATH"
 DIR_ENV = "EVALS_EXPERIMENTS_DIR"
@@ -42,6 +42,16 @@ REQUIRED_KEYS: tuple[str, ...] = (
     "finished_at",
     "dataset",
     "metrics",
+)
+
+# v2 additions (all optional — v1 records stay valid)
+V2_OPTIONAL_KEYS: tuple[str, ...] = (
+    "prompt_lineage",
+    "prompt_source",
+    "prompt_versions",
+    "pipeline_git",
+    "prompts_snapshot_path",
+    "judging",
 )
 
 _SUMMARY_KEYS = (
@@ -92,15 +102,18 @@ def new_run_id(family: str, task: str) -> str:
 
 
 def validate_record(record: dict[str, Any]) -> list[str]:
-    """Schema-v1 conformance checks. Returns a list of problems (empty = valid)."""
+    """Schema v1/v2 conformance checks. Returns a list of problems (empty = valid)."""
     problems: list[str] = []
     for key in REQUIRED_KEYS:
         if key not in record:
             problems.append(f"missing required key: {key}")
-    if record.get("schema_version") != SCHEMA_VERSION:
-        problems.append(f"schema_version must be {SCHEMA_VERSION}")
+    if record.get("schema_version") not in (1, SCHEMA_VERSION):
+        problems.append(f"schema_version must be 1 or {SCHEMA_VERSION}")
     if record.get("record_kind") not in ("run_summary", "case"):
         problems.append("record_kind must be run_summary|case")
+    judging = record.get("judging")
+    if judging is not None and record.get("schema_version", 1) < 2:
+        problems.append("judging block requires schema_version >= 2")
     return problems
 
 
@@ -315,6 +328,46 @@ def write_markdown(path: Path | None = None) -> Path:
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(render_full_log(), encoding="utf-8")
     return target
+
+
+def record_judging(
+    run_id: str,
+    *,
+    dimensions: list[str],
+    judge_model: str | None,
+    mock: bool,
+    metrics: dict[str, Any],
+    prompt_versions: dict[str, Any] | None = None,
+    judgments_ref: str | None = None,
+) -> dict[str, Any]:
+    """Append a follow-up run-summary record carrying the judging block.
+
+    History is append-only: the original run record is never edited — the
+    judging outcome is a NEW line referencing the same run_id.
+    """
+    original = next((r for r in load_runs() if r.get("run_id") == run_id), None)
+    if original is None:
+        raise KeyError(f"unknown run_id {run_id!r}")
+    follow_up = {
+        **original,
+        "schema_version": SCHEMA_VERSION,
+        "record_kind": "run_summary",
+        "started_at": original.get("started_at"),
+        "finished_at": utc_now(),
+        "cases_embedded": [],
+        "judging": {
+            "dimensions": dimensions,
+            "judge_model": judge_model,
+            "mock": mock,
+            "metrics": metrics,
+            "prompt_versions": prompt_versions or {},
+            "judgments_ref": judgments_ref,
+            "judged_at": utc_now(),
+        },
+    }
+    with jsonl_path().open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(follow_up, default=str) + "\n")
+    return follow_up
 
 
 def export_run(run_id: str, fmt: str = "csv", path: Path | None = None) -> Path | None:

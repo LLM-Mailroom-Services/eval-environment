@@ -37,7 +37,9 @@ This repository consists of:
 - **Dual-mode invocation** (`src/evals/invoke.py`) — node-level measurement (call `classify_node`, `extract_node`, `judge_verify_node`, … with a faithful `DocumentState`) or agent-level measurement (call `SorterAgent`, specialists, `CompletenessJudge`, … directly), plus a deterministic mock shim and per-run `MAILROOM_BASE_DIR` isolation.
 - **Deterministic scoring + performance accounting** (`src/evals/scoring.py`) — the pipeline's own scorers (`classes_match`, suite/field scoring) plus per-case latency, token usage, and cost: per-node performance analysis is a first-class output.
 - **Trace-sink wiring** (`src/evals/tracing.py`) — one root span per case named after the node's stable observation name (`classify-document`, `judge-verify`, …), curated inputs (never raw document text), scorer metrics attached to spans.
-- **A centralized experiment log** (`src/evals/experiment_log.py` + `schemas/experiment_record.v1.json`) — one versioned record schema for all families; strict JSONL for machines, rendered tables for humans.
+- **A centralized experiment log** (`src/evals/experiment_log.py` + `schemas/experiment_record.v2.json`) — one versioned record schema for all families; strict JSONL for machines, rendered tables for humans.
+- **A frozen prompt lineage** (`src/evals/prompts/` + `prompts/`) — `mailroom-evals-v1`, the official prompt version 1 snapshotted from the mailroom docclass lineage (KANBAN-090), injected into the pipeline at runtime with full provenance (sha256 + pipeline git commit per run) and drift detection — the seed for the GEPA prompt-mutation loop.
+- **Local scoring self-sufficiency** (`src/evals/judges/`, `scripts/score_run.py`, `evals/analysis.py`) — the full evaluation suite runs post hoc from the experiment log: deterministic recompute, local LLM-as-judge over frozen rubrics, A/B comparisons with bootstrap CIs. Sinks carry tracing + essential scores only.
 - **Calibration machinery** (`src/evals/calibration/`) — reliability tables, ECE, threshold sweeps, bootstrap CIs, and REPORT-ONLY threshold recommendations over the corpus's fixtures grid.
 - **Project agent skills** (`.opencode/skills/`) — a tool router plus dedicated skills for the corpus, both trace sinks, the experiment log, calibration methodology, pipeline internals, and eval engineering; **subagents** (`.opencode/agents/`) for run execution, corpus curation, trace auditing, calibration analysis, and log hygiene.
 
@@ -48,6 +50,8 @@ This repository consists of:
 - [Datasets & subsets](#datasets--subsets) — [Ground-truth columns](#ground-truth-columns) · [Subset grammar](#subset-grammar)
 - [Trace sinks](#trace-sinks)
 - [The experiment log](#the-experiment-log)
+- [Prompt lineage & GEPA](#prompt-lineage--gepa)
+- [Scoring: essential in-sink, full post-hoc](#scoring-essential-in-sink-full-post-hoc)
 - [Pilot scenarios](#pilot-scenarios)
 - [Calibration scenarios](#calibration-scenarios)
 - [Scoring & performance metrics](#scoring--performance-metrics)
@@ -226,6 +230,49 @@ uv run python scripts/run_evals.py --task eval:classify --real --trace-backend p
 - Langfuse is intentionally **not** a sink here — issue #7 names Phoenix
   and/or Braintrust.
 
+## Prompt lineage & GEPA
+
+Every eval run measures the **frozen `mailroom-evals-v1` lineage** — the
+official prompt version 1 snapshotted from the mailroom docclass lineage
+(KANBAN-090) plus the pipeline evaluator rubrics — injected into the live
+pipeline at runtime (`--prompt-source frozen|live-docclass|production`,
+`--prompt-version <key>` for explicit pins). Full details, the freeze/drift
+workflow, and the GEPA mutation scaffold live in
+[`docs/prompt-lineage.md`](docs/prompt-lineage.md).
+
+```bash
+uv run python scripts/freeze_prompts.py --check      # drift check vs the live pipeline
+uv run python scripts/run_evals.py --task eval:classify --real \
+    --subset class:contract --sample 50 --prompt-version sorter_v2   # a GEPA candidate A/B
+```
+
+Provenance is automatic: every run records `prompt_lineage`, per-agent
+resolved keys + sha256s, the pipeline git commit, and a full
+`prompts_snapshot.json` in the run dir.
+
+## Scoring: essential in-sink, full post-hoc
+
+**Sinks carry essential scores only** — one to three headline metrics per
+case (`class_correct`, `overall_score`, `judge_agrees`, … per family in
+`evals.scoring.ESSENTIAL_SCORES`) plus one run-level rollup span
+(`evals-run`) with the essential aggregates. Everything else — the full
+deterministic suite, LLM-as-judge across all dimensions, A/B analysis — runs
+**post hoc, locally, from the experiment log**:
+
+```bash
+uv run python scripts/score_run.py --run-id <id> --recompute        # re-score with current scorers
+uv run python scripts/score_run.py --run-id <id> --judge verdict,quality --mock   # local judges (frozen rubrics)
+uv run python scripts/score_run.py --run-id <id> --export-failures data/manifests/<id>.failures.jsonl
+uv run python scripts/compare_runs.py --a <baseline> --b <candidate> --md reports/comparisons/
+```
+
+Judgments use the **frozen** `judge_v1` / `judge-classification_v1` /
+`judge-correctness_v1` / `pipeline_verdict_v1` / `pipeline_quality_v1`
+rubrics, re-load case text from the pinned corpus (verified via the case
+row's `doc_text_sha256`), and append `judgments.jsonl` to the run dir plus a
+follow-up run-summary record — history stays append-only. `--mock` judges
+derive deterministic verdicts from the stored scores (CI-safe, zero network).
+
 ## The experiment log
 
 One canonical, versioned record schema (`schemas/experiment_record.v1.json`)
@@ -369,24 +416,32 @@ registry completeness, and runner smoke (mock mode, stubbed cases).
 ```
 eval-environment/
 ├── pyproject.toml                     # uv pkg "mailroom-evals"; mailroom = path source
-├── schemas/experiment_record.v1.json  # the record contract
+├── schemas/experiment_record.v2.json  # the record contract (v1 records stay valid)
+├── prompts/                           # frozen lineage mirror + manifest + mutations (generated)
 ├── src/evals/
 │   ├── registry.py                    # 31 tasks: eval | pilot | calibration
 │   ├── cases.py                       # corpus loading + subset grammar + stratified sampling
 │   ├── invoke.py                      # node-level + agent-level invocation, mocks, isolation
-│   ├── scoring.py                     # deterministic scorers + performance accounting
-│   ├── tracing.py                     # Braintrust → Phoenix → none; per-case spans
+│   ├── scoring.py                     # deterministic scorers + essential-sink curation + perf
+│   ├── tracing.py                     # Braintrust → Phoenix → none; per-case + run-rollup spans
 │   ├── runner.py                      # shared execution engine (CLI semantics)
-│   ├── experiment_log.py              # append-only log + markdown renderer + export
+│   ├── experiment_log.py              # append-only log + markdown renderer + export + judging
 │   ├── pilot.py                       # stratified micro-slice presets
+│   ├── analysis.py                    # local run aggregation + A/B comparisons (bootstrap CIs)
+│   ├── judges/                        # local LLM-as-judge engine (post-hoc, mock judges)
+│   ├── prompts/                       # frozen_v1 + lineage registry + runtime injection + GEPA gates
 │   ├── tasks/                         # per-node task documentation
 │   └── calibration/                   # base + 7 node analyzers (report-only)
 ├── scripts/
-│   ├── run_evals.py                   # the CLI
+│   ├── run_evals.py                   # the eval CLI
+│   ├── score_run.py                   # post-hoc local scoring (recompute / judge / failures)
+│   ├── compare_runs.py                # A/B comparisons with bootstrap CIs
+│   ├── freeze_prompts.py              # freeze the lineage + drift check
+│   ├── prompt_engineer.py             # GEPA DRAFT tool (one surgical mutation per iteration)
 │   └── render_experiment_log.py       # rebuild/validate the markdown log
-├── tests/                             # hermetic pytest suite
-├── .opencode/skills/                  # 7 project skills (router + specialties)
-└── .opencode/agents/                  # 5 subagents (runner, corpus, traces, calibration, log)
+├── tests/                             # hermetic pytest suite (70 tests)
+├── .opencode/skills/                  # project skills (router + specialties)
+└── .opencode/agents/                  # subagents (runner, corpus, traces, calibration, log, GEPA)
 ```
 
 ## The Mailroom umbrella

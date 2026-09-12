@@ -11,4 +11,4 @@ Phoenix; ``none`` disables. Every run appends to the centralized experiment
 log (``evals.experiment_log``).
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

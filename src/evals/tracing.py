@@ -236,3 +236,43 @@ def flush(backend: str) -> None:
             flush_phoenix()
     except Exception:
         logger.warning("evals_flush_failed", backend=backend, exc_info=True)
+
+
+@contextmanager
+def run_span(
+    backend: str,
+    *,
+    run_meta: dict[str, Any],
+) -> Iterator[Any]:
+    """One run-level rollup span per eval run (the sink's dashboard entry).
+
+    Carries the run summary's essential aggregates (metrics, latency mean,
+    ECE for calibration) — never per-case noise. No-op when backend is none.
+    """
+    if backend == "none":
+        yield _noop
+        return
+    try:
+        if backend == "braintrust":
+            import braintrust
+
+            with braintrust.start_span(
+                name="evals-run",
+                type="task",
+                input={"run_id": run_meta.get("run_id"), "task": run_meta.get("task")},
+                metadata=run_meta or None,
+                tags=list(run_meta.get("tags") or []) or None,
+            ) as span:
+                yield _BraintrustHandle(span)
+            return
+        if backend == "phoenix":
+            from opentelemetry import trace
+
+            tracer = trace.get_tracer("mailroom-evals")
+            with tracer.start_as_current_span("evals-run") as span:
+                _otel_attrs(span, "chain", {"run_id": run_meta.get("run_id")}, run_meta)
+                yield _PhoenixHandle(span)
+            return
+    except Exception:
+        logger.warning("evals_run_span_failed", backend=backend, exc_info=True)
+    yield _noop

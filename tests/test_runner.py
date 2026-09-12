@@ -49,6 +49,13 @@ def test_run_task_mock_classification(monkeypatch, sample_case):
     assert summary["mode"] == "mock" and summary["trace_backend"] == "none"
     assert summary["metrics"]["n"] == 1
     assert summary["dataset"]["n_selected"] == 1
+    # prompt lineage: frozen v1 by default, provenance recorded
+    assert summary["prompt_lineage"] == "frozen"
+    assert summary["prompt_versions"]["sorter"]["key"] == "sorter_v1"
+    assert summary["pipeline_git"]
+    assert summary["prompts_snapshot_path"] and Path(summary["prompts_snapshot_path"]).exists()
+    # case rows carry the post-hoc text-integrity key
+    assert result.case_rows[0]["doc_text_sha256"]
     # experiment log landed
     runs = experiment_log.load_runs()
     assert any(r["run_id"] == summary["run_id"] for r in runs)

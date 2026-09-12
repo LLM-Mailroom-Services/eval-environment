@@ -23,8 +23,57 @@ class Timer:
         return round((time.perf_counter() - self.start) * 1000.0, 1)
 
 
+# ESSENTIAL_SCORES — the curated headline metrics forwarded to the trace sinks
+# at run time (one to three per scorer family). The FULL score set stays in
+# the experiment log's case rows; sinks carry tracing + essentials only, and
+# the complete evaluation suite runs post hoc (evals.judges + score_run.py).
+ESSENTIAL_SCORES: dict[str, tuple[str, ...]] = {
+    "intake": ("no_truncation", "triage_agrees"),
+    "classification": ("class_correct", "subclass_correct"),
+    "extraction": ("overall_score", "needs_judge_review"),
+    "judge": ("judge_agrees",),
+    "arbiter": ("decision_valid", "decision_agrees"),
+    "boss": ("decision_valid",),
+    "archivist": ("archived_ok", "stage_ok"),
+    "pipeline": ("stage_agrees", "class_correct"),
+}
+
+
+def essential_metrics(scorer: str, scores: dict[str, Any]) -> dict[str, float]:
+    """Filter a score dict down to the family's essential span metrics."""
+    wanted = ESSENTIAL_SCORES.get(scorer, ())
+    return {
+        key: float(value)
+        for key, value in scores.items()
+        if key in wanted and isinstance(value, (int, float)) and not isinstance(value, bool)
+        or key in wanted and isinstance(value, bool)
+    }
+
+
+def essential_rollup(scorer: str, rows: list[dict[str, Any]]) -> dict[str, float]:
+    """Mean essential metrics over a run's case rows (run-level rollup)."""
+    out: dict[str, float] = {}
+    for key in ESSENTIAL_SCORES.get(scorer, ()):
+        values = [
+            float((r.get("scores") or {}).get(key))
+            for r in rows
+            if isinstance((r.get("scores") or {}).get(key), (int, float))
+        ]
+        mean = _mean(values)
+        if mean is not None:
+            out[key] = mean
+    return out
+
+
 def _mean(values: list[float]) -> float | None:
     return round(sum(values) / len(values), 4) if values else None
+
+
+def sha256_text(text: str) -> str:
+    """sha256 of a case's exact text — the post-hoc re-load integrity key."""
+    import hashlib
+
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def _p95(values: list[float]) -> float | None:

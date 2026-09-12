@@ -19,6 +19,7 @@ this repo has exactly one of each.
 | Log run results | `evals.experiment_log` (append-only JSONL + MD) | [experiment-log](../experiment-log/SKILL.md) | Free-form JSON dumps or per-run one-off formats |
 | Edge-test / calibrate a node | `evals.calibration.*` | [calibration](../calibration/SKILL.md) | Guessing thresholds without the fixtures grid |
 | Invoke a pipeline node or agent | `evals.invoke` (node fn or agent class) | [pipeline-internals](../pipeline-internals/SKILL.md) | Reimplementing agent prompts or node logic |
+| Prompt versions / lineage / GEPA | `evals.prompts.*` + freeze script | [prompt-lineage](../prompt-lineage/SKILL.md) | Editing frozen prompts or forking prompt text |
 | Design a new eval task | `evals.registry` + `evals.runner` | [eval-engineering](../eval-engineering/SKILL.md) | One-off scripts outside the task registry |
 
 ## Non-negotiables

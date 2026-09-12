@@ -11,4 +11,13 @@ Phoenix; ``none`` disables. Every run appends to the centralized experiment
 log (``evals.experiment_log``).
 """
 
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+# Repo-local .env (gitignored): LLM provider config (e.g. the Vercel AI
+# Gateway), sink keys. override=False so real environment variables always
+# win; must NOT set OBSERVABILITY_PROVIDER / MAILROOM_BASE_DIR (runner-owned).
+load_dotenv(dotenv_path=Path(__file__).resolve().parents[2] / ".env", override=False)
+
 __version__ = "0.2.0"

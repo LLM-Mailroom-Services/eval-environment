@@ -23,6 +23,11 @@ Prompt lineage, essential-sink scoring, and the full post-hoc suite.
   tables); run-detail upgrades (failures-only filter, subclass confusion
   matrix); dashboard recent-activity feed; `scripts/viewer_smoke.js`
   headless regression check over every route.
+- **Vercel AI Gateway as the default LLM provider** — the repo `.env` routes
+  real runs + local judges through the gateway (OpenAI-compatible,
+  `DEFAULT_PROVIDER=generic` + `GENERIC_BASE_URL` + `GENERIC_API_KEY`);
+  loaded by `evals/__init__` via python-dotenv (override=False — exported
+  vars win). Model IDs pass through verbatim (`openai/gpt-4o`, …).
 
 - **Frozen prompt lineage `mailroom-evals-v1`** — 15 prompts (docclass
   lineage KANBAN-090 + intake production template + pipeline evaluator

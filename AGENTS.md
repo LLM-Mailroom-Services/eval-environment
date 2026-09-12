@@ -24,7 +24,10 @@ specialty skill:
 2. **Pin the corpus.** Revision `eafe1ab4c0d330d8f9c7a5fb254155e75d290828`.
    Join `ground_truth` ⇆ `default` on `filename`; never zip positionally.
 3. **Mock before real.** `--mock` must never touch the network. `--real`
-   requires `OPENROUTER_API_KEY`.
+   requires a configured LLM provider: `OPENROUTER_API_KEY`, or the repo
+   `.env` routing through the Vercel AI Gateway (`DEFAULT_PROVIDER=generic`
+   + `GENERIC_BASE_URL` + `GENERIC_API_KEY` — loaded by `evals/__init__`,
+   real environment always wins).
 4. **Isolate the base dir.** Every run sets `MAILROOM_BASE_DIR` to a temp dir;
    pipeline_chain drains daemon threads before restoring it. Never eval
    against a live data dir.
@@ -76,7 +79,8 @@ uv run python scripts/render_experiment_log.py       # rebuild markdown
 
 | variable | note |
 |---|---|
-| `OPENROUTER_API_KEY` | real runs |
+| `OPENROUTER_API_KEY` | real runs (alternative: the AI-gateway `.env`) |
+| `DEFAULT_PROVIDER` / `GENERIC_BASE_URL` / `GENERIC_API_KEY` | repo `.env` default: Vercel AI Gateway (OpenAI-compatible; model IDs pass through, e.g. `openai/gpt-4o`) |
 | `BRAINTRUST_API_KEY` / `BRAINTRUST_PROJECT` | Braintrust sink (auto when set) |
 | `PHOENIX_ENDPOINT` / `PHOENIX_PROJECT` | Phoenix sink (local default) |
 | `EVALS_TRACE_BACKEND` | `auto` default; `none` in tests |

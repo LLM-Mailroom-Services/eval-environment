@@ -17,6 +17,12 @@ Prompt lineage, essential-sink scoring, and the full post-hoc suite.
   `web/data/snapshot.json` (`scripts/export_site_snapshot.py`, `--check`
   staleness mode); root `vercel.json` rewrites `/` to the viewer with
   board-grade security headers.
+- **Viewer analytics views** — Trends (per-task metric history over time,
+  SVG chart with best/worst/mean and mock/real split) and Compare (A/B two
+  runs: metric deltas with better/worse verdicts, per-case disagreement
+  tables); run-detail upgrades (failures-only filter, subclass confusion
+  matrix); dashboard recent-activity feed; `scripts/viewer_smoke.js`
+  headless regression check over every route.
 
 - **Frozen prompt lineage `mailroom-evals-v1`** — 15 prompts (docclass
   lineage KANBAN-090 + intake production template + pipeline evaluator

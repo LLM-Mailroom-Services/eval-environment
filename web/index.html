@@ -223,6 +223,8 @@
             <nav id="nav">
                 <a href="#/dashboard" data-view="dashboard">Dashboard</a>
                 <a href="#/runs" data-view="runs">Runs</a>
+                <a href="#/trends" data-view="trends">Trends</a>
+                <a href="#/compare" data-view="compare">Compare</a>
                 <a href="#/tasks" data-view="tasks">Tasks</a>
                 <a href="#/corpus" data-view="corpus">Corpus</a>
                 <a href="#/prompts" data-view="prompts">Prompts</a>
@@ -326,6 +328,8 @@ function route() {
     window.scrollTo(0, 0);
     if (view === "runs") return viewRuns();
     if (view === "run" && arg) return viewRun(decodeURIComponent(arg));
+    if (view === "trends") return viewTrends();
+    if (view === "compare") return viewCompare();
     if (view === "tasks") return viewTasks();
     if (view === "corpus") return viewCorpus();
     if (view === "prompts") return viewPrompts();
@@ -386,6 +390,17 @@ function viewDashboard() {
 
         '<div class="grid c3 mb24">' + famCards + "</div>" +
 
+        '<div class="card mb24"><h3>Recent activity</h3><div class="tbl-wrap"><table><tbody>' +
+        DATA.runs.slice(0, 8).map(r =>
+            "<tr class=\"clickable\" onclick=\"location.hash='#/run/" + encodeURIComponent(r.run_id) + "'\">" +
+            "<td style=\"width:90px;color:var(--text-dim)\">" + fmtWhen(r.started_at) + "</td>" +
+            "<td>" + familyBadge(r.family) + ' <span class="mono">' + esc(r.task) + "</span></td>" +
+            "<td>" + modeBadge(r.mode) + "</td>" +
+            "<td>" + headlineDisplay(r) + "</td>" +
+            '<td class="num">' + fmtNum(r.n_cases) + "</td>" +
+            '<td style="width:60px"><a href="#/run/' + encodeURIComponent(r.run_id) + '">view</a></td></tr>').join("") +
+        "</tbody></table></div></div>" +
+
         '<div class="card"><h3>Per-task status <span class="badge dim">latest run each</span></h3>' +
         '<div class="tbl-wrap"><table><thead><tr><th>task</th><th>family</th><th>runs</th><th>mode</th><th>headline</th><th>cases</th><th>last</th><th></th></tr></thead>' +
         "<tbody>" + taskRows + "</tbody></table></div></div>";
@@ -434,6 +449,7 @@ function viewRuns() {
 }
 
 // ── run detail ───────────────────────────────────────────────────
+let caseFailuresOnly = false;
 function viewRun(runId) {
     const run = DATA.runs.find(r => r.run_id === runId);
     if (!run) { $main.innerHTML = '<div class="empty">run not found: ' + esc(runId) + "</div>"; return; }
@@ -448,19 +464,25 @@ function viewRun(runId) {
         "</div></div>").join("");
 
     const expKeys = ["expected_doc_class", "expected_subclass", "expected_stage", "fixture_cell", "fixture_outcome"];
-    const hasClass = cases.some(c => c.expected_doc_class != null && c.prediction && c.prediction.doc_type != null);
+    const isFailing = c => {
+        const s = c.scores || {};
+        return Object.entries(s).some(([k, v]) =>
+            (typeof v === "number" && v === 0 && /correct|ok$|_ok$|agree|match|valid|pass/.test(k)) || v === false);
+    };
+    const visibleCases = caseFailuresOnly ? cases.filter(isFailing) : cases;
 
     let confusion = "";
-    if (hasClass) {
+    const matrix = (expKey, predKey, title) => {
+        if (!cases.some(c => c[expKey] != null && c.prediction && c.prediction[predKey] != null)) return "";
         const cells = {};
         cases.forEach(c => {
-            const e = c.expected_doc_class, p = (c.prediction || {}).doc_type;
+            const e = c[expKey], p = (c.prediction || {})[predKey];
             if (e == null || p == null) return;
             cells[e] = cells[e] || {};
             cells[e][p] = (cells[e][p] || 0) + 1;
         });
         const classes = Array.from(new Set([...Object.keys(cells), ...Object.values(cells).flatMap(o => Object.keys(o))])).sort();
-        confusion = '<div class="card mb16"><h3>Expected → predicted (doc class)</h3><div class="tbl-wrap"><table><thead><tr><th>expected \\ predicted</th>' +
+        return '<div class="card mb16"><h3>' + esc(title) + "</h3><div class=\"tbl-wrap\"><table><thead><tr><th>expected \\ predicted</th>" +
             classes.map(c => '<th class="mono">' + esc(c) + "</th>").join("") + "</tr></thead><tbody>" +
             classes.map(e => "<tr><td class=\"mono\">" + esc(e) + "</td>" +
                 classes.map(p => {
@@ -468,9 +490,11 @@ function viewRun(runId) {
                     const good = e === p && n > 0;
                     return '<td class="num" style="' + (n ? (good ? "color:var(--green)" : "color:var(--red)") : "color:var(--text-dim)") + '">' + (n || "·") + "</td>";
                 }).join("") + "</tr>").join("") + "</tbody></table></div></div>";
-    }
+    };
+    confusion = matrix("expected_doc_class", "doc_type", "Expected → predicted (doc class)") +
+        matrix("expected_subclass", "doc_subclass", "Expected → predicted (subclass)");
 
-    const caseRows = cases.map((c, i) => {
+    const caseRows = visibleCases.map((c, i) => {
         const pred = c.prediction || {};
         const scores = c.scores || {};
         const scoreChips = Object.entries(scores).slice(0, 4).map(([k, v]) =>
@@ -531,11 +555,226 @@ function viewRun(runId) {
 
         confusion +
 
-        '<div class="card"><h3>Cases <span class="badge dim mono">' + cases.length + (run.n_cases > cases.length ? " of " + run.n_cases + " (capped)" : "") + '</span></h3>' +
+        '<div class="card"><h3>Cases <span class="badge dim mono">' + visibleCases.length + (run.n_cases > cases.length ? " of " + run.n_cases + " in snapshot (capped)" : "") + '</span>' +
+        '<label style="display:inline-flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--text-muted);margin-left:12px;font-weight:400;cursor:pointer">' +
+        '<input type="checkbox" id="incOnly"' + (caseFailuresOnly ? " checked" : "") + '> failures only</label></h3>' +
         (cases.length ? '<div class="tbl-wrap" style="max-height:520px;overflow-y:auto"><table><thead><tr><th>#</th><th>file</th>' +
             (expKeys.some(k => cases[0][k] != null) ? "<th>expected</th>" : "") +
             "<th>prediction</th><th>scores</th><th>latency</th><th></th></tr></thead><tbody>" + caseRows + "</tbody></table></div>"
             : '<div class="empty">no case rows in snapshot</div>') +
+        "</div>";
+
+    const inc = document.getElementById("incOnly");
+    if (inc) inc.addEventListener("change", () => { caseFailuresOnly = inc.checked; viewRun(runId); });
+}
+
+// ── svg line chart ───────────────────────────────────────────────
+function lineChart(series) {
+    const W = 640, H = 200, P = 34;
+    if (!series.length) return '<div class="empty">no data points</div>';
+    const ys = series.map(p => p.y);
+    const yMax = Math.max(...ys), yMin = Math.min(...ys);
+    const pct = yMax <= 1;
+    const top = pct ? 1 : yMax + (yMax - yMin) * 0.08 || 1;
+    const bottom = pct ? 0 : yMin - (yMax - yMin) * 0.08;
+    const X = i => P + (series.length === 1 ? (W - P) / 2 : i * (W - P * 2) / (series.length - 1));
+    const Y = v => H - P - (v - bottom) / (top - bottom || 1) * (H - P * 2);
+    const path = series.map((p, i) => (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(p.y).toFixed(1)).join(" ");
+    const dots = series.map((p, i) =>
+        '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(p.y).toFixed(1) + '" r="3.5" fill="' +
+        (p.mode === "real" ? "var(--green)" : "var(--accent)") + '" opacity="0.9"><title>' +
+        esc(p.label + " · " + (pct ? fmtPct(p.y) : p.y)) + "</title></circle>").join("");
+    const tick = v => pct ? (v * 100).toFixed(0) + "%" : v.toFixed(2);
+    const yTicks = [top, (top + bottom) / 2, bottom].map(v =>
+        '<text x="' + (P - 6) + '" y="' + (Y(v) + 3).toFixed(1) + '" text-anchor="end" font-size="9" fill="#5c6478">' + tick(v) + "</text>").join("");
+    const xTicks =
+        '<text x="' + X(0).toFixed(1) + '" y="' + (H - 8) + '" font-size="9" fill="#5c6478">' + esc(series[0].label) + "</text>" +
+        '<text x="' + (W - P).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="end" font-size="9" fill="#5c6478">' + esc(series[series.length - 1].label) + "</text>";
+    return '<svg viewBox="0 0 ' + W + " " + H + '" style="width:100%;height:auto;display:block">' +
+        '<line x1="' + P + '" y1="' + Y(top).toFixed(1) + '" x2="' + (W - P) + '" y2="' + Y(top).toFixed(1) + '" stroke="#2a3142" stroke-dasharray="3 3" />' +
+        '<line x1="' + P + '" y1="' + Y(bottom).toFixed(1) + '" x2="' + (W - P) + '" y2="' + Y(bottom).toFixed(1) + '" stroke="#2a3142" />' +
+        '<path d="' + path + '" fill="none" stroke="var(--accent)" stroke-width="1.5" opacity="0.65" />' +
+        dots + yTicks + xTicks + "</svg>" +
+        '<div class="spark-labels" style="justify-content:flex-end;gap:14px"><span>' +
+        badge("green", "● real") + badge("blue", "● mock") + "</span></div>";
+}
+
+// ── trends ───────────────────────────────────────────────────────
+const HEAD_FIRST = ["class_accuracy", "accuracy", "overall_score", "extraction_f1", "verdict_agreement", "mean_score", "intake_pass_rate"];
+const trendState = { task: null, metric: null, mode: "" };
+
+function metricIsPct(key, runs) {
+    if (!/accuracy|score|rate|f1|agreement|recall|precision/i.test(key)) return false;
+    return runs.every(r => r.metrics[key] == null || (r.metrics[key] >= 0 && r.metrics[key] <= 1));
+}
+function fmtMetric(key, v, runs) { return metricIsPct(key, runs) ? fmtPct(v) : fmtNum(v); }
+function isLowerBetter(key) { return /error|latency|invalid|fail/i.test(key); }
+
+function viewTrends() {
+    const ascending = {};
+    DATA.runs.slice().reverse().forEach(r => { (ascending[r.task] = ascending[r.task] || []).push(r); });
+    const taskNames = Object.keys(ascending).sort();
+    if (!taskNames.length) { $main.innerHTML = '<div class="empty">no runs recorded yet</div>'; return; }
+    if (!trendState.task || !ascending[trendState.task]) trendState.task = taskNames[0];
+    const runs = ascending[trendState.task];
+    const metricKeys = [];
+    runs.forEach(r => Object.entries(r.metrics || {}).forEach(([k, v]) => {
+        if (typeof v === "number" && isFinite(v) && !metricKeys.includes(k)) metricKeys.push(k);
+    }));
+    metricKeys.sort((a, b) => (HEAD_FIRST.indexOf(b) + 1 || 99) - (HEAD_FIRST.indexOf(a) + 1 || 99) || a.localeCompare(b));
+    if (!metricKeys.length) { $main.innerHTML = '<div class="empty">task has no numeric metrics</div>'; return; }
+    if (!trendState.metric || !metricKeys.includes(trendState.metric)) trendState.metric = metricKeys[0];
+
+    const key = trendState.metric;
+    const pct = metricIsPct(key, runs);
+    const filtered = runs.filter(r => (!trendState.mode || r.mode === trendState.mode) && r.metrics[key] != null);
+    const series = filtered.map(r => ({
+        y: r.metrics[key], mode: r.mode, x: r.started_at,
+        label: r.started_at.slice(5, 16).replace("T", " ") + " " + r.run_id.slice(-18),
+    }));
+    const vals = series.map(p => p.y);
+    const best = vals.length ? (isLowerBetter(key) ? Math.min(...vals) : Math.max(...vals)) : null;
+    const worst = vals.length ? (isLowerBetter(key) ? Math.max(...vals) : Math.min(...vals)) : null;
+    const mean = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+    const last = series[series.length - 1];
+
+    const opt = (v, cur, label) => '<option value="' + esc(v) + '"' + (cur === v ? " selected" : "") + ">" + esc(label) + "</option>";
+    $main.innerHTML =
+        '<div class="page-title">Trends</div>' +
+        '<div class="page-sub">Metric history per task across the append-only log — spot regressions before they ship.</div>' +
+        '<div class="controls">' +
+        '<select id="tt">' + taskNames.map(t => opt(t, trendState.task, t + " (" + ascending[t].length + ")")).join("") + "</select>" +
+        '<select id="tm">' + metricKeys.map(k => opt(k, key, k)).join("") + "</select>" +
+        '<select id="to">' + opt("", trendState.mode, "all modes") + opt("mock", trendState.mode, "mock only") + opt("real", trendState.mode, "real only") + "</select>" +
+        '<span class="badge dim mono">' + series.length + " points</span></div>" +
+        '<div class="grid c4 mb16">' +
+        '<div class="metric-card"><div class="k">latest</div><div class="v">' + (last ? fmtMetric(key, last.y, runs) : "—") + '</div><div class="hint">' + (last ? esc(last.label.split(" · ")[0]) : "") + "</div></div>" +
+        '<div class="metric-card"><div class="k">' + (isLowerBetter(key) ? "best (lowest)" : "best (highest)") + '</div><div class="v" style="color:var(--green)">' + (best != null ? fmtMetric(key, best, runs) : "—") + "</div></div>" +
+        '<div class="metric-card"><div class="k">worst</div><div class="v" style="color:var(--red)">' + (worst != null ? fmtMetric(key, worst, runs) : "—") + "</div></div>" +
+        '<div class="metric-card"><div class="k">mean</div><div class="v">' + (mean != null ? fmtMetric(key, mean, runs) : "—") + "</div></div>" +
+        "</div>" +
+        '<div class="card mb16"><h3><span class="mono">' + esc(trendState.task) + '</span> · <span class="mono" style="color:var(--accent)">' + esc(key) + "</span></h3>" +
+        lineChart(series) + "</div>" +
+        '<div class="card"><h3>Series</h3><div class="tbl-wrap" style="max-height:380px;overflow-y:auto"><table><thead><tr><th>when</th><th>run</th><th>mode</th><th>' + esc(key) + "</th></tr></thead><tbody>" +
+        series.slice().reverse().map(p =>
+            "<tr class=\"clickable\" onclick=\"location.hash='#/run/" + encodeURIComponent(p.label.split(" · ")[1]) + "'\">" +
+            "<td>" + esc(p.x.slice(0, 16).replace("T", " ")) + "</td><td>" + shortId(p.label.split(" · ")[1]) + "</td>" +
+            "<td>" + modeBadge(p.mode) + '</td><td class="num">' + fmtMetric(key, p.y, runs) + "</td></tr>").join("") +
+        "</tbody></table></div></div>";
+
+    ["tt", "tm", "to"].forEach(id => document.getElementById(id).addEventListener("change", ev => {
+        if (id === "tt") { trendState.task = ev.target.value; trendState.metric = null; }
+        if (id === "tm") trendState.metric = ev.target.value;
+        if (id === "to") trendState.mode = ev.target.value;
+        viewTrends();
+    }));
+}
+
+// ── compare ──────────────────────────────────────────────────────
+const compareState = { a: "", b: "" };
+
+function viewCompare() {
+    const groups = {};
+    DATA.runs.forEach(r => (groups[r.task] = groups[r.task] || []).push(r));
+    const pairTask = Object.keys(groups).sort().find(t => groups[t].length >= 2);
+    if (!pairTask) { $main.innerHTML = '<div class="empty">need at least two runs of one task to compare</div>'; return; }
+    if (!compareState.a || !DATA.runs.find(r => r.run_id === compareState.a)) {
+        const g = groups[pairTask];
+        compareState.b = g[0].run_id; compareState.a = g[1].run_id; // newest vs previous
+    }
+    if (!compareState.b || !DATA.runs.find(r => r.run_id === compareState.b)) compareState.b = compareState.a;
+
+    const optgroups = sel => Object.keys(groups).sort().map(t =>
+        '<optgroup label="' + esc(t) + '">' + groups[t].map(r =>
+            '<option value="' + esc(r.run_id) + '"' + (sel === r.run_id ? " selected" : "") + ">" +
+            esc(r.run_id.slice(0, 17) + "… " + r.mode + (r.prompt_version ? " · " + r.prompt_version : "")) + "</option>").join("") + "</optgroup>").join("");
+
+    $main.innerHTML =
+        '<div class="page-title">Compare</div>' +
+        '<div class="page-sub">A/B two runs — metric deltas and per-case disagreement. Same task + same subset + same seed is the honest comparison.</div>' +
+        '<div class="controls"><select id="ca">' + optgroups(compareState.a) + "</select>" +
+        '<span class="badge dim">vs</span><select id="cb">' + optgroups(compareState.b) + "</select></div>" +
+        '<div id="cmp-out"></div>';
+
+    const rerender = () => {
+        compareState.a = document.getElementById("ca").value;
+        compareState.b = document.getElementById("cb").value;
+        renderCompare();
+    };
+    document.getElementById("ca").addEventListener("change", rerender);
+    document.getElementById("cb").addEventListener("change", rerender);
+    renderCompare();
+}
+
+function renderCompare() {
+    const a = DATA.runs.find(r => r.run_id === compareState.a);
+    const b = DATA.runs.find(r => r.run_id === compareState.b);
+    const out = document.getElementById("cmp-out");
+    if (!a || !b) { out.innerHTML = '<div class="empty">pick two runs</div>'; return; }
+
+    const keys = Array.from(new Set([...Object.keys(a.metrics || {}), ...Object.keys(b.metrics || {})]))
+        .filter(k => typeof a.metrics[k] === "number" || typeof b.metrics[k] === "number")
+        .sort((x, y) => (HEAD_FIRST.indexOf(y) + 1 || 99) - (HEAD_FIRST.indexOf(x) + 1 || 99) || x.localeCompare(y));
+    const deltaRows = keys.map(k => {
+        const va = a.metrics[k], vb = b.metrics[k];
+        const d = (typeof va === "number" && typeof vb === "number") ? vb - va : null;
+        let verdict = '<span class="badge dim">n/a</span>';
+        if (d != null) {
+            if (Math.abs(d) < 1e-9) verdict = badge("dim", "flat");
+            else {
+                const better = (d > 0) !== isLowerBetter(k);
+                verdict = badge(better ? "green" : "red", (d > 0 ? "+" : "") + (metricIsPct(k, [a, b]) ? (100 * d).toFixed(1) + "pp" : d.toFixed(3)) + " " + (better ? "better" : "worse"));
+            }
+        }
+        return "<tr><td class=\"mono\">" + esc(k) + "</td>" +
+            '<td class="num">' + (va != null ? fmtMetric(k, va, [a, b]) : "—") + "</td>" +
+            '<td class="num">' + (vb != null ? fmtMetric(k, vb, [a, b]) : "—") + "</td>" +
+            '<td class="num">' + (d != null ? (metricIsPct(k, [a, b]) ? (100 * d).toFixed(1) + "pp" : d.toFixed(3)) : "—") + "</td>" +
+            "<td>" + verdict + "</td></tr>";
+    }).join("");
+
+    const ca = DATA.cases[a.run_id] || [], cb = DATA.cases[b.run_id] || [];
+    const byId = list => { const m = {}; list.forEach(c => { m[c.case_id] = c; }); return m; };
+    const ma = byId(ca), mb = byId(cb);
+    const shared = ca.filter(c => mb[c.case_id]);
+    const differ = shared.filter(c => JSON.stringify(c.scores || {}) !== JSON.stringify((mb[c.case_id] || {}).scores || {}));
+
+    const chipRow = (scores) => {
+        const s = scores || {};
+        const keys2 = ["class_correct", "subclass_correct", "correct", "verdict_agrees", "intake_ok"];
+        const shown = keys2.filter(k => k in s).slice(0, 3);
+        const rest = Object.keys(s).filter(k => !keys2.includes(k)).slice(0, 2);
+        return shown.concat(rest).map(k => {
+            const v = s[k];
+            const cls = v === 1 || v === true ? "green" : v === 0 || v === false ? "red" : "dim";
+            const txt = typeof v === "number" && metricIsPct(k, []) && v <= 1 ? fmtPct(v) : esc(v);
+            return '<span class="badge ' + cls + '">' + esc(k.replace(/_correct$/, "")) + " " + txt + "</span>";
+        }).join(" ") || "—";
+    };
+
+    const same = shared.length - differ.length;
+    out.innerHTML =
+        '<div class="grid c2 mb16">' +
+        '<div class="card"><h3>Run A</h3><dl class="kv"><dt>run_id</dt><dd>' + shortId(a.run_id) + "</dd>" +
+        "<dt>headline</dt><dd>" + headlineDisplay(a) + "</dd>" +
+        "<dt>mode / model</dt><dd>" + modeBadge(a.mode) + " " + esc(a.model || "—") + "</dd>" +
+        "<dt>prompt</dt><dd>" + esc(a.prompt_version || a.prompt_lineage || "—") + "</dd>" +
+        "<dt>dataset</dt><dd>" + esc((a.dataset || {}).subset || "—") + " · seed " + esc((a.dataset || {}).seed ?? "—") + " · n=" + fmtNum(a.n_cases) + "</dd></dl></div>" +
+        '<div class="card"><h3>Run B</h3><dl class="kv"><dt>run_id</dt><dd>' + shortId(b.run_id) + "</dd>" +
+        "<dt>headline</dt><dd>" + headlineDisplay(b) + "</dd>" +
+        "<dt>mode / model</dt><dd>" + modeBadge(b.mode) + " " + esc(b.model || "—") + "</dd>" +
+        "<dt>prompt</dt><dd>" + esc(b.prompt_version || b.prompt_lineage || "—") + "</dd>" +
+        "<dt>dataset</dt><dd>" + esc((b.dataset || {}).subset || "—") + " · seed " + esc((b.dataset || {}).seed ?? "—") + " · n=" + fmtNum(b.n_cases) + "</dd></dl></div>" +
+        "</div>" +
+        '<div class="card mb16"><h3>Metric deltas</h3><div class="tbl-wrap"><table><thead><tr><th>metric</th><th>A</th><th>B</th><th>Δ</th><th>verdict</th></tr></thead><tbody>' +
+        (deltaRows || '<tr><td colspan="5" class="empty">no numeric metrics</td></tr>') + "</tbody></table></div></div>" +
+        '<div class="card"><h3>Per-case disagreement <span class="badge dim mono">' + same + " agree · " + differ.length + " differ (of " + shared.length + " shared)</span></h3>" +
+        (differ.length ? '<div class="tbl-wrap" style="max-height:420px;overflow-y:auto"><table><thead><tr><th>file</th><th>A scores</th><th>B scores</th></tr></thead><tbody>' +
+            differ.slice(0, 80).map(c =>
+                '<tr><td class="mono" style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + esc(c.filename) + '">' + esc(c.filename || c.case_id) + "</td>" +
+                "<td>" + chipRow(c.scores) + "</td><td>" + chipRow((mb[c.case_id] || {}).scores) + "</td></tr>").join("") +
+            "</tbody></table>" + (differ.length > 80 ? '<p style="font-size:0.78rem;color:var(--text-dim);margin-top:8px">showing first 80 of ' + differ.length + "</p>" : "")
+            : '<p style="font-size:0.85rem;color:var(--text-muted)">' + (shared.length ? "No scoring disagreements on shared cases." : "No shared cases (different subsets or snapshot cap).") + "</p>") +
         "</div>";
 }
 

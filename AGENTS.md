@@ -66,6 +66,7 @@ uv run python scripts/compare_runs.py --a <run_a> --b <run_b> --md reports/compa
 uv run python scripts/freeze_prompts.py --check      # prompt lineage drift check
 uv run python scripts/export_site_snapshot.py        # refresh the Vercel viewer snapshot
 uv run python scripts/export_site_snapshot.py --check  # exit 1 if snapshot is stale
+node scripts/viewer_smoke.js                         # headless viewer regression check (needs node)
 uv run pytest tests/ -q                              # hermetic test suite (73 tests)
 uv run python scripts/render_experiment_log.py --validate
 uv run python scripts/render_experiment_log.py       # rebuild markdown

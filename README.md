@@ -237,12 +237,17 @@ uv run python scripts/run_evals.py --task eval:classify --real --trace-backend p
 results** plus a **dashboard of the eval environment itself** — deployed on
 Vercel via the GitHub integration (same pattern as the DMR dispatch board).
 
-**Views**: Dashboard (health badges, runs/day sparkline, per-task status) ·
-Runs (filterable index of every recorded run) · Run detail (metrics,
-provenance, expected→predicted matrix, per-case table with scores/latency/
-errors) · Tasks (the 31-task catalog) · Corpus (the pinned revision + subset
-grammar) · Prompts (frozen lineage browser + GEPA mutations) · Environment
-(health checks, command surface, skills/subagents, non-negotiables).
+**Views**: Dashboard (health badges, runs/day sparkline, per-task status,
+recent-activity feed) · Runs (filterable index of every recorded run) ·
+**Trends** (per-task metric history over time — SVG chart, best/worst/mean,
+mock-vs-real split) · **Compare** (A/B any two runs: metric deltas with
+better/worse verdicts + per-case disagreement tables) · Run detail (metrics,
+provenance, expected→predicted matrices for class AND subclass, failures-only
+case filter) · Tasks (the 31-task catalog) · Corpus (the pinned revision +
+subset grammar) · Prompts (frozen lineage browser + GEPA mutations) ·
+Environment (health checks, command surface, skills/subagents,
+non-negotiables). Project dashboard:
+[Vercel → eval-environment](https://vercel.com/lucius-projects-54efe0bb/eval-environment/A5xZpmnPeh8RB2H2Pjn3acTtn4RS).
 
 **Data flow**: the raw experiment log stays local (per `.gitignore`); the
 viewer reads one tracked, generated snapshot:
@@ -258,6 +263,14 @@ The snapshot embeds run summaries + capped case rows (250/run), the task
 catalog, corpus pin, prompt lineage manifest, and in-process health checks
 (log validation + lineage drift), with a visible `generated_at` staleness
 stamp in the header.
+
+The viewer itself has a headless regression check (DOM-stubbed, no browser
+needed — catches empty renders and leaked `undefined`/`NaN` across every
+route):
+
+```bash
+node scripts/viewer_smoke.js
+```
 
 **Deployment** (one-time, via the already-configured Vercel account):
 Vercel → Add New Project → import `LLM-Mailroom-Services/eval-environment`

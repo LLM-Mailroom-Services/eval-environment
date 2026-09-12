@@ -44,7 +44,7 @@ def main() -> int:
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--n", type=int, default=None, help="hard cap on cases")
     parser.add_argument("--mock", action="store_true", help="deterministic fake LLM (no network)")
-    parser.add_argument("--real", action="store_true", help="real LLM (OPENROUTER_API_KEY, or the AI-gateway .env provider)")
+    parser.add_argument("--real", action="store_true", help="real LLM (OPENROUTER_API_KEY primary, or the gateway .env alternative)")
     parser.add_argument("--trace-backend", choices=("auto", "braintrust", "phoenix", "none"), default=None)
     parser.add_argument("--model", default=None, help="model override recorded in the log")
     parser.add_argument("--prompt-version", default=None,

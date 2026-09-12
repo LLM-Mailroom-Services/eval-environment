@@ -116,13 +116,14 @@ mailroom = { path = "../Digital-Mailroom/packages/llm-mailroom", editable = true
 > **Moving machines?** Re-point `[tool.uv.sources]` at the new checkout (or a
 > git source). Everything else in this repo is self-contained.
 
-Real runs need a configured LLM provider — either `OPENROUTER_API_KEY` or the
-repo `.env` routing through the **Vercel AI Gateway** (the default here:
-`DEFAULT_PROVIDER=generic` + `GENERIC_BASE_URL=https://ai-gateway.vercel.sh/v1`
+Real runs need a configured LLM provider — `OPENROUTER_API_KEY` (primary; the
+pipeline's provider registry resolves per-agent models), or the repo `.env`
+routing through the **Vercel AI Gateway** as an alternative
+(`DEFAULT_PROVIDER=generic` + `GENERIC_BASE_URL=https://ai-gateway.vercel.sh/v1`
 + `GENERIC_API_KEY`; loaded by `evals/__init__`, real environment always wins).
-The pipeline's provider registry resolves per-agent models; gateway model IDs
-match OpenRouter's slash convention (`openai/gpt-4o`, …) so agent configs pass
-through verbatim. See [Configuration](#configuration) for the full env table.
+Gateway model IDs match OpenRouter's slash convention (`openai/gpt-4o`, …) so
+agent configs pass through verbatim. See
+[Configuration](#configuration) for the full env table.
 
 ## The task families
 
@@ -424,8 +425,8 @@ Every case records **performance** regardless of family:
 
 | variable | used for | default |
 |---|---|---|
-| `OPENROUTER_API_KEY` | real LLM runs (`--real`) | alternative to the gateway `.env` |
-| `DEFAULT_PROVIDER` / `GENERIC_BASE_URL` / `GENERIC_API_KEY` | LLM provider override — repo `.env` ships the Vercel AI Gateway | gateway (from `.env`) |
+| `OPENROUTER_API_KEY` | real LLM runs (`--real`) — primary provider | — (required for real) |
+| `DEFAULT_PROVIDER` / `GENERIC_BASE_URL` / `GENERIC_API_KEY` | optional alternative via the repo `.env`: Vercel AI Gateway (OpenAI-compatible) | unset (OpenRouter) |
 | `BRAINTRUST_API_KEY` / `BRAINTRUST_PROJECT` | Braintrust sink | auto-selects Braintrust when set / `mailroom` |
 | `PHOENIX_ENDPOINT` / `PHOENIX_PROJECT` / `PHOENIX_SERVICE_NAME` | Phoenix sink | `http://localhost:6006/v1/traces` / `mailroom-evals` |
 | `EVALS_TRACE_BACKEND` | default backend without the CLI flag | `auto` |

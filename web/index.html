@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mailroom Evals — Run Viewer & Environment Dashboard</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    <meta name="description" content="Dedicated viewer for llm-mailroom evaluation runs and the eval environment itself — experiment log, task catalog, corpus pin, frozen prompt lineage.">
+    <style>
+        :root {
+            --bg: #0b0e14;
+            --bg-secondary: #11151f;
+            --bg-tertiary: #161b28;
+            --bg-card: #1a2030;
+            --bg-card-hover: #1f2638;
+            --border: #2a3142;
+            --border-light: #3a4256;
+            --text: #e4e7ed;
+            --text-muted: #8a94a7;
+            --text-dim: #5c6478;
+            --accent: #6c8cff;
+            --accent-glow: rgba(108, 140, 255, 0.25);
+            --green: #4ade80;
+            --green-dim: rgba(74, 222, 128, 0.15);
+            --yellow: #facc15;
+            --yellow-dim: rgba(250, 204, 21, 0.15);
+            --orange: #fb923c;
+            --orange-dim: rgba(251, 146, 60, 0.15);
+            --red: #f87171;
+            --red-dim: rgba(248, 113, 113, 0.15);
+            --purple: #a78bfa;
+            --purple-dim: rgba(167, 139, 250, 0.15);
+            --cyan: #22d3ee;
+            --cyan-dim: rgba(34, 211, 238, 0.15);
+            --pink: #f472b6;
+            --pink-dim: rgba(244, 114, 182, 0.15);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --font-mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace;
+            --font-sans: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { font-size: 15px; scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            background-image:
+                radial-gradient(ellipse at 20% 0%, rgba(108, 140, 255, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 100%, rgba(167, 139, 250, 0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(34, 211, 238, 0.02) 0%, transparent 70%);
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
+
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+
+        /* ── header ─────────────────────────────────────────── */
+        header {
+            position: sticky; top: 0; z-index: 50;
+            background: rgba(11, 14, 20, 0.88);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+        .header-inner {
+            display: flex; align-items: center; gap: 20px;
+            padding: 14px 0; flex-wrap: wrap;
+        }
+        .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em; }
+        .brand .logo {
+            width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 17px; box-shadow: 0 0 18px var(--accent-glow);
+        }
+        .brand small { display: block; font-weight: 400; font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.02em; }
+        nav { display: flex; gap: 4px; flex-wrap: wrap; margin-left: auto; }
+        nav a {
+            padding: 7px 13px; border-radius: var(--radius-sm);
+            color: var(--text-muted); font-size: 0.86rem; font-weight: 500;
+            transition: all 0.18s ease; border: 1px solid transparent;
+        }
+        nav a:hover { color: var(--text); background: var(--bg-tertiary); text-decoration: none; }
+        nav a.active { color: var(--accent); background: var(--accent-glow); border-color: rgba(108, 140, 255, 0.3); }
+        .header-meta { width: 100%; display: flex; gap: 8px; align-items: center; padding-bottom: 10px; flex-wrap: wrap; }
+
+        /* ── badges & chips ─────────────────────────────────── */
+        .badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 10px; border-radius: 999px;
+            font-size: 0.72rem; font-weight: 600; letter-spacing: 0.02em;
+            border: 1px solid transparent; white-space: nowrap;
+        }
+        .badge.green { background: var(--green-dim); color: var(--green); border-color: rgba(74, 222, 128, 0.3); }
+        .badge.yellow { background: var(--yellow-dim); color: var(--yellow); border-color: rgba(250, 204, 21, 0.3); }
+        .badge.red { background: var(--red-dim); color: var(--red); border-color: rgba(248, 113, 113, 0.3); }
+        .badge.blue { background: var(--accent-glow); color: var(--accent); border-color: rgba(108, 140, 255, 0.3); }
+        .badge.purple { background: var(--purple-dim); color: var(--purple); border-color: rgba(167, 139, 250, 0.3); }
+        .badge.cyan { background: var(--cyan-dim); color: var(--cyan); border-color: rgba(34, 211, 238, 0.3); }
+        .badge.orange { background: var(--orange-dim); color: var(--orange); border-color: rgba(251, 146, 60, 0.3); }
+        .badge.pink { background: var(--pink-dim); color: var(--pink); border-color: rgba(244, 114, 182, 0.3); }
+        .badge.dim { background: var(--bg-tertiary); color: var(--text-muted); border-color: var(--border); }
+        .mono { font-family: var(--font-mono); font-size: 0.82em; }
+
+        /* ── layout blocks ──────────────────────────────────── */
+        main { padding: 28px 0 80px; }
+        .page-title { font-size: 1.45rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+        .page-sub { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 24px; }
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow);
+        }
+        .card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+        .grid { display: grid; gap: 16px; }
+        .grid.c2 { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+        .grid.c3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+        .grid.c4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+        .mb16 { margin-bottom: 16px; } .mb24 { margin-bottom: 24px; }
+
+        .stat { position: relative; overflow: hidden; }
+        .stat .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px; }
+        .stat .value { font-size: 1.9rem; font-weight: 700; font-family: var(--font-mono); letter-spacing: -0.02em; }
+        .stat .hint { font-size: 0.75rem; color: var(--text-dim); margin-top: 4px; }
+        .stat::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); opacity: 0.5; }
+        .stat.green::after { background: var(--green); } .stat.purple::after { background: var(--purple); }
+        .stat.cyan::after { background: var(--cyan); } .stat.orange::after { background: var(--orange); }
+
+        /* ── tables ─────────────────────────────────────────── */
+        .tbl-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+        th {
+            text-align: left; padding: 10px 14px; font-size: 0.7rem; text-transform: uppercase;
+            letter-spacing: 0.07em; color: var(--text-muted); background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border); white-space: nowrap; position: sticky; top: 0;
+        }
+        td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tbody tr { transition: background 0.15s ease; }
+        tbody tr:hover { background: var(--bg-card-hover); }
+        tbody tr.clickable { cursor: pointer; }
+        td.num { font-family: var(--font-mono); text-align: right; white-space: nowrap; }
+
+        /* ── controls ───────────────────────────────────────── */
+        .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+        input[type="text"], select {
+            background: var(--bg-secondary); border: 1px solid var(--border);
+            color: var(--text); border-radius: var(--radius-sm); padding: 8px 12px;
+            font-size: 0.84rem; font-family: var(--font-sans); outline: none;
+            transition: border-color 0.18s ease;
+        }
+        input[type="text"]:focus, select:focus { border-color: var(--accent); }
+        input[type="text"] { min-width: 220px; font-family: var(--font-mono); font-size: 0.8rem; }
+
+        /* ── sparkline ──────────────────────────────────────── */
+        .spark { display: flex; align-items: flex-end; gap: 3px; height: 72px; padding-top: 6px; }
+        .spark .bar {
+            flex: 1; min-width: 6px; max-width: 26px; border-radius: 3px 3px 0 0;
+            background: linear-gradient(180deg, var(--accent) 0%, rgba(108, 140, 255, 0.35) 100%);
+            position: relative; transition: opacity 0.15s ease; cursor: default;
+        }
+        .spark .bar:hover { opacity: 0.8; }
+        .spark .bar .tip {
+            position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+            background: var(--bg-tertiary); border: 1px solid var(--border-light);
+            padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; white-space: nowrap;
+            opacity: 0; pointer-events: none; transition: opacity 0.15s ease; z-index: 10;
+            font-family: var(--font-mono);
+        }
+        .spark .bar:hover .tip { opacity: 1; }
+        .spark-labels { display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--text-dim); margin-top: 6px; font-family: var(--font-mono); }
+
+        /* ── misc ───────────────────────────────────────────── */
+        .kv { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; font-size: 0.84rem; }
+        .kv dt { color: var(--text-muted); }
+        .kv dd { font-family: var(--font-mono); font-size: 0.8rem; word-break: break-all; }
+        .metric-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; }
+        .metric-card .k { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 4px; }
+        .metric-card .v { font-family: var(--font-mono); font-size: 1.15rem; font-weight: 600; }
+        .bar-mini { height: 6px; border-radius: 3px; background: var(--bg-tertiary); overflow: hidden; margin-top: 6px; }
+        .bar-mini > div { height: 100%; border-radius: 3px; }
+        .empty { text-align: center; color: var(--text-dim); padding: 48px 0; font-size: 0.9rem; }
+        .error-panel { background: var(--red-dim); border: 1px solid rgba(248, 113, 113, 0.4); border-radius: var(--radius); padding: 20px; }
+        .cmd {
+            background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm);
+            padding: 10px 14px; font-family: var(--font-mono); font-size: 0.78rem; color: var(--cyan);
+            overflow-x: auto; white-space: pre; margin: 6px 0;
+        }
+        .footer { border-top: 1px solid var(--border); padding: 20px 0; color: var(--text-dim); font-size: 0.78rem; text-align: center; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 6px; background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-muted); font-size: 0.7rem; font-family: var(--font-mono); margin: 2px 2px 2px 0; }
+        .sha { color: var(--cyan); }
+        .section-h { font-size: 1.05rem; font-weight: 700; margin: 28px 0 12px; letter-spacing: -0.01em; }
+        .pill-row { display: flex; gap: 6px; flex-wrap: wrap; }
+        details.prompt-src { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 8px; background: var(--bg-secondary); }
+        details.prompt-src summary { cursor: pointer; font-size: 0.86rem; font-weight: 600; }
+        details.prompt-src .body { margin-top: 10px; }
+
+        @media (max-width: 720px) {
+            .header-inner { gap: 10px; }
+            nav { margin-left: 0; width: 100%; }
+            .page-title { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="container">
+        <div class="header-inner">
+            <div class="brand">
+                <div class="logo">📊</div>
+                <div>Mailroom Evals<small>run viewer &amp; environment dashboard</small></div>
+            </div>
+            <nav id="nav">
+                <a href="#/dashboard" data-view="dashboard">Dashboard</a>
+                <a href="#/runs" data-view="runs">Runs</a>
+                <a href="#/tasks" data-view="tasks">Tasks</a>
+                <a href="#/corpus" data-view="corpus">Corpus</a>
+                <a href="#/prompts" data-view="prompts">Prompts</a>
+                <a href="#/environment" data-view="environment">Environment</a>
+            </nav>
+        </div>
+        <div class="header-meta" id="header-meta"></div>
+    </div>
+</header>
+
+<main class="container" id="main">
+    <div class="empty">Loading snapshot…</div>
+</main>
+
+<footer>
+    <div class="container footer">
+        mailroom-evals · snapshot <span class="mono" id="footer-stamp">—</span> ·
+        <a href="https://github.com/LLM-Mailroom-Services/eval-environment" target="_blank" rel="noopener">repo</a> ·
+        <a href="https://digital-mailroom-theta.vercel.app" target="_blank" rel="noopener">DMR dispatch board</a>
+    </div>
+</footer>
+
+<script>
+"use strict";
+
+// ── state ────────────────────────────────────────────────────────
+let DATA = null;
+const $main = document.getElementById("main");
+const $meta = document.getElementById("header-meta");
+
+const FAMILY_BADGE = { eval: "blue", pilot: "cyan", calibration: "purple" };
+const MODE_BADGE = { mock: "dim", real: "green" };
+
+function esc(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c => (
+        { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+    ));
+}
+function fmtPct(v) { return (typeof v === "number" && isFinite(v)) ? (100 * v).toFixed(1) + "%" : "—"; }
+function fmtNum(v) { return (typeof v === "number" && isFinite(v)) ? v.toLocaleString() : "—"; }
+function fmtDur(s) {
+    if (typeof s !== "number") return "—";
+    return s < 90 ? s.toFixed(1) + "s" : Math.floor(s / 60) + "m " + Math.round(s % 60) + "s";
+}
+function fmtWhen(iso) {
+    if (!iso) return "—";
+    const d = new Date(iso);
+    const diff = (Date.now() - d.getTime()) / 1000;
+    if (diff < 3600) return Math.max(1, Math.floor(diff / 60)) + "m ago";
+    if (diff < 86400) return Math.floor(diff / 3600) + "h ago";
+    return d.toISOString().slice(0, 10);
+}
+function shortSha(sha) { return sha ? '<span class="sha mono">' + esc(String(sha).slice(0, 12)) + "</span>" : "—"; }
+function shortId(runId) { return '<span class="mono">' + esc(runId) + "</span>"; }
+function headlineDisplay(run) {
+    const v = run.headline;
+    if (v == null) return "—";
+    return typeof v === "number" ? (v <= 1 ? fmtPct(v) : fmtNum(v)) : esc(v);
+}
+function badge(kind, text) { return '<span class="badge ' + kind + '">' + esc(text) + "</span>"; }
+function modeBadge(mode) { return badge(MODE_BADGE[mode] || "dim", mode); }
+function familyBadge(f) { return badge(FAMILY_BADGE[f] || "dim", f); }
+
+// ── data ─────────────────────────────────────────────────────────
+async function load() {
+    try {
+        const res = await fetch("data/snapshot.json", { cache: "no-cache" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        DATA = await res.json();
+        renderHeaderMeta();
+        route();
+        window.addEventListener("hashchange", route);
+    } catch (err) {
+        $main.innerHTML =
+            '<div class="error-panel"><h3 style="color:var(--red);margin-bottom:10px">Snapshot unavailable</h3>' +
+            '<p style="font-size:0.88rem;color:var(--text-muted)">Could not load <span class="mono">data/snapshot.json</span> (' +
+            esc(err.message) + ').</p>' +
+            '<p style="font-size:0.84rem;margin-top:10px;color:var(--text-muted)">Regenerate it from the repo root:</p>' +
+            '<div class="cmd">uv run python scripts/export_site_snapshot.py</div></div>';
+    }
+}
+
+function renderHeaderMeta() {
+    const h = DATA.health, gen = DATA.generated_at;
+    const ageH = Math.max(0, (Date.now() - new Date(gen).getTime()) / 3600000);
+    const age = ageH < 48 ? Math.round(ageH) + "h ago" : Math.round(ageH / 24) + "d ago";
+    $meta.innerHTML =
+        badge(h.log_valid ? "green" : "red", (h.log_valid ? "✓ log valid" : "✗ log invalid") + " · " + h.log_records + " runs") +
+        badge(h.lineage_drift_free ? "green" : "yellow", (h.lineage_drift_free ? "✓ lineage drift-free" : "⚠ lineage drift") + " · " + esc(DATA.environment.prompts.lineage_id)) +
+        badge("dim", "snapshot " + age) +
+        (DATA.environment.corpus.revision ? badge("dim", "corpus @ " + DATA.environment.corpus.revision.slice(0, 7)) : "");
+    document.getElementById("footer-stamp").textContent = gen;
+}
+
+// ── router ───────────────────────────────────────────────────────
+function route() {
+    const hash = location.hash.replace(/^#\/?/, "") || "dashboard";
+    const [view, arg] = hash.split("/");
+    document.querySelectorAll("#nav a").forEach(a =>
+        a.classList.toggle("active", a.dataset.view === view || (view === "run" && a.dataset.view === "runs")));
+    window.scrollTo(0, 0);
+    if (view === "runs") return viewRuns();
+    if (view === "run" && arg) return viewRun(decodeURIComponent(arg));
+    if (view === "tasks") return viewTasks();
+    if (view === "corpus") return viewCorpus();
+    if (view === "prompts") return viewPrompts();
+    if (view === "environment") return viewEnvironment();
+    return viewDashboard();
+}
+
+// ── dashboard ────────────────────────────────────────────────────
+function viewDashboard() {
+    const t = DATA.totals, days = Object.entries(t.by_day).slice(-21);
+    const maxDay = Math.max(1, ...days.map(([, n]) => n));
+    const spark = days.map(([day, n]) =>
+        '<div class="bar" style="height:' + Math.max(6, 100 * n / maxDay) + '%">' +
+        '<span class="tip">' + esc(day) + " · " + n + " run" + (n > 1 ? "s" : "") + "</span></div>").join("");
+
+    const taskRows = Object.entries(t.by_task).map(([task, info]) => {
+        const l = info.latest;
+        const spec = DATA.environment.tasks.find(x => x.task_id.split(":").slice(1).join(":") === task);
+        return "<tr>" +
+            '<td class="mono">' + esc(task) + "</td>" +
+            "<td>" + (spec ? familyBadge(spec.family) : "") + "</td>" +
+            '<td class="num">' + info.runs + "</td>" +
+            "<td>" + (l ? modeBadge(l.mode) : "—") + "</td>" +
+            "<td>" + (l ? headlineDisplay({ headline: l.headline }) : "—") + "</td>" +
+            '<td class="num">' + (l ? fmtNum(l.n_cases) : "—") + "</td>" +
+            "<td>" + (l ? fmtWhen(l.started_at) : "—") + "</td>" +
+            '<td><a href="#/run/' + encodeURIComponent(l ? l.run_id : "") + '">view</a></td></tr>';
+    }).join("");
+
+    const last = DATA.runs[0];
+    const famCards = Object.entries(t.by_family).map(([f, n]) =>
+        '<div class="card stat ' + (f === "eval" ? "" : f === "pilot" ? "cyan" : "purple") + '">' +
+        '<div class="label">' + esc(f) + " runs</div><div class=\"value\">" + n + "</div>" +
+        '<div class="hint">' + esc(DATA.environment.tasks.filter(x => x.family === f).length) + " tasks registered</div></div>").join("");
+
+    $main.innerHTML =
+        '<div class="page-title">Dashboard</div>' +
+        '<div class="page-sub">The eval environment at a glance — health, activity, and per-task status.</div>' +
+
+        '<div class="grid c4 mb24">' +
+        '<div class="card stat"><div class="label">Total runs</div><div class="value">' + t.total_runs + '</div><div class="hint">append-only experiment log</div></div>' +
+        '<div class="card stat green"><div class="label">Registered tasks</div><div class="value">' + DATA.environment.tasks.length + '</div><div class="hint">eval · pilot · calibration</div></div>' +
+        '<div class="card stat purple"><div class="label">Frozen prompts</div><div class="value">' + DATA.environment.prompts.versions.length + '</div><div class="hint">' + esc(DATA.environment.prompts.lineage_id) + "</div></div>" +
+        '<div class="card stat cyan"><div class="label">Last activity</div><div class="value" style="font-size:1.3rem">' + (last ? fmtWhen(last.started_at) : "—") + '</div><div class="hint">' + (last ? esc(last.family + ":" + last.task) : "") + "</div></div>" +
+        "</div>" +
+
+        '<div class="grid c2 mb24">' +
+        '<div class="card"><h3>Runs per day <span class="badge dim mono">last ' + days.length + "d</span></h3>" +
+        (days.length ? '<div class="spark">' + spark + "</div>" + '<div class="spark-labels"><span>' + esc(days[0][0].slice(5)) + "</span><span>" + esc(days[days.length - 1][0].slice(5)) + "</span></div>" : '<div class="empty">no runs yet</div>') +
+        "</div>" +
+        '<div class="card"><h3>Environment health</h3><div class="pill-row" style="flex-direction:column;align-items:flex-start;gap:10px">' +
+        badge(DATA.health.log_valid ? "green" : "red", (DATA.health.log_valid ? "✓" : "✗") + " experiment log validates (schema v2)") +
+        badge(DATA.health.lineage_drift_free ? "green" : "yellow", (DATA.health.lineage_drift_free ? "✓" : "⚠") + " frozen lineage matches live pipeline") +
+        badge(DATA.environment.corpus.revision ? "green" : "yellow", "✓ corpus pinned @ " + DATA.environment.corpus.revision.slice(0, 12)) +
+        badge("blue", DATA.environment.inventory.test_count + " hermetic tests") +
+        "</div></div>" +
+        "</div>" +
+
+        '<div class="grid c3 mb24">' + famCards + "</div>" +
+
+        '<div class="card"><h3>Per-task status <span class="badge dim">latest run each</span></h3>' +
+        '<div class="tbl-wrap"><table><thead><tr><th>task</th><th>family</th><th>runs</th><th>mode</th><th>headline</th><th>cases</th><th>last</th><th></th></tr></thead>' +
+        "<tbody>" + taskRows + "</tbody></table></div></div>";
+}
+
+// ── runs list ────────────────────────────────────────────────────
+let runFilter = { q: "", family: "", mode: "" };
+function viewRuns() {
+    $main.innerHTML =
+        '<div class="page-title">Runs</div>' +
+        '<div class="page-sub">Every recorded run — click a row for the full result view.</div>' +
+        '<div class="controls">' +
+        '<input type="text" id="rq" placeholder="filter run_id / task…" value="' + esc(runFilter.q) + '">' +
+        '<select id="rf"><option value="">all families</option>' + ["eval", "pilot", "calibration"].map(f =>
+            '<option value="' + f + '"' + (runFilter.family === f ? " selected" : "") + ">" + f + "</option>").join("") + "</select>" +
+        '<select id="rm"><option value="">all modes</option>' + ["mock", "real"].map(m =>
+            '<option value="' + m + '"' + (runFilter.mode === m ? " selected" : "") + ">" + m + "</option>").join("") + "</select>" +
+        '<span class="badge dim" id="rcount"></span></div>' +
+        '<div class="tbl-wrap"><table><thead><tr><th>run_id</th><th>task</th><th>family</th><th>invoke</th><th>mode</th><th>model</th><th>cases</th><th>headline</th><th>duration</th><th>when</th></tr></thead><tbody id="rbody"></tbody></table></div>';
+
+    const apply = () => {
+        runFilter.q = document.getElementById("rq").value.toLowerCase();
+        runFilter.family = document.getElementById("rf").value;
+        runFilter.mode = document.getElementById("rm").value;
+        const rows = DATA.runs.filter(r =>
+            (!runFilter.q || r.run_id.toLowerCase().includes(runFilter.q) || r.task.toLowerCase().includes(runFilter.q)) &&
+            (!runFilter.family || r.family === runFilter.family) &&
+            (!runFilter.mode || r.mode === runFilter.mode));
+        document.getElementById("rcount").textContent = rows.length + " / " + DATA.runs.length + " runs";
+        document.getElementById("rbody").innerHTML = rows.map(r =>
+            '<tr class="clickable" onclick="location.hash=\'#/run/' + encodeURIComponent(r.run_id) + '\'">' +
+            "<td>" + shortId(r.run_id) + "</td>" +
+            '<td class="mono">' + esc(r.task) + "</td>" +
+            "<td>" + familyBadge(r.family) + "</td>" +
+            '<td class="mono" style="color:var(--text-muted)">' + esc(r.invoke) + "</td>" +
+            "<td>" + modeBadge(r.mode) + "</td>" +
+            "<td>" + (r.model ? '<span class="mono" style="font-size:0.75rem">' + esc(r.model) + "</span>" : "—") + "</td>" +
+            '<td class="num">' + fmtNum(r.n_cases) + "</td>" +
+            "<td>" + headlineDisplay(r) + "</td>" +
+            '<td class="num">' + fmtDur(r.duration_s) + "</td>" +
+            "<td>" + fmtWhen(r.started_at) + "</td></tr>").join("") ||
+            '<tr><td colspan="10" class="empty">no runs match</td></tr>';
+    };
+    ["rq", "rf", "rm"].forEach(id => document.getElementById(id).addEventListener("input", apply));
+    apply();
+}
+
+// ── run detail ───────────────────────────────────────────────────
+function viewRun(runId) {
+    const run = DATA.runs.find(r => r.run_id === runId);
+    if (!run) { $main.innerHTML = '<div class="empty">run not found: ' + esc(runId) + "</div>"; return; }
+    const cases = (DATA.cases[runId] || []);
+    const metrics = run.metrics || {};
+    const perf = run.performance || {};
+    const ds = run.dataset || {};
+
+    const metricCards = Object.entries(metrics).filter(([, v]) => typeof v === "number" || typeof v === "string").map(([k, v]) =>
+        '<div class="metric-card"><div class="k">' + esc(k) + '</div><div class="v">' +
+        (typeof v === "number" && k.match(/accuracy|score|rate|f1|agreement|recall|precision/) && v <= 1 ? fmtPct(v) : esc(v)) +
+        "</div></div>").join("");
+
+    const expKeys = ["expected_doc_class", "expected_subclass", "expected_stage", "fixture_cell", "fixture_outcome"];
+    const hasClass = cases.some(c => c.expected_doc_class != null && c.prediction && c.prediction.doc_type != null);
+
+    let confusion = "";
+    if (hasClass) {
+        const cells = {};
+        cases.forEach(c => {
+            const e = c.expected_doc_class, p = (c.prediction || {}).doc_type;
+            if (e == null || p == null) return;
+            cells[e] = cells[e] || {};
+            cells[e][p] = (cells[e][p] || 0) + 1;
+        });
+        const classes = Array.from(new Set([...Object.keys(cells), ...Object.values(cells).flatMap(o => Object.keys(o))])).sort();
+        confusion = '<div class="card mb16"><h3>Expected → predicted (doc class)</h3><div class="tbl-wrap"><table><thead><tr><th>expected \\ predicted</th>' +
+            classes.map(c => '<th class="mono">' + esc(c) + "</th>").join("") + "</tr></thead><tbody>" +
+            classes.map(e => "<tr><td class=\"mono\">" + esc(e) + "</td>" +
+                classes.map(p => {
+                    const n = (cells[e] || {})[p] || 0;
+                    const good = e === p && n > 0;
+                    return '<td class="num" style="' + (n ? (good ? "color:var(--green)" : "color:var(--red)") : "color:var(--text-dim)") + '">' + (n || "·") + "</td>";
+                }).join("") + "</tr>").join("") + "</tbody></table></div></div>";
+    }
+
+    const caseRows = cases.map((c, i) => {
+        const pred = c.prediction || {};
+        const scores = c.scores || {};
+        const scoreChips = Object.entries(scores).slice(0, 4).map(([k, v]) =>
+            badge(typeof v === "boolean" ? (v ? "green" : "red") : typeof v === "number" && v >= 0.999 ? "green" : typeof v === "number" && v >= 0.5 ? "yellow" : v === 0 ? "red" : "dim",
+                esc(k) + (typeof v === "number" && v <= 1 && k.match(/accuracy|score|f1|rate/) ? " " + fmtPct(v) : " " + esc(v)))).join("");
+        return "<tr>" +
+            '<td class="num" style="color:var(--text-dim)">' + (i + 1) + "</td>" +
+            '<td class="mono" style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + esc(c.filename) + '">' + esc(c.filename || c.case_id) + "</td>" +
+            (expKeys.some(k => c[k] != null) ? "<td>" + expKeys.filter(k => c[k] != null).map(k => '<span class="tag">' + esc(c[k]) + "</span>").join("") + "</td>" : "") +
+            "<td>" + (pred.doc_type ? '<span class="tag" style="color:var(--text)">' + esc(pred.doc_type) + (pred.doc_subclass ? " / " + esc(pred.doc_subclass) : "") + "</span>" : "—") + "</td>" +
+            "<td>" + (scoreChips || "—") + "</td>" +
+            '<td class="num">' + (c.latency_ms != null ? c.latency_ms.toFixed(0) + "ms" : "—") + "</td>" +
+            "<td>" + (c.error ? badge("red", "error") : "") + "</td></tr>";
+    }).join("");
+
+    $main.innerHTML =
+        '<div class="page-sub" style="margin-bottom:8px"><a href="#/runs">← all runs</a></div>' +
+        '<div class="page-title mono" style="font-size:1.1rem">' + esc(run.run_id) + "</div>" +
+        '<div class="pill-row mb24">' +
+        familyBadge(run.family) + '<span class="badge dim mono">' + esc(run.task) + "</span>" +
+        modeBadge(run.mode) + '<span class="badge dim mono">' + esc(run.invoke) + "</span>" +
+        (run.error ? badge("red", "run error") : badge("green", "completed")) +
+        (run.prompt_lineage ? badge("purple", "lineage: " + run.prompt_lineage) : "") +
+        (run.trace_backend && run.trace_backend !== "none" ? badge("cyan", "traced → " + run.trace_backend) : badge("dim", "untraced")) +
+        "</div>" +
+
+        (run.error ? '<div class="error-panel mb16"><h3 style="color:var(--red)">Run error</h3><p class="mono" style="font-size:0.8rem;white-space:pre-wrap">' + esc(run.error) + "</p></div>" : "") +
+
+        '<div class="grid c4 mb16">' +
+        '<div class="metric-card"><div class="k">headline</div><div class="v">' + headlineDisplay(run) + "</div></div>" +
+        '<div class="metric-card"><div class="k">cases</div><div class="v">' + fmtNum(run.n_cases) + "</div></div>" +
+        '<div class="metric-card"><div class="k">duration</div><div class="v">' + fmtDur(run.duration_s) + "</div></div>" +
+        '<div class="metric-card"><div class="k">started</div><div class="v" style="font-size:0.95rem">' + esc((run.started_at || "").replace("T", " ").slice(0, 19)) + "</div></div>" +
+        "</div>" +
+
+        (metricCards ? '<div class="grid c4 mb16">' + metricCards + "</div>" : "") +
+
+        '<div class="grid c2 mb16">' +
+        '<div class="card"><h3>Dataset</h3><dl class="kv">' +
+        "<dt>repo</dt><dd>" + esc(ds.repo || "—") + "</dd>" +
+        "<dt>config / split</dt><dd>" + esc((ds.config || "—") + " · " + (ds.split || "—")) + "</dd>" +
+        "<dt>subset</dt><dd>" + esc(ds.subset || ds.subset_spec?.kind || "—") + "</dd>" +
+        "<dt>selected</dt><dd>" + fmtNum(ds.n_selected) + " / " + fmtNum(ds.n_total) + "</dd>" +
+        "<dt>seed</dt><dd>" + esc(ds.seed ?? "—") + "</dd>" +
+        (ds.revision ? "<dt>revision</dt><dd>" + shortSha(ds.revision) + "</dd>" : "") +
+        "</dl></div>" +
+        '<div class="card"><h3>Provenance</h3><dl class="kv">' +
+        "<dt>model</dt><dd>" + esc(run.model || "—") + "</dd>" +
+        "<dt>prompt source</dt><dd>" + esc(run.prompt_source || "—") + "</dd>" +
+        "<dt>pipeline git</dt><dd>" + shortSha(run.pipeline_git || (run.git || {}).commit) + "</dd>" +
+        "<dt>evals git</dt><dd>" + ((run.git || {}).dirty ? badge("yellow", "dirty") + " " : "") + shortSha((run.git || {}).commit) + "</dd>" +
+        "<dt>schema</dt><dd>v" + esc(run.schema_version) + "</dd>" +
+        (perf.latency_ms_mean != null ? "<dt>latency μ/p95</dt><dd>" + perf.latency_ms_mean.toFixed(0) + " / " + perf.latency_ms_p95?.toFixed(0) + " ms</dd>" : "") +
+        (perf.tokens_prompt_total ? "<dt>tokens in/out</dt><dd>" + fmtNum(perf.tokens_prompt_total) + " / " + fmtNum(perf.tokens_completion_total) + "</dd>" : "") +
+        (perf.cost_usd_est_total != null ? "<dt>cost est.</dt><dd>$" + perf.cost_usd_est_total.toFixed(4) + "</dd>" : "") +
+        "</dl></div>" +
+        "</div>" +
+
+        confusion +
+
+        '<div class="card"><h3>Cases <span class="badge dim mono">' + cases.length + (run.n_cases > cases.length ? " of " + run.n_cases + " (capped)" : "") + '</span></h3>' +
+        (cases.length ? '<div class="tbl-wrap" style="max-height:520px;overflow-y:auto"><table><thead><tr><th>#</th><th>file</th>' +
+            (expKeys.some(k => cases[0][k] != null) ? "<th>expected</th>" : "") +
+            "<th>prediction</th><th>scores</th><th>latency</th><th></th></tr></thead><tbody>" + caseRows + "</tbody></table></div>"
+            : '<div class="empty">no case rows in snapshot</div>') +
+        "</div>";
+}
+
+// ── tasks ────────────────────────────────────────────────────────
+function viewTasks() {
+    const byFam = {};
+    DATA.environment.tasks.forEach(t => (byFam[t.family] = byFam[t.family] || []).push(t));
+    const famDesc = { eval: "Per-node correctness against the pinned corpus ground truth.", pilot: "Stratified micro-slices of the full pipeline for fast iteration.", calibration: "Fixtures-grid calibration — report-only threshold recommendations." };
+    const sections = Object.entries(byFam).map(([fam, tasks]) => {
+        const cards = tasks.map(t => {
+            const stat = DATA.totals.by_task[t.name] || {};
+            const l = stat.latest;
+            return '<div class="card"><h3><span class="mono" style="color:var(--accent)">' + esc(t.name) + "</span>" +
+                (l ? modeBadge(l.mode) : "") + "</h3>" +
+                '<p style="font-size:0.83rem;color:var(--text-muted);margin-bottom:10px">' + esc(t.description) + "</p>" +
+                '<div style="margin-bottom:10px"><span class="tag">node: ' + esc(t.node_name) + "</span>" +
+                '<span class="tag">subset: ' + esc(t.default_subset) + "</span>" +
+                '<span class="tag">scorer: ' + esc(t.scorer) + "</span>" +
+                (t.supports_agent_mode ? "" : '<span class="tag">node-only</span>') +
+                t.tags.map(x => '<span class="tag">' + esc(x) + "</span>").join("") + "</div>" +
+                '<div style="font-size:0.78rem;color:var(--text-dim)">' + (stat.runs || 0) + " runs" +
+                (l ? " · latest " + fmtWhen(l.started_at) + " · " + headlineDisplay({ headline: l.headline }) : " · never run") + "</div>" +
+                (l ? '<div style="margin-top:8px"><a href="#/run/' + encodeURIComponent(l.run_id) + '" style="font-size:0.8rem">latest run →</a></div>' : "") +
+                "</div>";
+        }).join("");
+        return '<div class="section-h">' + esc(fam) + ' <span class="badge ' + FAMILY_BADGE[fam] + '">' + tasks.length + " tasks</span>" +
+            '<span style="font-weight:400;font-size:0.8rem;color:var(--text-muted)"> — ' + esc(famDesc[fam] || "") + "</span></div>" +
+            '<div class="grid c2 mb16">' + cards + "</div>";
+    }).join("");
+    $main.innerHTML =
+        '<div class="page-title">Task catalog</div>' +
+        '<div class="page-sub">' + DATA.environment.tasks.length + ' registered tasks · <span class="mono">uv run python scripts/run_evals.py --list</span></div>' + sections;
+}
+
+// ── corpus ───────────────────────────────────────────────────────
+function viewCorpus() {
+    const c = DATA.environment.corpus;
+    const cfgRows = c.configs.map(k =>
+        "<tr><td class=\"mono\">" + esc(k.slug) + "</td><td>" + esc(k.schema || "—") + "</td><td>" + esc(k.role || "—") + "</td>" +
+        "<td>" + (k.pipeline ? badge("green", "pipeline") : badge("dim", "aux")) + "</td>" +
+        '<td class="num">' + fmtNum(k.n_docs) + "</td>" +
+        "<td>" + (k.classes || []).map(x => '<span class="tag">' + esc(x) + "</span>").join("") + "</td></tr>").join("");
+    $main.innerHTML =
+        '<div class="page-title">Corpus</div>' +
+        '<div class="page-sub">The pinned evaluation corpus — every run joins ground_truth ⇆ default on filename at this revision.</div>' +
+        '<div class="grid c2 mb16">' +
+        '<div class="card"><h3>Pin</h3><dl class="kv">' +
+        "<dt>repo</dt><dd>" + esc(c.repo) + "</dd>" +
+        "<dt>revision</dt><dd>" + esc(c.revision) + "</dd>" +
+        "<dt>hub classes</dt><dd>" + c.hub_classes.map(x => '<span class="tag">' + esc(x) + "</span>").join("") + "</dd>" +
+        "</dl></div>" +
+        '<div class="card"><h3>Subset grammar</h3><div class="cmd">full | train | test\nclass:&lt;name&gt;\nsubclass:&lt;class&gt;:&lt;subclass&gt;\nfixtures | bundles | streams | pilot\ncuad | enron | claims</div>' +
+        '<p style="font-size:0.8rem;color:var(--text-muted)">plus stratified <span class="mono">--sample N --seed S</span> and hard caps <span class="mono">--n N</span></p></div>' +
+        "</div>" +
+        '<div class="card"><h3>Configs <span class="badge dim mono">' + c.configs.length + "</span></h3>" +
+        '<div class="tbl-wrap"><table><thead><tr><th>slug</th><th>schema</th><th>role</th><th></th><th>docs</th><th>classes</th></tr></thead><tbody>' + cfgRows + "</tbody></table></div></div>";
+}
+
+// ── prompts ──────────────────────────────────────────────────────
+function viewPrompts() {
+    const p = DATA.environment.prompts;
+    const kinds = { docclass: "blue", production: "green", rubric: "purple" };
+    const rows = p.versions.map(v =>
+        "<tr><td class=\"mono\">" + esc(v.key) + "</td>" +
+        "<td>" + badge(kinds[v.source_kind] || "dim", v.source_kind || "?") + "</td>" +
+        '<td class="mono" style="color:var(--text-muted)">' + esc(v.source_key || "—") + "</td>" +
+        "<td>" + shortSha(v.sha256) + "</td>" +
+        '<td class="num">' + fmtNum(v.chars) + "</td></tr>").join("");
+
+    const mutations = (p.mutations || []);
+    $main.innerHTML =
+        '<div class="page-title">Prompt lineage</div>' +
+        '<div class="page-sub">' + esc(p.lineage_id) + " — the frozen official prompt version " + p.frozen_version + ", snapshotted from the live pipeline. GEPA mutations append; v1 is immutable.</div>" +
+        '<div class="grid c3 mb16">' +
+        '<div class="card stat purple"><div class="label">Frozen versions</div><div class="value">' + p.versions.length + '</div><div class="hint">frozen ' + esc((p.frozen_at || "").slice(0, 10)) + "</div></div>" +
+        '<div class="card stat cyan"><div class="label">Mutations</div><div class="value">' + mutations.length + '</div><div class="hint">four-gate validated</div></div>' +
+        '<div class="card stat"><div class="label">Pipeline commit</div><div class="value mono" style="font-size:1rem">' + esc((p.pipeline_git_commit || "").slice(0, 12)) + '</div><div class="hint">prompt provenance anchor</div></div>' +
+        "</div>" +
+        '<div class="card mb16"><h3>Frozen versions</h3>' +
+        '<div class="tbl-wrap"><table><thead><tr><th>key</th><th>kind</th><th>source key</th><th>sha256</th><th>chars</th></tr></thead><tbody>' + rows + "</tbody></table></div></div>" +
+        '<div class="card"><h3>GEPA mutations</h3>' +
+        (mutations.length ? mutations.map(m =>
+            '<details class="prompt-src"><summary><span class="mono">' + esc(m.key || m.new_key) + "</span> ← " + esc(m.parent_key || m.parent) + "</summary>" +
+            '<div class="body"><dl class="kv">' +
+            "<dt>change note</dt><dd>" + esc(m.note || m.change_note || "—") + "</dd>" +
+            "<dt>created</dt><dd>" + esc(m.created_at || "—") + "</dd></dl></div></details>").join("")
+            : '<p style="font-size:0.85rem;color:var(--text-muted)">No mutations yet. The loop: <span class="mono">score_run.py --export-failures</span> → DECOMPOSE → DRAFT (one surgical change) → four gates → A/B with <span class="mono">compare_runs.py</span>.</p>') +
+        "</div>";
+}
+
+// ── environment ──────────────────────────────────────────────────
+function viewEnvironment() {
+    const inv = DATA.environment.inventory;
+    const h = DATA.health;
+    $main.innerHTML =
+        '<div class="page-title">Environment</div>' +
+        '<div class="page-sub">The eval environment itself — tooling, discipline, and health.</div>' +
+        '<div class="grid c2 mb16">' +
+        '<div class="card"><h3>Health checks</h3><div class="pill-row" style="flex-direction:column;align-items:flex-start;gap:10px">' +
+        badge(h.log_valid ? "green" : "red", (h.log_valid ? "✓" : "✗") + " all " + h.log_records + " log records validate") +
+        badge(h.lineage_drift_free ? "green" : "yellow", (h.lineage_drift_free ? "✓" : "⚠") + " frozen lineage drift-free") +
+        badge("blue", inv.test_count + " hermetic tests") +
+        badge("dim", "record schema: " + inv.schemas.map(s => s.replace("experiment_record.", "v")).join(", ")) +
+        "</div></div>" +
+        '<div class="card"><h3>Command surface</h3>' +
+        '<div class="cmd">run_evals.py --task all --mock --n 2   # CI smoke\nrun_evals.py --task eval:classification --real\nscore_run.py --run-id &lt;id&gt; --recompute\nscore_run.py --run-id &lt;id&gt; --judge --mock\ncompare_runs.py --a &lt;A&gt; --b &lt;B&gt; --md …\nfreeze_prompts.py --check          # drift\nexport_site_snapshot.py            # this page</div></div>' +
+        "</div>" +
+        '<div class="grid c2 mb16">' +
+        '<div class="card"><h3>Skills <span class="badge dim mono">' + inv.skills.length + "</span></h3>" +
+        inv.skills.map(s => '<span class="tag">' + esc(s) + "</span>").join("") + "</div>" +
+        '<div class="card"><h3>Subagents <span class="badge dim mono">' + inv.subagents.length + "</span></h3>" +
+        inv.subagents.map(s => '<span class="tag">' + esc(s) + "</span>").join("") + "</div>" +
+        "</div>" +
+        '<div class="card"><h3>Non-negotiables</h3><dl class="kv" style="grid-template-columns:1fr">' +
+        ["Every run logs — including failures and mock runs.",
+         "Pin the corpus — revision " + DATA.environment.corpus.revision.slice(0, 12) + ", join on filename.",
+         "Mock before real — --mock never touches the network.",
+         "Isolate the base dir — MAILROOM_BASE_DIR is always a temp dir.",
+         "Trace, never break — a sink outage logs a warning, never fails a run.",
+         "Calibration is report-only — recommendations never auto-write configs.",
+         "History is append-only — follow-up records, never edits.",
+         "Sinks score essentials only — full suite is post-hoc.",
+         "Frozen lineage is immutable — mutations append via the four gates."]
+            .map((s, i) => "<dt>" + (i + 1) + ". " + esc(s) + "</dt>").join("") + "</dl></div>";
+}
+
+load();
+</script>
+</body>
+</html>

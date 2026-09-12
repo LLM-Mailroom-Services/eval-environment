@@ -43,6 +43,9 @@ specialty skill:
    or `prompts/*.md` by hand; mutations append via
    `evals.prompts.mutations.apply_mutation` (four gates, one rule per A/B).
    Drift-check with `scripts/freeze_prompts.py --check`.
+10. **Refresh the viewer snapshot.** When the experiment log changes,
+    re-run `scripts/export_site_snapshot.py` and commit
+    `web/data/snapshot.json` — the Vercel viewer reads only that file.
 
 ## Commands
 
@@ -61,7 +64,9 @@ uv run python scripts/score_run.py --run-id <run_id> --judge verdict,quality --m
 uv run python scripts/score_run.py --run-id <run_id> --export-failures data/manifests/x.jsonl  # GEPA OBSERVE
 uv run python scripts/compare_runs.py --a <run_a> --b <run_b> --md reports/comparisons/  # A/B + CIs
 uv run python scripts/freeze_prompts.py --check      # prompt lineage drift check
-uv run pytest tests/ -q                              # hermetic test suite (70 tests)
+uv run python scripts/export_site_snapshot.py        # refresh the Vercel viewer snapshot
+uv run python scripts/export_site_snapshot.py --check  # exit 1 if snapshot is stale
+uv run pytest tests/ -q                              # hermetic test suite (73 tests)
 uv run python scripts/render_experiment_log.py --validate
 uv run python scripts/render_experiment_log.py       # rebuild markdown
 ```

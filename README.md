@@ -50,6 +50,7 @@ This repository consists of:
 - [Datasets & subsets](#datasets--subsets) — [Ground-truth columns](#ground-truth-columns) · [Subset grammar](#subset-grammar)
 - [Trace sinks](#trace-sinks)
 - [The experiment log](#the-experiment-log)
+- [Vercel viewer & dashboard](#vercel-viewer--dashboard)
 - [Prompt lineage & GEPA](#prompt-lineage--gepa)
 - [Scoring: essential in-sink, full post-hoc](#scoring-essential-in-sink-full-post-hoc)
 - [Pilot scenarios](#pilot-scenarios)
@@ -229,6 +230,40 @@ uv run python scripts/run_evals.py --task eval:classify --real --trace-backend p
   attached to the span; `flush()` per case; failures warn, never fail a run.
 - Langfuse is intentionally **not** a sink here — issue #7 names Phoenix
   and/or Braintrust.
+
+## Vercel viewer & dashboard
+
+`web/` is a zero-dependency static site — a **dedicated viewer of eval run
+results** plus a **dashboard of the eval environment itself** — deployed on
+Vercel via the GitHub integration (same pattern as the DMR dispatch board).
+
+**Views**: Dashboard (health badges, runs/day sparkline, per-task status) ·
+Runs (filterable index of every recorded run) · Run detail (metrics,
+provenance, expected→predicted matrix, per-case table with scores/latency/
+errors) · Tasks (the 31-task catalog) · Corpus (the pinned revision + subset
+grammar) · Prompts (frozen lineage browser + GEPA mutations) · Environment
+(health checks, command surface, skills/subagents, non-negotiables).
+
+**Data flow**: the raw experiment log stays local (per `.gitignore`); the
+viewer reads one tracked, generated snapshot:
+
+```bash
+uv run python scripts/export_site_snapshot.py          # regenerate web/data/snapshot.json
+uv run python scripts/export_site_snapshot.py --check  # exit 1 if stale vs the log
+```
+
+Refresh discipline: whenever the experiment log changes, re-export and
+commit the snapshot — the viewer then shows it on the next Vercel deploy.
+The snapshot embeds run summaries + capped case rows (250/run), the task
+catalog, corpus pin, prompt lineage manifest, and in-process health checks
+(log validation + lineage drift), with a visible `generated_at` staleness
+stamp in the header.
+
+**Deployment** (one-time, via the already-configured Vercel account):
+Vercel → Add New Project → import `LLM-Mailroom-Services/eval-environment`
+→ framework **Other** (zero-config; root `vercel.json` rewrites `/` to the
+viewer and serves `web/data/`) → Deploy. No env vars, no build command, no
+functions. Every push to `main` redeploys.
 
 ## Prompt lineage & GEPA
 

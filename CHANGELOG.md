@@ -9,6 +9,15 @@ Prompt lineage, essential-sink scoring, and the full post-hoc suite.
 
 ### Added
 
+- **Vercel viewer & dashboard** (`web/` + `vercel.json`) — zero-dependency
+  static site deployed via the GitHub integration: run-result viewer
+  (dashboard / runs / run detail with per-case tables and expected→predicted
+  matrices) plus an environment dashboard (task catalog, corpus pin, prompt
+  lineage, health checks). Data via the tracked, generated
+  `web/data/snapshot.json` (`scripts/export_site_snapshot.py`, `--check`
+  staleness mode); root `vercel.json` rewrites `/` to the viewer with
+  board-grade security headers.
+
 - **Frozen prompt lineage `mailroom-evals-v1`** — 15 prompts (docclass
   lineage KANBAN-090 + intake production template + pipeline evaluator
   rubrics) snapshotted by `scripts/freeze_prompts.py` with sha256 manifest +
@@ -36,11 +45,11 @@ Prompt lineage, essential-sink scoring, and the full post-hoc suite.
 - **Experiment-log schema v2** — `judging` block, case-row
   `doc_text_sha256`, prompt-lineage fields; v1 records stay valid.
 - **Docs** — `docs/prompt-lineage.md`; README prompt-lineage + local-scoring
-  sections; AGENTS.md non-negotiables 8–9; prompt-lineage skill.
+  sections; AGENTS.md non-negotiables 8–10; prompt-lineage skill.
 
 ### Changed
 
-- Test suite grown to 70 tests (prompt lineage, judging, analysis).
+- Test suite grown to 73 tests (prompt lineage, judging, analysis, site snapshot).
 - Sink spans now carry essential metrics only (full scores remain in the log).
 
 ## [0.1.0] — 2026-09-11

@@ -63,3 +63,8 @@ judgments_ref), `cases_ref`,
 Append ONE summary line per run even when the run fails (record the error).
 Never edit history — add a follow-up record. Schema changes bump
 `schema_version` and update `schemas/` + this skill in the same commit.
+
+**Viewer snapshot**: the log stays local, but the Vercel viewer reads the
+tracked `web/data/snapshot.json`. Whenever the log changes, re-run
+`scripts/export_site_snapshot.py` and commit the snapshot in the same push
+(`--check` exits 1 if stale).

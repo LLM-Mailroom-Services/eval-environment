@@ -82,16 +82,22 @@ def recompute_run(run_id: str) -> dict:
 def export_failures(run_id: str, out_path: Path) -> Path:
     """The GEPA OBSERVE manifest: failed cases + evidence for the prompt engineer."""
     rows = experiment_log.load_cases(run_id)
-    failures = [
-        row for row in rows
-        if row.get("error") or any(
+
+    def _failure(row: dict) -> bool:
+        if row.get("error"):
+            return True
+        scores = row.get("scores") or {}
+        if scores.get("scorer_error"):
+            return True
+        gate_zero = any(
             isinstance(v, (int, float)) and v == 0
-            for k, v in (row.get("scores") or {}).items()
+            for k, v in scores.items()
             if k.endswith(("_correct", "_agrees", "_valid", "_ok"))
-        ) or (row.get("scores") or {}).get("overall_score", 1) is not None
-        and isinstance((row.get("scores") or {}).get("overall_score"), (int, float))
-        and row["scores"]["overall_score"] < 0.8
-    ]
+        )
+        overall = scores.get("overall_score")
+        return gate_zero or (isinstance(overall, (int, float)) and overall < 0.8)
+
+    failures = [row for row in rows if _failure(row)]
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with out_path.open("w", encoding="utf-8") as fh:
         for row in failures:

@@ -97,8 +97,38 @@ def git_snapshot() -> dict[str, Any]:
 
 
 def new_run_id(family: str, task: str) -> str:
+    """Fresh run id `<UTC stamp>-<family>-<task>`, collision-guarded.
+
+    Two same-task launches within one second (or a resume racing a fresh
+    launch) would otherwise be indistinguishable — the JSONL index and the
+    run-dir keyed by run_id would silently interleave. A deterministic
+    `-a<N>` suffix disambiguates while keeping the id format greppable.
+    """
     stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
-    return f"{stamp}-{family}-{task}"
+    base = f"{stamp}-{family}-{task}"
+    if not _run_id_exists(base):
+        return base
+    counter = 0
+    while True:
+        counter += 1
+        candidate = f"{base}-a{counter}"
+        if not _run_id_exists(candidate):
+            return candidate
+
+
+def _run_id_exists(run_id: str) -> bool:
+    try:
+        with open(jsonl_path(), encoding="utf-8") as fh:
+            for line in fh:
+                try:
+                    record = json.loads(line)
+                except json.JSONDecodeError:
+                    continue  # torn tail — not a collision witness
+                if isinstance(record, dict) and record.get("run_id") == run_id:
+                    return True
+    except OSError:
+        return False
+    return False
 
 
 def validate_record(record: dict[str, Any]) -> list[str]:

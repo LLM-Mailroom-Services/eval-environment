@@ -329,27 +329,51 @@ def _invoke_node(task: str, case: dict[str, Any]) -> dict[str, Any]:
             "doc_type": update.get("doc_type", state.get("doc_type")),
         }
     if task == "archivist":
+        import hashlib
+
         from pipeline.bins import archive_dir, manifests_dir
 
         state = build_state(case, doc_type=case.get("expected_doc_class"))
         state["stage"] = "report_compiled"
         update = bg.archive_node(state)
-        # archive_node returns only {"stage": ...}; verify conformance from
-        # the isolated base dir (archive bin + manifest sidecar).
-        archived_file = any(
-            (archive_dir() / str(case.get("filename") or "")).resolve()
-            == p.resolve()
-            for p in archive_dir().rglob(str(case.get("filename") or "*"))
-        )
-        manifest_written = any(
-            str(case.get("id") or "") in p.name or str(case.get("filename") or "") in p.name
+        # Verify conformance from the isolated base dir: the archived file
+        # (staged under the flattened corpus filename), its manifest sidecar,
+        # and content integrity (archived bytes must hash to the case text).
+        # The previous check rglob'd the RAW corpus filename (e.g. Enron
+        # `bailey-s/deleted_items/288.`) — it could never match the flattened
+        # staged name, so sha256_ok silently scored 0 on every real run.
+        raw_name = str(case.get("filename") or "")
+        flattened = raw_name.replace("/", "_").replace("\\", "_").strip() or "case.txt"
+        archive_root = archive_dir()
+        archived_path: Path | None = None
+        for p in archive_root.rglob(flattened):
+            if p.is_file():
+                archived_path = p
+                break
+        if archived_path is None:
+            for p in archive_root.rglob("*"):
+                if p.is_file() and (p.name == raw_name or p.name.startswith(flattened)):
+                    archived_path = p
+                    break
+        doc_id = str(case.get("row", {}).get("document_id") or case.get("id") or "")
+        manifest_written = (manifests_dir() / f"{doc_id}.json").is_file() or any(
+            (doc_id and doc_id in p.name)
+            or (raw_name and raw_name in p.name)
+            or flattened in p.name
             for p in manifests_dir().glob("*.json")
         )
+        expected_digest = hashlib.sha256(str(case.get("text") or "").encode("utf-8")).hexdigest()
+        sha256_ok = False
+        if archived_path is not None:
+            try:
+                sha256_ok = hashlib.sha256(archived_path.read_bytes()).hexdigest() == expected_digest
+            except OSError:
+                sha256_ok = False
         return {
             "stage": update.get("stage"),
-            "archive_path": str(archived_file),
+            "archive_path": str(archived_path) if archived_path is not None else None,
             "audit_entry": manifest_written,
-            "sha256_ok": archived_file,
+            "sha256_ok": sha256_ok,
         }
     raise ValueError(f"task {task!r} has no node-mode invocation")
 

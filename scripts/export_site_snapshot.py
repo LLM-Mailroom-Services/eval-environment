@@ -34,11 +34,15 @@ SCHEMA = "eval-site-snapshot"
 VERSION = 1
 
 # Run-summary keys the viewer needs (drop bulky provenance blocks).
+# trace_ids + the judging block stay: they make follow-up records
+# (post-hoc judging re-appends share the run_id) distinguishable from
+# their originals and keep log rows ↔ trace-sink cross-references possible.
 _RUN_KEYS = (
     "run_id", "family", "task", "invoke", "mode", "model", "prompt_version",
     "prompt_lineage", "prompt_source", "trace_backend", "started_at",
     "finished_at", "duration_s", "error", "metrics", "performance",
-    "dataset", "git", "schema_version", "calibration",
+    "dataset", "git", "schema_version", "calibration", "trace_ids",
+    "judging", "pipeline_git", "prompt_versions",
 )
 
 # Case-row keys the viewer needs (drop doc text / raw predictions).

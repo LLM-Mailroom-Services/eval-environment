@@ -25,7 +25,7 @@ from . import experiment_log, scoring, tracing
 from . import invoke as invoke_mod
 from .cases import load_cases
 from .prompts import registry as prompts_registry
-from .registry import TaskSpec, get_task
+from .registry import AGENT_CATALOG, TaskSpec, get_task
 
 logger = structlog.get_logger(__name__)
 
@@ -160,6 +160,23 @@ def run_task(
         prior_ids = {row.get("case_id") for row in prior if row.get("case_id")}
         cases = [case for case in cases if case["id"] not in prior_ids]
         run_dir = run_dir or (experiment_log.experiments_dir() / resume_run_id)
+        if not cases and not dry_run:
+            # No-op resume: every case is already recorded. Appending another
+            # summary line would fabricate a {"n": 0, "errors": 0} "success"
+            # under the same run_id — report and stop instead.
+            logger.info(
+                "evals_resume_noop",
+                run_id=resume_run_id,
+                skipped_already_run=len(prior_ids),
+            )
+            return RunResult(
+                {
+                    "run_id": resume_run_id,
+                    "noop_resume": True,
+                    "skipped_already_run": len(prior_ids),
+                },
+                [],
+            )
     if dry_run:
         cases = cases[:1]
 
@@ -217,6 +234,7 @@ def run_task(
     finally:
         prompts_registry.deactivate()
         tracing.flush(backend)
+        summary["flush"] = _flush_health(backend)
 
     summary["finished_at"] = experiment_log.utc_now()
     summary["duration_s"] = round(time.time() - started, 1)
@@ -262,7 +280,19 @@ def run_task(
 
 
 def _essential_keys(spec: TaskSpec) -> list[str]:
-    return list(scoring.ESSENTIAL_SCORES.get(spec.scorer, ()))
+    return list(scoring.ESSENTIAL_SCORES.get(scoring.essential_scorer(spec.scorer), ()))
+
+
+def _flush_health(backend: str) -> dict[str, Any] | None:
+    """Affirmative flush counters for the run record (dropped-event evidence)."""
+    if backend not in ("braintrust", "phoenix"):
+        return None
+    try:
+        from observability.tracing import flush_health
+
+        return dict(flush_health())
+    except Exception:
+        return None
 
 
 def _pipeline_git() -> str | None:
@@ -315,13 +345,29 @@ def run_meta_stub(spec: TaskSpec, summary: dict[str, Any]) -> dict[str, Any]:
         "invoke": summary["invoke"],
         "mode": summary["mode"],
         "model": summary["model"] or "pipeline-default",
-        "prompt_version": summary["prompt_version"],
+        "prompt_version": summary.get("prompt_version") or _primary_prompt_key(spec, summary),
         "prompt_lineage": summary.get("prompt_lineage"),
         "dataset.config": summary["dataset"].get("config"),
         "dataset.split": summary["dataset"].get("split"),
+        "dataset.revision": summary["dataset"].get("revision"),
         "subset": summary["dataset"].get("subset"),
         "tags": [spec.family, spec.name, summary["mode"], "run-rollup"],
     }
+
+
+def _primary_prompt_key(spec: TaskSpec, summary: dict[str, Any]) -> str | None:
+    """The task's primary agent-role prompt key (span metadata provenance).
+
+    ``summary["prompt_version"]`` only carries an explicit --prompt-version
+    override; the per-role snapshot (prompt_versions) is what actually ran.
+    """
+    versions = summary.get("prompt_versions") or {}
+    catalog = AGENT_CATALOG.get(spec.node_name) or {}
+    for role in catalog.get("agents") or []:
+        slot = versions.get(role)
+        if isinstance(slot, dict) and slot.get("key"):
+            return slot["key"]
+    return None
 
 
 def _calibration_block(spec: TaskSpec, case_rows: list[dict[str, Any]]) -> dict[str, Any]:
@@ -399,7 +445,7 @@ def _execute_cases(
         "invoke": invoke_mode,
         "mode": summary["mode"],
         "model": model or summary["model"] or "pipeline-default",
-        "prompt_version": summary.get("prompt_version"),
+        "prompt_version": summary.get("prompt_version") or _primary_prompt_key(spec, summary),
         "prompt_lineage": summary.get("prompt_lineage"),
         "dataset.config": summary["dataset"].get("config"),
         "dataset.split": summary["dataset"].get("split"),
@@ -430,11 +476,14 @@ def _execute_cases(
                 (m for slot in (usage or {}).get("by_agent", {}).values() for m in slot.get("models", [])),
                 None,
             )
+            if case_model:
+                span.update_metadata({"model": case_model})
             perf = scoring.performance_row(latency, usage, case_model)
             span.set_output({"scores": scores, "error": error})
             # Sinks carry ESSENTIAL scores only — the full set lives in the
             # experiment log's case rows (post-hoc suite scores everything).
             span.set_metrics(scoring.essential_metrics(spec.scorer, scores))
+            case_trace = getattr(span, "trace_ref", None)
         rows.append(
             {
                 "case_id": case.get("id"),
@@ -462,6 +511,7 @@ def _execute_cases(
                 # per-agent token/call attribution for this case (the
                 # accumulator's by_agent map — every agent that fired)
                 "agent_usage": _agent_usage(),
+                "trace": case_trace,
                 "error": error,
             }
         )

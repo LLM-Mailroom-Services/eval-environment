@@ -80,7 +80,10 @@ def configure(backend: str) -> bool:
         try:
             from observability.braintrust_setup import configure as bt_configure
 
-            return bool(bt_configure())
+            ok = bool(bt_configure())
+            if ok:
+                _install_langchain_llm_spans()
+            return ok
         except Exception:
             logger.warning("evals_braintrust_configure_failed", exc_info=True)
             return False
@@ -94,6 +97,114 @@ def configure(backend: str) -> bool:
             logger.warning("evals_phoenix_configure_failed", exc_info=True)
             return False
     return False
+
+
+_LC_BT_REGISTERED = False
+_LC_BT_VAR: Any = None  # ContextVar holding the active handler instance
+
+
+try:
+    from langchain_core.callbacks import BaseCallbackHandler as _LCBaseHandler
+except Exception:  # pragma: no cover - langchain-core is a pipeline dependency
+    _LCBaseHandler = object  # type: ignore[assignment,misc]
+
+
+class _LangchainLLMHandler(_LCBaseHandler):
+    """Braintrust span writer for LangChain-agent LLM calls (see installer)."""
+
+    def __init__(self) -> None:
+        self._spans: dict[Any, Any] = {}
+
+    def _braintrust(self) -> Any:
+        import braintrust
+
+        return braintrust
+
+    def _curate(self, message: Any) -> str | None:
+        try:
+            return str(message)[:4000]
+        except Exception:
+            return None
+
+    def _flatten(self, payload: Any) -> list[str | None]:
+        out: list[str | None] = []
+        for group in payload or []:
+            if hasattr(group, "content"):
+                out.append(self._curate(group))
+            else:
+                for message in group:
+                    out.append(self._curate(message))
+        return out
+
+    def on_chat_model_start(self, serialized: Any, messages: Any, *, run_id: Any = None, **kwargs: Any) -> None:
+        try:
+            bt = self._braintrust()
+            self._spans[run_id] = bt.start_span(
+                name="Chat Completion", type="llm", input=self._flatten(messages)
+            )
+        except Exception:
+            logger.warning("evals_langchain_span_start_failed", exc_info=True)
+
+    on_llm_start = on_chat_model_start  # plain-LLM callback shape (list[str])
+
+    def _finish(self, run_id: Any, output: Any = None, metrics: dict[str, float] | None = None) -> None:
+        span = self._spans.pop(run_id, None)
+        if span is None:
+            return
+        try:
+            span.log(output=output, metrics=metrics or None)
+            span.end()
+        except Exception:
+            logger.warning("evals_langchain_span_end_failed", exc_info=True)
+
+    def on_llm_end(self, response: Any, *, run_id: Any = None, **kwargs: Any) -> None:
+        usage = (getattr(response, "llm_output", None) or {}).get("token_usage") or {}
+        metrics = {
+            key: value
+            for key, value in (
+                ("prompt_tokens", usage.get("prompt_tokens")),
+                ("completion_tokens", usage.get("completion_tokens")),
+                ("tokens_total", usage.get("total_tokens")),
+            )
+            if isinstance(value, (int, float)) and not isinstance(value, bool)
+        }
+        self._finish(run_id, output="ok", metrics=metrics or None)
+
+    def on_llm_error(self, error: Any, *, run_id: Any = None, **kwargs: Any) -> None:
+        self._finish(run_id, output=f"error: {error}"[:500])
+
+
+def _install_langchain_llm_spans() -> None:
+    """Route LangChain-agent LLM calls into Braintrust as nested llm spans.
+
+    ``braintrust.wrap_openai`` only instruments raw OpenAI clients — the
+    LangChain agents (sorter, specialists, judge, …) build ChatOpenAI
+    directly and bypass that chokepoint, leaving their calls invisible in
+    the sink. A global callback handler (langchain-core ≥1.x
+    ``register_configure_hook`` mechanism) restores the "every LLM call
+    auto-traces" contract; spans nest under the active case span. Failures
+    warn and never break a run.
+    """
+    global _LC_BT_REGISTERED, _LC_BT_VAR
+    if _LC_BT_REGISTERED and _LC_BT_VAR is not None:
+        _LC_BT_VAR.set(_LangchainLLMHandler())  # fresh handler for this run's context
+        return
+    try:
+        from contextvars import ContextVar
+
+        from langchain_core.tracers.context import register_configure_hook
+    except Exception:
+        logger.warning("evals_langchain_tracing_unavailable")
+        return
+
+    try:
+        _LC_BT_VAR = ContextVar("evals_langchain_braintrust", default=None)
+        register_configure_hook(_LC_BT_VAR, inheritable=True, handle_class=_LangchainLLMHandler)
+        _LC_BT_VAR.set(_LangchainLLMHandler())
+        _LC_BT_REGISTERED = True
+        logger.info("evals_langchain_llm_tracing_enabled")
+    except Exception:
+        logger.warning("evals_langchain_callback_register_failed", exc_info=True)
 
 
 def _curate_case_input(case: dict[str, Any]) -> dict[str, Any]:
@@ -116,6 +227,13 @@ class _NoopSpan:
 
     def set_metrics(self, metrics: dict[str, float]) -> Any:
         return self
+
+    def update_metadata(self, metadata: dict[str, Any]) -> Any:
+        return self
+
+    @property
+    def trace_ref(self) -> dict[str, Any] | None:
+        return None
 
     def __enter__(self) -> Self:
         return self
@@ -184,6 +302,26 @@ def _otel_attrs(span: Any, as_type: str, inp: dict[str, Any], meta: dict[str, An
 class _BraintrustHandle:
     def __init__(self, span: Any) -> None:
         self._span = span
+        # Captured at open time: the per-case trace cross-reference written
+        # into the case rows (the schema documents `trace`; this is its writer).
+        try:
+            self._span_id = span.id
+        except Exception:
+            self._span_id = None
+        try:
+            self._root_span_id = getattr(span, "root_span_id", None)
+        except Exception:
+            self._root_span_id = None
+
+    @property
+    def trace_ref(self) -> dict[str, Any] | None:
+        if not self._span_id:
+            return None
+        return {
+            "backend": "braintrust",
+            "span_id": str(self._span_id),
+            **({"root_span_id": str(self._root_span_id)} if self._root_span_id else {}),
+        }
 
     def set_output(self, output: dict[str, Any]) -> Any:
         try:
@@ -199,10 +337,40 @@ class _BraintrustHandle:
             pass
         return self
 
+    def update_metadata(self, metadata: dict[str, Any]) -> Any:
+        try:
+            self._span.log(metadata={k: v for k, v in (metadata or {}).items() if v is not None})
+        except Exception:
+            pass
+        return self
+
 
 class _PhoenixHandle:
     def __init__(self, span: Any) -> None:
         self._span = span
+
+    @property
+    def trace_ref(self) -> dict[str, Any] | None:
+        try:
+            from opentelemetry import trace
+
+            ctx = self._span.get_span_context()
+            return {
+                "backend": "phoenix",
+                "span_id": trace.format_span_id(ctx.span_id),
+                "trace_id": trace.format_trace_id(ctx.trace_id),
+            }
+        except Exception:
+            return None
+
+    def update_metadata(self, metadata: dict[str, Any]) -> Any:
+        try:
+            for key, value in (metadata or {}).items():
+                if value is not None:
+                    self._span.set_attribute(f"evals.meta.{key}", str(value))
+        except Exception:
+            pass
+        return self
 
     def set_output(self, output: dict[str, Any]) -> Any:
         try:

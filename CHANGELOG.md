@@ -3,6 +3,86 @@
 All notable changes to mailroom-evals are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.4.0] — 2026-09-13
+
+v9 corpus alignment (`mailroom-dataset` GT-closure `46a4d3c2`), silent-failure
+remediation, and tracking restoration.
+
+### Added
+
+- **v9 GT expansion** — schema v9 moved the 13 insurance GT fields plus
+  `cuad_clause_labels`/`maud_clause_labels` into a nested `gt_fields` JSON
+  payload; `evals.cases._expand_gt_fields` now hoists it (inner JSON-array
+  strings parsed, empty containers skipped) so insurance extraction and
+  clause-label scoring are live again (insurance extraction_f1 0.55–0.90 on
+  the validation sweep vs hard-zero before).
+- **LangChain LLM tracing** — `evals.tracing` installs a Braintrust callback
+  handler (langchain-core ≥1.x `register_configure_hook`), closing the gap
+  where `wrap_openai` only traced raw OpenAI clients: sorter/specialist/judge
+  `Chat Completion` spans now nest under their case spans with token metrics
+  (verified live: 3/3 nested).
+- **Per-case trace refs** — case rows now carry `trace`
+  (`{backend, span_id, root_span_id}`) written from the open case span — the
+  log ↔ trace cross-reference the schema documented but never populated.
+- **Flush health** — run summaries record `flush` (provider, flush_ok,
+  flush_failures) so dropped events are affirmatively verifiable per record.
+- **Span metadata provenance** — case/rollup spans now carry the task's
+  primary role prompt key (`prompt_version`, e.g. `sorter_v1`), the resolved
+  per-case model, and `dataset.revision` on the run rollup.
+- **`scorer_errors` run metric** — cases whose suite scorer crashed
+  (`scorer_error: True`) surface at run level instead of hiding per case.
+- **Rehydrated experiment log** — `reports/experiment_log.jsonl` +
+  `data/experiments/` were lost with the checkout (gitignored); restored
+  113 historical run summaries + 1,292 case rows from the tracked snapshot,
+  each annotated `params.reconstructed_from_snapshot`.
+
+### Changed
+
+- **Corpus pin → v9 GT-closure** — `Lucius-Morningstar/mailroom-dataset`
+  revision `46a4d3c2` (3,302 docs; default 2,979/323, fixtures 26/6, bundles
+  47/3, streams 59/3; v8 parent `mailroom-corpus` @ `eafe1ab4` stays frozen
+  for lineage). Updated AGENTS.md, README, skills, agents, and the pin test.
+- **Snapshot projection** — run records now keep `trace_ids`, `judging`,
+  `pipeline_git`, and `prompt_versions` so judging follow-up rows are
+  distinguishable from their originals and trace cross-references survive.
+
+### Fixed
+
+- **Archivist silent zeros** — verification searched the archive for the RAW
+  corpus filename while staging flattens it (`/`→`_`), so `sha256_ok`
+  scored 0 on every real run with a pathed filename (25/25 and 32/32). Now
+  matches the flattened name, returns a real `archive_path` (was a
+  stringified bool), and verifies content integrity (archived bytes hash to
+  the case text) — `sha256_ok = 1.0` verified live.
+- **Empty-GT clause scoring** — `score_label_lists` treated the v9 "no
+  annotations" convention (`{}`/`[]` JSON strings) as a phantom token and
+  scored F1 0.0; empty payloads now skip, JSON objects contribute annotated
+  keys, and calibration essential metrics resolve their eval-node alias.
+- **No-op resume pollution** — `--resume` on a fully-recorded run appended a
+  fake `{"n": 0, "errors": 0}` summary under the same run_id; it now returns
+  a `noop_resume` marker without logging.
+- **run_id collisions** — `new_run_id()` guards same-second collisions with
+  a deterministic `-a<N>` suffix (torn-tail tolerant).
+- **GEPA failure predicate** — `score_run.py --export-failures` precedence
+  rewritten explicitly and counts `scorer_error` cases as failures.
+- **GT catalog fallback** — `cases.py` no longer swallows catalog failures
+  silently (logged warning instead of bare `except: pass`).
+- **Family corpora fail loudly** — `--subset cuad/enron` raise on 0-case
+  loads (Hub-side parquet conversion currently failed/pending) instead of
+  silently running empty; family corpora accept registry revisions.
+
+### Validation
+
+- 141 tests green (17 new regression tests for the fixes above).
+- Mock gates: 12-task sweep + previously-broken paths
+  (`pilot:classification` FileNotFoundError, `calibration:classify` /
+  `pilot:pipeline_chain` invoke-mode ValueErrors) all clean.
+- Real sweep (qwen/qwen3.7-flash, Braintrust `Mailroom-Evals`): 5/5 passed —
+  classification 1.0, insurance_claims overall 0.78, merger 0.46, archivist
+  sha256 1.0, calibration:classify report generated — ≈$0.04 total.
+- Trace audit: 39/39 case roots present with full metadata; llm-span nesting
+  fixed and verified; flush healthy.
+
 ## [0.3.0] — 2026-09-12
 
 Real-mode preflight complete: full baseline sweep, calibration sweep, live judges.

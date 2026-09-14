@@ -1,8 +1,9 @@
-# Experiment log — schema v1 reference
+# Experiment log — schema v2 reference
 
 The centralized, append-only experiment log. One record schema
-(`schemas/experiment_record.v1.json`, `schema_version: 1`) for every task
-family (`eval`, `pilot`, `calibration`).
+(`schemas/experiment_record.v2.json`, `schema_version: 2`; v1 records remain
+valid and `schemas/experiment_record.v1.json` is kept for lineage) for every
+task family (`eval`, `pilot`, `calibration`).
 
 ## Storage layout
 
@@ -17,15 +18,21 @@ family (`eval`, `pilot`, `calibration`).
 
 | key | type | notes |
 |---|---|---|
-| `schema_version` | `1` | bump on schema change (same commit updates `schemas/` + skill) |
+| `schema_version` | `2` | bump on schema change (same commit updates `schemas/` + skill) |
 | `record_kind` | `"run_summary"` | |
-| `run_id` | string | `<UTC stamp>-<family>-<task>` |
+| `run_id` | string | `<UTC stamp>-<family>-<task>` (collision-guarded suffix on repeat) |
 | `family` | `eval \| pilot \| calibration` | |
 | `task` | string | registry task name |
 | `invoke` | `node \| agent` | |
 | `mode` | `mock \| real` | |
 | `model` | string\|null | recorded override or pipeline default |
 | `prompt_version` | string\|null | the A/B dimension |
+| `prompt_lineage` | string\|null | v2 — `frozen \| mutation \| live-docclass \| production` |
+| `prompt_source` | string\|null | v2 — lineage resolution layer |
+| `prompt_versions` | object\|null | v2 — per-agent `{key, lineage, sha256}` provenance |
+| `pipeline_git` | object\|null | v2 — the sibling pipeline repo commit under test |
+| `prompts_snapshot_path` | string\|null | v2 — exact rendered prompts used |
+| `judging` | object\|null | v2 — post-hoc local-judge block (`dimensions, judge_model, mock, metrics, judgments_ref`) |
 | `trace_backend` | `braintrust \| phoenix \| none` | |
 | `trace_ids` | object\|null | backend, project/endpoint — log rows ↔ traces join here |
 | `dataset` | object | `repo, config, split, revision, subset, n_selected, n_total, seed` |
@@ -45,6 +52,7 @@ family (`eval`, `pilot`, `calibration`).
 |---|---|
 | `run_id`, `case_id`, `filename` | identity |
 | `expected_doc_class`, `expected_subclass` | ground truth echo |
+| `doc_text_sha256` | v2 — post-hoc text re-load integrity key |
 | `review_expected`, `retry_expected`, `fixture_kind`, `fixture_cell`, `fixture_outcome`, `failure_stage` | fixture/calibration provenance |
 | `prediction` | the node/agent output (curated) |
 | `scores` | deterministic scorer output |

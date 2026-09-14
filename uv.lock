@@ -2407,7 +2407,7 @@ wheels = [
 
 [[package]]
 name = "mailroom"
-version = "0.7.0"
+version = "0.7.1"
 source = { editable = "../Digital-Mailroom/packages/llm-mailroom" }
 dependencies = [
     { name = "aiosqlite" },

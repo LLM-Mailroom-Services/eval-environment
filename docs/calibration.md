@@ -7,8 +7,9 @@ pipeline configs.
 
 ## The fixtures grid
 
-`Lucius-Morningstar/mailroom-corpus` config `fixtures` (26 train + 6 test) is
-a purpose-built calibration matrix:
+`Lucius-Morningstar/mailroom-dataset` config `fixtures` (26 train + 6 test,
+schema v9; the frozen v8 parent `mailroom-corpus` carried the identical grid)
+is a purpose-built calibration matrix:
 
 - **`calibration_cell`** — the 2×2 confidence grid: `correct_high`,
   `correct_low`, `wrong_high`, `wrong_low` (+ blank for non-grid fixtures).
@@ -24,7 +25,7 @@ a purpose-built calibration matrix:
 - **`arbiter_outcome`** — `stands`, `re_extract`, `escalate_human_review`.
 - **`review_expected` / `retry_expected` / `expected_stage`** — gating labels.
 
-`bundles` (46+4, duplicate families) and `streams` (58+4, thread scenarios)
+`bundles` (47+3, duplicate families) and `streams` (59+3, thread scenarios)
 extend intake calibration. `ground_truth` rows flagged `review_expected=true`
 / `retry_expected=true` add at-scale signal.
 

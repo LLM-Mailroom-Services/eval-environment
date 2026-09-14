@@ -9,7 +9,7 @@ Calibration tasks edge-test a node's DECISION BOUNDARIES against the corpus
 `fixtures` config and emit threshold recommendations. They never auto-write
 config values — reports only (`reports/calibration/<task>/<stamp>.{json,md}`).
 
-## The fixtures grid (mailroom-corpus `fixtures`, 26 train + 6 test)
+## The fixtures grid (mailroom-dataset `fixtures`, 26 train + 6 test)
 
 - `calibration_cell` — the 2×2 confidence grid: `correct_high`, `correct_low`,
   `wrong_high`, `wrong_low` (+ blank = non-grid fixtures)

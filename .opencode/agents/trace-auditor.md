@@ -30,7 +30,8 @@ sink (Braintrust when `BRAINTRUST_API_KEY` is set, else local Phoenix at
 ## Tools
 
 Braintrust: project Logs/Traces view filtered by `metadata.run_id`
-(`BRAINTRUST_PROJECT`, default `mailroom-evals`). Phoenix: HTTP API on
+(`BRAINTRUST_PROJECT`, e.g. `Mailroom-Evals`; runner default `mailroom`).
+Phoenix: HTTP API on
 `PHOENIX_ENDPOINT` host :6006 (`/projects`, `/traces`) or the local UI.
 
 Report: per-check pass/fail, sample trace ids, and concrete fixes (env vars,

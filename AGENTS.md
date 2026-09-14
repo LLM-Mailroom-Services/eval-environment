@@ -9,7 +9,7 @@ logged to one centralized append-only experiment log. Python 3.11+, uv.
 Read **`.opencode/skills/eval-tool-router/SKILL.md` first**, then exactly one
 specialty skill:
 
-- **mailroom-corpus** — schema v8 configs, subset grammar, GT columns, pinned revision
+- **mailroom-corpus** — schema v9 configs (`mailroom-dataset`, successor of the frozen v8 `mailroom-corpus`), subset grammar, GT columns (incl. the nested `gt_fields` payload), pinned revision
 - **braintrust** / **apache-phoenix** — the two trace sinks (never Langfuse here)
 - **experiment-log** — the record schema, storage layout, render/validate discipline
 - **calibration** — the fixtures grid + per-node calibration methodology
@@ -21,8 +21,12 @@ specialty skill:
 
 1. **Every run logs.** One run-summary line to `reports/experiment_log.jsonl`
    per run — including failures and mock runs. No exceptions.
-2. **Pin the corpus.** Revision `eafe1ab4c0d330d8f9c7a5fb254155e75d290828`.
-   Join `ground_truth` ⇆ `default` on `filename`; never zip positionally.
+2. **Pin the corpus.** Repo `Lucius-Morningstar/mailroom-dataset` (schema v9),
+   revision `46a4d3c240a36671cde0182fff4960f6b8b73aca` (the GT-closure
+   republish of 2026-09-13; the v8 parent
+   `mailroom-corpus` @ `eafe1ab4c0d330d8f9c7a5fb254155e75d290828` stays frozen
+   for lineage reference). Join `ground_truth` ⇆ `default` on `filename`; never
+   zip positionally; expand the nested `gt_fields` JSON payload before scoring.
 3. **Mock before real.** `--mock` must never touch the network. `--real`
    requires a configured LLM provider: `OPENROUTER_API_KEY` (primary), or
    the repo `.env` routing through the Vercel AI Gateway as an alternative

@@ -2,7 +2,7 @@
 
 # mailroom-evals
 
-**Evaluation environment for the LLM-Mailroom — per-node performance evals, pilot scenarios, and calibration suites over the mailroom-corpus.**
+**Evaluation environment for the LLM-Mailroom — per-node performance evals, pilot scenarios, and calibration suites over the mailroom-dataset.**
 
 One task registry for every LLM-based node in the 13-node LangGraph pipeline.
 Two invocation modes (graph node or underlying agent). Traced to Braintrust or
@@ -10,8 +10,8 @@ local Arize Phoenix. Every run lands in one centralized, append-only
 experiment log — machine-readable JSONL, human-readable markdown tables.
 
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
-[![Pipeline under test](https://img.shields.io/badge/pipeline-llm--mailroom%20v0.6.0-4C8CBF)](https://github.com/LLM-Mailroom-Services/Digital-Mailroom)
-[![Dataset](https://img.shields.io/badge/dataset-Lucius--Morningstar%2Fmailroom--corpus%20v8-F5A623)](https://huggingface.co/datasets/Lucius-Morningstar/mailroom-corpus)
+[![Pipeline under test](https://img.shields.io/badge/pipeline-llm--mailroom%20v0.7.0-4C8CBF)](https://github.com/LLM-Mailroom-Services/Digital-Mailroom)
+[![Dataset](https://img.shields.io/badge/dataset-Lucius--Morningstar%2Fmailroom--dataset%20v9-F5A623)](https://huggingface.co/datasets/Lucius-Morningstar/mailroom-dataset)
 [![Tracing](https://img.shields.io/badge/tracing-Braintrust%20%7C%20Phoenix-8A2BE2)](#trace-sinks)
 [![Tasks](https://img.shields.io/badge/tasks-31%20registered-2EA043)](#the-task-families)
 [![Contributor](https://img.shields.io/badge/contributor-Exios66-blue)](https://github.com/Exios66)
@@ -21,7 +21,7 @@ experiment log — machine-readable JSONL, human-readable markdown tables.
 | At a glance | |
 |---|---|
 | **Pipeline under test** | [`llm-mailroom`](https://github.com/LLM-Mailroom-Services/Digital-Mailroom) — 13-node LangGraph state machine (pkg `mailroom`, resolved as a local editable path source) |
-| **Dataset** | [`Lucius-Morningstar/mailroom-corpus`](https://huggingface.co/datasets/Lucius-Morningstar/mailroom-corpus) schema v8, **pinned** to revision `eafe1ab4` — 2,000 docs (1,792 train + 208 test) |
+| **Dataset** | [`Lucius-Morningstar/mailroom-dataset`](https://huggingface.co/datasets/Lucius-Morningstar/mailroom-dataset) schema v9, **pinned** to revision `46a4d3c2` (GT-closure) — 3,302 docs (2,979 train + 323 test); v8 parent `mailroom-corpus` @ `eafe1ab4` stays frozen for lineage reference |
 | **Task families** | `eval:<node>` (performance) · `pilot:<node\|chain>` (cheap validation) · `calibration:<node>` (edge-test + threshold recommendation) |
 | **Invocation** | `--invoke node` (raw graph node fns with corpus-built `DocumentState`) or `--invoke agent` (agent classes directly) |
 | **Trace sinks** | Braintrust (when `BRAINTRUST_API_KEY` is set) → local Arize Phoenix → `none` — never Langfuse (per [mailroom-issues #7](https://github.com/LLM-Mailroom-Services/mailroom-issues/issues/7)) |
@@ -174,21 +174,29 @@ Each task also exists as `pilot:<name>`; the seven calibration tasks are
 
 The one loading path is `evals.cases` → `pipeline.hf_corpus_loader`: the
 `ground_truth` config (labels) joined to `default` (blind text) on
-`filename`, **pinned** to revision `eafe1ab4c0d330d8f9c7a5fb254155e75d290828`,
-with `content_sha256` verification. Never zip rows positionally — always join.
+`filename`, **pinned** to revision `46a4d3c240a36671cde0182fff4960f6b8b73aca`
+(schema v9 of `Lucius-Morningstar/mailroom-dataset` — the standalone successor
+of the frozen v8 `mailroom-corpus`; GT-closure republish of 2026-09-13), with
+`content_sha256` verification. Never
+zip rows positionally — always join. The nested `gt_fields` JSON payload
+(13 insurance fields + `cuad_clause_labels` + `maud_clause_labels`) is expanded
+onto flat row keys before scoring.
 
 | config | train | test | contents |
 |---|---|---|---|
-| `default` | 1,792 | 208 | blind: `filename`, `doc_text`, `prompt`, `metadata` |
-| `ground_truth` | 1,792 | 208 | labels + provenance (~60 columns) |
+| `default` | 2,979 | 323 | blind: `filename`, `doc_text`, `prompt`, `metadata` |
+| `ground_truth` | 2,979 | 323 | labels + provenance (36 columns; per-field GT nested in `gt_fields`) |
 | `fixtures` | 26 | 6 | calibration cells (see [Calibration scenarios](#calibration-scenarios)) |
-| `bundles` | 46 | 4 | duplicate/bundle families |
-| `streams` | 58 | 4 | thread/stream scenarios |
+| `bundles` | 47 | 3 | duplicate/bundle families |
+| `streams` | 59 | 3 | thread/stream scenarios |
 
-Train + test = **2,000 docs = the full dataset**. Family corpora (via the
-`hf_corpora` registry): `docclass-pilot` (138 stratified class × subclass),
-`mailroom-cuad-contracts-full` (510), `enron-correspondence-dedup` (247k),
-`cms-desynpuf-insurance-claims` (400).
+Train + test = **3,302 docs = the full dataset** (v8's 2,000-row base + 1,302
+expansion draws: contract +91, corporate_record +411, correspondence +650,
+insurance_claim +150). Family corpora (via the `hf_corpora` registry, floating
+on Hub tip — only the main corpus is sha-pinned): `docclass-pilot` (138
+stratified class × subclass), `mailroom-cuad-contracts-full` (510; viewer
+parquet export currently failed), `enron-correspondence-dedup` (247k; viewer
+conversion pending), `cms-desynpuf-insurance-claims` (400).
 
 ### Ground-truth columns
 
@@ -199,6 +207,7 @@ Train + test = **2,000 docs = the full dataset**. Family corpora (via the
 | `expected_specialist` | extract-node dispatch verification |
 | `expected_stage` | chained-pipeline terminal-stage conformance (`archived`, `review`, …) |
 | `review_expected` / `retry_expected` | judge, arbiter, and retry calibration labels |
+| `gt_fields` (nested JSON payload) | hoisted to flat keys before scoring: the 13 insurance fields (below) + `cuad_clause_labels` / `maud_clause_labels` |
 | insurance fields (`claim_number`, `policy_number`, `insurer`, `insured_party`, `claim_type`, `date_of_loss`, `date_filed`, `claimed_amount`, `adjuster`, `damages_description`, `coverage_determination`, `denial_reasons`, `supporting_documents`) | insurance-claims extraction scoring |
 | `cuad_clause_labels` / `maud_clause_labels` | clause-label precision/recall/F1 |
 
@@ -210,8 +219,10 @@ fixtures | bundles | streams | pilot | cuad | enron | claims
 ```
 
 Combine with `--sample N --seed S` (stratified by `expected`) and `--n N`
-(hard cap). `full` = all 2,000 rows; `train`/`test` select the split; class
-and subclass slices filter the train split.
+(hard cap). `full` = all 3,302 rows; `train`/`test` select the split; class
+and subclass slices filter the train split (v9 train per class: insurance_claim
+986 · correspondence 915 · contract 540 · corporate_record 403 ·
+merger_agreement 135).
 
 ## Trace sinks
 
@@ -221,11 +232,11 @@ Default order (`--trace-backend auto`): **Braintrust** when
 ```bash
 # Braintrust
 export BRAINTRUST_API_KEY=...
-export BRAINTRUST_PROJECT=mailroom-evals
+export BRAINTRUST_PROJECT=Mailroom-Evals
 
 # Phoenix (local, zero spend)
 phoenix serve                      # http://localhost:6006
-uv run python scripts/run_evals.py --task eval:classify --real --trace-backend phoenix
+uv run python scripts/run_evals.py --task eval:classification --real --trace-backend phoenix
 ```
 
 - The runner sets `OBSERVABILITY_PROVIDER` to the resolved backend **before**

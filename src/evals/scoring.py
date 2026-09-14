@@ -39,9 +39,28 @@ ESSENTIAL_SCORES: dict[str, tuple[str, ...]] = {
 }
 
 
+# Calibration probe scorers reuse their eval node's essential set (the
+# per-case scores are the node's own) — applied in essential_metrics /
+# essential_rollup so calibration spans carry the node's metrics.
+CALIBRATION_ESSENTIAL_ALIAS: dict[str, str] = {
+    "calibration_classify": "classification",
+    "calibration_judge": "judge",
+    "calibration_arbiter": "arbiter",
+    "calibration_retry": "extraction",
+    "calibration_boss": "boss",
+    "calibration_intake": "intake",
+    "calibration_archivist": "archivist",
+}
+
+
+def essential_scorer(scorer: str) -> str:
+    """Resolve a calibration probe scorer to its eval node's scorer."""
+    return CALIBRATION_ESSENTIAL_ALIAS.get(scorer, scorer)
+
+
 def essential_metrics(scorer: str, scores: dict[str, Any]) -> dict[str, float]:
     """Filter a score dict down to the family's essential span metrics."""
-    wanted = ESSENTIAL_SCORES.get(scorer, ())
+    wanted = ESSENTIAL_SCORES.get(essential_scorer(scorer), ())
     return {
         key: float(value)
         for key, value in scores.items()
@@ -53,7 +72,7 @@ def essential_metrics(scorer: str, scores: dict[str, Any]) -> dict[str, float]:
 def essential_rollup(scorer: str, rows: list[dict[str, Any]]) -> dict[str, float]:
     """Mean essential metrics over a run's case rows (run-level rollup)."""
     out: dict[str, float] = {}
-    for key in ESSENTIAL_SCORES.get(scorer, ()):
+    for key in ESSENTIAL_SCORES.get(essential_scorer(scorer), ()):
         values = [
             float((r.get("scores") or {}).get(key))
             for r in rows
@@ -140,12 +159,18 @@ def score_extraction(doc_class: str, predicted: dict, expected: dict) -> dict[st
 
 
 def score_label_lists(predicted: dict, expected: dict, key: str) -> dict[str, Any]:
-    """Set precision/recall/F1 over a GT label list (cuad/maud clause labels)."""
+    """Set precision/recall/F1 over a GT label list (cuad/maud clause labels).
+
+    Empty GT payloads (the v9 "no annotations" convention: ``{}`` / ``[]`` or
+    their JSON-string forms) return ``{}`` — an inapplicable metric must skip,
+    not score 0.0.
+    """
     want = expected.get(key)
-    if not want:
+    if not want or _is_empty_container(want):
         return {}
-    want_set = {str(v).strip().lower() for v in _as_list(want)}
-    got_set = {str(v).strip().lower() for v in _as_list(predicted.get(key))}
+    want_set = {str(v).strip().lower() for v in _label_items(want)}
+    pred_value = predicted.get(key) if isinstance(predicted, dict) else predicted
+    got_set = {str(v).strip().lower() for v in _label_items(pred_value)}
     if not want_set:
         return {}
     tp = len(want_set & got_set)
@@ -159,7 +184,32 @@ def score_label_lists(predicted: dict, expected: dict, key: str) -> dict[str, An
     }
 
 
-def _as_list(value: Any) -> list[Any]:
+def _is_empty_container(value: Any) -> bool:
+    if isinstance(value, str) and value.strip() in ("{}", "[]"):
+        return True
+    if isinstance(value, (dict, list)):
+        return len(value) == 0
+    return False
+
+
+def _label_items(value: Any) -> list[Any]:
+    """Label-list members from a GT/prediction value (JSON-container aware).
+
+    JSON objects (the v9 clause-label shape: clause → annotation spans)
+    contribute their annotated keys; JSON arrays their elements; plain lists
+    pass through; scalars fall back to comma splitting.
+    """
+    if isinstance(value, str):
+        text = value.strip()
+        if text[:1] in ("{", "["):
+            try:
+                import json as _json
+
+                value = _json.loads(text)
+            except ValueError:  # JSONDecodeError subclasses ValueError
+                pass
+    if isinstance(value, dict):
+        return [k for k, v in value.items() if v]
     if isinstance(value, (list, tuple)):
         return list(value)
     text = str(value or "").strip()
@@ -395,4 +445,11 @@ def summarize_scores(rows: list[dict[str, Any]]) -> dict[str, Any]:
             out[key.replace("correct", "accuracy")] = mean
     errors = sum(1 for r in rows if r.get("error"))
     out["errors"] = errors
+    # Silent-failure census: cases whose scorer crashed (`scorer_error: True`
+    # from score_extraction) must surface at run level, not hide per case.
+    out["scorer_errors"] = sum(
+        1
+        for r in rows
+        if isinstance(r.get("scores"), dict) and r["scores"].get("scorer_error")
+    )
     return out

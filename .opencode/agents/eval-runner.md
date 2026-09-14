@@ -13,8 +13,8 @@ pass — you diagnose and report.
 
 ```bash
 uv run python scripts/run_evals.py --list
-uv run python scripts/run_evals.py --task eval:classify --mock --n 3
-uv run python scripts/run_evals.py --task pilot:chain --mock
+uv run python scripts/run_evals.py --task eval:classification --mock --n 3
+uv run python scripts/run_evals.py --task pilot:pipeline_chain --mock
 uv run python scripts/run_evals.py --task calibration:judge --mock
 uv run python scripts/run_evals.py --task eval:insurance_claims --real --subset class:insurance_claim --sample 25 --seed 42
 ```

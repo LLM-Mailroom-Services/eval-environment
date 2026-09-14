@@ -19,6 +19,7 @@ Every case is a plain dict (JSONL-serializable) with a stable shape:
 
 from __future__ import annotations
 
+import json
 import random
 from typing import Any
 
@@ -32,8 +33,9 @@ from pipeline.hf_corpora import (
 )
 from pipeline.hf_corpus_loader import load_config_frame, load_corpus
 
-# Insurance GT columns (schema v8) — the expected_fields surface for the
-# insurance_claims specialist eval.
+# Insurance GT columns (schema v8/v9) — the expected_fields surface for the
+# insurance_claims specialist eval. On v9 these arrive nested inside the
+# `gt_fields` JSON payload and are hoisted by _expand_gt_fields.
 INSURANCE_GT_FIELDS: tuple[str, ...] = (
     "claim_number",
     "policy_number",
@@ -107,21 +109,72 @@ def _truthy(value: Any) -> bool | None:
     return str(value).strip().lower() in ("1", "true", "yes", "on")
 
 
+def _is_empty_container(value: Any) -> bool:
+    """v9 GT empties: the literal strings '{}' / '[]' mean "no items"."""
+    if isinstance(value, str) and value.strip() in ("{}", "[]"):
+        return True
+    if isinstance(value, (dict, list)):
+        return len(value) == 0
+    return False
+
+
+def _expand_gt_fields(row: dict[str, Any]) -> dict[str, Any]:
+    """Hoist the v9 nested ``gt_fields`` JSON payload onto flat row keys.
+
+    Schema v9 moved the 13 insurance GT fields plus ``cuad_clause_labels`` /
+    ``maud_clause_labels`` into a single ``gt_fields`` JSON-string column.
+    Scoring reads flat keys, so expand here (empty values and empty
+    containers stay absent — an empty payload must not shadow a flat key).
+    """
+    raw = row.get("gt_fields")
+    if raw is None or raw == "":
+        return row
+    if isinstance(raw, str):
+        try:
+            parsed = json.loads(raw)
+        except (json.JSONDecodeError, ValueError):
+            return row
+    else:
+        parsed = raw
+    if not isinstance(parsed, dict):
+        return row
+    merged = dict(row)
+    for key, value in parsed.items():
+        if isinstance(value, str) and value.strip()[:1] in ("{", "["):
+            # list-typed GT fields arrive as JSON-array strings (v9 contract)
+            try:
+                value = json.loads(value)
+            except (json.JSONDecodeError, ValueError):
+                pass
+        if value is None or value == "" or _is_empty_container(value):
+            continue
+        merged.setdefault(key, value)
+    return merged
+
+
 def _expected_fields(row: dict[str, Any]) -> dict[str, Any]:
     """Non-empty GT fields for the row's class, in the pipeline's canonical
     scoring shape (the suite expects flattened ``cuad_clauses`` /
     ``maud_clauses`` lists, not the raw Hub label JSON — a perfect prediction
     scores 0.0 against the raw shape)."""
+    row = _expand_gt_fields(row)
     fields: dict[str, Any] = {}
     if str(row.get("expected") or "") == "insurance_claim":
         for key in INSURANCE_GT_FIELDS:
             value = row.get(key)
-            if value is not None and str(value).strip() != "":
+            if (
+                value is not None
+                and str(value).strip() != ""
+                and not _is_empty_container(value)
+            ):
                 fields[key] = value
     labels = {}
     for key in ("cuad_clause_labels", "maud_clause_labels"):
         value = row.get(key)
-        if isinstance(value, list) and value or isinstance(value, str) and value.strip():
+        if (
+            isinstance(value, list) and value
+            or isinstance(value, str) and value.strip() and not _is_empty_container(value)
+        ):
             labels[key] = value
     # The pipeline's own GT catalog maps subclass → canonical field tokens
     # (corporate_record → record_type; contract/merger subclass → family
@@ -132,8 +185,12 @@ def _expected_fields(row: dict[str, Any]) -> dict[str, Any]:
             from observability.extraction_gt import catalog_expected_fields
 
             fields.update(catalog_expected_fields({**row, "expected": row.get("expected"), "expected_subclass": row.get("expected_subclass")}))
-        except Exception:
-            pass
+        except Exception as exc:  # fail open: catalog is a fallback surface
+            import structlog
+
+            structlog.get_logger(__name__).warning(
+                "evals_gt_catalog_unavailable", error=f"{type(exc).__name__}: {exc}"
+            )
     if labels:
         try:
             from observability.extraction_gt import catalog_expected_fields
@@ -161,7 +218,7 @@ def _case_from_row(row: dict[str, Any], *, config: str, split: str) -> dict[str,
         "review_expected": _truthy(row.get("review_expected")),
         "retry_expected": _truthy(row.get("retry_expected")),
         "expected_fields": _expected_fields(row),
-        "source": "mailroom-corpus",
+        "source": "mailroom-dataset",
         "config": config,
         "split": split,
     }
@@ -218,20 +275,25 @@ def _rows_for_family_corpus(alias: str) -> list[dict[str, Any]]:
 
     Family corpora split labels (``ground_truth``) from text (``default``) the
     same way the main corpus does — join on ``filename`` when both configs
-    exist; fall back to whichever loads.
+    exist; fall back to whichever loads. Family corpora are NOT sha-pinned
+    (they float on Hub tip) unless the registry carries a revision. Loads
+    that fail loudly raise — a silently-empty corpus would zero out a run.
     """
     slug = _SUBSET_CORPUS[alias]
     corp = resolve_corpus(slug)
     rows: list[dict[str, Any]] = []
+    failures: list[str] = []
     for split in ("train", "test"):
         try:
-            frame, _prov = load_config_frame(corp["id"], "ground_truth", split=split)
-        except Exception:
+            frame, _prov = load_config_frame(corp["id"], "ground_truth", split=split, revision=corp.get("revision"))
+        except Exception as exc:
             frame = None
+            failures.append(f"{slug}:ground_truth:{split}: {type(exc).__name__}: {exc}")
         try:
-            blind, _bprov = load_config_frame(corp["id"], "default", split=split)
-        except Exception:
+            blind, _bprov = load_config_frame(corp["id"], "default", split=split, revision=corp.get("revision"))
+        except Exception as exc:
             blind = None
+            failures.append(f"{slug}:default:{split}: {type(exc).__name__}: {exc}")
         if frame is None and blind is None:
             continue
         if frame is not None and blind is not None and "doc_text" in blind.columns:
@@ -247,6 +309,12 @@ def _rows_for_family_corpus(alias: str) -> list[dict[str, Any]]:
         row = adapt_hub_row(raw, corp)
         row.setdefault("expected", corp.get("default_class") or row.get("expected"))
         out.append(row)
+    if not out:
+        detail = "; ".join(failures) if failures else "no rows returned"
+        raise RuntimeError(
+            f"family corpus {slug!r} (subset {alias!r}) yielded 0 cases — "
+            f"refusing to proceed on an empty corpus ({detail})"
+        )
     return out
 
 

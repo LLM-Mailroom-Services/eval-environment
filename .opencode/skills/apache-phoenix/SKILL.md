@@ -31,7 +31,7 @@ open http://localhost:6006
 
 ## Environment
 
-```
+```text
 PHOENIX_TRACING=enabled        # default
 PHOENIX_ENDPOINT=http://localhost:6006/v1/traces
 PHOENIX_SERVICE_NAME=mailroom-evals

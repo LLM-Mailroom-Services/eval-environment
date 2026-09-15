@@ -1,0 +1,32 @@
+{
+  "globs": [
+    "**/*.{md,markdown}",
+    "!**/.venv/**",
+    "!**/.opencode/node_modules/**",
+    "!**/node_modules/**"
+  ],
+  "config": {
+    "default": true,
+    "MD013": {
+      "line_length": 120,
+      "code_blocks": false,
+      "tables": false,
+      "headings": false
+    },
+    "MD024": {
+      "siblings_only": true
+    },
+    "MD033": {
+      "allowed_elements": ["div", "a", "br", "img"]
+    },
+    "MD060": false
+  },
+  "configOverrides": [
+    {
+      "globs": ["README.md"],
+      "config": {
+        "MD041": false
+      }
+    }
+  ]
+}

@@ -11,7 +11,7 @@ One canonical, versioned record schema for ALL task families (`eval`,
 
 ## Storage layout
 
-```
+```text
 reports/experiment_log.jsonl      # THE index — one line per RUN (summary + pointers)
 reports/experiment_log.md         # human-readable tables, rebuildable from the JSONL
 data/experiments/<run_id>/cases.jsonl   # one line per CASE (full fidelity)

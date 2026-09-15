@@ -122,9 +122,11 @@ def apply_mutation(
 
 def render_prompts_mirror() -> int:
     """Regenerate prompts/<key>.md for every registered mutation. Returns count."""
+    from evals.prompts.mirror_md import prompt_mirror_markdown
+
     count = 0
     for key, meta in registered_mutations().items():
         path = MUTATIONS_PATH.parent / f"{key}.md"
-        path.write_text(meta["text"], encoding="utf-8")
+        path.write_text(prompt_mirror_markdown(key, meta["text"]), encoding="utf-8")
         count += 1
     return count

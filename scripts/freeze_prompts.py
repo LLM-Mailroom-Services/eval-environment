@@ -53,6 +53,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT.parent / "Digital-Mailroom" / "packages" / "llm-mailroom" / "src"))
 
+from evals.prompts.mirror_md import prompt_mirror_markdown
 from pipeline.env import load_env
 
 load_env()
@@ -187,7 +188,8 @@ def write_frozen(frozen: dict[str, tuple[str, str, str]]) -> None:
     FROZEN_MODULE.write_text(render_module(frozen), encoding="utf-8")
     PROMPTS_DIR.mkdir(parents=True, exist_ok=True)
     for role, (text, _kind, _source) in frozen.items():
-        (PROMPTS_DIR / f"{role}_v1.md").write_text(text, encoding="utf-8")
+        key = f"{role}_v1"
+        (PROMPTS_DIR / f"{key}.md").write_text(prompt_mirror_markdown(key, text), encoding="utf-8")
     MANIFEST_PATH.write_text(json.dumps(render_manifest(frozen), indent=2), encoding="utf-8")
 
 

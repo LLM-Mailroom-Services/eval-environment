@@ -37,7 +37,6 @@ _SPECIALIST_CLASSES: dict[str, tuple[str, str]] = {
         "agents.correspondence_specialist",
         "CorrespondenceSpecialist",
     ),
-    "compliance_specialist": ("agents.compliance_specialist", "ComplianceSpecialist"),
     "insurance_claims_specialist": (
         "agents.insurance_claims_specialist",
         "InsuranceClaimsSpecialist",
@@ -394,7 +393,6 @@ def _specialist_for_class(doc_class: str) -> str | None:
         "merger_agreement": "contracts_specialist",
         "corporate_record": "corporate_records_specialist",
         "correspondence": "correspondence_specialist",
-        "compliance_filing": "compliance_specialist",
         "insurance_claim": "insurance_claims_specialist",
     }.get(doc_class)
 

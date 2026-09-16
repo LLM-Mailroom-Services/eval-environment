@@ -262,13 +262,14 @@ def _totals(runs: list[dict]) -> dict:
 
 def build_snapshot() -> dict:
     raw_runs = elog.load_runs()
-    runs = [_trim_run(r) for r in raw_runs]
+    run_records = [r for r in raw_runs if r.get("record_kind") != "comparison_result"]
+    runs = [_trim_run(r) for r in run_records]
     runs.sort(key=lambda r: r["started_at"], reverse=True)
     return {
         "schema": SCHEMA,
         "version": VERSION,
         "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
-        "health": _health(raw_runs),
+        "health": _health(run_records),
         "environment": {
             "tasks": _tasks(),
             "agents": _agents(),

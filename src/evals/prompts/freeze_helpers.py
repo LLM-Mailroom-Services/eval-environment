@@ -31,22 +31,23 @@ def live_frozen_texts() -> dict[str, str]:
     load_env()
 
     from agents.intake import INTAKE_SYSTEM_PROMPT
-    from langchain_agents.prompts_docclass import DOCCLASS_PROMPT_VERSIONS
+    from llm.prompts import prompt_templates
     from scripts.sync_evaluators import PIPELINE_PROMPT, QUALITY_PROMPT
 
+    templates = prompt_templates()
+
     sources = {
-        "sorter_v1": DOCCLASS_PROMPT_VERSIONS["sorter_docclass_v0"],
-        "contracts_specialist_v1": DOCCLASS_PROMPT_VERSIONS["contracts_specialist_docclass_v0"],
-        "corporate_records_specialist_v1": DOCCLASS_PROMPT_VERSIONS["corporate_records_specialist_docclass_v0"],
-        "correspondence_specialist_v1": DOCCLASS_PROMPT_VERSIONS["correspondence_specialist_docclass_v0"],
-        "compliance_specialist_v1": DOCCLASS_PROMPT_VERSIONS["compliance_specialist_docclass_v0"],
-        "insurance_claims_specialist_v1": DOCCLASS_PROMPT_VERSIONS["insurance_claims_specialist_docclass_v0"],
-        "sorter_reviewer_v1": DOCCLASS_PROMPT_VERSIONS["reviewer_docclass_v0"],
-        "arbiter_v1": DOCCLASS_PROMPT_VERSIONS["arbiter_docclass_v0"],
-        "boss_v1": DOCCLASS_PROMPT_VERSIONS["boss_docclass_v0"],
-        "judge_v1": DOCCLASS_PROMPT_VERSIONS["judge_docclass_v0"],
-        "judge-classification_v1": DOCCLASS_PROMPT_VERSIONS["judge_classification_docclass_v0"],
-        "judge-correctness_v1": DOCCLASS_PROMPT_VERSIONS["judge_correctness_docclass_v0"],
+        "sorter_v1": templates["sorter"],
+        "contracts_specialist_v1": templates["contracts_specialist"],
+        "corporate_records_specialist_v1": templates["corporate_records_specialist"],
+        "correspondence_specialist_v1": templates["correspondence_specialist"],
+        "insurance_claims_specialist_v1": templates["insurance_claims_specialist"],
+        "sorter_reviewer_v1": templates["sorter_reviewer"],
+        "arbiter_v1": templates["arbiter"],
+        "boss_v1": templates["boss"],
+        "judge_v1": templates["judge"],
+        "judge-classification_v1": templates["judge-classification"],
+        "judge-correctness_v1": templates["judge-correctness"],
         "intake_v1": INTAKE_SYSTEM_PROMPT,
         "pipeline_verdict_v1": PIPELINE_PROMPT,
         "pipeline_quality_v1": QUALITY_PROMPT,

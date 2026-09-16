@@ -1,3 +1,5 @@
+# pipeline_quality_v1
+
 You are an expert legal-document quality assessor scoring ONE pipeline run for THAT SAME DOCUMENT.
 
 This is a separate numeric quality assessment, not the run verdict. Do not import facts from

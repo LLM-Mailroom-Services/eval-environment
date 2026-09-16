@@ -54,6 +54,26 @@ V2_OPTIONAL_KEYS: tuple[str, ...] = (
     "judging",
 )
 
+COMPARISON_KEYS: tuple[str, ...] = (
+    "schema_version",
+    "record_kind",
+    "run_a",
+    "run_b",
+    "recorded_at",
+    "comparison",
+    "accepted",
+)
+
+_SUMMARY_KEYS = (
+    "schema_version",
+    "record_kind",
+    "run_a",
+    "run_b",
+    "generated_at",
+    "comparison",
+    "accepted",
+)
+
 _SUMMARY_KEYS = (
     "schema_version", "record_kind", "run_id", "family", "task", "invoke",
     "mode", "model", "prompt_version", "trace_backend", "trace_ids",
@@ -134,13 +154,18 @@ def _run_id_exists(run_id: str) -> bool:
 def validate_record(record: dict[str, Any]) -> list[str]:
     """Schema v1/v2 conformance checks. Returns a list of problems (empty = valid)."""
     problems: list[str] = []
-    for key in REQUIRED_KEYS:
+    record_kind = record.get("record_kind")
+    if record_kind == "comparison_result":
+        check_keys = COMPARISON_KEYS
+    else:
+        check_keys = REQUIRED_KEYS
+    for key in check_keys:
         if key not in record:
             problems.append(f"missing required key: {key}")
     if record.get("schema_version") not in (1, SCHEMA_VERSION):
         problems.append(f"schema_version must be 1 or {SCHEMA_VERSION}")
-    if record.get("record_kind") not in ("run_summary", "case"):
-        problems.append("record_kind must be run_summary|case")
+    if record_kind not in ("run_summary", "case", "comparison_result"):
+        problems.append("record_kind must be run_summary|case|comparison_result")
     judging = record.get("judging")
     if judging is not None and record.get("schema_version", 1) < 2:
         problems.append("judging block requires schema_version >= 2")
@@ -335,6 +360,8 @@ def render_run_md(summary: dict[str, Any]) -> str:
 def render_full_log(path: Path | None = None) -> str:
     """Title + experiment index over the whole history."""
     runs = load_runs(path)
+    run_records = [r for r in runs if r.get("record_kind") in ("run_summary", None)]
+    comparisons = [r for r in runs if r.get("record_kind") == "comparison_result"]
     lines = ["# mailroom-evals — experiment log", ""]
     lines += _table(
         ["run_id", "family", "task", "mode", "model", "subset", "n", "key metric", "errors"],
@@ -350,11 +377,26 @@ def render_full_log(path: Path | None = None) -> str:
                 _headline_metric(r),
                 (r.get("metrics") or {}).get("errors"),
             ]
-            for r in runs
+            for r in run_records
         ],
     )
+    if comparisons:
+        lines += ["", "## A/B comparisons", ""]
+        lines += _table(
+            ["recorded_at", "run_a", "run_b", "accepted", "promoted_version"],
+            [
+                [
+                    c.get("recorded_at"),
+                    c.get("run_a"),
+                    c.get("run_b"),
+                    "ACCEPTED" if c.get("accepted") else "REJECTED",
+                    c.get("promoted_version") or "—",
+                ]
+                for c in comparisons
+            ],
+        )
     lines += ["", "---", ""]
-    for run in runs:
+    for run in run_records:
         lines.append(render_run_md(run))
         lines.append("")
     return "\n".join(lines)
@@ -417,6 +459,35 @@ def record_judging(
     with jsonl_path().open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(follow_up, default=str) + "\n")
     return follow_up
+
+
+def record_comparison(
+    run_id_a: str,
+    run_id_b: str,
+    *,
+    comparison: dict[str, Any],
+    accepted: bool,
+    promoted_version: str | None = None,
+) -> dict[str, Any]:
+    """Append an A/B comparison result as a new log line (append-only).
+
+    Winning prompt versions are recorded as ``promoted_version`` so downstream
+    tools can promote the champion; losing runs stay in the log for archival and
+    future training.
+    """
+    record: dict[str, Any] = {
+        "record_kind": "comparison_result",
+        "schema_version": SCHEMA_VERSION,
+        "run_a": run_id_a,
+        "run_b": run_id_b,
+        "accepted": accepted,
+        "promoted_version": promoted_version,
+        "comparison": comparison,
+        "recorded_at": utc_now(),
+    }
+    with jsonl_path().open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(record, default=str) + "\n")
+    return record
 
 
 def export_run(run_id: str, fmt: str = "csv", path: Path | None = None) -> Path | None:

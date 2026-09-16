@@ -1,16 +1,15 @@
 # Prompt lineage & GEPA
 
 mailroom-evals owns a **frozen, versioned prompt lineage** — the official
-prompt version 1 (`mailroom-evals-v1`) that GEPA mutations iterate on — while
+prompt version 1 (`mailroom-dataset-v1`) that GEPA mutations iterate on — while
 staying wired to the mailroom pipeline's live lineage for cross-source A/Bs.
 
-## The four resolution layers
+## The three resolution layers
 
 | layer | lineage id | source | when used |
 |---|---|---|---|
-| **frozen** | `mailroom-evals-v1` | `src/evals/prompts/frozen_v1.py` (generated) | **default for every eval run** — the stable measurement baseline |
+| **frozen** | `mailroom-dataset-v1` | `src/evals/prompts/frozen_v1.py` (generated) | **default for every eval run** — the stable measurement baseline |
 | **mutation** | same lineage, v2+ | `prompts/mutations.json` (GEPA output) | A/B candidates; recorded with parent + change note |
-| **live-docclass** | pipeline | `langchain_agents.prompts_docclass.DOCCLASS_PROMPT_VERSIONS` | `--prompt-source live-docclass` — tracks the pipeline checkout |
 | **production** | pipeline | `llm.prompts.prompt_templates` | `--prompt-source production` — the pipeline's own templates |
 
 Resolution: `evals.prompts.lineage.resolve(key)` — frozen wins ties; unknown
@@ -19,18 +18,23 @@ keys raise (fail loud, never silently substitute).
 ## The frozen v1 snapshot
 
 Materialized by `scripts/freeze_prompts.py` (idempotent; re-run on an
-unchanged pipeline is byte-identical) from the live llm-mailroom docclass
-lineage (KANBAN-090 pure-appended variants), the intake production template,
+unchanged pipeline is byte-identical) from the live llm-mailroom production
+prompts (`llm.prompts.prompt_templates`), the intake production template,
 and the Langfuse pipeline evaluator rubrics:
 
 | frozen key | source |
 |---|---|
-| `sorter_v1` | `sorter_docclass_v0` |
-| `contracts_specialist_v1` … `insurance_claims_specialist_v1`, `compliance_specialist_v1` | their `*_docclass_v0` |
-| `reviewer_v1` / `arbiter_v1` / `boss_v1` | `reviewer/arbiter/boss_docclass_v0` |
-| `judge_v1` / `judge-classification_v1` / `judge-correctness_v1` | `judge*_docclass_v0` |
-| `intake_v1` | production `INTAKE_SYSTEM_PROMPT` (no docclass variant upstream) |
+| `sorter_v1` | `sorter` (production) |
+| `contracts_specialist_v1` … `insurance_claims_specialist_v1` | their production templates |
+| `sorter_reviewer_v1` / `arbiter_v1` / `boss_v1` | `sorter_reviewer` / `arbiter` / `boss` (production) |
+| `judge_v1` / `judge-classification_v1` / `judge-correctness_v1` | `judge*` (production) |
+| `intake_v1` | production `INTAKE_SYSTEM_PROMPT` |
 | `pipeline_verdict_v1` / `pipeline_quality_v1` | `PIPELINE_PROMPT` / `QUALITY_PROMPT` (CORRECT/PARTIAL/MISS + 0–1.0 rubrics) |
+
+The pipeline taxonomy has five canonical document classes: contract,
+corporate_record, correspondence, insurance_claim, merger_agreement.
+merger_agreement is the MAUD class (agreement and plan of merger); contract
+is the CUAD commercial-contract class — they share the contracts specialist.
 
 Artifacts: `prompts/<key>.md` (human-readable mirror — never hand-edit),
 `prompts/manifest.json` (pipeline git commit, source keys, sha256 per
@@ -46,7 +50,7 @@ prompts moved: re-freeze to cut a new version (never silently mutate v1).
 the LIVE prompt surface of the pipeline for the run, at the two verified
 choke points:
 
-1. `pipeline.docclass_mode.managed_prompt_lookup` — BaseAgent prompts
+1. `llm.prompts.get_managed_prompt` — BaseAgent prompts
    (`agents.base.system_prompt` → `llm.prompts.get_managed_prompt`).
 2. `langchain_agents.prompts.PROMPT_VERSIONS` — the vendored LangChain
    versioned path (e.g. the sorter chain's `sorter_v14` key).

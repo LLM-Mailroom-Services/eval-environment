@@ -1,27 +1,25 @@
 #!/usr/bin/env python3
-"""Freeze the mailroom docclass prompt lineage into mailroom-evals v1.
+"""Freeze the mailroom production prompt lineage into mailroom-dataset-v1.
 
-Materializes the live llm-mailroom docclass lineage (KANBAN-090
-``DOCCLASS_PROMPT_VERSIONS``, derived from each role's live production
-template) plus the Langfuse pipeline evaluator rubrics and the intake
-production template into THIS repo as the official frozen prompt version 1
-of the new ``mailroom-evals-v1`` lineage — the seed GEPA mutations iterate on.
+Materializes the live llm-mailroom production prompts (``llm.prompts.prompt_templates``,
+derived from each role's live production template) plus the Langfuse pipeline evaluator
+rubrics and the intake production template into THIS repo as the official frozen prompt
+version 1 of the new ``mailroom-dataset-v1`` lineage — the seed GEPA mutations iterate on.
 
 Frozen keys (role-name keys, lineage-prefixed):
 
-    sorter_v1                       <- sorter_docclass_v0
-    contracts_specialist_v1         <- contracts_specialist_docclass_v0
-    corporate_records_specialist_v1 <- corporate_records_specialist_docclass_v0
-    correspondence_specialist_v1    <- correspondence_specialist_docclass_v0
-    compliance_specialist_v1        <- compliance_specialist_docclass_v0
-    insurance_claims_specialist_v1  <- insurance_claims_specialist_docclass_v0
-    reviewer_v1                     <- reviewer_docclass_v0
-    arbiter_v1                      <- arbiter_docclass_v0
-    boss_v1                         <- boss_docclass_v0
-    judge_v1                        <- judge_docclass_v0
-    judge_classification_v1         <- judge_classification_docclass_v0
-    judge_correctness_v1            <- judge_correctness_docclass_v0
-    intake_v1                       <- INTAKE_SYSTEM_PROMPT (production; no docclass variant upstream)
+    sorter_v1                       <- sorter (production)
+    contracts_specialist_v1         <- contracts_specialist (production)
+    corporate_records_specialist_v1 <- corporate_records_specialist (production)
+    correspondence_specialist_v1    <- correspondence_specialist (production)
+    insurance_claims_specialist_v1  <- insurance_claims_specialist (production)
+    sorter_reviewer_v1              <- sorter_reviewer (production)
+    arbiter_v1                      <- arbiter (production)
+    boss_v1                         <- boss (production)
+    judge_v1                        <- judge (production)
+    judge-classification_v1         <- judge-classification (production)
+    judge-correctness_v1            <- judge-correctness (production)
+    intake_v1                       <- INTAKE_SYSTEM_PROMPT (production)
     pipeline_verdict_v1             <- PIPELINE_PROMPT (sync_evaluators.py)
     pipeline_quality_v1             <- QUALITY_PROMPT (sync_evaluators.py)
 
@@ -60,24 +58,23 @@ load_env()
 
 # role -> (frozen key, source kind, source key)
 FREEZE_MAP: tuple[tuple[str, str, str], ...] = (
-    ("sorter", "docclass", "sorter_docclass_v0"),
-    ("contracts_specialist", "docclass", "contracts_specialist_docclass_v0"),
-    ("corporate_records_specialist", "docclass", "corporate_records_specialist_docclass_v0"),
-    ("correspondence_specialist", "docclass", "correspondence_specialist_docclass_v0"),
-    ("compliance_specialist", "docclass", "compliance_specialist_docclass_v0"),
-    ("insurance_claims_specialist", "docclass", "insurance_claims_specialist_docclass_v0"),
-    ("sorter_reviewer", "docclass", "reviewer_docclass_v0"),
-    ("arbiter", "docclass", "arbiter_docclass_v0"),
-    ("boss", "docclass", "boss_docclass_v0"),
-    ("judge", "docclass", "judge_docclass_v0"),
-    ("judge-classification", "docclass", "judge_classification_docclass_v0"),
-    ("judge-correctness", "docclass", "judge_correctness_docclass_v0"),
+    ("sorter", "production", "sorter"),
+    ("contracts_specialist", "production", "contracts_specialist"),
+    ("corporate_records_specialist", "production", "corporate_records_specialist"),
+    ("correspondence_specialist", "production", "correspondence_specialist"),
+    ("insurance_claims_specialist", "production", "insurance_claims_specialist"),
+    ("sorter_reviewer", "production", "sorter_reviewer"),
+    ("arbiter", "production", "arbiter"),
+    ("boss", "production", "boss"),
+    ("judge", "production", "judge"),
+    ("judge-classification", "production", "judge-classification"),
+    ("judge-correctness", "production", "judge-correctness"),
     ("intake", "production", "INTAKE_SYSTEM_PROMPT"),
     ("pipeline_verdict", "evaluator", "PIPELINE_PROMPT"),
     ("pipeline_quality", "evaluator", "QUALITY_PROMPT"),
 )
 
-LINEAGE_ID = "mailroom-evals-v1"
+LINEAGE_ID = "mailroom-dataset-v1"
 FROZEN_MODULE = REPO_ROOT / "src" / "evals" / "prompts" / "frozen_v1.py"
 PROMPTS_DIR = REPO_ROOT / "prompts"
 MANIFEST_PATH = PROMPTS_DIR / "manifest.json"
@@ -104,17 +101,18 @@ def collect_frozen() -> dict[str, tuple[str, str, str]]:
     cannot supply a template — freezing a partial lineage is worse than
     failing loudly."""
     from agents.intake import INTAKE_SYSTEM_PROMPT
-    from langchain_agents.prompts_docclass import DOCCLASS_PROMPT_VERSIONS
+    from llm.prompts import prompt_templates
     from scripts.sync_evaluators import PIPELINE_PROMPT, QUALITY_PROMPT
 
+    templates = prompt_templates()
     out: dict[str, tuple[str, str, str]] = {}
     for role, kind, source_key in FREEZE_MAP:
-        if kind == "docclass":
-            text = DOCCLASS_PROMPT_VERSIONS[source_key]
-        elif kind == "production":
+        if kind == "evaluator":
+            text = PIPELINE_PROMPT if source_key == "PIPELINE_PROMPT" else QUALITY_PROMPT
+        elif source_key == "INTAKE_SYSTEM_PROMPT":
             text = INTAKE_SYSTEM_PROMPT
         else:
-            text = PIPELINE_PROMPT if source_key == "PIPELINE_PROMPT" else QUALITY_PROMPT
+            text = templates[source_key]
         out[role] = (text, kind, source_key)
     return out
 
@@ -128,13 +126,14 @@ def render_module(frozen: dict[str, tuple[str, str, str]]) -> str:
     """Render frozen_v1.py — versioned constants + VERSIONS dict + metadata."""
     stamp = datetime.now(UTC).isoformat(timespec="seconds")
     lines = [
-        '"""FROZEN prompt lineage mailroom-evals-v1 — DO NOT EDIT BY HAND.',
+        f'"""FROZEN prompt lineage {LINEAGE_ID} — DO NOT EDIT BY HAND.',
         "",
         "Materialized by scripts/freeze_prompts.py from the llm-mailroom",
-        "docclass lineage (KANBAN-090), the intake production template, and the",
-        "Langfuse pipeline evaluator rubrics. This is the official prompt",
-        "version 1 of the new lineage and the seed for GEPA mutations",
-        "(mutations append to evals/prompts/lineage.py, never here).",
+        "production lineage (llm.prompts.prompt_templates), the intake production",
+        "template, and the Langfuse pipeline evaluator rubrics. This is the",
+        "official prompt version 1 of the mailroom-dataset lineage and the seed",
+        "for GEPA mutations (mutations append via evals/prompts/mutations.py,",
+        "never here).",
         "",
         f"Freeze stamp: {stamp}",
         '"""',
@@ -170,7 +169,7 @@ def render_manifest(frozen: dict[str, tuple[str, str, str]]) -> dict:
         "frozen_version": 1,
         "frozen_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "pipeline_git_commit": pipeline_git_commit(),
-        "derivation": "llm-mailroom DOCCLASS_PROMPT_VERSIONS (pure-appended docclass variants of live production templates) + intake production template + Langfuse pipeline evaluator rubrics",
+        "derivation": "llm-mailroom production prompt_templates (live production templates) + intake production template + Langfuse pipeline evaluator rubrics",
         "versions": {
             f"{role}_v1": {
                 "source_kind": kind,

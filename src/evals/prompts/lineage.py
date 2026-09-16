@@ -4,8 +4,7 @@ Version resolution order (``evals.prompts.registry.resolve``):
     1. frozen   — ``frozen_v1.VERSIONS`` (the official v1 snapshot)
     2. mutation — versions appended by ``evals.prompts.mutations.apply_mutation``
                   (GEPA output; each records its parent + change note)
-    3. live-docclass — ``langchain_agents.prompts_docclass.DOCCLASS_PROMPT_VERSIONS``
-    4. production — the pipeline's local templates (``llm.prompts.prompt_templates``)
+    3. production — the pipeline's local templates (``llm.prompts.prompt_templates``)
 
 Every version carries its sha256; ``verify_lineage`` detects drift between the
 frozen snapshot and the live pipeline (re-freeze to cut a new version).
@@ -33,7 +32,7 @@ def sha256(text: str) -> str:
 class PromptVersion:
     key: str
     text: str
-    lineage: str  # frozen | mutation | live-docclass | production
+    lineage: str  # frozen | mutation | production
     source: str  # provenance (source key or parent version)
     version: int  # lineage version number (1 for the frozen snapshot)
 
@@ -52,15 +51,6 @@ def _mutations() -> dict[str, dict[str, Any]]:
         return {}
 
 
-def _live_docclass() -> dict[str, str]:
-    try:
-        from langchain_agents.prompts_docclass import DOCCLASS_PROMPT_VERSIONS
-
-        return dict(DOCCLASS_PROMPT_VERSIONS)
-    except Exception:
-        return {}
-
-
 def _production() -> dict[str, str]:
     try:
         from llm.prompts import prompt_templates
@@ -71,12 +61,10 @@ def _production() -> dict[str, str]:
 
 
 def all_versions() -> dict[str, PromptVersion]:
-    """Every resolvable version across all four layers (frozen wins ties)."""
+    """Every resolvable version across all three layers (frozen wins ties)."""
     out: dict[str, PromptVersion] = {}
     for agent_name, text in _production().items():
         out[agent_name] = PromptVersion(agent_name, text, "production", "prompt_templates", 0)
-    for key, text in _live_docclass().items():
-        out[key] = PromptVersion(key, text, "live-docclass", "DOCCLASS_PROMPT_VERSIONS", 0)
     for key, meta in sorted(_mutations().items()):
         out[key] = PromptVersion(key, meta["text"], "mutation", meta["parent"], int(meta["version"]))
     for key, text in frozen_v1.VERSIONS.items():

@@ -4,7 +4,7 @@
 the llm-mailroom pipeline for the current process, at the two verified choke
 points:
 
-1. ``pipeline.docclass_mode.managed_prompt_lookup`` — BaseAgent prompts
+1. ``llm.prompts.get_managed_prompt`` — BaseAgent prompts
    (``agents.base.system_prompt`` → ``llm.prompts.get_managed_prompt``).
 2. ``langchain_agents.prompts.PROMPT_VERSIONS`` — the vendored LangChain
    versioned path (sorter chain keys like ``sorter_v14``).
@@ -26,14 +26,14 @@ from .lineage import all_versions, resolve, roles
 
 logger = structlog.get_logger(__name__)
 
-SOURCES = ("frozen", "live-docclass", "production")
+SOURCES = ("frozen", "production")
 
 
 @dataclass
 class InjectionState:
     """What activate() changed, so deactivate() can restore it exactly."""
 
-    original_lookup: Any = None
+    original_get_managed_prompt: Any = None
     original_prompt_versions: dict[str, str] = field(default_factory=dict)
     active: bool = False
 
@@ -45,11 +45,6 @@ def default_keys(source: str) -> dict[str, str]:
     """role -> version key for a source mode."""
     if source == "frozen":
         return roles()
-    if source == "live-docclass":
-        # role -> the docclass key AGENT_DOCCLASS_KEY maps it to
-        from pipeline.docclass_mode import AGENT_DOCCLASS_KEY
-
-        return dict(AGENT_DOCCLASS_KEY)
     # production: the agent's own live template (no injection needed)
     return {}
 
@@ -73,23 +68,28 @@ def activate(
         resolved = resolve(key)  # raises on unknown keys — fail loud, not silent
         keys[role] = resolved.key
 
+    import llm.prompts as llm_prompts
     from langchain_agents import prompts as lc_prompts
-    from pipeline import docclass_mode
 
     if not _state.active:
-        _state.original_lookup = docclass_mode.managed_prompt_lookup
+        _state.original_get_managed_prompt = llm_prompts.get_managed_prompt
         _state.original_prompt_versions = dict(lc_prompts.PROMPT_VERSIONS)
         _state.active = True
 
     versions = all_versions()
 
-    def _injected_lookup(agent_name: str, default_text: str) -> tuple[str, str]:
+    def _injected_get_managed_prompt(
+        agent_name: str, default_text: str,
+        variables: dict | None = None, label: str = "production",
+    ) -> tuple[str, object | None]:
         key = keys.get(agent_name)
         if key and key in versions:
-            return key, versions[key].text
-        return _state.original_lookup(agent_name, default_text)
+            return versions[key].text, None
+        return _state.original_get_managed_prompt(
+            agent_name, default_text, variables=variables, label=label,
+        )
 
-    docclass_mode.managed_prompt_lookup = _injected_lookup
+    llm_prompts.get_managed_prompt = _injected_get_managed_prompt
 
     patched = dict(_state.original_prompt_versions)
     # LangChain versioned path: map every role's key to the chosen text so a
@@ -115,10 +115,10 @@ def deactivate() -> None:
     """Restore the pipeline's original prompt surfaces."""
     if not _state.active:
         return
+    import llm.prompts as llm_prompts
     from langchain_agents import prompts as lc_prompts
-    from pipeline import docclass_mode
 
-    docclass_mode.managed_prompt_lookup = _state.original_lookup
+    llm_prompts.get_managed_prompt = _state.original_get_managed_prompt
     lc_prompts.PROMPT_VERSIONS = dict(_state.original_prompt_versions)
     _state.active = False
     logger.info("evals_prompts_deactivated")

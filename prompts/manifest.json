@@ -1,81 +1,75 @@
 {
-  "lineage_id": "mailroom-evals-v1",
+  "lineage_id": "mailroom-dataset-v1",
   "frozen_version": 1,
-  "frozen_at": "2026-09-12T02:30:36+00:00",
-  "pipeline_git_commit": "073d3a01096e535bbf33eb002b04bc19a36e8f63",
-  "derivation": "llm-mailroom DOCCLASS_PROMPT_VERSIONS (pure-appended docclass variants of live production templates) + intake production template + Langfuse pipeline evaluator rubrics",
+  "frozen_at": "2026-09-16T03:38:42+00:00",
+  "pipeline_git_commit": "be3d2973cce6610adba6e5f8765b6b78e37ed2e2",
+  "derivation": "llm-mailroom production prompt_templates (live production templates) + intake production template + Langfuse pipeline evaluator rubrics",
   "versions": {
     "sorter_v1": {
-      "source_kind": "docclass",
-      "source_key": "sorter_docclass_v0",
-      "sha256": "73c07682471122604c8174853640b74b84b1b425f4dd3c8014ca08c7c4ab5028",
-      "chars": 20207
+      "source_kind": "production",
+      "source_key": "sorter",
+      "sha256": "2b1e69b2c0530bd967bac6f0d3097818b65858f65687a826005cd495f04be788",
+      "chars": 17201
     },
     "contracts_specialist_v1": {
-      "source_kind": "docclass",
-      "source_key": "contracts_specialist_docclass_v0",
-      "sha256": "76327b411a731fd94643a04268f1bd44d8a2dcc70a59b1a0715585fc762af4d2",
-      "chars": 38128
+      "source_kind": "production",
+      "source_key": "contracts_specialist",
+      "sha256": "6216640edc40194556917211bd60bf575ce01a83c8ab5f8a633dad9cbd25e28d",
+      "chars": 32581
     },
     "corporate_records_specialist_v1": {
-      "source_kind": "docclass",
-      "source_key": "corporate_records_specialist_docclass_v0",
-      "sha256": "f2849f20a1f8d00a5aff4c23268cc298dda5db97a418fda8c555c184cd2f8c75",
-      "chars": 5673
+      "source_kind": "production",
+      "source_key": "corporate_records_specialist",
+      "sha256": "655ef1702f1439260b0168a32584489e919eefbe0da0cb89b657f91f2d964db4",
+      "chars": 3046
     },
     "correspondence_specialist_v1": {
-      "source_kind": "docclass",
-      "source_key": "correspondence_specialist_docclass_v0",
-      "sha256": "a9d4ff002107da99cb866a4b50b1646b1e68190abca1914e4075d569ebdc66d8",
-      "chars": 5908
-    },
-    "compliance_specialist_v1": {
-      "source_kind": "docclass",
-      "source_key": "compliance_specialist_docclass_v0",
-      "sha256": "6d465574f38ecf7d2fbf2f9bce483f1ba5b56397992889529b5d17e47a6337b1",
-      "chars": 5513
+      "source_kind": "production",
+      "source_key": "correspondence_specialist",
+      "sha256": "5636577d785d852f90b8332d0de1fab248465736b76bfd35dbab03a1ccfd608d",
+      "chars": 3367
     },
     "insurance_claims_specialist_v1": {
-      "source_kind": "docclass",
-      "source_key": "insurance_claims_specialist_docclass_v0",
-      "sha256": "3877dbc4f4ba28ba75cfd349bea2e8a3b403ee1b6e1b2c3b889c47024310be71",
-      "chars": 6374
+      "source_kind": "production",
+      "source_key": "insurance_claims_specialist",
+      "sha256": "6b951641038c248a39fb2bf8d7a3a7eabd759a12977d5b1fc87485e962b85af8",
+      "chars": 3762
     },
     "sorter_reviewer_v1": {
-      "source_kind": "docclass",
-      "source_key": "reviewer_docclass_v0",
-      "sha256": "8cf7367fd69372a4327a4f05bfab91e2df46aacb1670cc2bff20e93dc25b5faa",
-      "chars": 5292
+      "source_kind": "production",
+      "source_key": "sorter_reviewer",
+      "sha256": "db02beff97dd13f13be7965f8d389f6b2768a526a8f6c7a7688f1a86717fd7c3",
+      "chars": 3175
     },
     "arbiter_v1": {
-      "source_kind": "docclass",
-      "source_key": "arbiter_docclass_v0",
-      "sha256": "d72ea55b40372319a304aa70605fcf4380d50b397bca4b8d4a7503fe4caa0948",
-      "chars": 5023
+      "source_kind": "production",
+      "source_key": "arbiter",
+      "sha256": "d674eb5afc1efe57342b597740e850376a68d16b7041588d09fa03e62ff9cd5e",
+      "chars": 2907
     },
     "boss_v1": {
-      "source_kind": "docclass",
-      "source_key": "boss_docclass_v0",
-      "sha256": "94485c79cf2cae45cea3aa93c16f4880cd8ebc82bcde8fd39d725b0302ea87e1",
-      "chars": 4905
+      "source_kind": "production",
+      "source_key": "boss",
+      "sha256": "c760107a6e4abeb3a8ef078c344fd1dc2e3f4fd06b2065a4c21e7228ca39a5af",
+      "chars": 2990
     },
     "judge_v1": {
-      "source_kind": "docclass",
-      "source_key": "judge_docclass_v0",
-      "sha256": "c653ff3bde15230570c38c27112acc40221582a839aabe46a09f37f9ed0f1100",
-      "chars": 4978
+      "source_kind": "production",
+      "source_key": "judge",
+      "sha256": "d5fcdbf544605927c4fb1ee0bf8cef571043458d55588268c3fbbc5a355fc729",
+      "chars": 3153
     },
     "judge-classification_v1": {
-      "source_kind": "docclass",
-      "source_key": "judge_classification_docclass_v0",
-      "sha256": "2c2b3f57688d370d87bc825159573e11c62d5fc64699f709ad2436a5c887ce37",
-      "chars": 5562
+      "source_kind": "production",
+      "source_key": "judge-classification",
+      "sha256": "a577874ec28eff0bb742491b434dd9a5cdef027f86354a8c632cf1a492eced92",
+      "chars": 3407
     },
     "judge-correctness_v1": {
-      "source_kind": "docclass",
-      "source_key": "judge_correctness_docclass_v0",
-      "sha256": "beb05a6bd4cdfb146970251b0677138f0b837a2a644d3d548c4ff5cc3deacdca",
-      "chars": 4230
+      "source_kind": "production",
+      "source_key": "judge-correctness",
+      "sha256": "5f355f1f12ee6ce8b9486915299d508ff055ce489bbd7e195d21f3f30d71686b",
+      "chars": 2411
     },
     "intake_v1": {
       "source_kind": "production",
@@ -86,8 +80,8 @@
     "pipeline_verdict_v1": {
       "source_kind": "evaluator",
       "source_key": "PIPELINE_PROMPT",
-      "sha256": "50e54bc1a58924d0387d2372f77d70012367f09b290662d03754286d562d6164",
-      "chars": 5856
+      "sha256": "375a7853f3685f4b890b62210a5d08b361e176154c8ed2f656e800fda5447487",
+      "chars": 5742
     },
     "pipeline_quality_v1": {
       "source_kind": "evaluator",

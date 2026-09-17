@@ -11,12 +11,15 @@ dependencies = [
     # The pipeline under test (path-resolved below; brings langgraph, agents,
     # observability backends, and the HF corpus loader with it).
     "mailroom",
-    # Scoring suite — git-pinned so the eval-env is fully portable/standalone.
-    # v0.15.0 ships configure_from_taxonomy(): the harness wires the corpus
-    # taxonomy once at process start (src/evals/dojo_wiring.py) so
+    # Scoring suite — resolved transitively via mailroom's workspace member
+    # source (editable, v0.15.0). A git pin here is impossible while mailroom
+    # is a path dep: uv hard-requires workspace members to source members as
+    # `{ workspace = true }`, so the editable URL always wins and a second URL
+    # for the same package fails resolution ("conflicting URLs"). v0.15.0
+    # ships configure_from_taxonomy(): the harness wires the corpus taxonomy
+    # once at process start (src/evals/dojo_wiring.py) so
     # field_scoring.get_field_types(doc_class) auto-resolves real field-type
     # maps instead of {} (degraded extraction scores pre-wiring).
-    "llm-dojo-scoring @ git+https://github.com/Exios66/llm-dojo-scoring.git@v0.15.0",
     # Corpus loading (hf_corpus_loader is pandas-based; pyarrow for parquet).
     "pandas>=2.0",
     "pyarrow>=14.0",
@@ -36,11 +39,13 @@ dev = [
 # uv workspace. Override with a git source when this repo moves machines.
 mailroom = { path = "../Digital-Mailroom/packages/llm-mailroom", editable = true }
 
-# llm-dojo-scoring is intentionally NOT listed here: it resolves from the git
-# pin in [project.dependencies] (@v0.15.0), never an editable path. The
-# editable-path resolution visible in older uv.lock files was the transitive
-# Digital-Mailroom workspace artifact; the git pin replaces it so this repo
-# locks and runs standalone on any machine.
+# llm-dojo-scoring is intentionally NOT listed here: it resolves transitively
+# from mailroom's member-level `{ workspace = true }` source (editable, the
+# Digital-Mailroom workspace member). Any second source for the same package
+# (e.g., a git pin) makes uv fail with "conflicting URLs" — workspace members
+# are hard-required to source members as workspace, so the editable URL always
+# wins while mailroom is a path dep. Standalone machines: switch mailroom to
+# a git source, which brings dojo via mailroom's own release pin.
 
 [tool.setuptools.packages.find]
 where = ["src"]

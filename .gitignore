@@ -26,3 +26,4 @@ hf_cache/
 .DS_Store
 .idea/
 .vscode/
+docs/.Rhistory

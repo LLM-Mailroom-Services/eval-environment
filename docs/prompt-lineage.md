@@ -26,6 +26,7 @@ and the Langfuse pipeline evaluator rubrics:
 |---|---|
 | `sorter_v1` | `sorter` (production) |
 | `contracts_specialist_v1` … `insurance_claims_specialist_v1` | their production templates |
+| `merger_agreement_specialist_v1` | sandbox MAUD simplified (`merger_agreement_specialist_simplified` @ catalog promotion #8) — dedicated MAUD specialist, not CUAD contracts |
 | `sorter_reviewer_v1` / `arbiter_v1` / `boss_v1` | `sorter_reviewer` / `arbiter` / `boss` (production) |
 | `judge_v1` / `judge-classification_v1` / `judge-correctness_v1` | `judge*` (production) |
 | `intake_v1` | production `INTAKE_SYSTEM_PROMPT` |
@@ -34,7 +35,10 @@ and the Langfuse pipeline evaluator rubrics:
 The pipeline taxonomy has five canonical document classes: contract,
 corporate_record, correspondence, insurance_claim, merger_agreement.
 merger_agreement is the MAUD class (agreement and plan of merger); contract
-is the CUAD commercial-contract class — they share the contracts specialist.
+is the CUAD commercial-contract class. Eval catalog wires
+`merger_agreement_specialist_v1` for MAUD extraction (sandbox-sourced freeze);
+CUAD contracts use `contracts_specialist_v1` / mutations — they are not
+interchangeable.
 
 Artifacts: `prompts/<key>.md` (human-readable mirror — never hand-edit),
 `prompts/manifest.json` (pipeline git commit, source keys, sha256 per

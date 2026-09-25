@@ -66,6 +66,76 @@ def promote_mutation(
     return meta
 
 
+def _safe_ident(role: str) -> str:
+    return role.replace("-", "_")
+
+
+def _write_frozen_catalog(frozen: dict[str, tuple[str, str, str]]) -> None:
+    """Rewrite frozen_v1 + mirrors + manifest without importing the pipeline."""
+    from datetime import UTC, datetime
+
+    manifest_path = REPO_ROOT / "prompts" / "manifest.json"
+    prior = json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
+    stamp = datetime.now(UTC).isoformat(timespec="seconds")
+    module_path = REPO_ROOT / "src" / "evals" / "prompts" / "frozen_v1.py"
+    lines = [
+        '"""FROZEN prompt lineage mailroom-dataset-v1 — DO NOT EDIT BY HAND.',
+        "",
+        "Materialized by scripts/freeze_prompts.py / promote_sandbox_specialist.py.",
+        "",
+        f"Freeze stamp: {stamp}",
+        '"""',
+        "",
+        "from __future__ import annotations",
+        "",
+        "LINEAGE_ID = 'mailroom-dataset-v1'",
+        "FROZEN_VERSION = 1",
+        "",
+    ]
+    for r, (text, kind, source_key) in frozen.items():
+        key = f"{r}_v1"
+        ident = _safe_ident(r) + "_v1"
+        lines.append(f"# key: {key} — source: {kind}:{source_key} (sha256 {sha256(text)[:12]})")
+        lines.append(f"{ident} = {text!r}")
+        lines.append("")
+    lines.append("VERSIONS: dict[str, str] = {")
+    for r in frozen:
+        lines.append(f"    {r + '_v1'!r}: {_safe_ident(r)}_v1,")
+    lines.append("}")
+    lines.append("")
+    lines.append("SOURCE_OF: dict[str, str] = {")
+    for r, (_text, kind, source_key) in frozen.items():
+        lines.append(f"    {r + '_v1'!r}: {kind + ':' + source_key!r},")
+    lines.append("}")
+    lines.append("")
+    module_path.write_text("\n".join(lines), encoding="utf-8")
+    prompts_dir = REPO_ROOT / "prompts"
+    prompts_dir.mkdir(parents=True, exist_ok=True)
+    for r, (text, _kind, _source) in frozen.items():
+        key = f"{r}_v1"
+        (prompts_dir / f"{key}.md").write_text(prompt_mirror_markdown(key, text), encoding="utf-8")
+    manifest = {
+        "lineage_id": prior.get("lineage_id", "mailroom-dataset-v1"),
+        "frozen_version": prior.get("frozen_version", 1),
+        "frozen_at": stamp,
+        "pipeline_git_commit": prior.get("pipeline_git_commit"),
+        "derivation": prior.get(
+            "derivation",
+            "llm-mailroom production prompt_templates + intake + evaluator rubrics",
+        ),
+        "versions": {
+            f"{r}_v1": {
+                "source_kind": kind,
+                "source_key": source_key,
+                "sha256": sha256(text),
+                "chars": len(text),
+            }
+            for r, (text, kind, source_key) in frozen.items()
+        },
+    }
+    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
+
 def promote_freeze_new(
     *,
     role: str,
@@ -73,8 +143,6 @@ def promote_freeze_new(
     sandbox_stem: str,
     source_label: str,
 ) -> dict:
-    from scripts.freeze_prompts import write_frozen
-
     new_text = fetch_sandbox_prompt(sandbox_sha, sandbox_stem)
     frozen: dict[str, tuple[str, str, str]] = {}
     for key, text in frozen_v1.VERSIONS.items():
@@ -85,10 +153,8 @@ def promote_freeze_new(
     if role in frozen:
         raise SystemExit(f"role {role!r} already frozen")
     frozen[role] = (new_text, "sandbox", source_label)
-    write_frozen(frozen)
+    _write_frozen_catalog(frozen)
     key = f"{role}_v1"
-    mirror = REPO_ROOT / "prompts" / f"{key}.md"
-    mirror.write_text(prompt_mirror_markdown(key, new_text), encoding="utf-8")
     manifest = json.loads((REPO_ROOT / "prompts" / "manifest.json").read_text())
     return {
         "key": key,

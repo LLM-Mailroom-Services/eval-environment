@@ -24,6 +24,7 @@ import structlog
 from . import experiment_log, scoring, tracing
 from . import invoke as invoke_mod
 from .cases import load_cases
+from .openrouter_roster import apply_model_override, validate_model_slug
 from .prompts import registry as prompts_registry
 from .registry import AGENT_CATALOG, TaskSpec, get_task
 
@@ -115,6 +116,8 @@ def run_task(
     spec = get_task(task_id)
     if invoke_mode == "agent" and not spec.supports_agent_mode:
         raise ValueError(f"task {spec.task_id} does not support agent-mode invocation")
+    if model:
+        validate_model_slug(model)
     subset = subset or spec.default_subset
     backend = tracing.resolve_backend(trace_backend)
     if mock and trace_backend is None:
@@ -214,20 +217,21 @@ def run_task(
     error: str | None = None
     try:
         if not dry_run:
-            with invoke_mod.Isolation():
-                tracing.apply_provider_env(backend)
-                if mock:
-                    invoke_mod.install_mocks()
-                tracing.configure(backend)
-                case_rows = _execute_cases(
-                    spec, cases, invoke_mode=invoke_mode, backend=backend,
-                    mock=mock, model=model, prompt_version=prompt_version,
-                    summary=summary,
-                )
-                # Off-path writes (relations daemon, async-deferred audit/catalog
-                # coroutines) must land inside the isolated base dir — drain
-                # before the env is restored, for every task.
-                invoke_mod.drain_daemons(1.0 if spec.name == "pipeline_chain" else 0.5)
+            with apply_model_override(model):
+                with invoke_mod.Isolation():
+                    tracing.apply_provider_env(backend)
+                    if mock:
+                        invoke_mod.install_mocks()
+                    tracing.configure(backend)
+                    case_rows = _execute_cases(
+                        spec, cases, invoke_mode=invoke_mode, backend=backend,
+                        mock=mock, model=model, prompt_version=prompt_version,
+                        summary=summary,
+                    )
+                    # Off-path writes (relations daemon, async-deferred audit/catalog
+                    # coroutines) must land inside the isolated base dir — drain
+                    # before the env is restored, for every task.
+                    invoke_mod.drain_daemons(1.0 if spec.name == "pipeline_chain" else 0.5)
     except Exception as exc:
         error = f"{type(exc).__name__}: {exc}"
         logger.exception("evals_run_failed", task=spec.task_id)

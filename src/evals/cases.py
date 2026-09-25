@@ -202,7 +202,9 @@ def _expected_fields(row: dict[str, Any]) -> dict[str, Any]:
     # flattened shape (the suite scores unknown fields as 0).
     for key in ("cuad_clause_labels", "maud_clause_labels"):
         fields.pop(key, None)
-    return fields
+    from evals.extraction_scope import applicable_expected_fields
+
+    return applicable_expected_fields(str(row.get("expected") or ""), fields)
 
 
 def _case_from_row(row: dict[str, Any], *, config: str, split: str) -> dict[str, Any]:

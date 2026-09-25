@@ -133,7 +133,15 @@ def score_subclass(predicted: str | None, expected: str | None) -> dict[str, Any
 
 
 def score_extraction(doc_class: str, predicted: dict, expected: dict) -> dict[str, Any]:
-    """Field-level extraction score via the pipeline's suite scorer."""
+    """Field-level extraction score via the pipeline's suite scorer.
+
+    Ground truth may carry a Hub union of specialist keys; scope to the live
+    class schema (and drop empty placeholders) before ``score_with_suite`` so
+    other-class empties never penalize — see ``evals.extraction_scope``.
+    """
+    from evals.extraction_scope import scope_extraction_pair
+
+    predicted, expected = scope_extraction_pair(doc_class, predicted, expected)
     if not expected:
         return {"overall_score": None, "n_expected_fields": 0}
     try:

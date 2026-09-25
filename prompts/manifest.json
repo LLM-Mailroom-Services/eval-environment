@@ -1,7 +1,7 @@
 {
   "lineage_id": "mailroom-dataset-v1",
   "frozen_version": 1,
-  "frozen_at": "2026-09-16T03:38:42+00:00",
+  "frozen_at": "2026-09-25T20:27:52+00:00",
   "pipeline_git_commit": "be3d2973cce6610adba6e5f8765b6b78e37ed2e2",
   "derivation": "llm-mailroom production prompt_templates (live production templates) + intake production template + Langfuse pipeline evaluator rubrics",
   "versions": {
@@ -88,6 +88,12 @@
       "source_key": "QUALITY_PROMPT",
       "sha256": "e8eab7af550f59141db00e76475dea65f7fdcdcad0dda7bcd79a6bd294e86752",
       "chars": 1671
+    },
+    "merger_agreement_specialist_v1": {
+      "source_kind": "sandbox",
+      "source_key": "merger_agreement_specialist_simplified@97c0f940194f",
+      "sha256": "1392250f2164329e338d84369778ab77f422879c196f13173deb64d3454fc17d",
+      "chars": 4243
     }
   }
 }

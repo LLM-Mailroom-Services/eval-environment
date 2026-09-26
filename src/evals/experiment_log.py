@@ -22,7 +22,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 JSONL_ENV = "EXPERIMENT_LOG_PATH"
 MD_ENV = "EXPERIMENT_LOG_MD_PATH"
 DIR_ENV = "EVALS_EXPERIMENTS_DIR"
@@ -44,7 +44,7 @@ REQUIRED_KEYS: tuple[str, ...] = (
     "metrics",
 )
 
-# v2 additions (all optional — v1 records stay valid)
+# v2 additions (all optional — v1/v2 records stay valid)
 V2_OPTIONAL_KEYS: tuple[str, ...] = (
     "prompt_lineage",
     "prompt_source",
@@ -54,22 +54,22 @@ V2_OPTIONAL_KEYS: tuple[str, ...] = (
     "judging",
 )
 
+# v3 additions (all optional — v1/v2/v3 records stay valid): task-framing +
+# preflight provenance, the locked-subset artifacts, and the full scoring
+# suite pointer. See schemas/experiment_record.v3.json.
+V3_OPTIONAL_KEYS: tuple[str, ...] = (
+    "preflight",
+    "task_framing",
+    "scoring_suite",
+    "flush",
+)
+
 COMPARISON_KEYS: tuple[str, ...] = (
     "schema_version",
     "record_kind",
     "run_a",
     "run_b",
     "recorded_at",
-    "comparison",
-    "accepted",
-)
-
-_SUMMARY_KEYS = (
-    "schema_version",
-    "record_kind",
-    "run_a",
-    "run_b",
-    "generated_at",
     "comparison",
     "accepted",
 )
@@ -152,7 +152,7 @@ def _run_id_exists(run_id: str) -> bool:
 
 
 def validate_record(record: dict[str, Any]) -> list[str]:
-    """Schema v1/v2 conformance checks. Returns a list of problems (empty = valid)."""
+    """Schema v1/v2/v3 conformance checks. Returns a list of problems (empty = valid)."""
     problems: list[str] = []
     record_kind = record.get("record_kind")
     if record_kind == "comparison_result":
@@ -162,8 +162,8 @@ def validate_record(record: dict[str, Any]) -> list[str]:
     for key in check_keys:
         if key not in record:
             problems.append(f"missing required key: {key}")
-    if record.get("schema_version") not in (1, SCHEMA_VERSION):
-        problems.append(f"schema_version must be 1 or {SCHEMA_VERSION}")
+    if record.get("schema_version") not in (1, 2, SCHEMA_VERSION):
+        problems.append(f"schema_version must be 1, 2, or {SCHEMA_VERSION}")
     if record_kind not in ("run_summary", "case", "comparison_result"):
         problems.append("record_kind must be run_summary|case|comparison_result")
     judging = record.get("judging")

@@ -110,6 +110,8 @@ uv run python scripts/run_evals.py --task <id|all> \
 | `--model` | OpenRouter slug from `config/openrouter_models.yaml` (uniform agent override + cost pricing) |
 | `--list-models` | print the registered OpenRouter roster and exit |
 | `--prompt-version` | A/B tag — rides trace metadata + the experiment log |
-| `--resume` | skip cases already recorded in `<run_id>`, append to its dir |
+| `--resume` | skip cases already recorded in `<run_id>`, append to its dir (subset manifest is read, never truncated) |
+| `--require-trace-sink` | preflight-fails a real run that would resolve to trace backend `none` |
+| `--skip-preflight` | bypass preflight checks (warns when combined with `--real`; not recommended) |
 | `--export` | write the run's case rows as `cases.csv` / `cases.parquet` |
 | `--dry-run` | load + invoke exactly one case |

@@ -7,7 +7,7 @@ description: The centralized append-only experiment log for mailroom-evals — s
 
 One canonical, versioned record schema for ALL task families (`eval`,
 `pilot`, `calibration`). Append-only; never overwrite. Current schema:
-**v2** (`schemas/experiment_record.v2.json`) — v1 records remain valid.
+**v3** (`schemas/experiment_record.v3.json`) — v1/v2 records remain valid.
 
 ## Storage layout
 
@@ -17,15 +17,17 @@ reports/experiment_log.md         # human-readable tables, rebuildable from the 
 data/experiments/<run_id>/cases.jsonl   # one line per CASE (full fidelity)
 data/experiments/<run_id>/summary.json  # same run-summary record, self-contained
 data/experiments/<run_id>/prompts_snapshot.json  # exact rendered prompts used
+data/experiments/<run_id>/subset_manifest.json{l,}  # locked case set (v3)
+data/experiments/<run_id>/scoring_suite.json        # full deterministic rollup (v3)
 data/experiments/<run_id>/judgments.jsonl        # post-hoc judge verdicts (v2)
 data/experiments/<run_id>/rescored.jsonl         # --recompute output (v2)
-schemas/experiment_record.v2.json # JSON Schema for validation (v1 records valid)
+schemas/experiment_record.v3.json # JSON Schema for validation (v1/v2 records valid)
 ```
 
 Paths overridable: `EXPERIMENT_LOG_PATH`, `EXPERIMENT_LOG_MD_PATH`,
 `EVALS_EXPERIMENTS_DIR`. Tests redirect all three to tmp dirs.
 
-## Run-summary record (schema v2)
+## Run-summary record (schema v3)
 
 `schema_version`, `record_kind="run_summary"`, `run_id`
 (`<UTC stamp>-<family>-<task>`), `family`, `task`, `invoke` (node|agent),
@@ -34,19 +36,28 @@ Paths overridable: `EXPERIMENT_LOG_PATH`, `EXPERIMENT_LOG_MD_PATH`,
 `prompt_versions` (per-agent key/lineage/sha256), `pipeline_git`,
 `prompts_snapshot_path`, `trace_backend`,
 `trace_ids` (project/session), `dataset` (repo/config/split/revision/subset/
-n_selected/n_total/seed), `git` (commit/dirty), `started_at`/`finished_at`/
+n_selected/n_total/seed; **v3:** `case_ids`, `filenames`,
+`subset_manifest_path`, `subset_manifest_jsonl` — the locked case set),
+`git` (commit/dirty), `started_at`/`finished_at`/
 `duration_s`, `params`, `metrics` (task-specific), `performance`
-(latency_ms mean/p95, token totals, cost_usd_est), `calibration` (family=
+(latency_ms mean/p95, token totals, cost_usd_est, `by_agent` per-agent
+calls/tokens/models/cost), `calibration` (family=
 calibration only: cells, ece, recommended_thresholds), `judging` (v2:
 post-hoc local judge block — dimensions, judge_model, mock, metrics,
-judgments_ref), `cases_ref`,
+judgments_ref), **v3:** `preflight` (the preflight report: ok/checks/
+issues/resolved — written even for blocked runs), `task_framing` (the
+eval-task contract framing), `scoring_suite` (pointer to the full
+deterministic rollup artifact), `flush` (affirmative sink-flush counters),
+`cases_ref`,
 `cases_embedded` (rows inlined when n ≤ 50, else empty).
 
 ## Case row
 
 `run_id`, `case_id`, `filename`, `expected*` fields, `doc_text_sha256`
 (v2: the post-hoc text re-load integrity key), `prediction`, `scores`,
-`latency_ms`, `tokens`, `cost_usd`, `trace` (trace/span ids), `error`.
+`latency_ms`, `tokens`, `cost_usd`, `agent_usage` (v3: per-agent
+calls/tokens/models attribution — non-negotiable #9), `trace` (trace/span
+ids), `error`.
 
 ## Guarantees
 

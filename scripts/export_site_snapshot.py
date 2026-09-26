@@ -195,6 +195,12 @@ def _tasks() -> list[dict]:
     ]
 
 
+def _openrouter_models() -> dict:
+    from evals.openrouter_roster import roster_for_snapshot
+
+    return roster_for_snapshot()
+
+
 def _inventory() -> dict:
     def names(folder: str) -> list[str]:
         base = REPO_ROOT / folder
@@ -276,6 +282,7 @@ def build_snapshot() -> dict:
             "corpus": _corpus(),
             "prompts": _prompts(),
             "inventory": _inventory(),
+            "openrouter_models": _openrouter_models(),
         },
         "totals": _totals(runs),
         "runs": runs,

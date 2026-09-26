@@ -462,6 +462,15 @@ catalog of which agents sit behind which evaluated node is `AGENT_CATALOG`
 | `EXPERIMENT_LOG_PATH` / `EXPERIMENT_LOG_MD_PATH` / `EVALS_EXPERIMENTS_DIR` | log locations | `reports/experiment_log.{jsonl,md}` / `data/experiments` |
 | `MAILROOM_BASE_DIR` | set BY the runner per run — isolation | (temp dir) |
 
+Real runs can pin a single OpenRouter model for every pipeline agent with
+``--model <slug>``. Slugs must appear in ``config/openrouter_models.yaml``
+(use ``uv run python scripts/run_evals.py --list-models``). Example:
+
+```bash
+uv run python scripts/run_evals.py --task eval:classification --real \
+  --model ibm-granite/granite-4.2-8b --subset class:contract --sample 10 --seed 42
+```
+
 > [!WARNING]
 > Archive/intake/chain evals write real bins, manifests, SQLite catalogs, and
 > audit chains. The runner isolates every run inside a temp `MAILROOM_BASE_DIR`

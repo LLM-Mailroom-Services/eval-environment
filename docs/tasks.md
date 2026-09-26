@@ -74,6 +74,8 @@ uv run python scripts/run_evals.py --task <id|all> \
 | `--sample/--seed` | stratified sample by `expected`, deterministic |
 | `--mock` | deterministic fake LLM; forces tracing to `none` unless a backend is explicit |
 | `--real` | live LLM via the pipeline's provider registry (`OPENROUTER_API_KEY`) |
+| `--model` | OpenRouter slug from `config/openrouter_models.yaml` (uniform agent override + cost pricing) |
+| `--list-models` | print the registered OpenRouter roster and exit |
 | `--prompt-version` | A/B tag — rides trace metadata + the experiment log |
 | `--resume` | skip cases already recorded in `<run_id>`, append to its dir |
 | `--export` | write the run's case rows as `cases.csv` / `cases.parquet` |

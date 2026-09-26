@@ -32,6 +32,13 @@ def _main(module_name):
 
 
 # ── run_evals.py ─────────────────────────────────────────────────────
+def test_run_evals_list_models(capsys):
+    rc = _main("run_evals")("--list-models")
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "ibm-granite/granite-4.2-8b" in out
+
+
 def test_run_evals_list(capsys):
     rc = _main("run_evals")("--list")
     out = capsys.readouterr().out

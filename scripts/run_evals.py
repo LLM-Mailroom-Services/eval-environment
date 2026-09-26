@@ -46,7 +46,10 @@ def main() -> int:
     parser.add_argument("--mock", action="store_true", help="deterministic fake LLM (no network)")
     parser.add_argument("--real", action="store_true", help="real LLM (OPENROUTER_API_KEY primary, or the gateway .env alternative)")
     parser.add_argument("--trace-backend", choices=("auto", "braintrust", "phoenix", "none"), default=None)
-    parser.add_argument("--model", default=None, help="model override recorded in the log")
+    parser.add_argument("--model", default=None,
+                        help="OpenRouter model slug (see --list-models); overrides pipeline agents for real runs")
+    parser.add_argument("--list-models", action="store_true",
+                        help="list registered OpenRouter models and exit")
     parser.add_argument("--prompt-version", default=None,
                         help="pin an explicit prompt version key (frozen/mutation/live lineage)")
     parser.add_argument("--prompt-source", choices=("frozen", "live-docclass", "production"),
@@ -62,6 +65,21 @@ def main() -> int:
                         help="export the run's case rows to cases.csv/.parquet")
     parser.add_argument("--json", action="store_true", help="print the run summary as JSON")
     args = parser.parse_args()
+
+    if args.list_models:
+        from evals.openrouter_roster import list_models
+
+        print("OpenRouter models (config/openrouter_models.yaml):")
+        for entry in list_models():
+            slug = entry["slug"]
+            inp = entry.get("input_per_million")
+            out = entry.get("output_per_million")
+            ctx = entry.get("context_tokens")
+            label = entry.get("label") or slug
+            print(
+                f"  {slug:40s}  ${inp}/${out} per 1M  ctx={ctx}  {label}"
+            )
+        return 0
 
     if args.mock and args.real:
         parser.error("--mock and --real are mutually exclusive")

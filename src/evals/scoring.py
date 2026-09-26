@@ -332,12 +332,7 @@ def performance_row(latency_ms: float, usage: dict[str, Any] | None, model: str 
     completion = int(usage.get("completion_tokens") or 0)
     cost: float | None = None
     if model and (prompt or completion):
-        try:
-            from llm_dojo_scoring.cost import estimate_cost
-
-            cost = estimate_cost(prompt, completion, model)
-        except Exception:
-            cost = None
+        cost = cost_for(prompt, completion, model)
     return {
         "latency_ms": round(float(latency_ms), 1),
         "prompt_tokens": prompt,
@@ -384,6 +379,14 @@ def cost_for(prompt_tokens: int, completion_tokens: int, model: str | None) -> f
     """Estimated USD cost for a token bundle (None when unpriceable)."""
     if not model or not (prompt_tokens or completion_tokens):
         return None
+    try:
+        from evals.openrouter_roster import estimate_cost_usd as roster_cost
+
+        cost = roster_cost(prompt_tokens, completion_tokens, model)
+        if isinstance(cost, (int, float)):
+            return round(float(cost), 6)
+    except Exception:
+        pass
     try:
         from llm_dojo_scoring.cost import estimate_cost
 

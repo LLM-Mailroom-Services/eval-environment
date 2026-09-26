@@ -5,6 +5,14 @@ All notable changes to mailroom-evals are documented here. Format based on
 
 ## [Unreleased]
 
+### Added
+
+- **OpenRouter model roster** — `config/openrouter_models.yaml` (incl.
+  `ibm-granite/granite-4.2-8b` @ $0.06/$0.25 per 1M, 131K context).
+  `--list-models` prints registered slugs; `--model` validates, applies a
+  uniform OpenRouter override to pipeline agents for the run, and prices token
+  usage from the roster (dojo fallback when absent).
+
 ### Changed
 
 - **Frozen extraction specialists (concise baseline)** — `contracts_specialist_v1`,

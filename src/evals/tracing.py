@@ -117,15 +117,14 @@ _LANGCHAIN_ROLE_TO_OPENAI: dict[str, str] = {
     "function": "function",
 }
 
-_TRACE_MESSAGE_MAX_CHARS = 8000
+_TRACE_MESSAGE_MAX_CHARS = 12_000
 
 
-def _content_to_trace_str(content: Any) -> str:
-    """Curate message body for trace sinks (never full corpus dumps)."""
+def _raw_message_content(content: Any) -> str:
     if content is None:
         return ""
     if isinstance(content, str):
-        return content[:_TRACE_MESSAGE_MAX_CHARS]
+        return content
     if isinstance(content, list):
         parts: list[str] = []
         for block in content:
@@ -139,32 +138,60 @@ def _content_to_trace_str(content: Any) -> str:
                     parts.append(str(block))
             else:
                 parts.append(str(block))
-        return "\n".join(parts)[:_TRACE_MESSAGE_MAX_CHARS]
+        return "\n".join(parts)
     try:
-        return str(content)[:_TRACE_MESSAGE_MAX_CHARS]
+        return str(content)
     except Exception:
         return ""
 
 
-def _serialize_chat_message(message: Any) -> dict[str, str] | None:
+def _truncate_for_trace(text: str, max_chars: int | None = None) -> tuple[str, int, bool]:
+    """Keep the start of the message in traces; annotate when the tail is cut."""
+    limit = max_chars if max_chars is not None else _TRACE_MESSAGE_MAX_CHARS
+    total = len(text)
+    if total <= limit:
+        return text, total, False
+    omitted = total - limit
+    suffix = f"\n\n[trace truncated: {omitted} of {total} characters omitted]"
+    budget = limit - len(suffix)
+    if budget <= 0:
+        suffix = f"\n[+{omitted} chars truncated]"
+        budget = max(0, limit - len(suffix))
+    return text[:budget] + suffix, total, True
+
+
+def _content_to_trace_str(content: Any) -> tuple[str, int, bool]:
+    """Curate message body for trace sinks: prefix preserved, long tails truncated."""
+    raw = _raw_message_content(content)
+    return _truncate_for_trace(raw, _TRACE_MESSAGE_MAX_CHARS)
+
+
+def _serialize_chat_message(message: Any) -> dict[str, Any] | None:
     """Map one LangChain / OpenAI chat message to {role, content} for traces."""
     if isinstance(message, str):
-        return {"role": "user", "content": _content_to_trace_str(message)}
+        content, total, truncated = _content_to_trace_str(message)
+        return _trace_message_record("user", content, total, truncated)
     if isinstance(message, dict):
         role = message.get("role")
         if role:
-            return {
-                "role": str(role),
-                "content": _content_to_trace_str(message.get("content")),
-            }
+            content, total, truncated = _content_to_trace_str(message.get("content"))
+            return _trace_message_record(str(role), content, total, truncated)
     msg_type = getattr(message, "type", None)
     if msg_type and hasattr(message, "content"):
         role = _LANGCHAIN_ROLE_TO_OPENAI.get(str(msg_type), str(msg_type))
-        return {"role": role, "content": _content_to_trace_str(message.content)}
+        content, total, truncated = _content_to_trace_str(message.content)
+        return _trace_message_record(role, content, total, truncated)
     return None
 
 
-def format_langchain_llm_input(payload: Any) -> list[dict[str, str]]:
+def _trace_message_record(role: str, content: str, total_chars: int, truncated: bool) -> dict[str, Any]:
+    rec: dict[str, Any] = {"role": role, "content": content, "trace_content_chars": total_chars}
+    if truncated:
+        rec["trace_content_truncated"] = True
+    return rec
+
+
+def format_langchain_llm_input(payload: Any) -> list[dict[str, Any]]:
     """Flatten LangChain batched chat inputs into OpenAI-style message dicts."""
     out: list[dict[str, str]] = []
     for group in payload or []:

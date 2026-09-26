@@ -40,6 +40,14 @@ def test_frozen_v1_production_markers():
         assert frozen_v1.SOURCE_OF[role].startswith("sandbox:")
     merger = frozen_v1.VERSIONS["merger_agreement_specialist_v1"]
     assert "You are the merger-agreement specialist" in merger
+    for key in (
+        "contracts_specialist_v1",
+        "corporate_records_specialist_v1",
+        "correspondence_specialist_v1",
+        "insurance_claims_specialist_v1",
+        "merger_agreement_specialist_v1",
+    ):
+        assert "sorter handed you" in frozen_v1.VERSIONS[key]
 
 
 def test_frozen_concise_specialists_manifest():
@@ -56,7 +64,7 @@ def test_frozen_concise_specialists_manifest():
     }
     for key in sandbox_keys:
         assert manifest["versions"][key]["source_kind"] == "sandbox"
-        assert "@97c0f940194f" in manifest["versions"][key]["source_key"]
+        assert "@303e7f0bb05d" in manifest["versions"][key]["source_key"]
 
 
 def test_roles_mapping():

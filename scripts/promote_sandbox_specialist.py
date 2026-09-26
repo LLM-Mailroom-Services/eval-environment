@@ -28,7 +28,7 @@ from evals.prompts import frozen_v1, mutations
 from evals.prompts.mirror_md import prompt_mirror_markdown
 
 SANDBOX_REPO = "Exios66/local-mailroom-sandbox"
-DEFAULT_SANDBOX_SHA = "97c0f940194f030504db0b49443caf90ce749d79"
+DEFAULT_SANDBOX_SHA = "303e7f0bb05d858d1df1d23ce49b8a31cad3251b"
 DEFAULT_ARCHIVE_REF = "origin/main"
 ARCHIVED_MODULE = REPO_ROOT / "src" / "evals" / "prompts" / "archived_production.py"
 ARCHIVE_DIR = REPO_ROOT / "prompts" / "archive"
@@ -41,6 +41,13 @@ CONCISE_SPECIALIST_STEMS: dict[str, str] = {
     "corporate_records_specialist": "corporate_records_specialist_simplified",
     "correspondence_specialist": "correspondence_specialist_simplified",
     "insurance_claims_specialist": "insurance_claims_specialist_simplified",
+}
+
+# All frozen v1 extraction specialists promoted from sandbox (includes merger;
+# archive-production-specialists only snapshots the four pre-merger roles).
+FROZEN_SANDBOX_SPECIALIST_STEMS: dict[str, str] = {
+    **CONCISE_SPECIALIST_STEMS,
+    "merger_agreement_specialist": "merger_agreement_specialist_simplified",
 }
 
 
@@ -242,7 +249,7 @@ def upgrade_frozen_specialists(
         frozen[role] = (text, kind, source_key)
 
     updated: dict[str, dict] = {}
-    for role, stem in CONCISE_SPECIALIST_STEMS.items():
+    for role, stem in FROZEN_SANDBOX_SPECIALIST_STEMS.items():
         if role not in frozen:
             raise SystemExit(f"frozen role missing: {role!r}")
         new_text = fetch_sandbox_prompt(sandbox_sha, stem)

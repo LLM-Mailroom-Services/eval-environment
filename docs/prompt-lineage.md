@@ -26,7 +26,7 @@ and the Langfuse pipeline evaluator rubrics:
 | frozen key | source |
 |---|---|
 | `sorter_v1` | `sorter` (production) |
-| `contracts_specialist_v1` … `insurance_claims_specialist_v1`, `merger_agreement_specialist_v1` | sandbox concise prompts (`Exios66/local-mailroom-sandbox` @ `97c0f940194f`; four extraction specialists via `upgrade-frozen-specialists`, merger via `promote_sandbox_specialist.py freeze-new`) |
+| `contracts_specialist_v1` … `insurance_claims_specialist_v1`, `merger_agreement_specialist_v1` | sandbox concise prompts (`Exios66/local-mailroom-sandbox` @ `303e7f0bb05d`; promoted via `scripts/promote_sandbox_specialist.py upgrade-frozen-specialists`) |
 | `sorter_reviewer_v1` / `arbiter_v1` / `boss_v1` | `sorter_reviewer` / `arbiter` / `boss` (production) |
 | `judge_v1` / `judge-classification_v1` / `judge-correctness_v1` | `judge*` (production) |
 | `intake_v1` | production `INTAKE_SYSTEM_PROMPT` |

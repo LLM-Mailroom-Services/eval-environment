@@ -38,7 +38,7 @@ dev = [
 [tool.uv.sources]
 # Dev-machine resolution: the canonical pipeline lives in the Digital-Mailroom
 # uv workspace. Override with a git source when this repo moves machines.
-mailroom = { path = "../Digital-Mailroom/packages/llm-mailroom", editable = true }
+mailroom = { path = "Digital-Mailroom/packages/llm-mailroom", editable = true }
 
 # llm-dojo-scoring is intentionally NOT listed here: it resolves transitively
 # from mailroom's member-level `{ workspace = true }` source (editable, the

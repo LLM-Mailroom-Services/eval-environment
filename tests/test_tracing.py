@@ -56,3 +56,42 @@ def test_noop_span_when_disabled():
 def test_node_observation_names():
     assert tracing.NODE_OBSERVATION_TYPES["classify-document"] == "agent"
     assert tracing.NODE_OBSERVATION_TYPES["judge-verify"] == "evaluator"
+
+
+def test_format_langchain_llm_input_roles():
+    from langchain_core.messages import HumanMessage, SystemMessage
+
+    batch = [[SystemMessage(content="You are the contracts specialist."), HumanMessage(content="Extract fields.")]]
+    formatted = tracing.format_langchain_llm_input(batch)
+    assert formatted == [
+        {
+            "role": "system",
+            "content": "You are the contracts specialist.",
+            "trace_content_chars": 33,
+        },
+        {"role": "user", "content": "Extract fields.", "trace_content_chars": 15},
+    ]
+
+
+def test_format_langchain_llm_input_openai_dicts():
+    payload = [
+        [
+            {"role": "system", "content": "sys"},
+            {"role": "user", "content": "usr"},
+        ]
+    ]
+    assert tracing.format_langchain_llm_input(payload) == [
+        {"role": "system", "content": "sys", "trace_content_chars": 3},
+        {"role": "user", "content": "usr", "trace_content_chars": 3},
+    ]
+
+
+def test_format_langchain_llm_input_truncates_long_user_content(monkeypatch):
+    monkeypatch.setattr(tracing, "_TRACE_MESSAGE_MAX_CHARS", 50)
+    long_doc = "A" * 200
+    payload = [[{"role": "user", "content": long_doc}]]
+    formatted = tracing.format_langchain_llm_input(payload)
+    assert formatted[0]["trace_content_truncated"] is True
+    assert formatted[0]["trace_content_chars"] == 200
+    assert formatted[0]["content"].startswith("A")
+    assert "truncated" in formatted[0]["content"]

@@ -3,6 +3,16 @@
 All notable changes to mailroom-evals are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- **OpenRouter model roster** — `config/openrouter_models.yaml` (incl.
+  `ibm-granite/granite-4.2-8b` @ $0.06/$0.25 per 1M, 131K context).
+  `--list-models` prints registered slugs; `--model` validates, applies a
+  uniform OpenRouter override to pipeline agents for the run, and prices token
+  usage from the roster (dojo fallback when absent).
+
 ## [0.4.0] — 2026-09-13
 
 v9 corpus alignment (`mailroom-dataset` GT-closure `46a4d3c2`), silent-failure

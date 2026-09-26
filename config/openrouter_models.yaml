@@ -1,0 +1,35 @@
+# OpenRouter model roster for mailroom-evals real runs.
+# Prices are USD per 1M tokens (input / output). Update from the OpenRouter
+# model page when rates change; unknown slugs fail --model validation.
+provider: openrouter
+models:
+  openrouter/free:
+    label: OpenRouter free router
+    modality: text
+    context_tokens: 128000
+    input_per_million: 0.0
+    output_per_million: 0.0
+  qwen/qwen3.7-flash:
+    label: Qwen 3.7 Flash
+    modality: text
+    context_tokens: 128000
+    input_per_million: 0.03
+    output_per_million: 0.13
+  deepseek/deepseek-v4-flash:
+    label: DeepSeek V4 Flash
+    modality: text
+    context_tokens: 128000
+    input_per_million: 0.05
+    output_per_million: 0.25
+  deepseek/deepseek-v4-pro:
+    label: DeepSeek V4 Pro
+    modality: text
+    context_tokens: 128000
+    input_per_million: 0.435
+    output_per_million: 0.87
+  ibm-granite/granite-4.2-8b:
+    label: IBM Granite 4.2 8B
+    modality: text
+    context_tokens: 131072
+    input_per_million: 0.06
+    output_per_million: 0.25

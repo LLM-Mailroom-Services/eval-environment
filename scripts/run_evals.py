@@ -63,6 +63,10 @@ def main() -> int:
                         help="resume an interrupted run: skip its recorded cases, append to its log")
     parser.add_argument("--export", choices=("csv", "parquet"), default=None, metavar="FMT",
                         help="export the run's case rows to cases.csv/.parquet")
+    parser.add_argument("--require-trace-sink", action="store_true",
+                        help="fail preflight when a real run would resolve to trace backend=none")
+    parser.add_argument("--skip-preflight", action="store_true",
+                        help="skip preflight checks (not recommended for --real)")
     parser.add_argument("--json", action="store_true", help="print the run summary as JSON")
     args = parser.parse_args()
 
@@ -97,26 +101,40 @@ def main() -> int:
         return 0 if args.list else 2
 
     mock = not args.real
+    if args.real and args.skip_preflight:
+        print("warning: --skip-preflight with --real bypasses spend-safety checks", file=sys.stderr)
     task_ids = [spec.task_id for spec in list_tasks() if spec.family == "eval"] if args.task == "all" else [args.task]
     failures = 0
     for task_id in task_ids:
-        result = run_task(
-            task_id,
-            invoke_mode=args.invoke,
-            subset=args.subset,
-            sample=args.sample,
-            seed=args.seed,
-            n=args.n,
-            mock=mock,
-            trace_backend=args.trace_backend,
-            model=args.model,
-            prompt_version=args.prompt_version,
-            prompt_source=args.prompt_source,
-            concurrency=args.concurrency,
-            dry_run=args.dry_run,
-            pilot=args.task.startswith("pilot:"),
-            resume_run_id=args.resume,
-        )
+        try:
+            result = run_task(
+                task_id,
+                invoke_mode=args.invoke,
+                subset=args.subset,
+                sample=args.sample,
+                seed=args.seed,
+                n=args.n,
+                mock=mock,
+                trace_backend=args.trace_backend,
+                model=args.model,
+                prompt_version=args.prompt_version,
+                prompt_source=args.prompt_source,
+                concurrency=args.concurrency,
+                dry_run=args.dry_run,
+                pilot=args.task.startswith("pilot:"),
+                resume_run_id=args.resume,
+                require_trace_sink=args.require_trace_sink,
+                skip_preflight=args.skip_preflight,
+            )
+        except Exception as exc:
+            # PreflightError and other setup failures before a run record exists.
+            from evals.preflight import PreflightError
+
+            print(f"FAILED {task_id}: {type(exc).__name__}: {exc}", file=sys.stderr)
+            failures += 1
+            if isinstance(exc, PreflightError):
+                continue
+            raise
         if args.export:
             from evals import experiment_log
 
@@ -124,10 +142,10 @@ def main() -> int:
             if exported:
                 print(f"  exported: {exported}")
         summary = result.summary
+        metrics = summary.get("metrics") or {}
         if args.json:
             print(json.dumps(summary, indent=2, default=str))
         else:
-            metrics = summary.get("metrics") or {}
             perf = summary.get("performance") or {}
             by_agent = perf.get("by_agent") or {}
             top = next(iter(by_agent), None)
@@ -142,6 +160,12 @@ def main() -> int:
             calibration = summary.get("calibration") or {}
             if calibration.get("report_paths"):
                 print(f"  calibration report: {calibration['report_paths']['md']}")
+            subset_path = (summary.get("dataset") or {}).get("subset_manifest_path")
+            if subset_path:
+                print(f"  subset manifest: {subset_path}")
+            suite_path = (summary.get("scoring_suite") or {}).get("path")
+            if suite_path:
+                print(f"  scoring suite: {suite_path}")
         if summary.get("error") or (metrics.get("errors") or 0) > (metrics.get("n") or 1):
             failures += 1
     return 1 if failures else 0

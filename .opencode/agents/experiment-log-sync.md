@@ -17,8 +17,8 @@ You guard the centralized experiment log (see the `experiment-log` skill at
 ## Tasks
 
 - **Validate**: every `reports/experiment_log.jsonl` line parses as JSON and
-  conforms to `schemas/experiment_record.v2.json` (`schema_version` — v1 and
-  v2 records are both valid; `record_kind`, required keys); case files
+  conforms to `schemas/experiment_record.v3.json` (`schema_version` — v1, v2, and
+  v3 records are all valid; `record_kind`, required keys); case files
   referenced by `cases_ref` exist and their rows carry `run_id`.
 - **Render**: rebuild `reports/experiment_log.md` via
   `uv run python scripts/render_experiment_log.py` (idempotent, tables only).

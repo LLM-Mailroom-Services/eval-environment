@@ -3,6 +3,39 @@
 Every task registered in `src/evals/registry.py`. Ids are
 `<family>:<name>`; the CLI accepts one id, `all` (eval family), or `--list`.
 
+## Task modules (`src/evals/tasks/`)
+
+Each eval node has a module that frames the measurement as a **request** the
+agent/node must fulfill (system-prompt role, entity schema for specialists,
+structured output keys). Modules expose `TASK: EvalTask` with
+`build_cases` → `invoke` → `score`; the shared runner still executes runs.
+
+Specialist framing (contracts / merger_agreement / corporate_records /
+correspondence / insurance_claims):
+
+> Using your activated system prompt, extract the registered live-schema
+> entities from the sorter-handed document and return one complete JSON
+> object. Unstated values are null or [].
+
+After every run the harness:
+
+1. Forwards **essential** scores onto the designated sink (Braintrust or
+   Phoenix — never Langfuse here)
+2. Writes the **full** deterministic scoring suite to
+   `data/experiments/<run_id>/scoring_suite.json`
+3. Locks the exact case set to `subset_manifest.json` (+ `.jsonl`) for
+   reproducibility
+4. Runs **preflight** before any live API spend (`evals.preflight`)
+
+```bash
+# Preflight blocks --real without OPENROUTER_API_KEY (or gateway .env)
+uv run python scripts/run_evals.py --task eval:contracts --real \
+    --subset class:contract --sample 25 --seed 42 \
+    --model ibm-granite/granite-4.2-8b \
+    --prompt-version contracts_specialist_v1 \
+    --trace-backend braintrust --require-trace-sink
+```
+
 ## eval family — per-node performance analysis
 
 | id | node observed (span name) | default subset | scorer | agent mode |
@@ -77,6 +110,8 @@ uv run python scripts/run_evals.py --task <id|all> \
 | `--model` | OpenRouter slug from `config/openrouter_models.yaml` (uniform agent override + cost pricing) |
 | `--list-models` | print the registered OpenRouter roster and exit |
 | `--prompt-version` | A/B tag — rides trace metadata + the experiment log |
-| `--resume` | skip cases already recorded in `<run_id>`, append to its dir |
+| `--resume` | skip cases already recorded in `<run_id>`, append to its dir (subset manifest is read, never truncated) |
+| `--require-trace-sink` | preflight-fails a real run that would resolve to trace backend `none` |
+| `--skip-preflight` | bypass preflight checks (warns when combined with `--real`; not recommended) |
 | `--export` | write the run's case rows as `cases.csv` / `cases.parquet` |
 | `--dry-run` | load + invoke exactly one case |

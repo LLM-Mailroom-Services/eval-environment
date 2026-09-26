@@ -19,8 +19,11 @@ correspondence / insurance_claims):
 
 After every run the harness:
 
-1. Forwards **essential** scores onto the designated sink (Braintrust or
-   Phoenix — never Langfuse here)
+1. Forwards **essential** span metrics to the trace sink; on Braintrust, real
+   runs also open an **Experiment** linked to a project **Dataset** mirroring
+   the pinned HF corpus (`evals.braintrust_experiment`, `BRAINTRUST_EXPERIMENTS=auto`).
+   Experiment `scores` are capped to ≤2 headline metrics per case
+   (`scoring.sink_score_metrics`); the full suite stays in the experiment log.
 2. Writes the **full** deterministic scoring suite to
    `data/experiments/<run_id>/scoring_suite.json`
 3. Locks the exact case set to `subset_manifest.json` (+ `.jsonl`) for

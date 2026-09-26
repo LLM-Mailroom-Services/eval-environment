@@ -56,3 +56,27 @@ def test_noop_span_when_disabled():
 def test_node_observation_names():
     assert tracing.NODE_OBSERVATION_TYPES["classify-document"] == "agent"
     assert tracing.NODE_OBSERVATION_TYPES["judge-verify"] == "evaluator"
+
+
+def test_format_langchain_llm_input_roles():
+    from langchain_core.messages import HumanMessage, SystemMessage
+
+    batch = [[SystemMessage(content="You are the contracts specialist."), HumanMessage(content="Extract fields.")]]
+    formatted = tracing.format_langchain_llm_input(batch)
+    assert formatted == [
+        {"role": "system", "content": "You are the contracts specialist."},
+        {"role": "user", "content": "Extract fields."},
+    ]
+
+
+def test_format_langchain_llm_input_openai_dicts():
+    payload = [
+        [
+            {"role": "system", "content": "sys"},
+            {"role": "user", "content": "usr"},
+        ]
+    ]
+    assert tracing.format_langchain_llm_input(payload) == [
+        {"role": "system", "content": "sys"},
+        {"role": "user", "content": "usr"},
+    ]

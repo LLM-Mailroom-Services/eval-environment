@@ -109,6 +109,82 @@ except Exception:  # pragma: no cover - langchain-core is a pipeline dependency
     _LCBaseHandler = object  # type: ignore[assignment,misc]
 
 
+_LANGCHAIN_ROLE_TO_OPENAI: dict[str, str] = {
+    "system": "system",
+    "human": "user",
+    "ai": "assistant",
+    "tool": "tool",
+    "function": "function",
+}
+
+_TRACE_MESSAGE_MAX_CHARS = 8000
+
+
+def _content_to_trace_str(content: Any) -> str:
+    """Curate message body for trace sinks (never full corpus dumps)."""
+    if content is None:
+        return ""
+    if isinstance(content, str):
+        return content[:_TRACE_MESSAGE_MAX_CHARS]
+    if isinstance(content, list):
+        parts: list[str] = []
+        for block in content:
+            if isinstance(block, dict):
+                kind = block.get("type")
+                if kind == "text":
+                    parts.append(str(block.get("text") or ""))
+                elif kind == "image_url":
+                    parts.append("[image]")
+                else:
+                    parts.append(str(block))
+            else:
+                parts.append(str(block))
+        return "\n".join(parts)[:_TRACE_MESSAGE_MAX_CHARS]
+    try:
+        return str(content)[:_TRACE_MESSAGE_MAX_CHARS]
+    except Exception:
+        return ""
+
+
+def _serialize_chat_message(message: Any) -> dict[str, str] | None:
+    """Map one LangChain / OpenAI chat message to {role, content} for traces."""
+    if isinstance(message, str):
+        return {"role": "user", "content": _content_to_trace_str(message)}
+    if isinstance(message, dict):
+        role = message.get("role")
+        if role:
+            return {
+                "role": str(role),
+                "content": _content_to_trace_str(message.get("content")),
+            }
+    msg_type = getattr(message, "type", None)
+    if msg_type and hasattr(message, "content"):
+        role = _LANGCHAIN_ROLE_TO_OPENAI.get(str(msg_type), str(msg_type))
+        return {"role": role, "content": _content_to_trace_str(message.content)}
+    return None
+
+
+def format_langchain_llm_input(payload: Any) -> list[dict[str, str]]:
+    """Flatten LangChain batched chat inputs into OpenAI-style message dicts."""
+    out: list[dict[str, str]] = []
+    for group in payload or []:
+        if getattr(group, "type", None) and hasattr(group, "content"):
+            rec = _serialize_chat_message(group)
+            if rec:
+                out.append(rec)
+            continue
+        if isinstance(group, (list, tuple)):
+            for message in group:
+                rec = _serialize_chat_message(message)
+                if rec:
+                    out.append(rec)
+            continue
+        rec = _serialize_chat_message(group)
+        if rec:
+            out.append(rec)
+    return out
+
+
 class _LangchainLLMHandler(_LCBaseHandler):
     """Braintrust span writer for LangChain-agent LLM calls (see installer)."""
 
@@ -120,27 +196,13 @@ class _LangchainLLMHandler(_LCBaseHandler):
 
         return braintrust
 
-    def _curate(self, message: Any) -> str | None:
-        try:
-            return str(message)[:4000]
-        except Exception:
-            return None
-
-    def _flatten(self, payload: Any) -> list[str | None]:
-        out: list[str | None] = []
-        for group in payload or []:
-            if hasattr(group, "content"):
-                out.append(self._curate(group))
-            else:
-                for message in group:
-                    out.append(self._curate(message))
-        return out
-
     def on_chat_model_start(self, serialized: Any, messages: Any, *, run_id: Any = None, **kwargs: Any) -> None:
         try:
             bt = self._braintrust()
             self._spans[run_id] = bt.start_span(
-                name="Chat Completion", type="llm", input=self._flatten(messages)
+                name="Chat Completion",
+                type="llm",
+                input={"messages": format_langchain_llm_input(messages)},
             )
         except Exception:
             logger.warning("evals_langchain_span_start_failed", exc_info=True)

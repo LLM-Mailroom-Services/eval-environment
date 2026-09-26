@@ -112,10 +112,15 @@ def test_agents_for_node_lookup():
     assert agents_for_node("unknown-node") == {}
 
 
-def test_specialist_node_lists_all_four_specialists():
+def test_specialist_node_lists_all_extraction_specialists():
     agents = agents_for_node("extract-fields")["agents"]
-    for name in ("contracts_specialist", "merger_agreement" if False else "corporate_records_specialist",
-                 "correspondence_specialist", "insurance_claims_specialist"):
+    for name in (
+        "contracts_specialist",
+        "merger_agreement_specialist",
+        "corporate_records_specialist",
+        "correspondence_specialist",
+        "insurance_claims_specialist",
+    ):
         assert name in agents
 
 

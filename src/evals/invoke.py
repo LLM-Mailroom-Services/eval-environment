@@ -41,12 +41,16 @@ _SPECIALIST_CLASSES: dict[str, tuple[str, str]] = {
         "agents.insurance_claims_specialist",
         "InsuranceClaimsSpecialist",
     ),
+    "merger_agreement_specialist": (
+        "agents.merger_agreement_specialist",
+        "MergerAgreementSpecialist",
+    ),
 }
 
 # task name -> specialist agent (registry tasks dispatch through these)
 TASK_SPECIALIST: dict[str, str] = {
     "contracts": "contracts_specialist",
-    "merger_agreement": "contracts_specialist",
+    "merger_agreement": "merger_agreement_specialist",
     "corporate_records": "corporate_records_specialist",
     "correspondence": "correspondence_specialist",
     "insurance_claims": "insurance_claims_specialist",
@@ -390,7 +394,7 @@ def _intake_result(case: dict[str, Any], update: dict[str, Any]) -> dict[str, An
 def _specialist_for_class(doc_class: str) -> str | None:
     return {
         "contract": "contracts_specialist",
-        "merger_agreement": "contracts_specialist",
+        "merger_agreement": "merger_agreement_specialist",
         "corporate_record": "corporate_records_specialist",
         "correspondence": "correspondence_specialist",
         "insurance_claim": "insurance_claims_specialist",

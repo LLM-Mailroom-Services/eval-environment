@@ -10,7 +10,7 @@ from evals.prompts.registry import activate, deactivate, default_keys, resolved_
 
 
 def test_frozen_v1_complete():
-    assert len(frozen_v1.VERSIONS) == 14
+    assert len(frozen_v1.VERSIONS) == 15
     assert frozen_v1.LINEAGE_ID == "mailroom-dataset-v1"
     assert frozen_v1.FROZEN_VERSION == 1
     for key in frozen_v1.VERSIONS:
@@ -35,8 +35,11 @@ def test_frozen_v1_production_markers():
         "corporate_records_specialist_v1",
         "correspondence_specialist_v1",
         "insurance_claims_specialist_v1",
+        "merger_agreement_specialist_v1",
     ):
         assert frozen_v1.SOURCE_OF[role].startswith("sandbox:")
+    merger = frozen_v1.VERSIONS["merger_agreement_specialist_v1"]
+    assert "You are the merger-agreement specialist" in merger
 
 
 def test_frozen_concise_specialists_manifest():
@@ -49,6 +52,7 @@ def test_frozen_concise_specialists_manifest():
         "corporate_records_specialist_v1",
         "correspondence_specialist_v1",
         "insurance_claims_specialist_v1",
+        "merger_agreement_specialist_v1",
     }
     for key in sandbox_keys:
         assert manifest["versions"][key]["source_kind"] == "sandbox"
@@ -59,7 +63,7 @@ def test_roles_mapping():
     roles_map = roles()
     assert roles_map["sorter"] == "sorter_v1"
     assert roles_map["judge-classification"] == "judge-classification_v1"
-    assert len(roles_map) == 14
+    assert len(roles_map) == 15
     assert "compliance_specialist" not in roles_map
 
 
@@ -75,7 +79,7 @@ def test_resolve_all_layers():
 def test_verify_lineage_matches():
     result = verify_lineage()
     assert result["ok"], f"drifted: {result['drifted']}"
-    assert len(result["manifest"]["versions"]) == 14
+    assert len(result["manifest"]["versions"]) == 15
 
 
 def test_injection_and_restore():

@@ -109,6 +109,109 @@ except Exception:  # pragma: no cover - langchain-core is a pipeline dependency
     _LCBaseHandler = object  # type: ignore[assignment,misc]
 
 
+_LANGCHAIN_ROLE_TO_OPENAI: dict[str, str] = {
+    "system": "system",
+    "human": "user",
+    "ai": "assistant",
+    "tool": "tool",
+    "function": "function",
+}
+
+_TRACE_MESSAGE_MAX_CHARS = 12_000
+
+
+def _raw_message_content(content: Any) -> str:
+    if content is None:
+        return ""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts: list[str] = []
+        for block in content:
+            if isinstance(block, dict):
+                kind = block.get("type")
+                if kind == "text":
+                    parts.append(str(block.get("text") or ""))
+                elif kind == "image_url":
+                    parts.append("[image]")
+                else:
+                    parts.append(str(block))
+            else:
+                parts.append(str(block))
+        return "\n".join(parts)
+    try:
+        return str(content)
+    except Exception:
+        return ""
+
+
+def _truncate_for_trace(text: str, max_chars: int | None = None) -> tuple[str, int, bool]:
+    """Keep the start of the message in traces; annotate when the tail is cut."""
+    limit = max_chars if max_chars is not None else _TRACE_MESSAGE_MAX_CHARS
+    total = len(text)
+    if total <= limit:
+        return text, total, False
+    omitted = total - limit
+    suffix = f"\n\n[trace truncated: {omitted} of {total} characters omitted]"
+    budget = limit - len(suffix)
+    if budget <= 0:
+        suffix = f"\n[+{omitted} chars truncated]"
+        budget = max(0, limit - len(suffix))
+    return text[:budget] + suffix, total, True
+
+
+def _content_to_trace_str(content: Any) -> tuple[str, int, bool]:
+    """Curate message body for trace sinks: prefix preserved, long tails truncated."""
+    raw = _raw_message_content(content)
+    return _truncate_for_trace(raw, _TRACE_MESSAGE_MAX_CHARS)
+
+
+def _serialize_chat_message(message: Any) -> dict[str, Any] | None:
+    """Map one LangChain / OpenAI chat message to {role, content} for traces."""
+    if isinstance(message, str):
+        content, total, truncated = _content_to_trace_str(message)
+        return _trace_message_record("user", content, total, truncated)
+    if isinstance(message, dict):
+        role = message.get("role")
+        if role:
+            content, total, truncated = _content_to_trace_str(message.get("content"))
+            return _trace_message_record(str(role), content, total, truncated)
+    msg_type = getattr(message, "type", None)
+    if msg_type and hasattr(message, "content"):
+        role = _LANGCHAIN_ROLE_TO_OPENAI.get(str(msg_type), str(msg_type))
+        content, total, truncated = _content_to_trace_str(message.content)
+        return _trace_message_record(role, content, total, truncated)
+    return None
+
+
+def _trace_message_record(role: str, content: str, total_chars: int, truncated: bool) -> dict[str, Any]:
+    rec: dict[str, Any] = {"role": role, "content": content, "trace_content_chars": total_chars}
+    if truncated:
+        rec["trace_content_truncated"] = True
+    return rec
+
+
+def format_langchain_llm_input(payload: Any) -> list[dict[str, Any]]:
+    """Flatten LangChain batched chat inputs into OpenAI-style message dicts."""
+    out: list[dict[str, str]] = []
+    for group in payload or []:
+        if getattr(group, "type", None) and hasattr(group, "content"):
+            rec = _serialize_chat_message(group)
+            if rec:
+                out.append(rec)
+            continue
+        if isinstance(group, (list, tuple)):
+            for message in group:
+                rec = _serialize_chat_message(message)
+                if rec:
+                    out.append(rec)
+            continue
+        rec = _serialize_chat_message(group)
+        if rec:
+            out.append(rec)
+    return out
+
+
 class _LangchainLLMHandler(_LCBaseHandler):
     """Braintrust span writer for LangChain-agent LLM calls (see installer)."""
 
@@ -120,27 +223,13 @@ class _LangchainLLMHandler(_LCBaseHandler):
 
         return braintrust
 
-    def _curate(self, message: Any) -> str | None:
-        try:
-            return str(message)[:4000]
-        except Exception:
-            return None
-
-    def _flatten(self, payload: Any) -> list[str | None]:
-        out: list[str | None] = []
-        for group in payload or []:
-            if hasattr(group, "content"):
-                out.append(self._curate(group))
-            else:
-                for message in group:
-                    out.append(self._curate(message))
-        return out
-
     def on_chat_model_start(self, serialized: Any, messages: Any, *, run_id: Any = None, **kwargs: Any) -> None:
         try:
             bt = self._braintrust()
             self._spans[run_id] = bt.start_span(
-                name="Chat Completion", type="llm", input=self._flatten(messages)
+                name="Chat Completion",
+                type="llm",
+                input={"messages": format_langchain_llm_input(messages)},
             )
         except Exception:
             logger.warning("evals_langchain_span_start_failed", exc_info=True)

@@ -1,51 +1,33 @@
 #!/usr/bin/env bash
-# CI bootstrap: materialize the Digital-Mailroom uv workspace that this repo's
-# `pyproject.toml` path source points at, so `uv sync` resolves on a bare
-# runner. pyproject.toml declares:
+# CI / cloud bootstrap: materialize the sibling llm-mailroom checkout that
+# pyproject.toml's editable path source points at:
 #
-#     mailroom = { path = "../Digital-Mailroom/packages/llm-mailroom", editable = true }
+#     mailroom = { path = "../llm-mailroom", editable = true }
 #
-# and ../Digital-Mailroom is a private monorepo, absent from GitHub-hosted
-# runners. This script reconstructs the minimum tree that makes the path source
-# resolvable, pinned by immutable commit SHA. It is the single source of truth
-# for those pins; do not duplicate them in the workflow.
+# On GitHub Actions the repo lives under ~/work/<org>/<repo>/, so the parent
+# directory is writable. On some cloud VMs only the repo root is writable; set
+# MAILROOM_DEST to an in-repo path (e.g. Digital-Mailroom/packages/llm-mailroom)
+# and re-point [tool.uv.sources] locally for that session.
 #
-# WHY THIS SHAPE (the documented git-source fallback does not work):
-# llm-mailroom's own pyproject declares
-#     [tool.uv.sources] llm-dojo-scoring = { workspace = true }
-# so a standalone git source for `mailroom` fails outside its workspace with
-# "`llm-dojo-scoring` references a workspace in `tool.uv.sources` ... but is not
-# a workspace member", and adding an explicit dojo git source in this repo does
-# not help (workspace members must source members as `{ workspace = true }`;
-# a second URL is rejected as a conflicting URL). Reconstructing the workspace
-# root with a two-line pyproject makes the transitive `workspace = true`
-# resolve. Neither pin floats on a branch.
+# Pin is the single source of truth for CI; do not float on branch tips.
 #
-# Idempotent: an existing checkout already at the pinned SHA is reused as-is.
-# A checkout at a different SHA, or a dirty one, is refused rather than
-# clobbered (set CI_BOOTSTRAP_FORCE=1 to override deliberately).
+# Idempotent: an existing checkout at the pinned SHA is reused. Set
+# CI_BOOTSTRAP_FORCE=1 to replace a mismatched or dirty tree.
 
 set -euo pipefail
 
 MAILROOM_REPO="https://github.com/Exios66/llm-mailroom.git"
 MAILROOM_REV="28cb4be816fbb60e56cd3bb2ab72f8d9be1ab636"
 
-DOJO_REPO="https://github.com/Exios66/llm-dojo-scoring.git"
-DOJO_REV="c49393a91ad7f6bcff537652a85fa3338859beae" # tag v0.15.0
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-# Mirrors the relative path in pyproject.toml's [tool.uv.sources].
-WORKSPACE_ROOT="$(cd "$REPO_ROOT/.." && pwd)/Digital-Mailroom"
-PKG_ROOT="$WORKSPACE_ROOT/packages"
+MAILROOM_DEST="${MAILROOM_DEST:-$(cd "$REPO_ROOT/.." && pwd)/llm-mailroom}"
 
-# Never block a CI job on an interactive git credential prompt.
 export GIT_TERMINAL_PROMPT=0
 
 log() { printf 'bootstrap: %s\n' "$*"; }
 fail() { printf 'bootstrap: ERROR: %s\n' "$*" >&2; exit 1; }
 
-# materialize <url> <rev> <dest>
 materialize() {
   local url="$1" rev="$2" dest="$3" name head dirty
 
@@ -56,7 +38,7 @@ materialize() {
     head="$(git -C "$dest" rev-parse HEAD 2>/dev/null || echo none)"
     dirty="$(git -C "$dest" status --porcelain | head -1)"
     if [ "$head" = "$rev" ] && [ -z "$dirty" ]; then
-      log "$name already at $rev — reusing"
+      log "$name already at $rev — reusing ($dest)"
       return 0
     fi
     if [ "${CI_BOOTSTRAP_FORCE:-0}" != "1" ]; then
@@ -66,15 +48,13 @@ materialize() {
     rm -rf "$dest"
   fi
 
-  mkdir -p "$dest"
+  mkdir -p "$(dirname "$dest")"
   git init -q "$dest"
   git -C "$dest" remote add origin "$url"
 
-  # Primary: depth-1 fetch of the exact commit. Never fetch a branch tip.
   if git -C "$dest" fetch -q --depth 1 origin "$rev"; then
     log "$name fetched $rev (depth 1)"
   else
-    # Fallback: full history, still resolved to the exact immutable SHA.
     log "$name depth-1 SHA fetch unsupported — fetching full history"
     git -C "$dest" fetch -q --tags origin
   fi
@@ -82,21 +62,8 @@ materialize() {
 
   head="$(git -C "$dest" rev-parse HEAD)"
   [ "$head" = "$rev" ] || fail "$name resolved to $head, expected $rev"
-  log "$name @ $head OK"
+  log "$name @ $head OK → $dest"
 }
 
-mkdir -p "$PKG_ROOT"
-materialize "$MAILROOM_REPO" "$MAILROOM_REV" "$PKG_ROOT/llm-mailroom"
-materialize "$DOJO_REPO" "$DOJO_REV" "$PKG_ROOT/llm-dojo-scoring"
-
-# The two lines that make llm-mailroom's `{ workspace = true }` source for
-# llm-dojo-scoring resolve outside the original monorepo. Intentionally the
-# only content: this file is a resolution stub, not a copy of the real
-# workspace manifest.
-cat > "$WORKSPACE_ROOT/pyproject.toml" <<'TOML'
-[tool.uv.workspace]
-members = ["packages/*"]
-TOML
-
-log "workspace stub written: $WORKSPACE_ROOT/pyproject.toml"
-log "mailroom=$MAILROOM_REV dojo=$DOJO_REV"
+materialize "$MAILROOM_REPO" "$MAILROOM_REV" "$MAILROOM_DEST"
+log "mailroom=$MAILROOM_REV dest=$MAILROOM_DEST"

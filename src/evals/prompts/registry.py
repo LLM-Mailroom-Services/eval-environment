@@ -26,7 +26,7 @@ from .lineage import all_versions, resolve, roles
 
 logger = structlog.get_logger(__name__)
 
-SOURCES = ("frozen", "production")
+SOURCES = ("frozen", "archived", "production")
 
 
 @dataclass
@@ -45,6 +45,14 @@ def default_keys(source: str) -> dict[str, str]:
     """role -> version key for a source mode."""
     if source == "frozen":
         return roles()
+    if source == "archived":
+        keys = roles()
+        from . import archived_production
+
+        for key in archived_production.VERSIONS:
+            role = key.rsplit("_v", 1)[0]
+            keys[role] = key
+        return keys
     # production: the agent's own live template (no injection needed)
     return {}
 

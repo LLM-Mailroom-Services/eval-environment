@@ -300,7 +300,7 @@ functions. Every push to `main` redeploys.
 Every eval run measures the **frozen `mailroom-evals-v1` lineage** — the
 official prompt version 1 snapshotted from the mailroom docclass lineage
 (KANBAN-090) plus the pipeline evaluator rubrics — injected into the live
-pipeline at runtime (`--prompt-source frozen|live-docclass|production`,
+pipeline at runtime (`--prompt-source frozen|archived|live-docclass|production`,
 `--prompt-version <key>` for explicit pins). Full details, the freeze/drift
 workflow, and the GEPA mutation scaffold live in
 [`docs/prompt-lineage.md`](docs/prompt-lineage.md).

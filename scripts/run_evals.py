@@ -52,7 +52,7 @@ def main() -> int:
                         help="list registered OpenRouter models and exit")
     parser.add_argument("--prompt-version", default=None,
                         help="pin an explicit prompt version key (frozen/mutation/live lineage)")
-    parser.add_argument("--prompt-source", choices=("frozen", "live-docclass", "production"),
+    parser.add_argument("--prompt-source", choices=("frozen", "archived", "live-docclass", "production"),
                         default="frozen",
                         help="prompt lineage source for this run (default: frozen mailroom-evals-v1)")
     parser.add_argument("--judge-model", default=None,

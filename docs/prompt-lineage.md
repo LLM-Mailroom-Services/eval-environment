@@ -4,11 +4,12 @@ mailroom-evals owns a **frozen, versioned prompt lineage** — the official
 prompt version 1 (`mailroom-dataset-v1`) that GEPA mutations iterate on — while
 staying wired to the mailroom pipeline's live lineage for cross-source A/Bs.
 
-## The three resolution layers
+## The four resolution layers
 
 | layer | lineage id | source | when used |
 |---|---|---|---|
-| **frozen** | `mailroom-dataset-v1` | `src/evals/prompts/frozen_v1.py` (generated) | **default for every eval run** — the stable measurement baseline |
+| **frozen** | `mailroom-dataset-v1` | `src/evals/prompts/frozen_v1.py` (generated) | **default for every eval run** — concise specialists + production freeze for other roles |
+| **archived** | same lineage, v0 | `src/evals/prompts/archived_production.py` | `--prompt-source archived` or `--prompt-version <role>_v0` — the pre-concise production specialists (not the development baseline) |
 | **mutation** | same lineage, v2+ | `prompts/mutations.json` (GEPA output) | A/B candidates; recorded with parent + change note |
 | **production** | pipeline | `llm.prompts.prompt_templates` | `--prompt-source production` — the pipeline's own templates |
 
@@ -25,7 +26,7 @@ and the Langfuse pipeline evaluator rubrics:
 | frozen key | source |
 |---|---|
 | `sorter_v1` | `sorter` (production) |
-| `contracts_specialist_v1` … `insurance_claims_specialist_v1` | their production templates |
+| `contracts_specialist_v1` … `insurance_claims_specialist_v1` | sandbox concise prompts (`Exios66/local-mailroom-sandbox` @ `97c0f940194f`; promoted via `scripts/promote_sandbox_specialist.py upgrade-frozen-specialists`) |
 | `sorter_reviewer_v1` / `arbiter_v1` / `boss_v1` | `sorter_reviewer` / `arbiter` / `boss` (production) |
 | `judge_v1` / `judge-classification_v1` / `judge-correctness_v1` | `judge*` (production) |
 | `intake_v1` | production `INTAKE_SYSTEM_PROMPT` |
@@ -41,8 +42,10 @@ Artifacts: `prompts/<key>.md` (human-readable mirror — never hand-edit),
 version, freeze stamp).
 
 **Drift check**: `uv run python scripts/freeze_prompts.py --check` — compares
-every frozen sha256 against the live pipeline. Drift means the pipeline
-prompts moved: re-freeze to cut a new version (never silently mutate v1).
+every frozen sha256 against the live pipeline. Keys with `source_kind: sandbox`
+in `prompts/manifest.json` are pinned to the sandbox promotion and skipped.
+Drift on production-sourced keys means the pipeline prompts moved: re-freeze
+those keys (never silently mutate v1).
 
 ## Runtime injection
 

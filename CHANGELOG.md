@@ -12,6 +12,22 @@ All notable changes to mailroom-evals are documented here. Format based on
   `--list-models` prints registered slugs; `--model` validates, applies a
   uniform OpenRouter override to pipeline agents for the run, and prices token
   usage from the roster (dojo fallback when absent).
+- **Archived production specialists (`*_v0`)** — the pre-concise production
+  freeze is kept as a resolvable archive (`src/evals/prompts/archived_production.py`,
+  `prompts/archive/`). Opt in with `--prompt-source archived` or
+  `--prompt-version contracts_specialist_v0` (and the other specialist `_v0`
+  keys). New GEPA / token-budget / modal+vLLM work targets frozen concise v1.
+
+### Changed
+
+- **Frozen extraction specialists (concise baseline)** — `contracts_specialist_v1`,
+  `corporate_records_specialist_v1`, `correspondence_specialist_v1`, and
+  `insurance_claims_specialist_v1` now materialize the sandbox simplified
+  prompts from `Exios66/local-mailroom-sandbox` @ `97c0f940194f` (PR #33
+  lineage). Promote with
+  `python scripts/promote_sandbox_specialist.py upgrade-frozen-specialists`.
+  Removed the redundant `contracts_specialist_v2` mutation catalog entry.
+  Drift checks skip manifest keys with `source_kind: sandbox`.
 
 ## [0.4.0] — 2026-09-13
 

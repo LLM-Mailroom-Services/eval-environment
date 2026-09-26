@@ -140,19 +140,22 @@ def _partial_run(key: WaveKey) -> tuple[str, int] | None:
             if best is None or on_disk > best[1]:
                 best = (rid, on_disk)
     for path in sorted(exp_root.iterdir(), key=lambda p: p.name, reverse=True):
-        if not path.is_dir():
-            continue
-        manifest = path / "subset_manifest.json"
-        if not manifest.exists():
+        lock_path = path / "wave_lock.json"
+        if not lock_path.exists():
             continue
         try:
-            meta = json.loads(manifest.read_text(encoding="utf-8"))
+            lock = json.loads(lock_path.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
             continue
-        prov = meta.get("provenance") or {}
-        if prov.get("sample") != key.sample or prov.get("seed") != SEED:
+        if lock.get("sample") != key.sample or lock.get("seed") != SEED:
             continue
-        if (prov.get("subset") or "") != f"class:{key.doc_class}":
+        if lock.get("subset") != f"class:{key.doc_class}":
+            continue
+        if lock.get("model") != key.model:
+            continue
+        if lock.get("decode_profile") != key.decode_profile:
+            continue
+        if (lock.get("prompt_version") or None) != (key.prompt_version or None):
             continue
         rid = path.name
         if any(

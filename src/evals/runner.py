@@ -221,6 +221,23 @@ def run_task(
     run_id = resume_run_id or experiment_log.new_run_id(spec.family, spec.name)
     effective_run_dir = run_dir or (experiment_log.experiments_dir() / run_id)
     effective_run_dir.mkdir(parents=True, exist_ok=True)
+    (effective_run_dir / "wave_lock.json").write_text(
+        json.dumps(
+            {
+                "task": spec.name,
+                "task_id": spec.task_id,
+                "model": model or DEFAULT_MODEL,
+                "decode_profile": decode_profile,
+                "prompt_version": prompt_version,
+                "prompt_source": prompt_source,
+                "sample": sample,
+                "seed": seed,
+                "subset": subset,
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
 
     # Lock the exact case set BEFORE any LLM spend (reproducibility).
     # On resume the manifest already exists in the run dir and is the locked

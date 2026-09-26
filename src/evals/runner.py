@@ -551,6 +551,26 @@ def run_meta_stub(spec: TaskSpec, summary: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _specialist_name(spec: TaskSpec, agent_usage: dict[str, Any] | None) -> str | None:
+    """The specialist that evaluated this document (one agent per extraction case)."""
+    catalog = AGENT_CATALOG.get(spec.node_name) or {}
+    specialists = list(catalog.get("agents") or [])
+    usage = agent_usage or {}
+    hits = [name for name in specialists if name in usage]
+    if len(hits) == 1:
+        return hits[0]
+    if hits:
+        return hits[0]
+    task_map = {
+        "contracts": "contracts_specialist",
+        "merger_agreement": "merger_agreement_specialist",
+        "corporate_records": "corporate_records_specialist",
+        "correspondence": "correspondence_specialist",
+        "insurance_claims": "insurance_claims_specialist",
+    }
+    return task_map.get(spec.name)
+
+
 def _primary_prompt_key(spec: TaskSpec, summary: dict[str, Any]) -> str | None:
     """The task's primary agent-role prompt key (span metadata provenance).
 
@@ -668,6 +688,14 @@ def _execute_cases(
                 error = f"{type(exc).__name__}: {exc}"
                 logger.warning("evals_case_failed", case=case.get("id"), error=error)
             latency = timer.ms()
+            recovered_pred, recovered = decode_budget.recover_prediction(
+                prediction if isinstance(prediction, dict) else None
+            )
+            if recovered and recovered_pred is not None:
+                prediction = recovered_pred
+                summary["params"]["thinking_recovered"] = int(
+                    summary.get("params", {}).get("thinking_recovered") or 0
+                ) + 1
             scores = {} if error else _score_case(spec.name, spec.scorer, case, prediction)
             usage = _last_usage()
             case_model = model or next(
@@ -677,19 +705,36 @@ def _execute_cases(
             if case_model:
                 span.update_metadata({"model": case_model})
             perf = scoring.performance_row(latency, usage, case_model)
-            headline = scoring.sink_score_metrics(spec.scorer, scores)
-            span.set_output({"scores": headline, "error": error})
-            # Span metrics: essentials; Braintrust experiment scores: headline only.
+            span.set_output({"scores": scores, "error": error})
+            # Span metrics: essentials; Braintrust experiment: one fully scored document row.
             span.set_metrics(scoring.essential_metrics(spec.scorer, scores))
+            agent_usage = _agent_usage()
+            specialist = _specialist_name(spec, agent_usage)
+            tokens = {
+                "prompt": perf["prompt_tokens"],
+                "completion": perf["completion_tokens"],
+                "total": perf["total_tokens"],
+            }
             if backend == "braintrust":
                 from .braintrust_experiment import log_case_scores
 
-                log_case_scores(case, scorer=spec.scorer, scores=scores, error=error)
+                log_case_scores(
+                    case,
+                    scorer=spec.scorer,
+                    scores=scores,
+                    error=error,
+                    prediction=prediction if isinstance(prediction, dict) else None,
+                    specialist=specialist,
+                    latency_ms=perf["latency_ms"],
+                    cost_usd=perf["cost_usd_est"],
+                    tokens=tokens,
+                )
             case_trace = getattr(span, "trace_ref", None)
         rows.append(
             {
                 "case_id": case.get("id"),
                 "filename": case.get("filename"),
+                "specialist": specialist,
                 "expected_doc_class": case.get("expected_doc_class"),
                 "expected_subclass": case.get("expected_subclass"),
                 "review_expected": case.get("review_expected"),
@@ -704,11 +749,7 @@ def _execute_cases(
                 "prediction": prediction or None,
                 "scores": scores,
                 "latency_ms": perf["latency_ms"],
-                "tokens": {
-                    "prompt": perf["prompt_tokens"],
-                    "completion": perf["completion_tokens"],
-                    "total": perf["total_tokens"],
-                },
+                "tokens": tokens,
                 "cost_usd": perf["cost_usd_est"],
                 # per-agent token/call attribution for this case (the
                 # accumulator's by_agent map — every agent that fired)

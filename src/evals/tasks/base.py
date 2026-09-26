@@ -233,6 +233,20 @@ def write_scoring_suite(
         "performance": performance,
         "n_cases": len(case_rows),
         "n_errors": sum(1 for r in case_rows if r.get("error")),
+        # One object per document: specialist eval + full score dict.
+        "per_document": [
+            {
+                "case_id": r.get("case_id"),
+                "filename": r.get("filename"),
+                "doc_text_sha256": r.get("doc_text_sha256"),
+                "specialist": r.get("specialist"),
+                "scores": r.get("scores") or {},
+                "latency_ms": r.get("latency_ms"),
+                "cost_usd": r.get("cost_usd"),
+                "error": r.get("error"),
+            }
+            for r in case_rows
+        ],
         "post_hoc": {
             "recompute": "uv run python scripts/score_run.py --run-id <run_id> --recompute",
             "judges": "uv run python scripts/score_run.py --run-id <run_id> --judge verdict,quality",
@@ -241,5 +255,10 @@ def write_scoring_suite(
     }
     path = run_dir / "scoring_suite.json"
     path.write_text(json.dumps(suite, indent=2, default=str), encoding="utf-8")
+    rows_path = run_dir / "per_document_scores.jsonl"
+    with rows_path.open("w", encoding="utf-8") as fh:
+        for row in suite["per_document"]:
+            fh.write(json.dumps(row, default=str) + "\n")
     suite["path"] = str(path)
+    suite["per_document_jsonl"] = str(rows_path)
     return suite

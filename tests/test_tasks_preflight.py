@@ -95,6 +95,10 @@ def test_scoring_suite_artifact(tmp_path):
     assert "metrics_full" in suite
     assert "metrics_essential" in suite
     assert suite["n_cases"] == 2
+    assert len(suite["per_document"]) == 2
+    assert (tmp_path / "per_document_scores.jsonl").is_file()
+    lines = (tmp_path / "per_document_scores.jsonl").read_text().strip().splitlines()
+    assert len(lines) == 2
 
 
 def test_preflight_mock_ok():

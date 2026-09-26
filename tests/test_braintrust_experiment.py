@@ -63,16 +63,32 @@ def test_begin_eval_run_upserts_dataset_rows(mock_init_dataset, mock_init, monke
     end_eval_run()
 
 
-def test_log_case_scores_uses_headline_only():
+def test_log_case_scores_one_fully_scored_document_row():
     exp = MagicMock()
     with patch("evals.braintrust_experiment._active_experiment", exp):
-        case = {"id": "x", "text": "doc", "expected_doc_class": "contract"}
+        case = {"id": "x", "text": "doc", "expected_doc_class": "contract", "filename": "a.pdf"}
         log_case_scores(
             case,
             scorer="extraction",
-            scores={"overall_score": 0.7, "needs_judge_review": 1.0, "extraction_f1": 0.2},
+            scores={
+                "overall_score": 0.7,
+                "needs_judge_review": True,
+                "extraction_f1": 0.2,
+                "n_expected_fields": 6,
+            },
+            prediction={"extracted_data": {"parties": ["Acme"]}},
+            specialist="contracts_specialist",
+            latency_ms=12.0,
+            cost_usd=0.001,
+            tokens={"prompt": 10, "completion": 4},
         )
     exp.log.assert_called_once()
-    logged = exp.log.call_args.kwargs["scores"]
-    assert logged.get("overall_score") == 0.7
-    assert "extraction_f1" not in logged
+    kw = exp.log.call_args.kwargs
+    assert kw["scores"]["overall_score"] == 0.7
+    assert kw["scores"]["extraction_f1"] == 0.2
+    assert kw["scores"]["needs_judge_review"] == 1.0
+    assert "n_expected_fields" not in kw["scores"]
+    assert kw["output"]["specialist"] == "contracts_specialist"
+    assert kw["output"]["extracted_data"] == {"parties": ["Acme"]}
+    assert kw["metadata"]["specialist"] == "contracts_specialist"
+    assert "document" in kw["tags"]

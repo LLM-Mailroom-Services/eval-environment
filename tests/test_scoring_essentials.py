@@ -13,6 +13,7 @@ from evals.scoring import (
     ESSENTIAL_SCORES,
     essential_metrics,
     essential_rollup,
+    row_score_metrics,
     sha256_text,
 )
 
@@ -64,6 +65,23 @@ def test_essential_rollup_means():
 def test_essential_rollup_empty_rows():
     assert essential_rollup("classification", []) == {}
     assert essential_rollup("nonexistent_scorer", [{"scores": {"class_correct": 1}}]) == {}
+
+
+def test_row_score_metrics_is_one_document_full_suite():
+    scores = {
+        "overall_score": 0.41,
+        "extraction_f1": 0.0,
+        "extraction_precision": 0.0,
+        "needs_judge_review": True,
+        "n_expected_fields": 6,
+        "scorer_error": True,
+    }
+    out = row_score_metrics(scores)
+    assert out["overall_score"] == 0.41
+    assert out["extraction_f1"] == 0.0
+    assert out["needs_judge_review"] == 1.0
+    assert "n_expected_fields" not in out
+    assert "scorer_error" not in out
 
 
 def test_sha256_text_stable_and_sensitive():

@@ -174,70 +174,33 @@ def begin_eval_run(
 
 
 def finalize_eval_run(summary: dict[str, Any]) -> None:
-    """Log run-level wall time + estimated cost on the Braintrust Experiment."""
+    """Record wall time + cost on the Experiment without adding a non-document row."""
     exp = _active_experiment
     if exp is None:
         return
     perf = summary.get("performance") or {}
-    metrics_block = summary.get("metrics") or {}
-    cost_total = perf.get("cost_usd_est_total")
     duration = summary.get("duration_s")
+    cost_total = perf.get("cost_usd_est_total")
     cap = summary.get("cost_cap") or {}
-    rollup_scores: dict[str, float] = {}
-    if isinstance(cost_total, (int, float)):
-        rollup_scores["cost_usd_est_total"] = float(cost_total)
-    if isinstance(duration, (int, float)):
-        rollup_scores["duration_s"] = float(duration)
     try:
-        exp.log(
-            input={
-                "run_id": summary.get("run_id"),
-                "task": summary.get("task"),
-                "model": summary.get("model"),
-            },
-            output={
-                "n": metrics_block.get("n"),
-                "errors": metrics_block.get("errors"),
-                "cost_usd_est_total": cost_total,
-                "duration_s": duration,
-                "cost_cap_status": cap.get("status"),
-            },
-            scores=rollup_scores or None,
-            metrics={
-                k: float(v)
-                for k, v in {
-                    "duration_s": duration,
-                    "cost_usd_est_total": cost_total,
-                    "tokens_prompt_total": perf.get("tokens_prompt_total"),
-                    "tokens_completion_total": perf.get("tokens_completion_total"),
-                    "latency_ms_mean": perf.get("latency_ms_mean"),
-                }.items()
-                if isinstance(v, (int, float))
-            }
-            or None,
-            metadata={
-                "cost_cap": cap,
-                "decode_profile": (summary.get("params") or {}).get("decode_profile"),
-                "performance": {
-                    k: perf.get(k)
-                    for k in (
-                        "cost_usd_est_total",
-                        "latency_ms_mean",
-                        "latency_ms_p95",
-                        "tokens_prompt_total",
-                        "tokens_completion_total",
-                    )
-                },
-            },
-            tags=["run-rollup", "mailroom-evals"],
-            allow_concurrent_with_spans=True,
-        )
+        extra = {
+            "duration_s": duration,
+            "cost_usd_est_total": cost_total,
+            "cost_cap": cap,
+            "n": (summary.get("metrics") or {}).get("n"),
+            "errors": (summary.get("metrics") or {}).get("errors"),
+            "decode_profile": (summary.get("params") or {}).get("decode_profile"),
+        }
+        # Prefer metadata merge when the SDK exposes it; never log a fake case.
+        if hasattr(exp, "update_metadata"):
+            exp.update_metadata(extra)
         logger.info(
             "braintrust_experiment_finalized",
             run_id=summary.get("run_id"),
             duration_s=duration,
             cost_usd_est_total=cost_total,
             cost_cap_status=cap.get("status"),
+            document_rows=(summary.get("metrics") or {}).get("n"),
         )
     except Exception:
         logger.warning("braintrust_experiment_finalize_failed", exc_info=True)
@@ -262,23 +225,53 @@ def log_case_scores(
     scorer: str,
     scores: dict[str, Any],
     error: str | None = None,
+    prediction: dict[str, Any] | None = None,
+    specialist: str | None = None,
+    latency_ms: float | None = None,
+    cost_usd: float | None = None,
+    tokens: dict[str, Any] | None = None,
 ) -> None:
-    """Attach minimal headline scores to the Experiment (quota-safe)."""
+    """One Braintrust experiment row per document, with the full 0–1 score set."""
     exp = _active_experiment
     if exp is None:
         return
-    headline = scoring.sink_score_metrics(scorer, scores)
-    if not headline and not error:
-        return
+    row_scores = scoring.row_score_metrics(scores)
+    extracted = None
+    if isinstance(prediction, dict):
+        extracted = prediction.get("extracted_data") or prediction
     try:
         exp.log(
+            id=doc_text_sha256(case),
             input=_dataset_input(case),
-            output={"error": error} if error else {"ok": True},
+            output={
+                "specialist": specialist,
+                "extracted_data": extracted,
+                "error": error,
+                "scores": scores or {},
+            },
             expected=_dataset_expected(case),
-            scores=headline or None,
+            scores=row_scores or None,
             error=error,
             dataset_record_id=dataset_record_id(case),
-            metadata={"case_ref": public_case_ref(case)},
+            metrics={
+                k: float(v)
+                for k, v in {
+                    "latency_ms": latency_ms,
+                    "cost_usd": cost_usd,
+                    "prompt_tokens": (tokens or {}).get("prompt"),
+                    "completion_tokens": (tokens or {}).get("completion"),
+                }.items()
+                if isinstance(v, (int, float))
+            }
+            or None,
+            metadata={
+                "case_ref": public_case_ref(case),
+                "specialist": specialist,
+                "scorer": scorer,
+                "n_expected_fields": (scores or {}).get("n_expected_fields"),
+                "filename": case.get("filename"),
+            },
+            tags=[t for t in (specialist, scorer, "document") if t],
             allow_concurrent_with_spans=True,
         )
     except Exception:

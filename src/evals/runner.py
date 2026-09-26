@@ -21,7 +21,13 @@ from typing import Any
 
 import structlog
 
-from . import experiment_log, scoring, tracing
+from . import (
+    comparison_report,
+    decode_budget,
+    experiment_log,
+    scoring,
+    tracing,
+)
 from . import invoke as invoke_mod
 from .cases import load_cases
 from .openrouter_roster import apply_model_override, validate_model_slug
@@ -115,6 +121,7 @@ def run_task(
     resume_run_id: str | None = None,
     require_trace_sink: bool = False,
     skip_preflight: bool = False,
+    decode_profile: str | None = None,
 ) -> RunResult:
     """Execute one task. Returns the run summary + per-case rows."""
     spec = get_task(task_id)
@@ -228,6 +235,12 @@ def run_task(
             provenance={**dataset_prov, "subset": subset, "seed": seed, "sample": sample, "n": n},
         )
 
+    # Decode-profile state is declared before the summary so both the params
+    # block and the execution block see it.
+    thinking_recovered = 0
+    budget_applied_outer: dict[str, Any] | None = None
+    budget = decode_budget.get_profile(decode_profile)
+
     summary: dict[str, Any] = {
         "run_id": run_id,
         "family": spec.family,
@@ -252,6 +265,9 @@ def run_task(
             "scorer": spec.scorer,
             "resumed_from": resume_run_id,
             "skipped_already_run": len(prior_ids),
+            "decode_profile": decode_profile,
+            "decode_budget_applied": budget_applied_outer,
+            "thinking_recovered": thinking_recovered,
         },
         "dataset": {
             **dataset_prov,
@@ -269,40 +285,56 @@ def run_task(
     try:
         if not dry_run:
             with apply_model_override(model):
-                with invoke_mod.Isolation():
-                    tracing.apply_provider_env(backend)
-                    if mock:
-                        invoke_mod.install_mocks()
-                    tracing.configure(backend)
-                    bt_experiment: dict[str, Any] | None = None
-                    if backend == "braintrust":
-                        from .braintrust_experiment import begin_eval_run, end_eval_run, experiments_enabled
-
-                        if experiments_enabled(mock, backend):
-                            bt_experiment = begin_eval_run(
-                                run_id=run_id,
-                                task_id=spec.task_id,
-                                cases=cases,
-                                dataset_prov={**dataset_prov, **(summary.get("dataset") or {})},
-                                run_metadata=run_meta_stub(spec, summary),
-                            )
-                            if bt_experiment:
-                                summary["braintrust_experiment"] = bt_experiment
-                    try:
-                        case_rows = _execute_cases(
-                            spec, cases, invoke_mode=invoke_mode, backend=backend,
-                            mock=mock, model=model, prompt_version=prompt_version,
-                            summary=summary,
-                        )
-                    finally:
+                with decode_budget.apply_decode_budget(budget) as budget_applied:
+                    budget_applied_outer = dict(budget_applied)
+                    with invoke_mod.Isolation():
+                        tracing.apply_provider_env(backend)
+                        if mock:
+                            invoke_mod.install_mocks()
+                        tracing.configure(backend)
+                        bt_experiment: dict[str, Any] | None = None
                         if backend == "braintrust":
-                            from .braintrust_experiment import end_eval_run
+                            from .braintrust_experiment import begin_eval_run, end_eval_run, experiments_enabled
 
-                            end_eval_run()
-                    # Off-path writes (relations daemon, async-deferred audit/catalog
-                    # coroutines) must land inside the isolated base dir — drain
-                    # before the env is restored, for every task.
-                    invoke_mod.drain_daemons(1.0 if spec.name == "pipeline_chain" else 0.5)
+                            if experiments_enabled(mock, backend):
+                                bt_experiment = begin_eval_run(
+                                    run_id=run_id,
+                                    task_id=spec.task_id,
+                                    cases=cases,
+                                    dataset_prov={**dataset_prov, **(summary.get("dataset") or {})},
+                                    run_metadata=run_meta_stub(spec, summary),
+                                )
+                                if bt_experiment:
+                                    summary["braintrust_experiment"] = bt_experiment
+                        try:
+                            case_rows = _execute_cases(
+                                spec, cases, invoke_mode=invoke_mode, backend=backend,
+                                mock=mock, model=model, prompt_version=prompt_version,
+                                summary=summary,
+                            )
+                            # Granite thinking envelopes zero cases at the JSON
+                            # parse (issue #18 §4); strip + re-parse any
+                            # _parse_error predictions before scoring.
+                            for row in case_rows:
+                                recovered_pred, did = decode_budget.recover_prediction(
+                                    (row.get("prediction") or {})
+                                    if isinstance(row.get("prediction"), dict) else None
+                                )
+                                if did and recovered_pred is not None:
+                                    # Case rows carry the expected_* fields, so
+                                    # they double as the scoring `case` argument.
+                                    row["prediction"] = recovered_pred
+                                    row["scores"] = _score_case(spec.name, spec.scorer, row, recovered_pred)
+                                    thinking_recovered += 1
+                        finally:
+                            if backend == "braintrust":
+                                from .braintrust_experiment import end_eval_run
+
+                                end_eval_run()
+                        # Off-path writes (relations daemon, async-deferred audit/catalog
+                        # coroutines) must land inside the isolated base dir — drain
+                        # before the env is restored, for every task.
+                        invoke_mod.drain_daemons(1.0 if spec.name == "pipeline_chain" else 0.5)
     except Exception as exc:
         error = f"{type(exc).__name__}: {exc}"
         logger.exception("evals_run_failed", task=spec.task_id)
@@ -358,6 +390,21 @@ def run_task(
             **({"ece": summary["calibration"]["ece"]}
                if isinstance(summary.get("calibration"), dict) and isinstance(summary["calibration"].get("ece"), (int, float)) else {}),
         })
+
+    # Comparison report (Modal-comparable, filed by model): emitted whenever a
+    # decode profile drove the run and cases executed; never fails the run.
+    if budget and case_rows and not dry_run:
+        try:
+            summary["params"]["decode_sampling"] = budget.get("sampling")
+            summary["params"]["decode_call_timeout_s"] = budget.get("call_timeout_s")
+            cap = comparison_report.cap_status(summary, budget)
+            if cap:
+                summary["cost_cap"] = cap
+            report_file = comparison_report.write_report(summary, case_rows)
+            summary["comparison_report"] = str(report_file) if report_file else None
+        except Exception as exc:  # report is auxiliary — log and move on
+            logger.warning("comparison_report_failed", task=spec.task_id, error=str(exc))
+            summary["comparison_report"] = None
 
     written = experiment_log.write_run(summary, case_rows, run_dir=effective_run_dir)
     try:

@@ -26,7 +26,7 @@ and the Langfuse pipeline evaluator rubrics:
 | frozen key | source |
 |---|---|
 | `sorter_v1` | `sorter` (production) |
-| `contracts_specialist_v1` … `insurance_claims_specialist_v1` | sandbox concise prompts (`Exios66/local-mailroom-sandbox` @ `97c0f940194f`; promoted via `scripts/promote_sandbox_specialist.py upgrade-frozen-specialists`) |
+| `contracts_specialist_v1` … `insurance_claims_specialist_v1`, `merger_agreement_specialist_v1` | sandbox concise prompts (`Exios66/local-mailroom-sandbox` @ `97c0f940194f`; four extraction specialists via `upgrade-frozen-specialists`, merger via `promote_sandbox_specialist.py freeze-new`) |
 | `sorter_reviewer_v1` / `arbiter_v1` / `boss_v1` | `sorter_reviewer` / `arbiter` / `boss` (production) |
 | `judge_v1` / `judge-classification_v1` / `judge-correctness_v1` | `judge*` (production) |
 | `intake_v1` | production `INTAKE_SYSTEM_PROMPT` |
@@ -35,7 +35,8 @@ and the Langfuse pipeline evaluator rubrics:
 The pipeline taxonomy has five canonical document classes: contract,
 corporate_record, correspondence, insurance_claim, merger_agreement.
 merger_agreement is the MAUD class (agreement and plan of merger); contract
-is the CUAD commercial-contract class — they share the contracts specialist.
+is the CUAD commercial-contract class — each has its own frozen specialist
+(`merger_agreement_specialist_v1` vs `contracts_specialist_v1`).
 
 Artifacts: `prompts/<key>.md` (human-readable mirror — never hand-edit),
 `prompts/manifest.json` (pipeline git commit, source keys, sha256 per

@@ -113,6 +113,7 @@ AGENT_CATALOG: dict[str, dict[str, Any]] = {
         "role": "Specialist extraction",
         "agents": [
             "contracts_specialist",
+            "merger_agreement_specialist",
             "corporate_records_specialist",
             "correspondence_specialist",
             "insurance_claims_specialist",
@@ -144,6 +145,7 @@ AGENT_CATALOG: dict[str, dict[str, Any]] = {
         "agents": [
             "intake", "image_extractor", "pdf_transcriber", "sorter",
             "sorter_reviewer", "contracts_specialist",
+            "merger_agreement_specialist",
             "corporate_records_specialist", "correspondence_specialist",
             "insurance_claims_specialist",
             "judge", "arbiter", "boss",

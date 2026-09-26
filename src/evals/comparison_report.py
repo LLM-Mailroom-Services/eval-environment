@@ -198,7 +198,7 @@ def render_report(summary: dict[str, Any], case_rows: list[dict[str, Any]]) -> s
         f"seed {params.get('seed')} |"
     )
     lines.append(f"| timestamp | `{_fmt(summary.get('started_at'))}` |")
-    lines.append(f"| git (evals / pipeline) | evals-sha {_fmt(summary.get('pipeline_git'))} |")
+    lines.append(f"| pipeline git | `{_fmt(summary.get('pipeline_git'))}` |")
     lines.append(f"| subset manifest | `{_fmt(dataset.get('subset_manifest_path'))}` |")
     lines.append("")
 
@@ -253,7 +253,7 @@ def render_report(summary: dict[str, Any], case_rows: list[dict[str, Any]]) -> s
     lines.append(f"| sampling override | `{json.dumps(sampling) if sampling else 'none (pipeline posture)'}` |")
     lines.append(f"| sampling injected on wire | {applied.get('sampling_injected', False)} |")
     lines.append(f"| per-agent completion budgets | `{json.dumps(applied.get('max_tokens_by_agent') or {}, sort_keys=True)}` |")
-    lines.append(f"| per-call timeout | {applied.get('call_timeout_s') or 'pipeline default'} s |")
+    lines.append(f"| per-call timeout | {params.get('decode_call_timeout_s') or 'pipeline default'} s |")
     lines.append("")
 
     if by_agent:

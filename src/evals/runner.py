@@ -286,7 +286,8 @@ def run_task(
         if not dry_run:
             with apply_model_override(model):
                 with decode_budget.apply_decode_budget(budget) as budget_applied:
-                    budget_applied_outer = dict(budget_applied)
+                    # NOTE: the applied map is captured AFTER the block (below)
+                    # — config merges populate it lazily during execution.
                     with invoke_mod.Isolation():
                         tracing.apply_provider_env(backend)
                         if mock:
@@ -335,6 +336,11 @@ def run_task(
                         # coroutines) must land inside the isolated base dir — drain
                         # before the env is restored, for every task.
                         invoke_mod.drain_daemons(1.0 if spec.name == "pipeline_chain" else 0.5)
+                    # Capture AFTER execution: the applied map fills lazily as
+                    # agents consult the merged load_config during the run.
+                    budget_applied_outer = dict(budget_applied)
+                    # params dict was built pre-run — re-bind the final map.
+                    summary["params"]["decode_budget_applied"] = budget_applied_outer
     except Exception as exc:
         error = f"{type(exc).__name__}: {exc}"
         logger.exception("evals_run_failed", task=spec.task_id)

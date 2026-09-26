@@ -10,7 +10,19 @@ import pytest
 from evals.preflight import PreflightError, run_preflight
 from evals.registry import EVAL_TASKS, get_task
 from evals.tasks import ALL_EVAL_TASKS, get_eval_task, list_eval_tasks
-from evals.tasks.base import write_scoring_suite, write_subset_manifest
+from evals.tasks.base import read_subset_manifest, write_scoring_suite, write_subset_manifest
+
+_CASE_BASE = {
+    "expected_doc_class": "contract",
+    "expected_subclass": "master_services_agreement",
+    "expected_specialist": "contracts_specialist",
+    "expected_stage": "archived",
+    "expected_fields": {"parties": ["Acme Corp", "Beta LLC"]},
+    "source": "mailroom-dataset",
+    "config": "ground_truth",
+    "split": "train",
+    "text": "MASTER SERVICES AGREEMENT between Acme Corp and Beta LLC.",
+}
 
 
 def test_eval_task_modules_match_registry():
@@ -173,3 +185,104 @@ def test_runner_real_blocked_without_key(monkeypatch, sample_case):
     )
     with pytest.raises(PreflightError):
         runner.run_task("eval:classification", mock=False, n=1)
+
+
+# ── v3 fixes: resume-safe manifest, preflight-failure logging, flag plumbing ─
+
+
+def _stub_loader(monkeypatch, runner, cases):
+    def _load(subset, sample=None, seed=None, n=None):
+        selected = cases[:n] if n is not None else cases
+        return (
+            selected,
+            {
+                "n_total": len(cases),
+                "n_selected": len(selected),
+                "config": "ground_truth",
+                "split": "train",
+                "revision": "deadbeef",
+                "repo": "x",
+            },
+        )
+
+    monkeypatch.setattr(runner, "load_cases", _load)
+
+
+def test_resume_preserves_subset_manifest(monkeypatch, tmp_path):
+    """A partial resume must never truncate the locked full case set."""
+    import json
+
+    from evals import runner
+
+    cases = [
+        {**_CASE_BASE, "id": f"corpus:ground_truth:train:doc_{i}.txt",
+         "filename": f"doc_{i}.txt"}
+        for i in range(3)
+    ]
+    _stub_loader(monkeypatch, runner, cases)
+    run_dir = tmp_path / "run"
+
+    first = runner.run_task("eval:classification", mock=True, n=2, run_dir=run_dir)
+    manifest = json.loads((run_dir / "subset_manifest.json").read_text())
+    assert manifest["n"] == 2
+
+    # Resume the same run_id against a 3-case draw: 2 already run → 1 remains.
+    # The manifest must still describe the original 2-case locked set.
+    result = runner.run_task(
+        "eval:classification", mock=True, n=3, run_dir=run_dir,
+        resume_run_id=first.run_id,
+    )
+    after = json.loads((run_dir / "subset_manifest.json").read_text())
+    assert after == manifest
+    assert read_subset_manifest(run_dir)["case_ids"] == manifest["case_ids"]
+    assert result.summary["dataset"]["case_ids"] == manifest["case_ids"]
+
+
+def test_preflight_failure_is_logged(monkeypatch, sample_case):
+    """Non-negotiable #1: a preflight-blocked run still writes a log line."""
+    import json as _json
+
+    from evals import experiment_log, runner
+    from evals.preflight import PreflightError
+
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.delenv("GENERIC_API_KEY", raising=False)
+    monkeypatch.delenv("DEFAULT_PROVIDER", raising=False)
+    _stub_loader(monkeypatch, runner, [sample_case])
+    before = experiment_log.load_runs()
+    with pytest.raises(PreflightError):
+        runner.run_task("eval:classification", mock=False, n=1)
+    after = experiment_log.load_runs()
+    assert len(after) == len(before) + 1
+    blocked = after[-1]
+    assert blocked["error"] and "PreflightError" in blocked["error"]
+    assert blocked["metrics"] == {"n": 0, "errors": 0}
+    assert blocked["preflight"]["ok"] is False
+    # The appended record validates under the current schema.
+    assert not experiment_log.validate_record(blocked)
+
+
+def test_runner_skip_preflight(monkeypatch, sample_case, tmp_path):
+    from evals import runner
+
+    _stub_loader(monkeypatch, runner, [sample_case])
+    result = runner.run_task(
+        "eval:classification", mock=True, n=1, run_dir=tmp_path / "run",
+        skip_preflight=True,
+    )
+    assert result.summary["preflight"] is None
+    assert result.summary["task_framing"] is None
+
+
+def test_preflight_require_trace_sink_blocks_none_backend(monkeypatch):
+    from evals.preflight import PreflightError, run_preflight
+
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    spec = get_task("eval:classification")
+    report = run_preflight(
+        spec, mock=False, trace_backend="none", require_trace_sink=True,
+    )
+    assert not report.ok
+    assert any(i.code == "trace_sink_required" for i in report.errors)
+    with pytest.raises(PreflightError):
+        report.raise_if_failed()

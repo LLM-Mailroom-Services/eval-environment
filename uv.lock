@@ -2224,7 +2224,7 @@ wheels = [
 [[package]]
 name = "llm-dojo-scoring"
 version = "0.15.0"
-source = { editable = "Digital-Mailroom/packages/llm-dojo-scoring" }
+source = { git = "https://github.com/Exios66/llm-dojo-scoring.git?rev=v0.15.0#c49393a91ad7f6bcff537652a85fa3338859beae" }
 dependencies = [
     { name = "jellyfish" },
     { name = "matplotlib" },
@@ -2238,31 +2238,6 @@ dependencies = [
     { name = "scipy", version = "1.18.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "structlog" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "arize-phoenix", marker = "extra == 'tracing'", specifier = ">=4.0" },
-    { name = "jellyfish", specifier = ">=1.0" },
-    { name = "jellyfish", marker = "extra == 'jellyfish'", specifier = ">=1.0" },
-    { name = "langfuse", marker = "extra == 'tracing'", specifier = ">=2.50" },
-    { name = "llm-dojo-scoring", extras = ["embeddings", "tracing", "dev"], marker = "extra == 'all'", editable = "Digital-Mailroom/packages/llm-dojo-scoring" },
-    { name = "matplotlib", specifier = ">=3.9.0" },
-    { name = "numpy", specifier = ">=1.26.0" },
-    { name = "openai", marker = "extra == 'embeddings'", specifier = ">=1.30" },
-    { name = "openpyxl", specifier = ">=3.1.0" },
-    { name = "opentelemetry-exporter-otlp-proto-http", marker = "extra == 'tracing'", specifier = ">=1.20" },
-    { name = "opentelemetry-sdk", marker = "extra == 'tracing'", specifier = ">=1.20" },
-    { name = "pandas", specifier = ">=2.0.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
-    { name = "pytest-mock", marker = "extra == 'dev'", specifier = ">=3.14" },
-    { name = "python-dateutil", specifier = ">=2.8.2" },
-    { name = "python-dotenv", marker = "extra == 'tracing'", specifier = ">=1.0" },
-    { name = "pyyaml", specifier = ">=6.0" },
-    { name = "scipy", specifier = ">=1.10.0" },
-    { name = "sentence-transformers", marker = "extra == 'embeddings'", specifier = ">=3.0" },
-    { name = "structlog", specifier = ">=24.0" },
-]
-provides-extras = ["embeddings", "jellyfish", "tracing", "dev", "all"]
 
 [[package]]
 name = "logfire-api"
@@ -2408,7 +2383,7 @@ wheels = [
 [[package]]
 name = "mailroom"
 version = "0.7.1"
-source = { editable = "Digital-Mailroom/packages/llm-mailroom" }
+source = { editable = "../llm-mailroom" }
 dependencies = [
     { name = "aiosqlite" },
     { name = "arize-phoenix" },
@@ -2457,7 +2432,7 @@ requires-dist = [
     { name = "langfuse", specifier = ">=2.50" },
     { name = "langgraph", specifier = ">=0.2.0" },
     { name = "langgraph-checkpoint-sqlite", specifier = ">=1.0" },
-    { name = "llm-dojo-scoring", editable = "Digital-Mailroom/packages/llm-dojo-scoring" },
+    { name = "llm-dojo-scoring", git = "https://github.com/Exios66/llm-dojo-scoring.git?rev=v0.15.0" },
     { name = "modal", marker = "extra == 'deploy'", specifier = "==1.5.5" },
     { name = "onnxruntime", marker = "extra == 'bert'", specifier = ">=1.30" },
     { name = "openai", specifier = ">=1.30" },
@@ -2509,7 +2484,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "httpx", specifier = ">=0.27" },
-    { name = "mailroom", editable = "Digital-Mailroom/packages/llm-mailroom" },
+    { name = "mailroom", editable = "../llm-mailroom" },
     { name = "pandas", specifier = ">=2.0" },
     { name = "pyarrow", specifier = ">=14.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },

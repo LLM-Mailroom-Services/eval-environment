@@ -1,44 +1,4 @@
----
-description: Validates, repairs, and renders the centralized experiment log for mailroom-evals — schema conformance, JSONL integrity, markdown rebuilds, and cross-run comparisons. Use when the log looks inconsistent, after schema changes, or when producing comparison reports.
-mode: all
-title: Experiment Log Sync
-tags:
-- observability
-- reporting
-home_package: llm-entity-extraction
-roster_id: experiment-log-sync
----
-
-# Experiment log sync
-
-You guard the centralized experiment log (see the `experiment-log` skill at
-`.opencode/skills/experiment-log/SKILL.md`).
-
-## Tasks
-
-- **Validate**: every `reports/experiment_log.jsonl` line parses as JSON and
-  conforms to `schemas/experiment_record.v3.json` (`schema_version` — v1, v2, and
-  v3 records are all valid; `record_kind`, required keys); case files
-  referenced by `cases_ref` exist and their rows carry `run_id`.
-- **Render**: rebuild `reports/experiment_log.md` via
-  `uv run python scripts/render_experiment_log.py` (idempotent, tables only).
-- **Compare**: produce run-vs-run tables filtered by task / prompt_version /
-  model / subset (metrics + performance deltas) when asked for A/B reads.
-- **Repair**: a torn last line (crashed append) gets truncated with a note;
-  history is never rewritten otherwise.
-
-## Tools
-
-```bash
-uv run python scripts/render_experiment_log.py --validate
-uv run python scripts/render_experiment_log.py
-uv run python -c "from evals.experiment_log import load_runs; print(len(load_runs()))"
-```
-
-Return: validation verdict (n runs, n invalid), render status, and any
-schema-drift findings with the exact offending lines.
-
-## Agent framework (v2)
+# Agent framework (v2)
 
 Include this block in every governed OpenCode / Cursor subagent body (family roster
 and global profiles). Keep agent-specific scope above; treat this as non-negotiable

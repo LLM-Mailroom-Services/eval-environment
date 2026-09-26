@@ -11,11 +11,8 @@ dependencies = [
     # The pipeline under test (path-resolved below; brings langgraph, agents,
     # observability backends, and the HF corpus loader with it).
     "mailroom",
-    # Scoring suite — resolved transitively via mailroom's workspace member
-    # source (editable, v0.15.0). A git pin here is impossible while mailroom
-    # is a path dep: uv hard-requires workspace members to source members as
-    # `{ workspace = true }`, so the editable URL always wins and a second URL
-    # for the same package fails resolution ("conflicting URLs"). v0.15.0
+    # Scoring suite — resolved transitively via mailroom's own dependency pin
+    # (git+https://github.com/Exios66/llm-dojo-scoring.git@v0.15.0). v0.15.0
     # ships configure_from_taxonomy(): the harness wires the corpus taxonomy
     # once at process start (src/evals/dojo_wiring.py) so
     # field_scoring.get_field_types(doc_class) auto-resolves real field-type
@@ -36,17 +33,14 @@ dev = [
 ]
 
 [tool.uv.sources]
-# Dev-machine resolution: the canonical pipeline lives in the Digital-Mailroom
-# uv workspace. Override with a git source when this repo moves machines.
-mailroom = { path = "Digital-Mailroom/packages/llm-mailroom", editable = true }
+# Dev-machine resolution: the standalone Exios66/llm-mailroom clone (v0.7.1,
+# includes the merger_agreement_specialist land). Override with a git source
+# when this repo moves machines. Cloud Agents: scripts/cloud-agent-install.sh
+# materializes the sibling checkout when the parent dir is not writable.
+mailroom = { path = "../llm-mailroom", editable = true }
 
 # llm-dojo-scoring is intentionally NOT listed here: it resolves transitively
-# from mailroom's member-level `{ workspace = true }` source (editable, the
-# Digital-Mailroom workspace member). Any second source for the same package
-# (e.g., a git pin) makes uv fail with "conflicting URLs" — workspace members
-# are hard-required to source members as workspace, so the editable URL always
-# wins while mailroom is a path dep. Standalone machines: switch mailroom to
-# a git source, which brings dojo via mailroom's own release pin.
+# from mailroom's own `llm-dojo-scoring @ git+...@v0.15.0` dependency pin.
 
 [tool.setuptools.packages.find]
 where = ["src"]

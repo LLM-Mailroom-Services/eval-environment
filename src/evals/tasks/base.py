@@ -190,6 +190,24 @@ def write_subset_manifest(
     return summary
 
 
+def read_subset_manifest(run_dir: Path) -> dict[str, Any]:
+    """Load a previously written subset manifest (empty dict when absent).
+
+    Used by resume paths: the original manifest is the locked full case set
+    and must never be truncated by the not-yet-run remainder.
+    """
+    summary_path = run_dir / "subset_manifest.json"
+    if not summary_path.exists():
+        return {}
+    try:
+        summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {}
+    summary.setdefault("manifest_json", str(summary_path))
+    summary.setdefault("manifest_jsonl", str(run_dir / "subset_manifest.jsonl"))
+    return summary
+
+
 def write_scoring_suite(
     case_rows: list[dict[str, Any]],
     *,

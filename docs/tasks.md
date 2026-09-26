@@ -19,8 +19,11 @@ correspondence / insurance_claims):
 
 After every run the harness:
 
-1. Forwards **essential** scores onto the designated sink (Braintrust or
-   Phoenix — never Langfuse here)
+1. Forwards **essential** span metrics to the trace sink; on Braintrust, real
+   runs also open an **Experiment** linked to a project **Dataset** mirroring
+   the pinned HF corpus (`evals.braintrust_experiment`, `BRAINTRUST_EXPERIMENTS=auto`).
+   Experiment `scores` are capped to ≤2 headline metrics per case
+   (`scoring.sink_score_metrics`); the full suite stays in the experiment log.
 2. Writes the **full** deterministic scoring suite to
    `data/experiments/<run_id>/scoring_suite.json`
 3. Locks the exact case set to `subset_manifest.json` (+ `.jsonl`) for
@@ -110,6 +113,8 @@ uv run python scripts/run_evals.py --task <id|all> \
 | `--model` | OpenRouter slug from `config/openrouter_models.yaml` (uniform agent override + cost pricing) |
 | `--list-models` | print the registered OpenRouter roster and exit |
 | `--prompt-version` | A/B tag — rides trace metadata + the experiment log |
-| `--resume` | skip cases already recorded in `<run_id>`, append to its dir |
+| `--resume` | skip cases already recorded in `<run_id>`, append to its dir (subset manifest is read, never truncated) |
+| `--require-trace-sink` | preflight-fails a real run that would resolve to trace backend `none` |
+| `--skip-preflight` | bypass preflight checks (warns when combined with `--real`; not recommended) |
 | `--export` | write the run's case rows as `cases.csv` / `cases.parquet` |
 | `--dry-run` | load + invoke exactly one case |

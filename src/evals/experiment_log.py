@@ -172,6 +172,43 @@ def validate_record(record: dict[str, Any]) -> list[str]:
     return problems
 
 
+def cases_file_path(run_id: str) -> Path:
+    """Per-run case JSONL (may exist before a run-summary is appended)."""
+    return experiments_dir() / run_id / "cases.jsonl"
+
+
+def _read_cases_file(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    rows: list[dict[str, Any]] = []
+    with path.open(encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rows.append(json.loads(line))
+            except json.JSONDecodeError:
+                break
+    return rows
+
+
+def append_case_row(run_dir: Path, run_id: str, row: dict[str, Any]) -> None:
+    """Checkpoint one case row (resume-safe; survives interrupted runs)."""
+    run_dir.mkdir(parents=True, exist_ok=True)
+    path = run_dir / "cases.jsonl"
+    if row.get("case_id"):
+        existing = {r.get("case_id") for r in _read_cases_file(path) if r.get("case_id")}
+        if row.get("case_id") in existing:
+            return
+    payload = dict(row)
+    payload.setdefault("run_id", run_id)
+    payload.setdefault("record_kind", "case")
+    payload.setdefault("schema_version", SCHEMA_VERSION)
+    with path.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(payload, default=str) + "\n")
+
+
 def write_run(
     summary: dict[str, Any],
     case_rows: list[dict[str, Any]],
@@ -232,7 +269,12 @@ def load_runs(path: Path | None = None) -> list[dict[str, Any]]:
 
 
 def load_cases(run_id: str) -> list[dict[str, Any]]:
-    """Per-case rows for one run (embedded when small, else from cases_ref)."""
+    """Per-case rows for one run (embedded when small, else from cases_ref).
+
+    Falls back to ``data/experiments/<run_id>/cases.jsonl`` when no run-summary
+    exists yet (interrupted real runs checkpoint per case).
+    """
+    on_disk = _read_cases_file(cases_file_path(run_id))
     for run in load_runs():
         if run.get("run_id") != run_id:
             continue
@@ -240,19 +282,11 @@ def load_cases(run_id: str) -> list[dict[str, Any]]:
         if embedded:
             return list(embedded)
         ref = run.get("cases_ref")
-        if not ref or not Path(ref).exists():
-            return []
-        rows: list[dict[str, Any]] = []
-        with Path(ref).open(encoding="utf-8") as fh:
-            for line in fh:
-                line = line.strip()
-                if line:
-                    try:
-                        rows.append(json.loads(line))
-                    except json.JSONDecodeError:
-                        break
-        return rows
-    return []
+        if ref and Path(ref).exists():
+            from_ref = _read_cases_file(Path(ref))
+            return from_ref if from_ref else on_disk
+        return on_disk
+    return on_disk
 
 
 # ── Markdown rendering (tables only, never raw JSON) ────────────────────────

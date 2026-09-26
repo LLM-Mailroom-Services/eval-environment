@@ -312,6 +312,8 @@ def run_task(
                                 spec, cases, invoke_mode=invoke_mode, backend=backend,
                                 mock=mock, model=model, prompt_version=prompt_version,
                                 summary=summary,
+                                run_dir=effective_run_dir,
+                                run_id=run_id,
                             )
                             # Granite thinking envelopes zero cases at the JSON
                             # parse (issue #18 §4); strip + re-parse any
@@ -328,10 +330,7 @@ def run_task(
                                     row["scores"] = _score_case(spec.name, spec.scorer, row, recovered_pred)
                                     thinking_recovered += 1
                         finally:
-                            if backend == "braintrust":
-                                from .braintrust_experiment import end_eval_run
-
-                                end_eval_run()
+                            pass  # Braintrust finalize+flush after run summary is built
                         # Off-path writes (relations daemon, async-deferred audit/catalog
                         # coroutines) must land inside the isolated base dir — drain
                         # before the env is restored, for every task.
@@ -384,10 +383,14 @@ def run_task(
 
     # Run-level rollup span: the sink's per-run dashboard entry (essential
     # aggregates only). Emitted even on run error, so the sink shows the run.
+    perf = summary.get("performance") or {}
     with tracing.run_span(backend, run_meta={**run_meta_stub(spec, summary)}) as span:
         span.set_output({
             "metrics": {k: summary["metrics"].get(k) for k in _essential_keys(spec)},
-            "performance": {"latency_ms_mean": summary["performance"].get("latency_ms_mean")},
+            "performance": perf,
+            "duration_s": summary.get("duration_s"),
+            "cost_usd_est_total": perf.get("cost_usd_est_total"),
+            "cost_cap": summary.get("cost_cap"),
             "error": error,
         })
         rollup = scoring.essential_rollup(spec.scorer, case_rows)
@@ -395,7 +398,22 @@ def run_task(
             **scoring.sink_score_metrics(spec.scorer, rollup, max_scores=scoring.SINK_SCORE_METRICS_MAX),
             **({"ece": summary["calibration"]["ece"]}
                if isinstance(summary.get("calibration"), dict) and isinstance(summary["calibration"].get("ece"), (int, float)) else {}),
+            **(
+                {
+                    "duration_s": float(summary["duration_s"]),
+                    "cost_usd_est_total": float(perf["cost_usd_est_total"]),
+                }
+                if isinstance(summary.get("duration_s"), (int, float))
+                and isinstance(perf.get("cost_usd_est_total"), (int, float))
+                else {}
+            ),
         })
+
+    if backend == "braintrust" and summary.get("braintrust_experiment") and not dry_run:
+        from .braintrust_experiment import end_eval_run, finalize_eval_run
+
+        finalize_eval_run(summary)
+        end_eval_run()
 
     # Comparison report (Modal-comparable, filed by model): emitted whenever a
     # decode profile drove the run and cases executed; never fails the run.
@@ -614,6 +632,8 @@ def _execute_cases(
     model: str | None,
     prompt_version: str | None,
     summary: dict[str, Any],
+    run_dir: Path | None = None,
+    run_id: str | None = None,
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     run_meta = {
@@ -697,6 +717,8 @@ def _execute_cases(
                 "error": error,
             }
         )
+        if run_dir is not None and run_id and not mock:
+            experiment_log.append_case_row(run_dir, run_id, rows[-1])
         tracing.flush(backend)
     return rows
 

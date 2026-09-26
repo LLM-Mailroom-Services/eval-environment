@@ -173,6 +173,76 @@ def begin_eval_run(
         return None
 
 
+def finalize_eval_run(summary: dict[str, Any]) -> None:
+    """Log run-level wall time + estimated cost on the Braintrust Experiment."""
+    exp = _active_experiment
+    if exp is None:
+        return
+    perf = summary.get("performance") or {}
+    metrics_block = summary.get("metrics") or {}
+    cost_total = perf.get("cost_usd_est_total")
+    duration = summary.get("duration_s")
+    cap = summary.get("cost_cap") or {}
+    rollup_scores: dict[str, float] = {}
+    if isinstance(cost_total, (int, float)):
+        rollup_scores["cost_usd_est_total"] = float(cost_total)
+    if isinstance(duration, (int, float)):
+        rollup_scores["duration_s"] = float(duration)
+    try:
+        exp.log(
+            input={
+                "run_id": summary.get("run_id"),
+                "task": summary.get("task"),
+                "model": summary.get("model"),
+            },
+            output={
+                "n": metrics_block.get("n"),
+                "errors": metrics_block.get("errors"),
+                "cost_usd_est_total": cost_total,
+                "duration_s": duration,
+                "cost_cap_status": cap.get("status"),
+            },
+            scores=rollup_scores or None,
+            metrics={
+                k: float(v)
+                for k, v in {
+                    "duration_s": duration,
+                    "cost_usd_est_total": cost_total,
+                    "tokens_prompt_total": perf.get("tokens_prompt_total"),
+                    "tokens_completion_total": perf.get("tokens_completion_total"),
+                    "latency_ms_mean": perf.get("latency_ms_mean"),
+                }.items()
+                if isinstance(v, (int, float))
+            }
+            or None,
+            metadata={
+                "cost_cap": cap,
+                "decode_profile": (summary.get("params") or {}).get("decode_profile"),
+                "performance": {
+                    k: perf.get(k)
+                    for k in (
+                        "cost_usd_est_total",
+                        "latency_ms_mean",
+                        "latency_ms_p95",
+                        "tokens_prompt_total",
+                        "tokens_completion_total",
+                    )
+                },
+            },
+            tags=["run-rollup", "mailroom-evals"],
+            allow_concurrent_with_spans=True,
+        )
+        logger.info(
+            "braintrust_experiment_finalized",
+            run_id=summary.get("run_id"),
+            duration_s=duration,
+            cost_usd_est_total=cost_total,
+            cost_cap_status=cap.get("status"),
+        )
+    except Exception:
+        logger.warning("braintrust_experiment_finalize_failed", exc_info=True)
+
+
 def end_eval_run() -> None:
     global _active_experiment, _dataset_handle, _record_id_by_sha
     try:

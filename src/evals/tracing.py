@@ -12,14 +12,17 @@ OpenAI client with the matching instrumentation — every LLM call inside a
 node/agent invocation auto-traces.
 
 One root span per case, named after the node's stable observation name
-(`classify-document`, `extract-fields`, …). Input/output are CURATED
-(identifiers + scores, never raw document text). Scorer metrics attach to
-the span (Braintrust ``log(metrics=...)`` / Phoenix span attributes).
+(`classify-document`, `extract-fields`, …). Input/output are CURATED:
+no raw document text, no ground-truth labels, and no filename-bearing
+``case_id`` strings (use ``public_case_ref`` + ``doc_text_sha256`` to
+join back to the experiment log). Scorer metrics attach to the span
+(Braintrust ``log(metrics=...)`` / Phoenix span attributes).
 Tracing failures log warnings and never fail a run.
 """
 
 from __future__ import annotations
 
+import hashlib
 import os
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -296,12 +299,32 @@ def _install_langchain_llm_spans() -> None:
         logger.warning("evals_langchain_callback_register_failed", exc_info=True)
 
 
+def doc_text_sha256(case: dict[str, Any]) -> str:
+    """sha256 of the case document text (experiment-log join key)."""
+    return hashlib.sha256(str(case.get("text") or "").encode("utf-8")).hexdigest()
+
+
+def public_case_ref(case: dict[str, Any]) -> str:
+    """Trace-safe case reference: corpus position without filename or GT tokens.
+
+    Full ``case["id"]`` values embed the corpus filename (often revealing
+    doc type / subtype). Sinks use this ref; the append-only experiment log
+    keeps the canonical ``case_id``.
+    """
+    raw = str(case.get("id") or "")
+    digest = doc_text_sha256(case)[:12]
+    if raw.startswith("corpus:"):
+        parts = raw.split(":", 3)
+        if len(parts) == 4:
+            return f"{parts[0]}:{parts[1]}:{parts[2]}:doc#{digest}"
+    id_digest = hashlib.sha256(raw.encode("utf-8")).hexdigest()[:12]
+    return f"eval-case:doc#{id_digest}"
+
+
 def _curate_case_input(case: dict[str, Any]) -> dict[str, Any]:
     return {
-        "case_id": case.get("id"),
-        "filename": case.get("filename"),
-        "expected_doc_class": case.get("expected_doc_class"),
-        "expected_subclass": case.get("expected_subclass"),
+        "case_ref": public_case_ref(case),
+        "doc_text_sha256": doc_text_sha256(case),
         "chars": len(str(case.get("text") or "")),
         "config": case.get("config"),
         "split": case.get("split"),
@@ -349,8 +372,8 @@ def case_span(
         return
     as_type = NODE_OBSERVATION_TYPES.get(node_name, "span")
     meta = dict(run_meta or {})
-    meta.setdefault("case_id", case.get("id"))
-    meta.setdefault("filename", case.get("filename"))
+    meta.setdefault("case_ref", public_case_ref(case))
+    meta.setdefault("doc_text_sha256", doc_text_sha256(case))
     try:
         if backend == "braintrust":
             import braintrust

@@ -86,6 +86,27 @@ def test_format_langchain_llm_input_openai_dicts():
     ]
 
 
+def test_public_case_ref_strips_filename_and_labels():
+    case = {
+        "id": "corpus:ground_truth:train:2ThemartComInc_19990826_EX-10.10_Co-Branding Agreement.pdf",
+        "text": "CO-BRANDING AND ADVERTISING AGREEMENT",
+        "expected_doc_class": "contract",
+        "expected_subclass": "Co_Branding",
+        "filename": "2ThemartComInc_19990826_EX-10.10_Co-Branding Agreement.pdf",
+    }
+    ref = tracing.public_case_ref(case)
+    assert ref.startswith("corpus:ground_truth:train:doc#")
+    assert "Co-Branding" not in ref
+    assert "Co_Branding" not in ref
+    curated = tracing._curate_case_input(case)
+    assert "case_ref" in curated
+    assert "case_id" not in curated
+    assert "filename" not in curated
+    assert "expected_doc_class" not in curated
+    assert "expected_subclass" not in curated
+    assert curated["doc_text_sha256"] == tracing.doc_text_sha256(case)
+
+
 def test_format_langchain_llm_input_truncates_long_user_content(monkeypatch):
     monkeypatch.setattr(tracing, "_TRACE_MESSAGE_MAX_CHARS", 50)
     long_doc = "A" * 200

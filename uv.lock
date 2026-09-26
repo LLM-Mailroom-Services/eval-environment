@@ -2245,7 +2245,7 @@ requires-dist = [
     { name = "jellyfish", specifier = ">=1.0" },
     { name = "jellyfish", marker = "extra == 'jellyfish'", specifier = ">=1.0" },
     { name = "langfuse", marker = "extra == 'tracing'", specifier = ">=2.50" },
-    { name = "llm-dojo-scoring", extras = ["embeddings", "tracing", "dev"], marker = "extra == 'all'", editable = "../Digital-Mailroom/packages/llm-dojo-scoring" },
+    { name = "llm-dojo-scoring", extras = ["embeddings", "tracing", "dev"], marker = "extra == 'all'" },
     { name = "matplotlib", specifier = ">=3.9.0" },
     { name = "numpy", specifier = ">=1.26.0" },
     { name = "openai", marker = "extra == 'embeddings'", specifier = ">=1.30" },
@@ -2448,6 +2448,7 @@ requires-dist = [
     { name = "fastapi", specifier = ">=0.110" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.27" },
+    { name = "huggingface-hub", marker = "extra == 'bert'", specifier = ">=0.30" },
     { name = "ipywidgets", marker = "extra == 'notebooks'", specifier = ">=8.1" },
     { name = "jellyfish", specifier = ">=1.0" },
     { name = "jupyterlab", marker = "extra == 'notebooks'", specifier = ">=4.0" },
@@ -2458,6 +2459,7 @@ requires-dist = [
     { name = "langgraph-checkpoint-sqlite", specifier = ">=1.0" },
     { name = "llm-dojo-scoring", editable = "../Digital-Mailroom/packages/llm-dojo-scoring" },
     { name = "modal", marker = "extra == 'deploy'", specifier = "==1.5.5" },
+    { name = "onnxruntime", marker = "extra == 'bert'", specifier = ">=1.30" },
     { name = "openai", specifier = ">=1.30" },
     { name = "opentelemetry-exporter-otlp-proto-http", specifier = ">=1.20" },
     { name = "opentelemetry-sdk", specifier = ">=1.20" },
@@ -2478,10 +2480,11 @@ requires-dist = [
     { name = "sentence-transformers", marker = "extra == 'embeddings'", specifier = ">=3.0" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0" },
     { name = "structlog", specifier = ">=24.0" },
+    { name = "tokenizers", marker = "extra == 'bert'", specifier = ">=0.20" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.29" },
     { name = "watchdog", specifier = ">=4.0" },
 ]
-provides-extras = ["embeddings", "postgres", "deploy", "notebooks", "dev"]
+provides-extras = ["embeddings", "postgres", "deploy", "bert", "notebooks", "dev"]
 
 [[package]]
 name = "mailroom-evals"
@@ -2493,6 +2496,7 @@ dependencies = [
     { name = "pandas" },
     { name = "pyarrow" },
     { name = "python-dotenv" },
+    { name = "pyyaml" },
     { name = "structlog" },
 ]
 
@@ -2510,6 +2514,7 @@ requires-dist = [
     { name = "pyarrow", specifier = ">=14.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "python-dotenv", specifier = ">=1.0" },
+    { name = "pyyaml", specifier = ">=6.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6" },
     { name = "structlog", specifier = ">=24.0" },
 ]

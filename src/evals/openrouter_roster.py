@@ -1,18 +1,26 @@
-"""OpenRouter model roster for eval real runs.
+"""OpenRouter model roster + per-run decode-budget control for eval real runs.
 
 ``config/openrouter_models.yaml`` is the allow-list for ``--model`` and the
 pricing source for cost estimates when the dojo table lacks a slug. During a
 run, :func:`apply_model_override` merges roster pricing into the pipeline
 taxonomy and rewrites OpenRouter agent models to the chosen slug.
+
+The decode seam is the SAME taxonomy ``agents:`` block — ``max_tokens`` /
+``reasoning_effort`` / ``temperature`` are read from the agent config by the
+pipeline's two client families, so :func:`apply_decode_budget` merges a
+per-agent budget into the same place. :func:`inert_decode_keys` reports which
+requested knobs the pipeline never reads, so a run can never claim a budget it
+did not actually send (issue #18 §3/§5).
 """
 
 from __future__ import annotations
 
 import copy
 from contextlib import contextmanager
+from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, Iterator, Mapping
 
 import structlog
 import yaml

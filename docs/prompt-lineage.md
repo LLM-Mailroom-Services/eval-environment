@@ -35,8 +35,14 @@ and the Langfuse pipeline evaluator rubrics:
 The pipeline taxonomy has five canonical document classes: contract,
 corporate_record, correspondence, insurance_claim, merger_agreement.
 merger_agreement is the MAUD class (agreement and plan of merger); contract
-is the CUAD commercial-contract class — each has its own frozen specialist
-(`merger_agreement_specialist_v1` vs `contracts_specialist_v1`).
+is the CUAD commercial-contract class. Each has its OWN specialist: MAUD
+extraction runs on `merger_agreement_specialist_v1` and CUAD contracts on
+`contracts_specialist_v1` / mutations — they are not interchangeable, and
+`contracts_specialist_v1` explicitly forbids MAUD output (`merger_consideration`
+null, `maud_clauses` []). The eval catalog wires them separately
+(`evals.invoke.TASK_SPECIALIST["merger_agreement"]` →
+`merger_agreement_specialist`, and `AGENT_CATALOG` catalogs it for
+`extract-fields` + `document-pipeline`).
 
 Artifacts: `prompts/<key>.md` (human-readable mirror — never hand-edit),
 `prompts/manifest.json` (pipeline git commit, source keys, sha256 per
@@ -47,6 +53,13 @@ every frozen sha256 against the live pipeline. Keys with `source_kind: sandbox`
 in `prompts/manifest.json` are pinned to the sandbox promotion and skipped.
 Drift on production-sourced keys means the pipeline prompts moved: re-freeze
 those keys (never silently mutate v1).
+
+**Adding a frozen v1 key for a new role** (e.g. a specialist that has none):
+`uv run python scripts/promote_sandbox_specialist.py freeze-new --role <role>
+--sandbox-stem <stem> [--sandbox-root <checkout>]` — the official path. It reads
+the sandbox stem, rebuilds the frozen module from the current snapshot with the
+new role appended, rewrites every mirror + the manifest, and refuses to clobber
+an existing role. Never hand-write `prompts/<key>.md` or the frozen module.
 
 ## Runtime injection
 

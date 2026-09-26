@@ -6,13 +6,15 @@ Uses the official lineage paths only:
     parent-span anchor when the sandbox text is not a surgical GEPA edit).
   - ``scripts/freeze_prompts.write_frozen`` for a new frozen v1 role key.
 
-Provenance: pass sandbox git SHA + stem; never hand-edit frozen v1 bytes.
+Provenance: pass sandbox git SHA + stem (or ``--sandbox-root`` for a local
+checkout); never hand-edit frozen v1 bytes.
 """
 
 from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import subprocess
 import sys
@@ -27,8 +29,26 @@ sys.path.insert(0, str(REPO_ROOT))
 from evals.prompts import frozen_v1, mutations
 from evals.prompts.mirror_md import prompt_mirror_markdown
 
+
+def load_freeze_prompts():
+    """Import ``scripts/freeze_prompts.py`` by path.
+
+    The llm-mailroom pipeline also ships a ``scripts`` package, so a plain
+    ``import scripts.freeze_prompts`` resolves to the pipeline's once the
+    pipeline is importable. Load the sibling module explicitly instead.
+    """
+    path = REPO_ROOT / "scripts" / "freeze_prompts.py"
+    spec = importlib.util.spec_from_file_location("mailroom_evals_freeze_prompts", path)
+    if spec is None or spec.loader is None:
+        raise SystemExit(f"cannot load {path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules.setdefault(spec.name, module)
+    spec.loader.exec_module(module)
+    return module
+
 SANDBOX_REPO = "Exios66/local-mailroom-sandbox"
 DEFAULT_SANDBOX_SHA = "303e7f0bb05d858d1df1d23ce49b8a31cad3251b"
+SANDBOX_PROMPT_REL = Path("config") / "prompts"
 DEFAULT_ARCHIVE_REF = "origin/main"
 ARCHIVED_MODULE = REPO_ROOT / "src" / "evals" / "prompts" / "archived_production.py"
 ARCHIVE_DIR = REPO_ROOT / "prompts" / "archive"
@@ -194,7 +214,14 @@ def archive_production_specialists(
     }
 
 
-def fetch_sandbox_prompt(sha: str, stem: str) -> str:
+def fetch_sandbox_prompt(sha: str, stem: str, *, sandbox_root: str | Path | None = None) -> str:
+    """Read one sandbox prompt stem. ``sandbox_root`` (a local checkout) wins
+    over the network so the absorbed bytes are the exact local files."""
+    if sandbox_root:
+        path = Path(sandbox_root).expanduser().resolve() / SANDBOX_PROMPT_REL / f"{stem}.txt"
+        if not path.exists():
+            raise SystemExit(f"sandbox stem not found: {path}")
+        return path.read_text(encoding="utf-8")
     url = (
         f"https://raw.githubusercontent.com/{SANDBOX_REPO}/{sha}"
         f"/config/prompts/{stem}.txt"
@@ -210,10 +237,11 @@ def promote_mutation(
     sandbox_sha: str,
     sandbox_stem: str,
     note: str,
+    sandbox_root: str | Path | None = None,
 ) -> dict:
     from evals.prompts.lineage import resolve
 
-    new_text = fetch_sandbox_prompt(sandbox_sha, sandbox_stem)
+    new_text = fetch_sandbox_prompt(sandbox_sha, sandbox_stem, sandbox_root=sandbox_root)
     parent = resolve(parent_key)
     meta = mutations.apply_mutation(
         parent_key=parent_key,
@@ -234,7 +262,7 @@ def upgrade_frozen_specialists(
     skip_archive_if_exists: bool = True,
 ) -> dict[str, dict]:
     """Archive production specialists as v0, then freeze concise sandbox text as v1."""
-    from scripts.freeze_prompts import write_frozen
+    write_frozen = load_freeze_prompts().write_frozen
 
     archived_meta = archive_production_specialists(
         from_ref=archive_from_ref,
@@ -267,10 +295,17 @@ def promote_freeze_new(
     sandbox_sha: str,
     sandbox_stem: str,
     source_label: str,
+    sandbox_root: str | Path | None = None,
 ) -> dict:
-    from scripts.freeze_prompts import write_frozen
+    """Add a NEW frozen v1 role key from a sandbox stem (the official path for a
+    role that has no frozen key yet — e.g. ``merger_agreement_specialist``).
 
-    new_text = fetch_sandbox_prompt(sandbox_sha, sandbox_stem)
+    Every existing key is re-rendered from the current ``frozen_v1`` snapshot, so
+    the new key is the only addition; existing frozen bytes never change.
+    """
+    write_frozen = load_freeze_prompts().write_frozen
+
+    new_text = fetch_sandbox_prompt(sandbox_sha, sandbox_stem, sandbox_root=sandbox_root)
     frozen: dict[str, tuple[str, str, str]] = {}
     for key, text in frozen_v1.VERSIONS.items():
         r = key.rsplit("_v1", 1)[0]
@@ -305,6 +340,11 @@ def main() -> int:
     mut.add_argument("--sandbox-stem", required=True)
     mut.add_argument("--sandbox-sha", default=DEFAULT_SANDBOX_SHA)
     mut.add_argument("--note", required=True)
+    mut.add_argument(
+        "--sandbox-root",
+        default=None,
+        help="local sandbox checkout to read config/prompts/<stem>.txt from (default: fetch from GitHub)",
+    )
 
     upg = sub.add_parser(
         "upgrade-frozen-specialists",
@@ -334,6 +374,11 @@ def main() -> int:
         default=None,
         help="manifest source_key (default: sandbox stem @ sha)",
     )
+    frz.add_argument(
+        "--sandbox-root",
+        default=None,
+        help="local sandbox checkout to read config/prompts/<stem>.txt from (default: fetch from GitHub)",
+    )
 
     args = parser.parse_args()
     if args.cmd == "archive-production-specialists":
@@ -358,6 +403,7 @@ def main() -> int:
             sandbox_sha=args.sandbox_sha,
             sandbox_stem=args.sandbox_stem,
             note=args.note,
+            sandbox_root=args.sandbox_root,
         )
         print(json.dumps({"key": meta["key"], "sha256": meta["sha256"], "parent": meta["parent"]}, indent=2))
         return 0
@@ -367,6 +413,7 @@ def main() -> int:
         sandbox_sha=args.sandbox_sha,
         sandbox_stem=args.sandbox_stem,
         source_label=source,
+        sandbox_root=args.sandbox_root,
     )
     print(json.dumps(meta, indent=2))
     return 0

@@ -15,8 +15,11 @@ other-class key on the wrong `expected` class.
 Before the suite runs, `evals.extraction_scope` filters each
 `(doc_class, predicted, expected)` pair:
 
-1. Drop empty GT placeholders (`[]`, `{}`, `""`, `null`) — the dojo skips
-   `None`/`""` but not empty lists.
+1. Drop empty GT placeholders (`[]`, `{}`, `""`, `null`, empty `ndarray` /
+   `Series`, `NaN`, `pd.NA`, `pd.NaT`) — the dojo skips `None`/`""` but not
+   empty lists. Numeric zero (`0`, `"$0"`, `False`) is a **stated** value and is
+   never dropped; a list of only-empty items is empty, one with a real item is
+   not.
 2. Drop keys outside the live schema for `doc_class` (five Hub classes).
 3. Drop trace-only keys (`reasoning`, `confidence`).
 4. Alias Hub union names (`claimed_amount` → `demand_amount` on correspondence).

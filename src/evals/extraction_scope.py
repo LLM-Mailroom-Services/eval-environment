@@ -137,21 +137,73 @@ HUB_FIELD_ALIASES: dict[str, dict[str, str]] = {
     "correspondence": {"claimed_amount": "demand_amount"},
 }
 
-_EMPTY: tuple[Any, ...] = (None, "", [], {})
+def is_missing_scalar(value: Any) -> bool:
+    """True for ``float("nan")`` and the pandas missing sentinels ``pd.NA`` /
+    ``pd.NaT``. Never true for numeric zero or ``False`` — those are stated.
+
+    ``pandas`` is imported lazily so the pure-python path stays import-cheap
+    and hermetic; the ``int``/``bool``/``float`` fast paths never reach it.
+    """
+    if isinstance(value, bool):
+        return False
+    if isinstance(value, float):
+        return value != value  # covers float and its numpy float64 subclass
+    if isinstance(value, int):
+        return False
+    try:
+        import pandas as pd  # noqa: PLC0415 — lazy by design
+    except Exception:  # pragma: no cover - pandas is a hard dep in practice
+        return False
+    try:
+        marker = pd.isna(value)
+    except (TypeError, ValueError):
+        return False
+    if isinstance(marker, bool):
+        return marker
+    return bool(getattr(marker, "shape", None) == () and marker)
+
+
+def _is_empty_array(value: Any) -> bool:
+    """Emptiness of an array-like GT cell (numpy ``ndarray``, ``pandas.Series``).
+
+    Duck-typed via ``size`` + ``ravel()`` / ``tolist()`` — no numpy import, so
+    the pure-python path stays cheap. Size 0 is absence; otherwise the payload
+    is classified recursively, so ``[0]`` is a *stated* value.
+    """
+    try:
+        if int(value.size) == 0:
+            return True
+        payload = value.ravel().tolist() if hasattr(value, "ravel") else value.tolist()
+    except (AttributeError, TypeError, ValueError):
+        return is_missing_scalar(value)
+    return is_empty_gt(payload)
 
 
 def is_empty_gt(value: Any) -> bool:
     """True when a Hub/GT value is absence, not a stated fact.
 
-    Numeric zero is a stated value. Empty lists / dicts / blank strings are not.
+    Numeric zero is a stated value. ``None`` / blank strings / empty containers
+    / empty arrays / ``NaN`` / ``pd.NA`` / ``pd.NaT`` are not.
+
+    The classification is an ordered ``isinstance`` cascade rather than a
+    ``value in _EMPTY`` membership test: ``in`` compares with ``==``, which is
+    element-wise for a numpy array, and the resulting ``bool()`` raises
+    ``ValueError: The truth value of an empty array is ambiguous``. Schema-v9
+    list-typed parquet cells reach here as ``numpy.ndarray`` because
+    ``cases._case_from_row`` reads them back through
+    ``DataFrame.to_dict(orient="records")``.
     """
-    if value in _EMPTY:
+    if value is None:
         return True
-    if isinstance(value, str) and not value.strip():
-        return True
+    if isinstance(value, str):
+        return not value.strip()
+    if isinstance(value, Mapping):
+        return len(value) == 0
     if isinstance(value, (list, tuple)):
         return all(is_empty_gt(item) for item in value)
-    return False
+    if hasattr(value, "size") and hasattr(value, "shape"):
+        return _is_empty_array(value)
+    return is_missing_scalar(value)
 
 
 def _apply_hub_aliases(doc_type: str, fields: Mapping[str, Any] | None) -> dict[str, Any]:

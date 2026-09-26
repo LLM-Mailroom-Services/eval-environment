@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-"""SAND-027 N=20 OpenRouter waves — resume-safe, spend-capped orchestration.
+"""SAND-027 OpenRouter waves: N=20 first, N=50 only after all 20s complete.
 
-Skips completed waves (experiment log), resumes interrupted runs (--resume),
-tracks cumulative estimated cost + wall time, and stops on over_cap per handoff.
+N=100 is never scheduled. Resume-safe, spend-tracked, Braintrust-traced.
+Qwen comparator is ``qwen/qwen3-8b`` (Modal Qwen3-8B twin). Extra N=20
+contracts wave pins ``contracts_specialist_v33`` for Modal prompt parity.
 """
 from __future__ import annotations
 
@@ -19,23 +20,23 @@ sys.path.insert(0, str(REPO / "src"))
 
 from evals import experiment_log  # noqa: E402
 
-SAMPLE = 20
 SEED = 42
-PROGRAM_CAP_USD = 15.0  # 10 waves × $1.50 profile cap (hard stop)
+ALLOWED_SAMPLES = frozenset({20, 50})
+FORBIDDEN_SAMPLES = frozenset({100})
+N20_PROGRAM_CAP_USD = 16.5  # 11 N=20 waves × $1.50 profile cap
 TRACKER = REPO / "reports" / "api-comparisons" / "spend-tracker.jsonl"
 LOG = REPO / "reports" / "api-comparisons" / "sand027-n20-run.log"
 
-WAVES: list[tuple[str, str, str, str]] = [
-    ("correspondence", "eval:correspondence", "qwen/qwen3-8b", "qwen3-8b"),
-    ("insurance_claim", "eval:insurance_claims", "qwen/qwen3-8b", "qwen3-8b"),
-    ("contract", "eval:contracts", "qwen/qwen3-8b", "qwen3-8b"),
-    ("merger_agreement", "eval:merger_agreement", "qwen/qwen3-8b", "qwen3-8b"),
-    ("corporate_record", "eval:corporate_records", "qwen/qwen3-8b", "qwen3-8b"),
-    ("correspondence", "eval:correspondence", "ibm-granite/granite-4.2-8b", "granite-4.2-8b"),
-    ("insurance_claim", "eval:insurance_claims", "ibm-granite/granite-4.2-8b", "granite-4.2-8b"),
-    ("contract", "eval:contracts", "ibm-granite/granite-4.2-8b", "granite-4.2-8b"),
-    ("merger_agreement", "eval:merger_agreement", "ibm-granite/granite-4.2-8b", "granite-4.2-8b"),
-    ("corporate_record", "eval:corporate_records", "ibm-granite/granite-4.2-8b", "granite-4.2-8b"),
+SPECIALISTS: list[tuple[str, str]] = [
+    ("correspondence", "eval:correspondence"),
+    ("insurance_claim", "eval:insurance_claims"),
+    ("contract", "eval:contracts"),
+    ("merger_agreement", "eval:merger_agreement"),
+    ("corporate_record", "eval:corporate_records"),
+]
+MODELS: list[tuple[str, str]] = [
+    ("qwen/qwen3-8b", "qwen3-8b"),
+    ("ibm-granite/granite-4.2-8b", "granite-4.2-8b"),
 ]
 
 
@@ -45,17 +46,44 @@ class WaveKey:
     model: str
     decode_profile: str
     doc_class: str
+    sample: int
+    prompt_version: str | None = None
 
 
-def _wave_key(cls: str, task: str, model: str, profile: str) -> WaveKey:
-    return WaveKey(task=task, model=model, decode_profile=profile, doc_class=cls)
+def _matrix(sample: int) -> list[WaveKey]:
+    if sample in FORBIDDEN_SAMPLES or sample not in ALLOWED_SAMPLES:
+        raise ValueError(f"sample {sample} is not authorized (allowed={sorted(ALLOWED_SAMPLES)})")
+    waves = [
+        WaveKey(task=task, model=model, decode_profile=profile, doc_class=cls, sample=sample)
+        for model, profile in MODELS
+        for cls, task in SPECIALISTS
+    ]
+    if sample == 20:
+        # Modal Leg A apples-to-apples: full v33 contracts prompt + Qwen3-8B.
+        waves.insert(
+            3,
+            WaveKey(
+                task="eval:contracts",
+                model="qwen/qwen3-8b",
+                decode_profile="qwen3-8b",
+                doc_class="contract",
+                sample=20,
+                prompt_version="contracts_specialist_v33",
+            ),
+        )
+    return waves
+
+
+PHASE_20 = _matrix(20)
+PHASE_50 = _matrix(50)
+ALL_WAVES = PHASE_20 + PHASE_50
 
 
 def _matches_wave(run: dict, key: WaveKey) -> bool:
     if run.get("mode") != "real":
         return False
     params = run.get("params") or {}
-    if params.get("sample") != SAMPLE or params.get("seed") != SEED:
+    if params.get("sample") != key.sample or params.get("seed") != SEED:
         return False
     if params.get("decode_profile") != key.decode_profile:
         return False
@@ -65,26 +93,39 @@ def _matches_wave(run: dict, key: WaveKey) -> bool:
     if run.get("task") != task_name:
         return False
     subset = (run.get("dataset") or {}).get("subset") or ""
-    return subset == f"class:{key.doc_class}"
+    if subset != f"class:{key.doc_class}":
+        return False
+    want_pv = key.prompt_version
+    got_pv = run.get("prompt_version")
+    if not got_pv:
+        slot = (run.get("prompt_versions") or {}).get("contracts_specialist") or {}
+        if key.doc_class == "contract" and slot.get("key") == "contracts_specialist_v33":
+            got_pv = "contracts_specialist_v33"
+        elif key.doc_class == "contract" and slot.get("key") == "contracts_specialist_v1":
+            got_pv = None
+    if want_pv:
+        return got_pv == want_pv
+    if key.doc_class == "contract" and got_pv == "contracts_specialist_v33":
+        return False
+    return got_pv in (None, "", "contracts_specialist_v1")
 
 
-def _completed_waves() -> dict[WaveKey, dict]:
+def _completed_waves(waves: list[WaveKey]) -> dict[WaveKey, dict]:
     out: dict[WaveKey, dict] = {}
-    for run in experiment_log.load_runs():
-        for cls, task, model, profile in WAVES:
-            key = _wave_key(cls, task, model, profile)
+    runs = experiment_log.load_runs()
+    for key in waves:
+        for run in runs:
             if key in out:
-                continue
+                break
             if not _matches_wave(run, key):
                 continue
             n = (run.get("metrics") or {}).get("n") or 0
-            if n >= SAMPLE and not run.get("error"):
+            if n >= key.sample and not run.get("error"):
                 out[key] = run
     return out
 
 
 def _partial_run(key: WaveKey) -> tuple[str, int] | None:
-    """Best partial run dir for this wave (cases on disk, no full summary yet)."""
     exp_root = experiment_log.experiments_dir()
     if not exp_root.exists():
         return None
@@ -93,7 +134,7 @@ def _partial_run(key: WaveKey) -> tuple[str, int] | None:
         if not _matches_wave(run, key):
             continue
         n = (run.get("metrics") or {}).get("n") or 0
-        if 0 < n < SAMPLE:
+        if 0 < n < key.sample:
             rid = run["run_id"]
             on_disk = len(experiment_log.load_cases(rid))
             if best is None or on_disk > best[1]:
@@ -109,16 +150,18 @@ def _partial_run(key: WaveKey) -> tuple[str, int] | None:
         except json.JSONDecodeError:
             continue
         prov = meta.get("provenance") or {}
-        if prov.get("sample") != SAMPLE or prov.get("seed") != SEED:
+        if prov.get("sample") != key.sample or prov.get("seed") != SEED:
             continue
-        subset = prov.get("subset") or ""
-        if subset != f"class:{key.doc_class}":
+        if (prov.get("subset") or "") != f"class:{key.doc_class}":
             continue
         rid = path.name
-        if any(r.get("run_id") == rid and (r.get("metrics") or {}).get("n", 0) >= SAMPLE for r in experiment_log.load_runs()):
+        if any(
+            r.get("run_id") == rid and (r.get("metrics") or {}).get("n", 0) >= key.sample
+            for r in experiment_log.load_runs()
+        ):
             continue
         n_cases = len(experiment_log.load_cases(rid))
-        if 0 < n_cases < SAMPLE and (best is None or n_cases > best[1]):
+        if 0 < n_cases < key.sample and (best is None or n_cases > best[1]):
             best = (rid, n_cases)
     return best
 
@@ -126,8 +169,7 @@ def _partial_run(key: WaveKey) -> tuple[str, int] | None:
 def _cumulative_cost(completed: dict[WaveKey, dict]) -> float:
     total = 0.0
     for run in completed.values():
-        perf = run.get("performance") or {}
-        c = perf.get("cost_usd_est_total")
+        c = (run.get("performance") or {}).get("cost_usd_est_total")
         if isinstance(c, (int, float)):
             total += float(c)
     return round(total, 6)
@@ -141,29 +183,20 @@ def _append_tracker(entry: dict) -> None:
 
 def _run_wave(key: WaveKey, resume_id: str | None) -> int:
     cmd = [
-        "uv",
-        "run",
-        "python",
-        "scripts/run_evals.py",
-        "--task",
-        key.task,
+        "uv", "run", "python", "scripts/run_evals.py",
+        "--task", key.task,
         "--real",
-        "--subset",
-        f"class:{key.doc_class}",
-        "--sample",
-        str(SAMPLE),
-        "--seed",
-        str(SEED),
-        "--model",
-        key.model,
-        "--decode-profile",
-        key.decode_profile,
+        "--subset", f"class:{key.doc_class}",
+        "--sample", str(key.sample),
+        "--seed", str(SEED),
+        "--model", key.model,
+        "--decode-profile", key.decode_profile,
         "--require-trace-sink",
-        "--prompt-source",
-        "frozen",
-        "--trace-backend",
-        "auto",
+        "--prompt-source", "frozen",
+        "--trace-backend", "auto",
     ]
+    if key.prompt_version:
+        cmd.extend(["--prompt-version", key.prompt_version])
     if resume_id:
         cmd.extend(["--resume", resume_id])
     LOG.parent.mkdir(parents=True, exist_ok=True)
@@ -171,7 +204,8 @@ def _run_wave(key: WaveKey, resume_id: str | None) -> int:
     with LOG.open("a", encoding="utf-8") as logfh:
         logfh.write(
             f"\n=== ORCH {time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())} "
-            f"class={key.doc_class} model={key.model} profile={key.decode_profile} "
+            f"n={key.sample} class={key.doc_class} model={key.model} "
+            f"profile={key.decode_profile} prompt={key.prompt_version or 'frozen-v1'} "
             f"resume={resume_id or 'none'} ===\n"
         )
         logfh.flush()
@@ -180,7 +214,13 @@ def _run_wave(key: WaveKey, resume_id: str | None) -> int:
     _append_tracker(
         {
             "ts": experiment_log.utc_now(),
-            "wave": key.__dict__,
+            "wave": {
+                "sample": key.sample,
+                "doc_class": key.doc_class,
+                "model": key.model,
+                "decode_profile": key.decode_profile,
+                "prompt_version": key.prompt_version,
+            },
             "resume_id": resume_id,
             "exit_code": proc.returncode,
             "wall_s": wall_s,
@@ -189,62 +229,104 @@ def _run_wave(key: WaveKey, resume_id: str | None) -> int:
     return proc.returncode
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dry-plan", action="store_true", help="print plan only")
-    args = parser.parse_args()
-
-    completed = _completed_waves()
-    spent = _cumulative_cost(completed)
-    print(f"Completed waves: {len(completed)}/{len(WAVES)}  cumulative_cost_usd_est≈${spent:.4f}")
-
-    status = 0
-    for cls, task, model, profile in WAVES:
-        key = _wave_key(cls, task, model, profile)
+def _execute_phase(
+    waves: list[WaveKey],
+    *,
+    dry_plan: bool,
+    stop_on_over_cap: bool,
+    n20_spent: float,
+) -> tuple[int, float]:
+    completed = _completed_waves(waves)
+    spent = _cumulative_cost(completed) + n20_spent
+    print(
+        f"Phase n={waves[0].sample}: {len(completed)}/{len(waves)} done  "
+        f"phase_cost≈${_cumulative_cost(completed):.4f}"
+    )
+    for key in waves:
         if key in completed:
             run = completed[key]
             perf = run.get("performance") or {}
             cap = run.get("cost_cap") or {}
             print(
-                f"SKIP done  {cls:18} {profile:14} run={run['run_id']} "
-                f"n={(run.get('metrics') or {}).get('n')} "
-                f"cost=${perf.get('cost_usd_est_total')} "
+                f"SKIP n={key.sample:<2} {key.doc_class:18} {key.decode_profile:14} "
+                f"{key.prompt_version or 'frozen-v1':28} "
+                f"run={run['run_id']} cost=${perf.get('cost_usd_est_total')} "
                 f"wall={run.get('duration_s')}s cap={cap.get('status')}"
             )
-            if cap.get("status") == "over_cap":
-                print("STOP: prior N=20 wave over_cap (handoff escalation)")
-                return 2
+            if stop_on_over_cap and cap.get("status") == "over_cap":
+                print("STOP: N=20 wave over_cap (handoff escalation)")
+                return 2, spent
             continue
 
-        if spent >= PROGRAM_CAP_USD:
-            print(f"STOP: program cap ${PROGRAM_CAP_USD} reached (spent≈${spent})")
-            return 3
+        if stop_on_over_cap and spent >= N20_PROGRAM_CAP_USD:
+            print(f"STOP: N=20 program cap ${N20_PROGRAM_CAP_USD} (spent≈${spent})")
+            return 3, spent
 
         partial = _partial_run(key)
         resume_id = partial[0] if partial else None
-        if args.dry_plan:
-            print(
-                f"RUN  plan  {cls:18} {profile:14} resume={resume_id or 'fresh'} "
-                f"partial_cases={partial[1] if partial else 0}"
-            )
+        label = (
+            f"n={key.sample:<2} {key.doc_class:18} {key.decode_profile:14} "
+            f"{key.prompt_version or 'frozen-v1':28}"
+        )
+        if dry_plan:
+            print(f"PLAN {label} resume={resume_id or 'fresh'} partial={partial[1] if partial else 0}")
             continue
 
-        print(f"RUN       {cls:18} {profile:14} resume={resume_id or 'fresh'}")
+        print(f"RUN  {label} resume={resume_id or 'fresh'}")
         code = _run_wave(key, resume_id)
         if code != 0:
-            print(f"FAIL exit={code} — re-run this script to resume")
-            return code
-        # refresh completed + spend after each wave
-        completed = _completed_waves()
-        spent = _cumulative_cost(completed)
+            print(f"FAIL exit={code} — re-run to resume")
+            return code, spent
+        completed = _completed_waves(waves)
+        spent = _cumulative_cost(completed) + n20_spent
         last = completed.get(key)
-        if last:
-            cap = last.get("cost_cap") or {}
-            if cap.get("status") == "over_cap":
-                print("STOP: wave over_cap")
-                return 2
+        if last and stop_on_over_cap and (last.get("cost_cap") or {}).get("status") == "over_cap":
+            print("STOP: N=20 wave over_cap")
+            return 2, spent
+    return 0, spent
 
-    print(f"All {len(WAVES)} waves complete. cumulative_cost_usd_est≈${spent:.4f}")
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--dry-plan", action="store_true")
+    parser.add_argument(
+        "--phase",
+        choices=("20", "50", "20-then-50"),
+        default="20-then-50",
+        help="20 only, 50 only (refuses unless all N=20 complete), or 20 then 50. Never 100.",
+    )
+    args = parser.parse_args()
+
+    n20_done = _completed_waves(PHASE_20)
+    print(f"N=20 complete: {len(n20_done)}/{len(PHASE_20)}  cost≈${_cumulative_cost(n20_done):.4f}")
+
+    if args.phase in ("20", "20-then-50"):
+        code, _ = _execute_phase(PHASE_20, dry_plan=args.dry_plan, stop_on_over_cap=True, n20_spent=0.0)
+        if code != 0:
+            return code
+        n20_done = _completed_waves(PHASE_20)
+
+    if args.phase == "20":
+        print("N=20 phase complete. N=50 not started (--phase 20). N=100 never scheduled.")
+        return 0
+
+    if len(n20_done) < len(PHASE_20):
+        missing = [w for w in PHASE_20 if w not in n20_done]
+        print(
+            f"REFUSE N=50: {len(missing)} N=20 wave(s) still incomplete "
+            f"(first missing: {missing[0].doc_class} {missing[0].decode_profile} "
+            f"{missing[0].prompt_version or 'frozen-v1'}). Finish 20s first."
+        )
+        return 4
+
+    print("All N=20 waves complete — starting N=50 (N=100 not scheduled).")
+    # $1.50 profile cap will trip over_cap on 50-doc waves; that is expected, do not halt.
+    code, _ = _execute_phase(
+        PHASE_50, dry_plan=args.dry_plan, stop_on_over_cap=False, n20_spent=_cumulative_cost(n20_done)
+    )
+    if code != 0:
+        return code
+    print("N=20 + N=50 complete. N=100 not scheduled.")
     return 0
 
 

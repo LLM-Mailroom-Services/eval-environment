@@ -378,13 +378,34 @@ def case_span(
         if backend == "braintrust":
             import braintrust
 
-            with braintrust.start_span(
-                name=node_name,
-                type=as_type,
-                input=_curate_case_input(case),
-                metadata=meta or None,
-                tags=list(meta.get("tags") or []) or None,
-            ) as span:
+            from evals.braintrust_experiment import current_experiment, dataset_record_id
+
+            exp = current_experiment()
+            span_cm = (
+                exp.start_span(
+                    name=node_name,
+                    type=as_type,
+                    input=_curate_case_input(case),
+                    metadata={
+                        **(meta or {}),
+                        **(
+                            {"dataset_record_id": dataset_record_id(case)}
+                            if dataset_record_id(case)
+                            else {}
+                        ),
+                    },
+                    tags=list(meta.get("tags") or []) or None,
+                )
+                if exp is not None
+                else braintrust.start_span(
+                    name=node_name,
+                    type=as_type,
+                    input=_curate_case_input(case),
+                    metadata=meta or None,
+                    tags=list(meta.get("tags") or []) or None,
+                )
+            )
+            with span_cm as span:
                 yield _BraintrustHandle(span)
             return
         if backend == "phoenix":

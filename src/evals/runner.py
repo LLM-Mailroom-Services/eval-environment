@@ -274,11 +274,31 @@ def run_task(
                     if mock:
                         invoke_mod.install_mocks()
                     tracing.configure(backend)
-                    case_rows = _execute_cases(
-                        spec, cases, invoke_mode=invoke_mode, backend=backend,
-                        mock=mock, model=model, prompt_version=prompt_version,
-                        summary=summary,
-                    )
+                    bt_experiment: dict[str, Any] | None = None
+                    if backend == "braintrust":
+                        from .braintrust_experiment import begin_eval_run, end_eval_run, experiments_enabled
+
+                        if experiments_enabled(mock, backend):
+                            bt_experiment = begin_eval_run(
+                                run_id=run_id,
+                                task_id=spec.task_id,
+                                cases=cases,
+                                dataset_prov={**dataset_prov, **(summary.get("dataset") or {})},
+                                run_metadata=run_meta_stub(spec, summary),
+                            )
+                            if bt_experiment:
+                                summary["braintrust_experiment"] = bt_experiment
+                    try:
+                        case_rows = _execute_cases(
+                            spec, cases, invoke_mode=invoke_mode, backend=backend,
+                            mock=mock, model=model, prompt_version=prompt_version,
+                            summary=summary,
+                        )
+                    finally:
+                        if backend == "braintrust":
+                            from .braintrust_experiment import end_eval_run
+
+                            end_eval_run()
                     # Off-path writes (relations daemon, async-deferred audit/catalog
                     # coroutines) must land inside the isolated base dir — drain
                     # before the env is restored, for every task.
@@ -306,7 +326,10 @@ def run_task(
             default=(None, {}),
         )[0]
         summary["model"] = ((by_agent.get(dominant) or {}).get("models") or [None])[0]
-    summary["trace_ids"] = _trace_ids(backend)
+    trace_ids = _trace_ids(backend) or {}
+    if summary.get("braintrust_experiment"):
+        trace_ids = {**trace_ids, **summary["braintrust_experiment"]}
+    summary["trace_ids"] = trace_ids or None
     summary["pipeline_git"] = _pipeline_git()
     summary["prompts_snapshot_path"] = _write_prompts_snapshot(summary, effective_run_dir)
     if case_rows:
@@ -329,8 +352,9 @@ def run_task(
             "performance": {"latency_ms_mean": summary["performance"].get("latency_ms_mean")},
             "error": error,
         })
+        rollup = scoring.essential_rollup(spec.scorer, case_rows)
         span.set_metrics({
-            **scoring.essential_rollup(spec.scorer, case_rows),
+            **scoring.sink_score_metrics(spec.scorer, rollup, max_scores=scoring.SINK_SCORE_METRICS_MAX),
             **({"ece": summary["calibration"]["ece"]}
                if isinstance(summary.get("calibration"), dict) and isinstance(summary["calibration"].get("ece"), (int, float)) else {}),
         })
@@ -580,10 +604,14 @@ def _execute_cases(
             if case_model:
                 span.update_metadata({"model": case_model})
             perf = scoring.performance_row(latency, usage, case_model)
-            span.set_output({"scores": scores, "error": error})
-            # Sinks carry ESSENTIAL scores only — the full set lives in the
-            # experiment log's case rows (post-hoc suite scores everything).
+            headline = scoring.sink_score_metrics(spec.scorer, scores)
+            span.set_output({"scores": headline, "error": error})
+            # Span metrics: essentials; Braintrust experiment scores: headline only.
             span.set_metrics(scoring.essential_metrics(spec.scorer, scores))
+            if backend == "braintrust":
+                from .braintrust_experiment import log_case_scores
+
+                log_case_scores(case, scorer=spec.scorer, scores=scores, error=error)
             case_trace = getattr(span, "trace_ref", None)
         rows.append(
             {

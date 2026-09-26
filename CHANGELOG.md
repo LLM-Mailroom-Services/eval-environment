@@ -12,6 +12,11 @@ All notable changes to mailroom-evals are documented here. Format based on
   `--list-models` prints registered slugs; `--model` validates, applies a
   uniform OpenRouter override to pipeline agents for the run, and prices token
   usage from the roster (dojo fallback when absent).
+- **Archived production specialists (`*_v0`)** — the pre-concise production
+  freeze is kept as a resolvable archive (`src/evals/prompts/archived_production.py`,
+  `prompts/archive/`). Opt in with `--prompt-source archived` or
+  `--prompt-version contracts_specialist_v0` (and the other specialist `_v0`
+  keys). New GEPA / token-budget / modal+vLLM work targets frozen concise v1.
 
 ### Changed
 

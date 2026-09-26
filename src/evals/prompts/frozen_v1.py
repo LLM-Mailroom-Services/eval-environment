@@ -7,7 +7,7 @@ official prompt version 1 of the mailroom-dataset lineage and the seed
 for GEPA mutations (mutations append via evals/prompts/mutations.py,
 never here).
 
-Freeze stamp: 2026-09-26T00:00:12+00:00
+Freeze stamp: 2026-09-26T00:31:05+00:00
 """
 
 from __future__ import annotations

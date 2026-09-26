@@ -96,7 +96,30 @@ def test_injection_and_restore():
 
 def test_default_keys_sources():
     assert default_keys("frozen")["sorter"] == "sorter_v1"
+    assert default_keys("frozen")["contracts_specialist"] == "contracts_specialist_v1"
+    assert default_keys("archived")["contracts_specialist"] == "contracts_specialist_v0"
+    assert default_keys("archived")["sorter"] == "sorter_v1"
     assert default_keys("production") == {}
+
+
+def test_archived_production_specialists():
+    from evals.prompts import archived_production
+
+    for role in (
+        "contracts_specialist",
+        "corporate_records_specialist",
+        "correspondence_specialist",
+        "insurance_claims_specialist",
+    ):
+        archived = resolve(f"{role}_v0")
+        frozen = resolve(f"{role}_v1")
+        assert archived.lineage == "archived" and archived.version == 0
+        assert frozen.lineage == "frozen" and frozen.version == 1
+        assert archived.text != frozen.text
+        assert archived_production.SOURCE_OF[f"{role}_v0"].startswith("production:")
+    assert "COMPLETENESS IS THE PRIORITY" not in frozen_v1.VERSIONS["contracts_specialist_v1"]
+    assert "COMPLETENESS IS THE PRIORITY" in resolve("contracts_specialist_v0").text
+    assert len(resolve("contracts_specialist_v0").text) > len(frozen_v1.VERSIONS["contracts_specialist_v1"])
 
 
 def test_mutation_gates_pass():

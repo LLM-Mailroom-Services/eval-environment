@@ -1,7 +1,7 @@
 {
   "lineage_id": "mailroom-dataset-v1",
   "frozen_version": 1,
-  "frozen_at": "2026-09-26T00:00:12+00:00",
+  "frozen_at": "2026-09-26T00:31:05+00:00",
   "pipeline_git_commit": null,
   "derivation": "llm-mailroom production prompt_templates (live production templates) + intake production template + Langfuse pipeline evaluator rubrics",
   "versions": {

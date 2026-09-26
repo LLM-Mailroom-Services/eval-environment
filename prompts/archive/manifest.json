@@ -1,0 +1,33 @@
+{
+  "lineage_id": "mailroom-dataset-v1",
+  "archived_version": 0,
+  "archived_at": "2026-09-26T00:31:05+00:00",
+  "from_ref": "origin/main",
+  "note": "Verbose production freeze superseded by concise sandbox frozen v1. Not the default; use --prompt-source archived or --prompt-version <role>_v0.",
+  "versions": {
+    "contracts_specialist_v0": {
+      "source_kind": "production",
+      "source_key": "contracts_specialist",
+      "sha256": "6216640edc40194556917211bd60bf575ce01a83c8ab5f8a633dad9cbd25e28d",
+      "chars": 32581
+    },
+    "corporate_records_specialist_v0": {
+      "source_kind": "production",
+      "source_key": "corporate_records_specialist",
+      "sha256": "655ef1702f1439260b0168a32584489e919eefbe0da0cb89b657f91f2d964db4",
+      "chars": 3046
+    },
+    "correspondence_specialist_v0": {
+      "source_kind": "production",
+      "source_key": "correspondence_specialist",
+      "sha256": "5636577d785d852f90b8332d0de1fab248465736b76bfd35dbab03a1ccfd608d",
+      "chars": 3367
+    },
+    "insurance_claims_specialist_v0": {
+      "source_kind": "production",
+      "source_key": "insurance_claims_specialist",
+      "sha256": "6b951641038c248a39fb2bf8d7a3a7eabd759a12977d5b1fc87485e962b85af8",
+      "chars": 3762
+    }
+  }
+}

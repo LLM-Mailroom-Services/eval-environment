@@ -4,11 +4,12 @@ mailroom-evals owns a **frozen, versioned prompt lineage** — the official
 prompt version 1 (`mailroom-dataset-v1`) that GEPA mutations iterate on — while
 staying wired to the mailroom pipeline's live lineage for cross-source A/Bs.
 
-## The three resolution layers
+## The four resolution layers
 
 | layer | lineage id | source | when used |
 |---|---|---|---|
-| **frozen** | `mailroom-dataset-v1` | `src/evals/prompts/frozen_v1.py` (generated) | **default for every eval run** — the stable measurement baseline |
+| **frozen** | `mailroom-dataset-v1` | `src/evals/prompts/frozen_v1.py` (generated) | **default for every eval run** — concise specialists + production freeze for other roles |
+| **archived** | same lineage, v0 | `src/evals/prompts/archived_production.py` | `--prompt-source archived` or `--prompt-version <role>_v0` — the pre-concise production specialists (not the development baseline) |
 | **mutation** | same lineage, v2+ | `prompts/mutations.json` (GEPA output) | A/B candidates; recorded with parent + change note |
 | **production** | pipeline | `llm.prompts.prompt_templates` | `--prompt-source production` — the pipeline's own templates |
 

@@ -1,10 +1,11 @@
-"""Unified prompt lineage registry — frozen v1 + GEPA mutations + live pipeline.
+"""Unified prompt lineage registry — frozen v1 + archived v0 + GEPA mutations + live pipeline.
 
 Version resolution order (``evals.prompts.registry.resolve``):
-    1. frozen   — ``frozen_v1.VERSIONS`` (the official v1 snapshot)
+    1. frozen   — ``frozen_v1.VERSIONS`` (the official v1 snapshot; concise specialists)
     2. mutation — versions appended by ``evals.prompts.mutations.apply_mutation``
                   (GEPA output; each records its parent + change note)
-    3. production — the pipeline's local templates (``llm.prompts.prompt_templates``)
+    3. archived — ``archived_production.VERSIONS`` (pre-concise production specialists as ``*_v0``)
+    4. production — the pipeline's local templates (``llm.prompts.prompt_templates``)
 
 Every version carries its sha256; ``verify_lineage`` detects drift between the
 frozen snapshot and the live pipeline (re-freeze to cut a new version).
@@ -60,11 +61,24 @@ def _production() -> dict[str, str]:
         return {}
 
 
+def _archived() -> dict[str, tuple[str, str]]:
+    """Archived production specialist texts: key -> (text, source)."""
+    try:
+        from . import archived_production
+
+        source_of = getattr(archived_production, "SOURCE_OF", {})
+        return {key: (text, source_of.get(key, "archived")) for key, text in archived_production.VERSIONS.items()}
+    except ImportError:
+        return {}
+
+
 def all_versions() -> dict[str, PromptVersion]:
-    """Every resolvable version across all three layers (frozen wins ties)."""
+    """Every resolvable version across all layers (frozen wins ties)."""
     out: dict[str, PromptVersion] = {}
     for agent_name, text in _production().items():
         out[agent_name] = PromptVersion(agent_name, text, "production", "prompt_templates", 0)
+    for key, (text, source) in _archived().items():
+        out[key] = PromptVersion(key, text, "archived", source, 0)
     for key, meta in sorted(_mutations().items()):
         out[key] = PromptVersion(key, meta["text"], "mutation", meta["parent"], int(meta["version"]))
     for key, text in frozen_v1.VERSIONS.items():

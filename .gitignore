@@ -27,3 +27,4 @@ hf_cache/
 .idea/
 .vscode/
 docs/.Rhistory
+/.cursor/agents

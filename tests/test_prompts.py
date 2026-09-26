@@ -27,6 +27,32 @@ def test_frozen_v1_production_markers():
     assert "compliance_specialist" not in frozen_v1.VERSIONS
     assert "INTAKE_SYSTEM_PROMPT" in frozen_v1.SOURCE_OF["intake_v1"]
     assert "CORRECT" in frozen_v1.VERSIONS["pipeline_verdict_v1"]
+    contracts = frozen_v1.VERSIONS["contracts_specialist_v1"]
+    assert "You are the contracts specialist" in contracts
+    assert "COMPLETENESS IS THE PRIORITY" not in contracts
+    assert frozen_v1.SOURCE_OF["contracts_specialist_v1"].startswith("sandbox:")
+    for role in (
+        "corporate_records_specialist_v1",
+        "correspondence_specialist_v1",
+        "insurance_claims_specialist_v1",
+    ):
+        assert frozen_v1.SOURCE_OF[role].startswith("sandbox:")
+
+
+def test_frozen_concise_specialists_manifest():
+    import json
+    from pathlib import Path
+
+    manifest = json.loads((Path(__file__).resolve().parents[1] / "prompts" / "manifest.json").read_text())
+    sandbox_keys = {
+        "contracts_specialist_v1",
+        "corporate_records_specialist_v1",
+        "correspondence_specialist_v1",
+        "insurance_claims_specialist_v1",
+    }
+    for key in sandbox_keys:
+        assert manifest["versions"][key]["source_kind"] == "sandbox"
+        assert "@97c0f940194f" in manifest["versions"][key]["source_key"]
 
 
 def test_roles_mapping():

@@ -3,6 +3,19 @@
 All notable changes to mailroom-evals are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+
+- **Frozen extraction specialists (concise baseline)** — `contracts_specialist_v1`,
+  `corporate_records_specialist_v1`, `correspondence_specialist_v1`, and
+  `insurance_claims_specialist_v1` now materialize the sandbox simplified
+  prompts from `Exios66/local-mailroom-sandbox` @ `97c0f940194f` (PR #33
+  lineage). Promote with
+  `python scripts/promote_sandbox_specialist.py upgrade-frozen-specialists`.
+  Removed the redundant `contracts_specialist_v2` mutation catalog entry.
+  Drift checks skip manifest keys with `source_kind: sandbox`.
+
 ## [0.4.0] — 2026-09-13
 
 v9 corpus alignment (`mailroom-dataset` GT-closure `46a4d3c2`), silent-failure

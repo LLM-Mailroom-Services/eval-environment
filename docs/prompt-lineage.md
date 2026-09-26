@@ -25,7 +25,7 @@ and the Langfuse pipeline evaluator rubrics:
 | frozen key | source |
 |---|---|
 | `sorter_v1` | `sorter` (production) |
-| `contracts_specialist_v1` … `insurance_claims_specialist_v1` | their production templates |
+| `contracts_specialist_v1` … `insurance_claims_specialist_v1` | sandbox concise prompts (`Exios66/local-mailroom-sandbox` @ `97c0f940194f`; promoted via `scripts/promote_sandbox_specialist.py upgrade-frozen-specialists`) |
 | `sorter_reviewer_v1` / `arbiter_v1` / `boss_v1` | `sorter_reviewer` / `arbiter` / `boss` (production) |
 | `judge_v1` / `judge-classification_v1` / `judge-correctness_v1` | `judge*` (production) |
 | `intake_v1` | production `INTAKE_SYSTEM_PROMPT` |
@@ -41,8 +41,10 @@ Artifacts: `prompts/<key>.md` (human-readable mirror — never hand-edit),
 version, freeze stamp).
 
 **Drift check**: `uv run python scripts/freeze_prompts.py --check` — compares
-every frozen sha256 against the live pipeline. Drift means the pipeline
-prompts moved: re-freeze to cut a new version (never silently mutate v1).
+every frozen sha256 against the live pipeline. Keys with `source_kind: sandbox`
+in `prompts/manifest.json` are pinned to the sandbox promotion and skipped.
+Drift on production-sourced keys means the pipeline prompts moved: re-freeze
+those keys (never silently mutate v1).
 
 ## Runtime injection
 

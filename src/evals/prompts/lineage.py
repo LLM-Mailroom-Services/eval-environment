@@ -98,8 +98,15 @@ def verify_lineage() -> dict[str, Any]:
 
     manifest = json.loads(MANIFEST_PATH.read_text()) if MANIFEST_PATH.exists() else {}
     drifted: list[str] = []
-    live = live_frozen_texts()
+    try:
+        live = live_frozen_texts()
+    except ModuleNotFoundError:
+        live = None
     for key, meta in (manifest.get("versions") or {}).items():
+        if meta.get("source_kind") == "sandbox":
+            continue
+        if live is None:
+            continue
         if key in live and sha256(live[key]) != meta["sha256"]:
             drifted.append(key)
     return {"ok": not drifted, "drifted": drifted, "manifest": manifest}

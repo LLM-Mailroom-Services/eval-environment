@@ -28,6 +28,15 @@ from evals.prompts.mirror_md import prompt_mirror_markdown
 SANDBOX_REPO = "Exios66/local-mailroom-sandbox"
 DEFAULT_SANDBOX_SHA = "97c0f940194f030504db0b49443caf90ce749d79"
 
+# Frozen v1 extraction specialists — concise sandbox stems @ DEFAULT_SANDBOX_SHA
+# (local-mailroom-sandbox PR #33 lineage; eval-environment #4).
+CONCISE_SPECIALIST_STEMS: dict[str, str] = {
+    "contracts_specialist": "contracts_specialist_v33_simplified",
+    "corporate_records_specialist": "corporate_records_specialist_simplified",
+    "correspondence_specialist": "correspondence_specialist_simplified",
+    "insurance_claims_specialist": "insurance_claims_specialist_simplified",
+}
+
 
 def sha256(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
@@ -64,6 +73,33 @@ def promote_mutation(
     )
     mutations.render_prompts_mirror()
     return meta
+
+
+def upgrade_frozen_specialists(
+    *,
+    sandbox_sha: str = DEFAULT_SANDBOX_SHA,
+) -> dict[str, dict]:
+    """Replace frozen v1 extraction specialist prompts with sandbox concise text."""
+    from scripts.freeze_prompts import write_frozen
+
+    frozen: dict[str, tuple[str, str, str]] = {}
+    for key, text in frozen_v1.VERSIONS.items():
+        role = key.rsplit("_v1", 1)[0]
+        prov = frozen_v1.SOURCE_OF[key]
+        kind, source_key = prov.split(":", 1)
+        frozen[role] = (text, kind, source_key)
+
+    updated: dict[str, dict] = {}
+    for role, stem in CONCISE_SPECIALIST_STEMS.items():
+        if role not in frozen:
+            raise SystemExit(f"frozen role missing: {role!r}")
+        new_text = fetch_sandbox_prompt(sandbox_sha, stem)
+        label = f"{stem}@{sandbox_sha[:12]}"
+        frozen[role] = (new_text, "sandbox", label)
+        updated[role] = {"key": f"{role}_v1", "sha256": sha256(new_text), "chars": len(new_text)}
+
+    write_frozen(frozen)
+    return updated
 
 
 def promote_freeze_new(
@@ -111,6 +147,12 @@ def main() -> int:
     mut.add_argument("--sandbox-sha", default=DEFAULT_SANDBOX_SHA)
     mut.add_argument("--note", required=True)
 
+    upg = sub.add_parser(
+        "upgrade-frozen-specialists",
+        help="replace all frozen v1 extraction specialists with sandbox concise prompts",
+    )
+    upg.add_argument("--sandbox-sha", default=DEFAULT_SANDBOX_SHA)
+
     frz = sub.add_parser("freeze-new", help="add a new frozen v1 role key from sandbox")
     frz.add_argument("--role", required=True)
     frz.add_argument("--sandbox-stem", required=True)
@@ -122,6 +164,10 @@ def main() -> int:
     )
 
     args = parser.parse_args()
+    if args.cmd == "upgrade-frozen-specialists":
+        meta = upgrade_frozen_specialists(sandbox_sha=args.sandbox_sha)
+        print(json.dumps({"updated": meta, "sandbox_sha": args.sandbox_sha}, indent=2))
+        return 0
     if args.cmd == "mutation":
         meta = promote_mutation(
             parent_key=args.parent,

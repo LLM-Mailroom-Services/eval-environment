@@ -48,7 +48,15 @@ PY
 )"
 
 if [[ ! -d "${DEST}/.git" ]]; then
-  mkdir -p "$(dirname "${DEST}")"
+  parent="$(dirname "${DEST}")"
+  if [[ ! -w "${parent}" ]]; then
+    # main's path source is ../llm-mailroom. From /workspace that is /llm-mailroom,
+    # which the agent user cannot create. Make an empty owned directory, then clone.
+    sudo mkdir -p "${DEST}"
+    sudo chown "$(id -un):$(id -gn)" "${DEST}"
+  else
+    mkdir -p "${parent}"
+  fi
   git clone --depth 1 "${URL}" "${DEST}"
 fi
 

@@ -31,7 +31,9 @@ def test_get_task_unknown():
 
 
 def test_agent_mode_rejected_for_chain():
-    with pytest.raises(ValueError):
+    from evals.preflight import PreflightError
+
+    with pytest.raises((ValueError, PreflightError)):
         run_task("eval:pipeline_chain", invoke_mode="agent", mock=True)
 
 

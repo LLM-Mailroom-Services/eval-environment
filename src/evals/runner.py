@@ -25,8 +25,10 @@ from . import experiment_log, scoring, tracing
 from . import invoke as invoke_mod
 from .cases import load_cases
 from .openrouter_roster import apply_model_override, validate_model_slug
+from .preflight import run_preflight
 from .prompts import registry as prompts_registry
 from .registry import AGENT_CATALOG, TaskSpec, get_task
+from .tasks.base import write_scoring_suite, write_subset_manifest
 
 logger = structlog.get_logger(__name__)
 
@@ -111,14 +113,35 @@ def run_task(
     dry_run: bool = False,
     pilot: bool = False,
     resume_run_id: str | None = None,
+    require_trace_sink: bool = False,
+    skip_preflight: bool = False,
 ) -> RunResult:
     """Execute one task. Returns the run summary + per-case rows."""
     spec = get_task(task_id)
+    subset = subset or spec.default_subset
+
+    # Preflight BEFORE any corpus load / prompt injection / LLM spend.
+    # Real mode hard-fails on missing credentials, bad model/prompt/subset,
+    # or an explicitly requested Braintrust sink without a key.
+    preflight_report = None
+    if not skip_preflight:
+        preflight_report = run_preflight(
+            spec,
+            mock=mock,
+            invoke_mode=invoke_mode,
+            subset=subset,
+            model=model,
+            prompt_version=prompt_version,
+            prompt_source=prompt_source,
+            trace_backend=trace_backend,
+            require_trace_sink=require_trace_sink,
+        )
+        preflight_report.raise_if_failed()
+
     if invoke_mode == "agent" and not spec.supports_agent_mode:
         raise ValueError(f"task {spec.task_id} does not support agent-mode invocation")
     if model:
         validate_model_slug(model)
-    subset = subset or spec.default_subset
     backend = tracing.resolve_backend(trace_backend)
     if mock and trace_backend is None:
         backend = "none"  # mocked clients are not wrappable; keep CI hermetic
@@ -183,8 +206,19 @@ def run_task(
     if dry_run:
         cases = cases[:1]
 
+    run_id = resume_run_id or experiment_log.new_run_id(spec.family, spec.name)
+    effective_run_dir = run_dir or (experiment_log.experiments_dir() / run_id)
+    effective_run_dir.mkdir(parents=True, exist_ok=True)
+
+    # Lock the exact case set BEFORE any LLM spend (reproducibility).
+    subset_lock = write_subset_manifest(
+        cases,
+        run_dir=effective_run_dir,
+        provenance={**dataset_prov, "subset": subset, "seed": seed, "sample": sample, "n": n},
+    )
+
     summary: dict[str, Any] = {
-        "run_id": resume_run_id or experiment_log.new_run_id(spec.family, spec.name),
+        "run_id": run_id,
         "family": spec.family,
         "task": spec.name,
         "invoke": invoke_mode,
@@ -196,6 +230,8 @@ def run_task(
         "prompt_versions": prompt_snapshot,
         "trace_backend": backend,
         "started_at": experiment_log.utc_now(),
+        "preflight": preflight_report.as_dict() if preflight_report else None,
+        "task_framing": (preflight_report.framing if preflight_report else None),
         "params": {
             "concurrency": concurrency,
             "sample": sample,
@@ -210,6 +246,10 @@ def run_task(
             **dataset_prov,
             "subset": subset,
             "repo": dataset_prov.get("repo"),
+            "case_ids": subset_lock.get("case_ids"),
+            "filenames": subset_lock.get("filenames"),
+            "subset_manifest_path": subset_lock.get("manifest_json"),
+            "subset_manifest_jsonl": subset_lock.get("manifest_jsonl"),
         },
     }
 
@@ -257,7 +297,16 @@ def run_task(
         summary["model"] = ((by_agent.get(dominant) or {}).get("models") or [None])[0]
     summary["trace_ids"] = _trace_ids(backend)
     summary["pipeline_git"] = _pipeline_git()
-    summary["prompts_snapshot_path"] = _write_prompts_snapshot(summary, run_dir)
+    summary["prompts_snapshot_path"] = _write_prompts_snapshot(summary, effective_run_dir)
+    if case_rows:
+        # Full scoring suite artifact (all deterministic keys). Sink spans carry
+        # ESSENTIAL_SCORES only; this file + case rows are the complete surface.
+        summary["scoring_suite"] = write_scoring_suite(
+            case_rows,
+            run_dir=effective_run_dir,
+            scorer=spec.scorer,
+            essential_on_sink=scoring.essential_rollup(spec.scorer, case_rows),
+        )
     if spec.family == "calibration" and not error:
         summary["calibration"] = _calibration_block(spec, case_rows)
 
@@ -275,7 +324,7 @@ def run_task(
                if isinstance(summary.get("calibration"), dict) and isinstance(summary["calibration"].get("ece"), (int, float)) else {}),
         })
 
-    written = experiment_log.write_run(summary, case_rows, run_dir=run_dir)
+    written = experiment_log.write_run(summary, case_rows, run_dir=effective_run_dir)
     try:
         experiment_log.write_markdown()
     except Exception:

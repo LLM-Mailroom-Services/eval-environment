@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import threading
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -30,6 +31,7 @@ DEFAULT_JSONL = "reports/experiment_log.jsonl"
 DEFAULT_MD = "reports/experiment_log.md"
 DEFAULT_DIR = "data/experiments"
 EMBED_LIMIT = 50  # inline case rows into the summary up to this many
+_CASE_IO = threading.Lock()
 
 REQUIRED_KEYS: tuple[str, ...] = (
     "schema_version",
@@ -211,16 +213,17 @@ def append_case_row(run_dir: Path, run_id: str, row: dict[str, Any]) -> None:
     """Checkpoint one case row (resume-safe; survives interrupted runs)."""
     run_dir.mkdir(parents=True, exist_ok=True)
     path = run_dir / "cases.jsonl"
-    if row.get("case_id"):
-        existing = {r.get("case_id") for r in _read_cases_file(path) if r.get("case_id")}
-        if row.get("case_id") in existing:
-            return
     payload = dict(row)
     payload.setdefault("run_id", run_id)
     payload.setdefault("record_kind", "case")
     payload.setdefault("schema_version", SCHEMA_VERSION)
-    with path.open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps(payload, default=str) + "\n")
+    with _CASE_IO:
+        if payload.get("case_id"):
+            existing = {r.get("case_id") for r in _read_cases_file(path) if r.get("case_id")}
+            if payload.get("case_id") in existing:
+                return
+        with path.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(payload, default=str) + "\n")
 
 
 def write_run(

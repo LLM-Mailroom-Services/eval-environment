@@ -94,3 +94,27 @@ def test_run_task_error_recorded(monkeypatch, sample_case):
     result = run_task("eval:classification", mock=True, n=1)
     assert result.summary["metrics"]["errors"] == 1
     assert result.case_rows[0]["error"]
+
+
+def test_run_task_concurrency_runs_documents_in_parallel(monkeypatch, sample_case):
+    import time
+
+    from evals import invoke as invoke_mod
+
+    cases = [
+        dict(sample_case, id=f"corpus:ground_truth:train:doc_{i}.txt", filename=f"doc_{i}.txt")
+        for i in range(4)
+    ]
+    _stub_load_cases(monkeypatch, cases)
+
+    def _slow(*_a, **_k):
+        time.sleep(0.35)
+        return {"doc_type": "contract", "confidence": 0.9}
+
+    monkeypatch.setattr(invoke_mod, "invoke", _slow)
+    started = time.perf_counter()
+    result = run_task("eval:classification", mock=True, n=4, concurrency=4)
+    elapsed = time.perf_counter() - started
+    assert result.summary["metrics"]["n"] == 4
+    assert result.summary["params"]["concurrency"] == 4
+    assert elapsed < 1.0  # serial would be ~1.4s

@@ -23,6 +23,8 @@ MODEL = "qwen/qwen3-8b"
 PROFILE = "qwen3-8b"
 SAMPLE = 20
 SEED = 42
+CONCURRENCY = int(os.environ.get("EVAL_CONCURRENCY") or "8")
+MERGER_RESUME = "20260927T012611Z-eval-merger_agreement"
 CONTRACTS_RID = "20260926T235347Z-eval-contracts"
 
 WAVES = [
@@ -97,6 +99,7 @@ def _run_wave(task: str, subset: str, resume_id: str | None) -> int:
         "--require-trace-sink",
         "--prompt-source", "frozen",
         "--trace-backend", "braintrust",
+        "--concurrency", str(CONCURRENCY),
     ]
     if resume_id:
         cmd.extend(["--resume", resume_id])
@@ -125,6 +128,11 @@ def main() -> int:
             )
             continue
         resume = None
+        if task == "eval:merger_agreement":
+            n_disk = _cases_on_disk(MERGER_RESUME)
+            if 0 < n_disk < SAMPLE:
+                resume = MERGER_RESUME
+                _log(f"RESUME {MERGER_RESUME} already={n_disk} concurrency={CONCURRENCY}")
         code = _run_wave(task, subset, resume)
         if code != 0:
             return code

@@ -56,9 +56,11 @@ def test_profiles_match_issue_18_budgets():
     assert CLASS_BUDGETS["insurance_claims_specialist"] == 6144
     assert CLASS_BUDGETS["contracts_specialist"] == 8192
     assert CLASS_BUDGETS["merger_agreement_specialist"] == 16384
-    assert GRANITE_CLASS_BUDGETS == {
+    expected_granite = {
         agent: budget * 2 for agent, budget in CLASS_BUDGETS.items()
     }
+    expected_granite["correspondence_specialist"] = 16_384
+    assert GRANITE_CLASS_BUDGETS == expected_granite
     assert (
         COMPARISON_PROFILES["granite-4.2-8b"]["max_tokens_by_agent"]
         == GRANITE_CLASS_BUDGETS
@@ -152,7 +154,7 @@ def test_apply_decode_budget_overrides_langchain_constructor_sampling(monkeypatc
             "model": "ibm-granite/granite-4.2-8b",
             "temperature": 1.0,
             "top_p": 0.95,
-            "model_kwargs": {"seed": 42},
+            "seed": 42,
         }]
         assert applied["sampling_injected"] is True
     assert lc_base.ChatOpenAI is FakeChatOpenAI

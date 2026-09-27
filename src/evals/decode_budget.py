@@ -42,6 +42,12 @@ CLASS_BUDGETS: dict[str, int] = {
 GRANITE_CLASS_BUDGETS: dict[str, int] = {
     agent: budget * 2 for agent, budget in CLASS_BUDGETS.items()
 }
+# Full canonical N=20 validation at 8192 still produced two correspondence
+# rows whose first AND retry attempts each stopped at exactly 8192 tokens
+# (16,384 aggregate) without JSON. Give this class 16K per attempt. The other
+# classes retain the evidence-backed 2x posture until their own full waves
+# prove a larger cap necessary.
+GRANITE_CLASS_BUDGETS["correspondence_specialist"] = 16_384
 
 # Thinking-ON decodes blow past the vendored 120 s per-call default (the
 # sandbox pins 600 s for exactly this reason — DMR-072 overlay comment).
@@ -279,9 +285,16 @@ def _install_sampling_injection(sampling: dict[str, Any], applied: dict[str, Any
                     kwargs["top_p"] = sampling["top_p"]
                 model_kwargs = dict(kwargs.get("model_kwargs") or {})
                 if sampling.get("seed") is not None:
-                    model_kwargs["seed"] = sampling["seed"]
+                    # Current langchain-openai exposes seed explicitly. Putting
+                    # it in model_kwargs still reaches OpenRouter, but emits a
+                    # warning on every sorter construction and obscures
+                    # whether the setting is first-class; pass it directly.
+                    kwargs["seed"] = sampling["seed"]
+                    model_kwargs.pop("seed", None)
                 if model_kwargs:
                     kwargs["model_kwargs"] = model_kwargs
+                else:
+                    kwargs.pop("model_kwargs", None)
                 applied["sampling_injected"] = True
                 super().__init__(*args, **kwargs)
 

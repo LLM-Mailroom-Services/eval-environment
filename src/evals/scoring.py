@@ -396,6 +396,9 @@ def summarize_performance(
     cost_usd_total = round(sum(actual_costs), 6) if actual_costs else None
 
     by_agent = summarize_agent_usage([r.get("agent_usage") for r in rows if r.get("agent_usage")])
+    # Prefer pricing aggregate per-agent token totals. Per-case costs are
+    # rounded to 6 decimals for storage; summing those rounded values creates
+    # measurable drift on N=20+ runs (and can zero tiny calls entirely).
     est_from_agents: float | None = None
     if by_agent:
         agent_est = [
@@ -406,11 +409,17 @@ def summarize_performance(
         if agent_est:
             est_from_agents = round(sum(agent_est), 6)
 
-    cost_usd_est_total = cost_for(prompt, completion, run_model) if run_model else None
+    cost_usd_est_total = est_from_agents
     if cost_usd_est_total is None:
-        cost_usd_est_total = est_from_agents
+        cost_usd_est_total = cost_for(prompt, completion, run_model) if run_model else None
     if cost_usd_est_total is None:
-        cost_usd_est_total = cost_usd_total
+        row_costs = [
+            r.get(cost_key)
+            for r in rows
+            for cost_key in ("cost_usd", "cost_usd_est")
+            if isinstance(r.get(cost_key), (int, float))
+        ]
+        cost_usd_est_total = round(sum(row_costs), 6) if row_costs else cost_usd_total
 
     summary: dict[str, Any] = {
         "latency_ms_mean": _mean([float(v) for v in latencies]),

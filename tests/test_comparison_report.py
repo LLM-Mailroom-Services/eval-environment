@@ -26,6 +26,8 @@ def _summary(**overrides):
             "latency_ms_p95": 30000.0,
             "tokens_prompt_total": 4000,
             "tokens_completion_total": 300,
+            "expected_cost_usd": 0.12,
+            "cost_usd_total": 0.0009,
             "cost_usd_est_total": 0.0009,
             "by_agent": {
                 "correspondence_specialist": {
@@ -136,9 +138,12 @@ def test_render_report_carries_modal_comparable_metrics():
     for needle in (
         "wall (run duration)", "concurrency",
         "cold boot | N/A", "gpu_seconds | N/A",
-        "cost per document", "latency e2e / p50 / p95 / max",
+        "cost expected (wave planning)", "cost actual (derived from case rows)",
+        "cost estimated (roster token rates)", "cost per document (actual)",
+        "latency e2e / p50 / p95 / max",
         "prompt / completion / total tokens", "cost cap",
         "Serial-vs-batched", "Decode posture",
+        "Run configuration", "Runtime performance",
         "Per-agent usage", "Per-document scores",
         "docs ok / total",
     ):
@@ -152,9 +157,15 @@ def test_render_report_carries_modal_comparable_metrics():
 
 def test_cap_status_flags_over_cap():
     summary = _summary()
+    summary["performance"]["cost_usd_total"] = 2.0
     summary["performance"]["cost_usd_est_total"] = 2.0
     status = comparison_report.cap_status(summary, {"cost_cap_usd": 1.5})
-    assert status == {"cap_usd": 1.5, "cost_usd_est": 2.0, "status": "over_cap"}
+    assert status == {
+        "cap_usd": 1.5,
+        "cost_usd_est": 2.0,
+        "cost_usd_total": 2.0,
+        "status": "over_cap",
+    }
     assert comparison_report.cap_status(summary, {}) is None
 
 

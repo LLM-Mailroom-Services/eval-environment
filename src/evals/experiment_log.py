@@ -369,9 +369,18 @@ def render_run_md(summary: dict[str, Any]) -> str:
             ["git", summary.get("git")],
             ["started / finished", f"{summary.get('started_at')} → {summary.get('finished_at')}"],
             ["duration_s", summary.get("duration_s")],
+            ["comparison report", summary.get("comparison_report")],
             ["error", summary.get("error")],
         ],
     )
+    params = summary.get("params") or {}
+    if params:
+        lines += ["", "### Run configuration", ""]
+        lines += _table(["Param", "Value"], sorted(params.items()))
+    cost_cap = summary.get("cost_cap") or {}
+    if cost_cap:
+        lines += ["", "### Cost cap", ""]
+        lines += _table(["Key", "Value"], sorted(cost_cap.items()))
     lines += ["", "### Dataset", ""]
     lines += _table(["Key", "Value"], sorted((summary.get("dataset") or {}).items()))
     lines += ["", "### Metrics", ""]
@@ -532,6 +541,47 @@ def _headline_metric(run: dict[str, Any]) -> Any:
     return "—"
 
 
+def _enrich_run_view(run: dict[str, Any]) -> dict[str, Any]:
+    """Recompute performance cost fields from on-disk case rows when available."""
+    run_id = run.get("run_id")
+    if not run_id:
+        return run
+    try:
+        case_rows = load_cases(run_id)
+    except Exception:
+        return run
+    if not case_rows:
+        return run
+    from evals import scoring
+    from evals.decode_budget import expected_cost_for_wave
+
+    out = dict(run)
+    params = out.get("params") or {}
+    wave = int(
+        params.get("sample")
+        or params.get("n")
+        or (out.get("metrics") or {}).get("n")
+        or 0
+    )
+    model = out.get("model")
+    if not model:
+        by_agent = scoring.summarize_agent_usage(
+            [r.get("agent_usage") for r in case_rows if r.get("agent_usage")]
+        )
+        dominant = max(
+            by_agent.items(),
+            key=lambda kv: kv[1].get("total_tokens") or 0,
+            default=(None, {}),
+        )[0]
+        model = ((by_agent.get(dominant) or {}).get("models") or [None])[0]
+    out["performance"] = scoring.summarize_performance(
+        case_rows,
+        run_model=model,
+        expected_cost_usd=expected_cost_for_wave(params.get("decode_profile"), wave),
+    )
+    return out
+
+
 def write_run_detail_files(path: Path | None = None, out_dir: Path | None = None) -> list[Path]:
     """One markdown file per run_id (idempotent, overwrite-in-place).
 
@@ -553,7 +603,7 @@ def write_run_detail_files(path: Path | None = None, out_dir: Path | None = None
     written = []
     for run_id, run in latest_by_id.items():
         detail_path = target_dir / f"{run_id}.md"
-        detail_path.write_text(render_run_md(run), encoding="utf-8")
+        detail_path.write_text(render_run_md(_enrich_run_view(run)), encoding="utf-8")
         written.append(detail_path)
     return written
 

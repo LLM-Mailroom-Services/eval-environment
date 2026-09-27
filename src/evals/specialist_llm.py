@@ -72,9 +72,12 @@ DEFAULT_CHUNK_CHARS = 120_000
 # lower-budget "qwen3.7-*" variant does not inherit this by accident.
 LARGE_COMPLETION_MODELS: dict[str, int] = {
     "qwen/qwen3.7-flash": 480_000,
-    # 131K context on OpenRouter; largest pinned merger doc is 464,926 chars.
-    # One-call extraction validated for Granite N=20 (see runbook §5).
-    "ibm-granite/granite-4.2-8b": 480_000,
+    # 131,072-token context minus 32,768 Granite merger max_tokens leaves ~98K
+    # input tokens. Live 400s at 345K chars (~120K input tokens) bound the
+    # safe single-chunk source span; ~280K chars keeps one call for most N=20
+    # merger rows and at most two coverage chunks for the 464,926-char outlier
+    # (not the qwen3-8b 48K → 8–10 chunk path).
+    "ibm-granite/granite-4.2-8b": 280_000,
 }
 
 

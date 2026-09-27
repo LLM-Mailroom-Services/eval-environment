@@ -239,13 +239,13 @@ def test_merger_large_completion_model_covers_pinned_corpus_in_one_call():
     assert sl._chunk_limit_for("merger_agreement", None) == 48_000
 
 
-def test_merger_granite_large_completion_model_covers_pinned_corpus_in_one_call():
+def test_merger_granite_uses_large_context_chunks_not_qwen3_8b_penalty():
     import evals.specialist_llm as sl
 
     limit = sl._chunk_limit_for("merger_agreement", "ibm-granite/granite-4.2-8b")
-    assert limit >= 465_000
-    assert needed_chunks(464_926, limit) == 1
-    assert llm_call_budget(1) == 2
+    assert limit > sl.CHUNK_CHARS["merger_agreement"]
+    assert needed_chunks(464_926, limit) <= 2
+    assert needed_chunks(200_000, limit) == 1
 
 
 def test_needed_chunks_and_call_budget_grant_one_retry_per_chunk():

@@ -212,7 +212,8 @@ call (see `LARGE_COMPLETION_MODELS` in `src/evals/specialist_llm.py`).
 | model | merger chunking | why |
 |---|---|---|
 | `qwen/qwen3-8b` | **48K multi-chunk** (8–10 calls/doc) | live evidence: ~8,192 completion-token hard cap truncates unchunked ~390K-char docs → parse_error |
-| `qwen/qwen3.7-flash`, `ibm-granite/granite-4.2-8b` | **one call/doc** (budget 2 with retry) | large completion/context ceiling on OpenRouter; 465K-char docs fit in one pass |
+| `qwen/qwen3.7-flash` | **one call/doc** (budget 2 with retry) | 1M context / 65K completion on OpenRouter; 465K-char docs fit in one pass |
+| `ibm-granite/granite-4.2-8b` | **~280K source span** (1 call for most N=20 rows; ≤2 for the 465K outlier) | 131K context minus 32K merger `max_tokens`; do not inherit the 48K qwen3-8b path |
 
 Do **not** run Granite (or qwen3.7-flash) merger evals with the qwen3-8b
 48K default — that wastes spend (e.g. Granite N=20 at ~170 calls / ~$0.44

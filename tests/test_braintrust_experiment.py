@@ -11,6 +11,7 @@ from evals.braintrust_experiment import (
     experiments_enabled,
     finalize_eval_run,
     log_case_scores,
+    sync_full_corpus_dataset,
 )
 
 
@@ -165,3 +166,55 @@ def test_log_case_scores_skips_without_parent_span():
             specialist="contracts_specialist",
         )
     exp.log.assert_not_called()
+
+
+def test_sync_full_corpus_dataset_covers_both_splits_and_is_idempotent_by_id():
+    """The full HF corpus (train + test) must land in the Braintrust
+    Dataset keyed by the stable case id -- re-running upserts in place
+    instead of duplicating rows, and no raw document text is sent."""
+    train_cases = [
+        {
+            "id": "corpus:ground_truth:train:a.txt",
+            "filename": "a.txt",
+            "text": "SECRET DOCUMENT BODY",
+            "expected_doc_class": "contract",
+            "split": "train",
+        }
+    ]
+    test_cases = [
+        {
+            "id": "corpus:ground_truth:test:b.txt",
+            "filename": "b.txt",
+            "text": "ANOTHER SECRET BODY",
+            "expected_doc_class": "insurance_claim",
+            "split": "test",
+        }
+    ]
+    prov_train = {"revision": "deadbeef12345678", "repo": "Lucius-Morningstar/mailroom-dataset"}
+    prov_test = {"revision": "deadbeef12345678", "repo": "Lucius-Morningstar/mailroom-dataset"}
+
+    fake_dataset = MagicMock()
+
+    def _load_cases(subset, **_kw):
+        return (train_cases, prov_train) if subset == "full" else (test_cases, prov_test)
+
+    with patch("evals.cases.load_cases", side_effect=_load_cases):
+        with patch("braintrust.init_dataset", return_value=fake_dataset) as init_ds:
+            result = sync_full_corpus_dataset(project="mailroom-evals")
+
+    assert result == {
+        "project": "mailroom-evals",
+        "dataset": "mailroom-hf-deadbeef",
+        "rows_train": 1,
+        "rows_test": 1,
+        "rows_total": 2,
+        "revision": "deadbeef12345678",
+    }
+    init_ds.assert_called_once_with(project="mailroom-evals", name="mailroom-hf-deadbeef")
+    assert fake_dataset.insert.call_count == 2
+    ids = {c.kwargs["id"] for c in fake_dataset.insert.call_args_list}
+    assert ids == {"corpus:ground_truth:train:a.txt", "corpus:ground_truth:test:b.txt"}
+    for call in fake_dataset.insert.call_args_list:
+        assert "SECRET" not in str(call.kwargs["input"])
+        assert call.kwargs["input"]["case_ref"]
+    fake_dataset.flush.assert_called_once()

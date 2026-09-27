@@ -86,6 +86,11 @@ uv run python scripts/run_evals.py --task pilot:pipeline_chain --real    # pre-s
 
 See [calibration.md](calibration.md) for the methodology and report shape.
 
+For the OpenRouter-provider + Braintrust-sink path specifically — model
+roster, decode profiles, concurrency reliability, the full-corpus Dataset
+sync, and exact per-task commands — see
+[openrouter-braintrust-runbook.md](openrouter-braintrust-runbook.md).
+
 ## CLI reference
 
 ```bash

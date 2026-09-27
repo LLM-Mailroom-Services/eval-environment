@@ -1,20 +1,20 @@
-# Run report — `20260927T022738Z-eval-correspondence` (API leg)
+# Run report — `20260927T033031Z-eval-correspondence` (API leg)
 
 Comparison report for the OpenRouter API leg, metric-for-metric against
 the Modal/vLLM leg reports (same wave+class stem = paired report).
 
 | | |
 |---|---|
-| run_id | `20260927T022738Z-eval-correspondence` |
+| run_id | `20260927T033031Z-eval-correspondence` |
 | task / agent | `correspondence` |
 | prompt | `—` (frozen) |
 | engine | `qwen/qwen3-8b` (OpenRouter API) |
 | profile / provider | `qwen3-8b` / `openrouter` |
 | dataset | Lucius-Morningstar/mailroom-dataset rev `46a4d3c240a36671cde0182fff4960f6b8b73aca` |
 | subset / draw | `class:correspondence` — 20 docs, seed 42 |
-| timestamp | `2026-09-27T02:27:38+00:00` |
+| timestamp | `2026-09-27T03:30:31+00:00` |
 | pipeline git | `28cb4be816fbb60e56cd3bb2ab72f8d9be1ab636` |
-| subset manifest | `data/experiments/20260927T022738Z-eval-correspondence/subset_manifest.json` |
+| subset manifest | `data/experiments/20260927T033031Z-eval-correspondence/subset_manifest.json` |
 
 ## Headline results
 
@@ -22,7 +22,7 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 |---|---|
 | docs ok / total | **20 / 20** (`errors=0`) |
 | errors | 0 |
-| overall_score | 0.0 |
+| overall_score | 0.513 |
 | scorer_errors | 0 |
 | thinking_recovered (stripped + re-scored) | 0 |
 
@@ -30,17 +30,17 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 
 | metric | value |
 |---|---|
-| wall (run duration) | 191.0000 s |
+| wall (run duration) | 1230.1 s |
 | concurrency | 8 |
 | cold boot | N/A (serverless API — no cold boot) |
 | gpu_seconds | N/A (no local GPU) |
-| cost (token-priced, roster rates) | **0.0287** USD est |
-| cost per document | 0.0014 USD est |
-| latency e2e / p50 / p95 / max | 191.0000 / 25.0867 / 133.5216 / 147.6044 s |
-| prompt / completion / total tokens | 48452 / 50672 / 99124 |
+| cost (token-priced, roster rates) | **0.0604** USD est |
+| cost per document | 0.0030 USD est |
+| latency e2e / p50 / p95 / max | 1230.1 / 84.1550 / 150.9337 / 1086.9 s |
+| prompt / completion / total tokens | 87002 / 110287 / 197289 |
 | cost cap | 1.5000 USD (profile) -> **under_cap** |
 
-**Serial-vs-batched proof:** sum(per-doc latency) = 1126.4 s vs wall = 191.0 s -> wall/serial factor 5.90x at concurrency 8.
+**Serial-vs-batched proof:** sum(per-doc latency) = 2577.2 s vs wall = 1230.1 s -> wall/serial factor 2.10x at concurrency 8.
 
 ## Decode posture
 
@@ -55,34 +55,34 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 
 | agent | calls | prompt tok | completion tok | total tok | cost est | models |
 |---|---|---|---|---|---|---|
-| `correspondence_specialist` | 20 | 48452 | 50672 | 99124 | 0.0287 | qwen/qwen3-8b |
+| `correspondence_specialist` | 39 | 87002 | 110287 | 197289 | 0.0604 | qwen/qwen3-8b |
 
 ## Per-document scores
 
 | # | doc id | subclass | overall | f1 | latency s | tok in | tok out | error |
 |---|---|---|---|---|---|---|---|---|
-| 1 | `corpus:ground_truth:train:blair-l/meetings/608.` | email | 0.0000 | 0.0000 | 15.1880 | 1576 | 719 | — |
-| 2 | `corpus:ground_truth:train:lokey-t/inbox/250.` | press_release | 0.0000 | 0.0000 | 13.6553 | 1539 | 499 | — |
-| 3 | `corpus:ground_truth:train:kean-s/all_documents/849.` | email | 0.0000 | 0.0000 | 15.7267 | 5990 | 586 | — |
-| 4 | `corpus:ground_truth:train:may-l/all_documents/41.` | email | 0.0000 | 0.0000 | 98.9224 | 1603 | 4791 | — |
-| 5 | `corpus:ground_truth:train:skilling-j/inbox/1555.` | letter | 0.0000 | 0.0000 | 19.8376 | 1958 | 1003 | — |
-| 6 | `corpus:ground_truth:train:sanders-r/sent_items/261.` | notice | 0.0000 | 0.0000 | 16.8000 | 1854 | 840 | — |
-| 7 | `corpus:ground_truth:train:mcconnell-m/all_documents/227.` | email | 0.0000 | 0.0000 | 18.5177 | 1717 | 893 | — |
-| 8 | `corpus:ground_truth:train:thomas-p/deleted_items/292.` | press_release | 0.0000 | 0.0000 | 92.8587 | 2513 | 4767 | — |
-| 9 | `corpus:ground_truth:train:nemec-g/all_documents/906.` | email | 0.0000 | 0.0000 | 14.0525 | 1505 | 721 | — |
-| 10 | `corpus:ground_truth:train:dasovich-j/all_documents/13056.` | press_release | 0.0000 | 0.0000 | 123.9451 | 2485 | 4997 | — |
-| 11 | `corpus:ground_truth:train:kaminski-v/all_documents/5470.` | letter | 0.0000 | 0.0000 | 25.0867 | 1887 | 1239 | — |
-| 12 | `corpus:ground_truth:train:parks-j/sent_items/425.` | email | 0.0000 | 0.0000 | 11.6486 | 1500 | 549 | — |
-| 13 | `corpus:ground_truth:train:campbell-l/inbox/81.` | meeting_request | 0.0000 | 0.0000 | 99.5406 | 1901 | 4691 | — |
-| 14 | `corpus:ground_truth:train:donoho-l/inbox/35.` | email | 0.0000 | 0.0000 | 147.6044 | 1805 | 5969 | — |
-| 15 | `corpus:ground_truth:train:kitchen-l/sent_items/613.` | press_release | 0.0000 | 0.0000 | 50.1052 | 1906 | 2344 | — |
-| 16 | `corpus:ground_truth:train:derrick-j/deleted_items/79.` | notice | 0.0000 | 0.0000 | 118.6407 | 1640 | 4467 | — |
-| 17 | `corpus:ground_truth:train:rogers-b/_sent_mail/358.` | email | 0.0000 | 0.0000 | 12.5481 | 1505 | 745 | — |
-| 18 | `corpus:ground_truth:train:dasovich-j/all_documents/10751.` | notice | 0.0000 | 0.0000 | 133.5216 | 9997 | 5849 | — |
-| 19 | `corpus:ground_truth:train:motley-m/deleted_items/63.` | email | 0.0000 | 0.0000 | 15.6700 | 2060 | 663 | — |
-| 20 | `corpus:ground_truth:train:dorland-c/_sent_mail/78.` | email | 0.0000 | 0.0000 | 82.5544 | 1511 | 4340 | — |
+| 1 | `corpus:ground_truth:train:blair-l/meetings/608.` | email | 0.4013 | 0.1818 | 99.0435 | 3157 | 5150 | — |
+| 2 | `corpus:ground_truth:train:lokey-t/inbox/250.` | press_release | 0.5500 | 0.2857 | 128.6658 | 3083 | 5123 | — |
+| 3 | `corpus:ground_truth:train:kean-s/all_documents/849.` | email | 0.5577 | 0.2000 | 39.3791 | 11985 | 1334 | — |
+| 4 | `corpus:ground_truth:train:may-l/all_documents/41.` | email | 0.4190 | 0.1429 | 106.3038 | 3211 | 5620 | — |
+| 5 | `corpus:ground_truth:train:skilling-j/inbox/1555.` | letter | 0.4354 | 0.1000 | 150.9337 | 3921 | 6206 | — |
+| 6 | `corpus:ground_truth:train:sanders-r/sent_items/261.` | notice | 0.6111 | 0.1904 | 134.2710 | 3713 | 5397 | — |
+| 7 | `corpus:ground_truth:train:mcconnell-m/all_documents/227.` | email | 0.5000 | 0.1904 | 55.4589 | 3439 | 2985 | — |
+| 8 | `corpus:ground_truth:train:thomas-p/deleted_items/292.` | press_release | 0.7000 | 0.2500 | 48.3339 | 5031 | 2369 | — |
+| 9 | `corpus:ground_truth:train:nemec-g/all_documents/906.` | email | 0.2500 | 0.2500 | 23.3535 | 3015 | 915 | — |
+| 10 | `corpus:ground_truth:train:dasovich-j/all_documents/13056.` | press_release | 0.5000 | 0.2105 | 32.8376 | 4975 | 1941 | — |
+| 11 | `corpus:ground_truth:train:kaminski-v/all_documents/5470.` | letter | 0.3566 | 0.1111 | 136.7258 | 3779 | 7188 | — |
+| 12 | `corpus:ground_truth:train:parks-j/sent_items/425.` | email | 0.5000 | 0.3636 | 44.9421 | 3005 | 1695 | — |
+| 13 | `corpus:ground_truth:train:campbell-l/inbox/81.` | meeting_request | 0.5833 | 0.2000 | 108.9905 | 3807 | 5852 | — |
+| 14 | `corpus:ground_truth:train:donoho-l/inbox/35.` | email | 0.6572 | 0.1904 | 49.5991 | 3615 | 2582 | — |
+| 15 | `corpus:ground_truth:train:kitchen-l/sent_items/613.` | press_release | 0.4496 | 0.1000 | 69.6412 | 3817 | 3465 | — |
+| 16 | `corpus:ground_truth:train:derrick-j/deleted_items/79.` | notice | 0.6000 | 0.2353 | 84.1550 | 3285 | 4774 | — |
+| 17 | `corpus:ground_truth:train:rogers-b/_sent_mail/358.` | email | 0.5000 | 0.3636 | 28.6864 | 3015 | 1396 | — |
+| 18 | `corpus:ground_truth:train:dasovich-j/all_documents/10751.` | notice | 0.6333 | 0.1333 | 1086.9 | 9997 | 39120 | — |
+| 19 | `corpus:ground_truth:train:motley-m/deleted_items/63.` | email | 0.5555 | 0.2353 | 47.4202 | 4125 | 1567 | — |
+| 20 | `corpus:ground_truth:train:dorland-c/_sent_mail/78.` | email | 0.5000 | 0.3077 | 101.5425 | 3027 | 5608 | — |
 
-- scored rows: 20/20; min=0.0000 max=0.0000 mean=0.0000
+- scored rows: 20/20; min=0.2500 max=0.7000 mean=0.5130
 
 ## Caveats / notes
 

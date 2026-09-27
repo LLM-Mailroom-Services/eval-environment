@@ -1,8 +1,16 @@
 """Braintrust Experiments + HF corpus dataset linkage for eval runs.
 
 Keeps the existing Logger (``init_logger``) for nested LLM spans while opening
-a per-run Experiment. Dataset-document upserts are intentionally off: Braintrust
-rows are specialist (or node) invocations, not corpus documents.
+a per-run Experiment. Per-run Experiment rows are specialist (or node)
+invocations, not corpus documents — ``begin_eval_run`` intentionally does not
+upsert the current run's sampled cases as Dataset rows (that would be
+redundant work repeated on every run for a corpus that rarely changes).
+
+The full corpus IS synced into a Braintrust Dataset, just via a separate,
+idempotent, one-shot path: ``sync_full_corpus_dataset`` /
+``scripts/sync_braintrust_dataset.py``. Run it once per corpus re-pin so the
+complete train+test sample set (3,302 rows at the pinned revision) is
+browsable/queryable in Braintrust, independent of any single eval run.
 
 Scoring on Braintrust stays minimal — see ``scoring.sink_score_metrics``.
 """
@@ -81,6 +89,57 @@ def _dataset_metadata(case: dict[str, Any], prov: dict[str, Any]) -> dict[str, A
         "filename": case.get("filename"),
         "corpus_case_id": case.get("id"),
     }
+
+
+def sync_full_corpus_dataset(*, project: str | None = None) -> dict[str, Any]:
+    """Populate a Braintrust Dataset with every row of the pinned full HF
+    corpus (train + test splits of the ``ground_truth`` x ``default`` join —
+    3,302 rows at the pinned revision) so the complete sample set is
+    available in Braintrust, not just the per-run N-sample subsets that
+    Experiments see.
+
+    Idempotent: each row is keyed by its stable corpus case id
+    (``corpus:<config>:<split>:<filename>``), so re-running updates rows in
+    place rather than duplicating them. Row ``input`` never carries raw
+    document text (same privacy rule as case spans) — just the case
+    reference, char count, and ground-truth/provenance metadata; the actual
+    text still loads from ``evals.cases`` at eval time, the one canonical
+    loading path.
+    """
+    import braintrust
+
+    from .cases import load_cases
+
+    project = project or os.environ.get("BRAINTRUST_PROJECT", "mailroom")
+    train, prov_train = load_cases("full")
+    test, prov_test = load_cases("test")
+    revision = str(prov_train.get("revision") or "")
+    ds_name = _dataset_name(revision)
+    dataset = braintrust.init_dataset(project=project, name=ds_name)
+
+    n = 0
+    for cases, prov in ((train, prov_train), (test, prov_test)):
+        for case in cases:
+            dataset.insert(
+                id=case["id"],
+                input=_dataset_input(case),
+                expected=_dataset_expected(case),
+                metadata=_dataset_metadata(case, prov),
+                tags=[t for t in (case.get("expected_doc_class"), case.get("split")) if t],
+            )
+            n += 1
+    dataset.flush()
+
+    result = {
+        "project": project,
+        "dataset": ds_name,
+        "rows_train": len(train),
+        "rows_test": len(test),
+        "rows_total": n,
+        "revision": revision,
+    }
+    logger.info("braintrust_full_corpus_dataset_synced", **result)
+    return result
 
 
 def begin_eval_run(

@@ -9,6 +9,7 @@ against the Modal/vLLM leg reports kept in the sandbox repo
     <this dir>/<model_short>/<task>/runs/<run_id>.md
     <this dir>/<model_short>/<task>/RUN-<wave>-<CLASS>-<MODEL_SHORT>-REPORT.md
     <this dir>/INDEX.md
+    <this dir>/API-LEG-MASTER-REPORT.md
 
 | slot | meaning | example |
 |---|---|---|
@@ -16,6 +17,8 @@ against the Modal/vLLM leg reports kept in the sandbox repo
 | `task/` | the eval task id — reports are always separated by specialist/task, never flat across a model dir | `contracts`, `insurance_claims`, `correspondence`, `corporate_records`, `merger_agreement`, `classification` |
 | `runs/` | immutable per-run write-up (one markdown file per experiment-log run id) | `20260927T033031Z-eval-correspondence.md` |
 | `INDEX.md` | catalog of every run write-up + link to its canonical wave stem when present | — |
+| `API-LEG-MASTER-REPORT.md` | cross-model master rollup (Qwen vs Granite, superseded runs) | regenerated with the script below |
+| `<model>/README.md` | per-model N=20 suite summary (`qwen3-8b`, `granite-4.2-8b`) | — |
 | `wave` | draw size: `--sample` when set, else `--n` | `20`, `50` |
 | `CLASS` | subset class uppercased | `CORRESPONDENCE`, `INSURANCE_CLAIM`, `CONTRACT`, `MERGER_AGREEMENT`, `CORPORATE_RECORD`; `ALL` for whole-corpus runs |
 | stem | `RUN-<wave>-<CLASS>` | pairs with the Modal report of the same stem |
@@ -47,7 +50,8 @@ recorded as `N/A (serverless API)`.
 Reports are emitted automatically by `run_task` whenever `--decode-profile`
 is active **or** the run is a substantive real eval wave (n≥20), before the
 experiment-log record lands (`summary.comparison_report` holds the path).
-Backfill or refresh all report-worthy runs from the log with:
+Backfill or refresh **all** report-worthy runs, `INDEX.md`, model suite READMEs,
+and the master rollup with:
 
     uv run python scripts/render_comparison_reports.py
 

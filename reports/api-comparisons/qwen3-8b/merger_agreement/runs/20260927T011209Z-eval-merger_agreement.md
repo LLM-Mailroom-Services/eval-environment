@@ -100,4 +100,5 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 
 - mode: **real**; trace backend: `braintrust`
 - decode profile: `qwen3-8b`; budgets/timeout per issue #18 §3
+- **Merger chunking:** up to `8` source chunks per row — confirm the run model inherits merger-specific limits from `LARGE_COMPLETION_MODELS` / `CHUNK_CHARS`, not an accidental qwen3-8b default on Granite.
 - Pair with the Modal leg: same `RUN-<wave>-<CLASS>` stem in `local-mailroom-sandbox/reports/` (e.g. `RUN-20-CORRESPONDENCE-AWQ-REPORT.md`).

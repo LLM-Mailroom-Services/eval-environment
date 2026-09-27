@@ -9,7 +9,7 @@
 | git | commit: 1d9f8d2 · dirty: True |
 | started / finished | 2026-09-27T06:03:22+00:00 → 2026-09-27T06:54:02+00:00 |
 | duration_s | 3041.9 |
-| comparison report | reports/api-comparisons/granite-4.2-8b/merger_agreement/RUN… |
+| comparison report | reports/api-comparisons/granite-4.2-8b/merger_agreement/run… |
 | error | — |
 
 ### Run configuration

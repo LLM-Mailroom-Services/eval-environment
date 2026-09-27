@@ -9,7 +9,34 @@
 | git | commit: a3506e2 · dirty: True |
 | started / finished | 2026-09-27T03:56:21+00:00 → 2026-09-27T04:20:36+00:00 |
 | duration_s | 1457.5 |
+| comparison report | reports/api-comparisons/qwen3-8b/contracts/runs/20260927T03… |
 | error | — |
+
+### Run configuration
+
+| Param | Value |
+|---|---|
+| concurrency | 8 |
+| decode_budget_applied | sampling_injected: False · max_tokens_by_agent: {'contracts… |
+| decode_call_timeout_s | 600 |
+| decode_profile | qwen3-8b |
+| decode_sampling | — |
+| dry_run | ✗ |
+| n | — |
+| resumed_from | — |
+| sample | 20 |
+| scorer | extraction |
+| seed | 42 |
+| skipped_already_run | 0 |
+| thinking_recovered | 0 |
+
+### Cost cap
+
+| Key | Value |
+|---|---|
+| cap_usd | 1.5 |
+| cost_usd_est | 0.1141 |
+| status | under_cap |
 
 ### Dataset
 
@@ -44,6 +71,8 @@
 | Metric | Value |
 |---|---|
 | cost_usd_est_total | 0.1141 |
+| cost_usd_total | 0.1141 |
+| expected_cost_usd | 0.12 |
 | latency_ms_mean | 177560.88 |
 | latency_ms_p95 | 285038.9 |
 | tokens_completion_total | 110286 |

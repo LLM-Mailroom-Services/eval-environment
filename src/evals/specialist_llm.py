@@ -72,6 +72,9 @@ DEFAULT_CHUNK_CHARS = 120_000
 # lower-budget "qwen3.7-*" variant does not inherit this by accident.
 LARGE_COMPLETION_MODELS: dict[str, int] = {
     "qwen/qwen3.7-flash": 480_000,
+    # 131K context on OpenRouter; largest pinned merger doc is 464,926 chars.
+    # One-call extraction validated for Granite N=20 (see runbook §5).
+    "ibm-granite/granite-4.2-8b": 480_000,
 }
 
 

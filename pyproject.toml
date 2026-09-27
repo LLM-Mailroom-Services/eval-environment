@@ -35,8 +35,8 @@ dev = [
 [tool.uv.sources]
 # Dev-machine resolution: the standalone Exios66/llm-mailroom clone (v0.7.1,
 # includes the merger_agreement_specialist land). Override with a git source
-# when this repo moves machines. Digital-Mailroom is an in-repo cloud fallback
-# only — do not commit that path (see docs/pipeline-checkout.md).
+# when this repo moves machines. Cloud Agents: scripts/cloud-agent-install.sh
+# materializes the sibling checkout when the parent dir is not writable.
 mailroom = { path = "../llm-mailroom", editable = true }
 
 # llm-dojo-scoring is intentionally NOT listed here: it resolves transitively

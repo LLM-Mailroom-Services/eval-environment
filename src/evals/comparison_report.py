@@ -79,6 +79,12 @@ HEADLINE_MEAN_KEYS = (
 
 _SLUG_RE = re.compile(r"[^a-z0-9.]+")
 
+# Slugified OpenRouter ids → the same filing keys used by decode profiles.
+MODEL_FILE_ALIASES: dict[str, str] = {
+    "qwen-qwen3-8b": "qwen3-8b",
+    "ibm-granite-granite-4.2-8b": "granite-4.2-8b",
+}
+
 
 def classify(subset: str | None) -> str:
     """Subset string -> report stem (``class:correspondence`` -> CORRESPONDENCE)."""
@@ -97,7 +103,8 @@ def model_short(summary: dict[str, Any]) -> str:
     if profile:
         return str(profile)
     model = str(summary.get("model") or "unknown")
-    return _SLUG_RE.sub("-", model.lower()).strip("-")
+    slug = _SLUG_RE.sub("-", model.lower()).strip("-")
+    return MODEL_FILE_ALIASES.get(slug, slug)
 
 
 def task_slug(summary: dict[str, Any]) -> str:
@@ -125,6 +132,22 @@ def _modal_contracts_v33(summary: dict[str, Any]) -> bool:
     return slot.get("key") == "contracts_specialist_v33"
 
 
+def repo_relative_path(path: Path, base: Path | None = None) -> str:
+    """Path under the repo root (for experiment-log links and JSONL fields)."""
+    root = base or REPO_ROOT
+    try:
+        return path.relative_to(root).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def run_report_path(summary: dict[str, Any], base_dir: Path | None = None) -> Path:
+    """Immutable per-run write-up: ``<model>/<task>/runs/<run_id>.md``."""
+    run_id = str(summary.get("run_id") or "unknown-run")
+    base = base_dir or reports_dir()
+    return base / model_short(summary) / task_slug(summary) / "runs" / f"{run_id}.md"
+
+
 def report_path(summary: dict[str, Any], base_dir: Path | None = None) -> Path:
     """Deterministic report path for a run summary — always filed under
     ``<model>/<task>/`` so reports never pile up flat across specialists."""
@@ -137,16 +160,36 @@ def report_path(summary: dict[str, Any], base_dir: Path | None = None) -> Path:
     return base / short / task / f"{stem}-REPORT.md"
 
 
+def is_wave_run(summary: dict[str, Any], *, min_n: int = 20) -> bool:
+    """True for substantive real eval waves that deserve a full write-up report."""
+    if summary.get("mode") != "real" or summary.get("family") != "eval":
+        return False
+    params = summary.get("params") or {}
+    wave = int(params.get("sample") or params.get("n") or (summary.get("metrics") or {}).get("n") or 0)
+    return wave >= min_n
+
+
+def run_cost_usd(summary: dict[str, Any]) -> float | None:
+    """Best available run cost for cap checks: actual (case-derived) then roster est."""
+    perf = summary.get("performance") or {}
+    for key in ("cost_usd_total", "cost_usd_est_total"):
+        value = perf.get(key)
+        if isinstance(value, (int, float)):
+            return float(value)
+    return None
+
+
 def cap_status(summary: dict[str, Any], profile: dict[str, Any]) -> dict[str, Any] | None:
-    """Compare the run's estimated cost against the profile's cap."""
+    """Compare the run's cost against the profile's cap."""
     cap = profile.get("cost_cap_usd")
     if cap is None:
         return None
-    cost = (summary.get("performance") or {}).get("cost_usd_est_total")
+    cost = run_cost_usd(summary)
     over = isinstance(cost, (int, float)) and cost > cap
     return {
         "cap_usd": cap,
         "cost_usd_est": cost,
+        "cost_usd_total": cost,
         "status": "over_cap" if over else "under_cap",
     }
 
@@ -189,7 +232,9 @@ def render_report(summary: dict[str, Any], case_rows: list[dict[str, Any]]) -> s
 
     tok_in = performance.get("tokens_prompt_total")
     tok_out = performance.get("tokens_completion_total")
-    cost_total = performance.get("cost_usd_est_total")
+    cost_actual = performance.get("cost_usd_total")
+    cost_est = performance.get("cost_usd_est_total")
+    cost_expected = performance.get("expected_cost_usd")
     n_scored = len(case_rows)
     n_ok = sum(
         1
@@ -197,11 +242,14 @@ def render_report(summary: dict[str, Any], case_rows: list[dict[str, Any]]) -> s
         if not r.get("error")
         and not ((r.get("prediction") or {}).get("_parse_error") if isinstance(r.get("prediction"), dict) else False)
     )
-    cost_per_doc = (cost_total / n_scored) if isinstance(cost_total, (int, float)) and n_scored else None
+    cost_per_doc_actual = (
+        (cost_actual / n_scored) if isinstance(cost_actual, (int, float)) and n_scored else None
+    )
+    cost_per_doc_est = (cost_est / n_scored) if isinstance(cost_est, (int, float)) and n_scored else None
 
+    wall = summary.get("duration_s")
     # Serial-vs-batched proof (same arithmetic the Modal reports print).
     serial_sum = sum(latencies) if latencies else None
-    wall = summary.get("duration_s")
 
     cap = summary.get("cost_cap") or {}
     headline = next((metrics[k] for k in HEADLINE_MEAN_KEYS if k in metrics), None)
@@ -227,6 +275,43 @@ def render_report(summary: dict[str, Any], case_rows: list[dict[str, Any]]) -> s
     lines.append(f"| timestamp | `{_fmt(summary.get('started_at'))}` |")
     lines.append(f"| pipeline git | `{_fmt(summary.get('pipeline_git'))}` |")
     lines.append(f"| subset manifest | `{_fmt(dataset.get('subset_manifest_path'))}` |")
+    lines.append(f"| eval git | `{_fmt((summary.get('git') or {}).get('commit'))}` |")
+    lines.append(f"| finished | `{_fmt(summary.get('finished_at'))}` |")
+    lines.append("")
+
+    lines.append("## Run configuration")
+    lines.append("")
+    lines.append("| control | value |")
+    lines.append("|---|---|")
+    config_rows = [
+        ("family / invoke", f"{summary.get('family')} / {summary.get('invoke')}"),
+        ("mode", summary.get("mode")),
+        ("concurrency", params.get("concurrency")),
+        ("seed", params.get("seed")),
+        ("sample / n", f"{params.get('sample')} / {params.get('n')}"),
+        ("scorer", params.get("scorer")),
+        ("decode profile", params.get("decode_profile")),
+        ("prompt source / lineage", f"{summary.get('prompt_source')} / {summary.get('prompt_lineage')}"),
+        ("trace backend", summary.get("trace_backend")),
+        ("resumed_from", params.get("resumed_from")),
+        ("dry_run", params.get("dry_run")),
+    ]
+    for label, value in config_rows:
+        lines.append(f"| {label} | {_fmt(value)} |")
+    trace_ids = summary.get("trace_ids")
+    if trace_ids:
+        lines.append(f"| trace ids | `{_fmt(trace_ids)}` |")
+    lines.append("")
+
+    lines.append("## Runtime performance")
+    lines.append("")
+    lines.append("| metric | value |")
+    lines.append("|---|---|")
+    lines.append(f"| started_at | `{_fmt(summary.get('started_at'))}` |")
+    lines.append(f"| finished_at | `{_fmt(summary.get('finished_at'))}` |")
+    lines.append(f"| duration_s (wall) | {_fmt(wall)} |")
+    lines.append(f"| latency_ms_mean | {_fmt(performance.get('latency_ms_mean'))} |")
+    lines.append(f"| latency_ms_p95 | {_fmt(performance.get('latency_ms_p95'))} |")
     lines.append("")
 
     lines.append("## Headline results")
@@ -255,8 +340,11 @@ def render_report(summary: dict[str, Any], case_rows: list[dict[str, Any]]) -> s
     lines.append(f"| concurrency | {_fmt(params.get('concurrency'))} |")
     lines.append("| cold boot | N/A (serverless API — no cold boot) |")
     lines.append("| gpu_seconds | N/A (no local GPU) |")
-    lines.append(f"| cost (token-priced, roster rates) | **{_fmt(cost_total)}** USD est |")
-    lines.append(f"| cost per document | {_fmt(cost_per_doc)} USD est |")
+    lines.append(f"| cost expected (wave planning) | **{_fmt(cost_expected)}** USD |")
+    lines.append(f"| cost actual (derived from case rows) | **{_fmt(cost_actual)}** USD |")
+    lines.append(f"| cost estimated (roster token rates) | **{_fmt(cost_est)}** USD |")
+    lines.append(f"| cost per document (actual) | {_fmt(cost_per_doc_actual)} USD |")
+    lines.append(f"| cost per document (estimated) | {_fmt(cost_per_doc_est)} USD |")
     lines.append(
         f"| latency e2e / p50 / p95 / max | {_fmt(wall)} / {_fmt(p50)} / {_fmt(p95)} / {_fmt(latency_max)} s |"
     )
@@ -350,15 +438,59 @@ def render_report(summary: dict[str, Any], case_rows: list[dict[str, Any]]) -> s
     return "\n".join(lines)
 
 
+def resolve_report_path(summary: dict[str, Any], base_dir: Path | None = None) -> Path | None:
+    """Best on-disk write-up for a run (per-run file, else canonical wave stem)."""
+    run_path = run_report_path(summary, base_dir)
+    if run_path.is_file():
+        return run_path
+    wave_path = report_path(summary, base_dir)
+    return wave_path if wave_path.is_file() else None
+
+
+def render_index(entries: list[dict[str, Any]], base_dir: Path | None = None) -> str:
+    """Markdown catalog of all experiment write-ups under ``api-comparisons``."""
+    base = base_dir or reports_dir()
+    lines = [
+        "# API-leg experiment write-ups",
+        "",
+        "Central store for Modal-comparable run reports. Layout:",
+        "",
+        "    api-comparisons/<model>/<task>/runs/<run_id>.md   — one file per run (immutable)",
+        "    api-comparisons/<model>/<task>/RUN-<wave>-<CLASS>-<MODEL>-REPORT.md — latest canonical wave stem",
+        "",
+        f"Generated from the experiment log; report root: `{repo_relative_path(base)}`.",
+        "",
+        "| run_id | task | model | n | write-up | canonical stem |",
+        "|---|---|---|---:|---|---|",
+    ]
+    for entry in sorted(entries, key=lambda e: e.get("run_id") or "", reverse=True):
+        run_rel = entry.get("run_report") or "—"
+        canon = entry.get("canonical_report") or "—"
+        lines.append(
+            f"| `{entry.get('run_id')}` | {entry.get('task')} | {entry.get('model')} | "
+            f"{entry.get('n')} | [{Path(run_rel).name}]({run_rel}) | "
+            f"{f'[{Path(canon).name}]({canon})' if canon != '—' else '—'} |"
+        )
+    return "\n".join(lines) + "\n"
+
+
 def write_report(
     summary: dict[str, Any],
     case_rows: list[dict[str, Any]],
     base_dir: Path | None = None,
+    *,
+    write_canonical: bool = True,
 ) -> Path | None:
-    """Write the comparison report for a finished run; returns its path."""
+    """Write experiment write-up(s) for a finished run; returns the per-run path."""
     if not case_rows:
         return None
-    path = report_path(summary, base_dir)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(render_report(summary, case_rows), encoding="utf-8")
-    return path
+    body = render_report(summary, case_rows)
+    root = base_dir or reports_dir()
+    run_path = run_report_path(summary, root)
+    run_path.parent.mkdir(parents=True, exist_ok=True)
+    run_path.write_text(body, encoding="utf-8")
+    if write_canonical:
+        wave_path = report_path(summary, root)
+        wave_path.parent.mkdir(parents=True, exist_ok=True)
+        wave_path.write_text(body, encoding="utf-8")
+    return run_path

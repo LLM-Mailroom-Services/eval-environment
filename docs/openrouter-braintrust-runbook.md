@@ -202,6 +202,23 @@ run_specialist eval:corporate_records  corporate_record   qwen/qwen3-8b qwen3-8b
 run_specialist eval:merger_agreement   merger_agreement   qwen/qwen3-8b qwen3-8b
 ```
 
+### Merger agreement: one LLM call per document (default)
+
+The pinned corpus includes merger agreements up to **464,926 characters**.
+**Default posture is one specialist completion per document** — not 48K
+source chunking — whenever the run model can safely hold the full text in one
+call (see `LARGE_COMPLETION_MODELS` in `src/evals/specialist_llm.py`).
+
+| model | merger chunking | why |
+|---|---|---|
+| `qwen/qwen3-8b` | **48K multi-chunk** (8–10 calls/doc) | live evidence: ~8,192 completion-token hard cap truncates unchunked ~390K-char docs → parse_error |
+| `qwen/qwen3.7-flash`, `ibm-granite/granite-4.2-8b` | **one call/doc** (budget 2 with retry) | large completion/context ceiling on OpenRouter; 465K-char docs fit in one pass |
+
+Do **not** run Granite (or qwen3.7-flash) merger evals with the qwen3-8b
+48K default — that wastes spend (e.g. Granite N=20 at ~170 calls / ~$0.44
+instead of ~20 calls). After changing chunk policy, rerun merger only; other
+specialist rows stay valid.
+
 Run each of the five sequentially (one at a time — §4), never in parallel.
 For Granite comparisons, swap `qwen/qwen3-8b qwen3-8b` for
 `ibm-granite/granite-4.2-8b granite-4.2-8b` (mandated sampling `T=1.0,

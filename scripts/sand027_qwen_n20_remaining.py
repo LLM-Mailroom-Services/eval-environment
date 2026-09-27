@@ -23,6 +23,13 @@ MODEL = "qwen/qwen3-8b"
 PROFILE = "qwen3-8b"
 SAMPLE = 20
 SEED = 42
+CONCURRENCY = int(os.environ.get("EVAL_CONCURRENCY") or "8")
+# 20260927T012611Z ran under the old 48k-char/8-9-call-per-doc chunking
+# formula (2 cases only, one of them a parse_error 0-score). specialist_llm's
+# CHUNK_CHARS for merger_agreement is now 480k chars (single call covers
+# every doc in the pinned N=20 set) — mixing those 9-call rows with the new
+# 1-call rows in one report would be methodologically inconsistent, so
+# merger starts a fresh run instead of resuming that partial one.
 CONTRACTS_RID = "20260926T235347Z-eval-contracts"
 
 WAVES = [
@@ -97,6 +104,7 @@ def _run_wave(task: str, subset: str, resume_id: str | None) -> int:
         "--require-trace-sink",
         "--prompt-source", "frozen",
         "--trace-backend", "braintrust",
+        "--concurrency", str(CONCURRENCY),
     ]
     if resume_id:
         cmd.extend(["--resume", resume_id])
@@ -124,8 +132,7 @@ def main() -> int:
                 f"cost={(done.get('performance') or {}).get('cost_usd_est_total')}"
             )
             continue
-        resume = None
-        code = _run_wave(task, subset, resume)
+        code = _run_wave(task, subset, None)
         if code != 0:
             return code
     _log("export_site_snapshot")

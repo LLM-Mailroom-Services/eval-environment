@@ -42,19 +42,41 @@ CLASS_PROMPT_STEM: dict[str, str] = {
     "insurance_claim": "You are the insurance-claims specialist.",
 }
 
-# Soft cap on source chars sent in one completion. Merger agreements in the
-# pinned corpus run 300k–400k chars; a single call truncates JSON and can
-# trip Python's int-digit limit on the broken number. Other classes stay
-# whole unless they blow past the fallback cap.
+# Soft cap on source chars sent in one completion. Confirmed by a real n=2
+# smoke test (run 20260927T014814Z): qwen/qwen3-8b has a 131,072-token
+# *context* window, but its actual *completion* ceiling is ~8,192 tokens
+# regardless of the requested max_tokens (OpenRouter's model page states
+# "supports up to 8,192 completion tokens"). A single unchunked call for a
+# ~390k-char merger doc truncated at exactly 8,195 completion tokens on both
+# smoke-test docs -> parse_error -> 0 score. So for qwen3-8b, keep the small
+# chunk size: each 48k-char chunk's extraction stays far under that ceiling
+# (~1,800 completion tokens/chunk observed), which is what actually scored
+# (0.529 f1 on contract_128). Do not raise this for qwen3-8b without
+# re-validating against the real completion cap, not just the context window.
 CHUNK_CHARS: dict[str, int] = {
     "merger_agreement": 48_000,
 }
 DEFAULT_CHUNK_CHARS = 120_000
+
+# Some models have a much larger real completion ceiling than qwen3-8b's
+# ~8,192 tokens, so the whole document fits in one call safely. Per
+# OpenRouter's model pages: qwen/qwen3.7-flash has a 1,000,000-token context
+# window and supports up to 65,536 completion tokens — 465k chars (the
+# largest doc in the pinned merger_agreement N=20) is a small fraction of
+# either budget. Keyed by exact model id (not a substring match) so a future
+# lower-budget "qwen3.7-*" variant does not inherit this by accident.
+LARGE_COMPLETION_MODELS: dict[str, int] = {
+    "qwen/qwen3.7-flash": 480_000,
+}
+
+
+def _chunk_limit_for(doc_class: str, model: str | None) -> int:
+    override = LARGE_COMPLETION_MODELS.get((model or "").strip().lower())
+    if override is not None:
+        return override
+    return CHUNK_CHARS.get(doc_class, DEFAULT_CHUNK_CHARS)
 CHUNK_OVERLAP = 1_500
 CHUNK_HEADER_CHARS = 3_500
-# Extra LLM calls allowed beyond the coverage count, for split-math
-# error — not a license to fan out. 8 needed → 10 max; 1 needed → 2 max.
-CALL_HEADROOM = 0.15
 
 _HUGE_INT_RE = re.compile(r"-?\d{4001,}")
 _ARTICLE_SPLIT = re.compile(
@@ -65,7 +87,9 @@ _JSON_NOTE = (
     "\n\nOutput must be a single json object conforming to the provided "
     "json schema (response_format is json_object). Keep values compact: "
     "clause answers are short labels or quotes of at most 80 characters; "
-    "never transcribe an article; never emit a number longer than 20 digits."
+    "never transcribe an article; never emit a number longer than 20 digits. "
+    "List fields (e.g. maud_clauses, keywords, parties) must contain at most "
+    "10 of the most salient items each, not an exhaustive enumeration."
 )
 
 # Set by invoke.install_mocks — never hits the network in mock mode.
@@ -163,9 +187,20 @@ def needed_chunks(n_chars: int, max_chars: int) -> int:
 
 
 def llm_call_budget(needed: int) -> int:
-    """Hard per-row LLM call cap: coverage count + 15% calculation headroom."""
+    """Hard per-row LLM call cap: one retry slot per coverage chunk.
+
+    Used to be ``ceil(needed * 1.15)`` — one shared spare call for the
+    whole document, sized for occasional split-math error. A concurrency=8
+    qwen/qwen3-8b repro showed that was not enough: under concurrent
+    provider load, EACH chunk call can independently come back as a
+    coherent-looking but non-JSON 200 response (not just network
+    exceptions), and a 2+-chunk document needing two retries had only one
+    spare slot (``specialist_llm_retry_blocked_by_budget``), silently
+    losing the second chunk's contribution. Budget now guarantees every
+    coverage call its own single retry: ``needed * 2``.
+    """
     needed = max(int(needed), 1)
-    return max(needed, math.ceil(needed * (1 + CALL_HEADROOM)))
+    return needed * 2
 
 
 def chunk_document(text: str, *, max_chars: int, overlap: int = CHUNK_OVERLAP) -> list[str]:
@@ -197,7 +232,7 @@ def extract_entities(
     assert_prompt_matches_class(specialist, doc_class, system)
     system = system + _JSON_NOTE
     client, model, max_tokens, temperature = _client_for(specialist)
-    limit = CHUNK_CHARS.get(doc_class, DEFAULT_CHUNK_CHARS)
+    limit = _chunk_limit_for(doc_class, model)
     needed = needed_chunks(len(text), limit)
     budget = llm_call_budget(needed)
     pieces = chunk_document(text, max_chars=limit)
@@ -441,44 +476,63 @@ def _complete_json(
     agent: str,
     meter: _RowCallBudget,
 ) -> dict[str, Any]:
+    """One chat completion, JSON-parsed, with a single meter-gated retry.
+
+    The retry fires on EITHER a network exception OR a "successful" 200
+    response that still fails to parse as JSON. The latter is not
+    hypothetical: under concurrent load (multiple simultaneous OpenRouter
+    requests for a cheap/free-tier model like qwen/qwen3-8b), the provider
+    can return coherent-looking but non-JSON placeholder text (e.g.
+    ``// JSON output here (as per the instructions) //``) even with
+    ``response_format=json_object`` and thinking explicitly disabled —
+    confirmed via a concurrency=8 repro that showed 0 parse errors at
+    concurrency=1 vs. 18/20 at concurrency=8 on the same model/prompts/docs.
+    A single retry (falling back to a plain, non-json_object completion
+    with an explicit "reply with ONLY a JSON object" instruction) is cheap
+    insurance against that provider-side flakiness.
+    """
     if not meter.consume():
         return {"_parse_error": True, "confidence": 0.0, "_budget_exhausted": True}
-    try:
+
+    def _attempt(*, plain_fallback: bool) -> dict[str, Any]:
         response = client.chat.completions.create(
             **_completion_kwargs(
                 model=model,
-                system=system,
+                system=system if not plain_fallback else system + "\nReply with ONLY a JSON object.",
                 user=user,
                 max_tokens=max_tokens,
                 temperature=temperature,
-                json_object=True,
+                json_object=not plain_fallback,
             )
         )
+        _record(response, model=model, agent=agent)
+        return _parse_json(_message_content(response))
+
+    try:
+        parsed = _attempt(plain_fallback=False)
+        needs_retry = bool(parsed.get("_parse_error"))
     except Exception:
-        if not meter.consume():
-            logger.warning(
-                "specialist_llm_retry_blocked_by_budget",
-                agent=agent,
-                used=meter.used,
-                budget=meter.limit,
-            )
-            return {"_parse_error": True, "confidence": 0.0, "_budget_exhausted": True}
-        try:
-            response = client.chat.completions.create(
-                **_completion_kwargs(
-                    model=model,
-                    system=system + "\nReply with ONLY a JSON object.",
-                    user=user,
-                    max_tokens=max_tokens,
-                    temperature=temperature,
-                    json_object=False,
-                )
-            )
-        except Exception:
-            logger.warning("specialist_llm_retry_failed", agent=agent, exc_info=True)
-            return {"_parse_error": True, "confidence": 0.0}
-    _record(response, model=model, agent=agent)
-    return _parse_json(_message_content(response))
+        parsed = {"_parse_error": True, "confidence": 0.0}
+        needs_retry = True
+
+    if not needs_retry:
+        return parsed
+
+    if not meter.consume():
+        logger.warning(
+            "specialist_llm_retry_blocked_by_budget",
+            agent=agent,
+            used=meter.used,
+            budget=meter.limit,
+        )
+        parsed["_budget_exhausted"] = True
+        return parsed
+
+    try:
+        return _attempt(plain_fallback=True)
+    except Exception:
+        logger.warning("specialist_llm_retry_failed", agent=agent, exc_info=True)
+        return {"_parse_error": True, "confidence": 0.0}
 
 
 def _client_for(specialist: str) -> tuple[Any, str, int, float]:

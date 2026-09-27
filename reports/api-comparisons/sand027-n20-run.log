@@ -454,3 +454,318 @@ hub tip ed7576b676343e0b402ec5412cded301e629bdee differs from the requested pinn
 2026-09-27 01:00:09 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=390026 doc_class=merger_agreement max_tokens=16384 model=qwen/qwen3-8b prompt_key=merger_agreement_specialist_v1
 2026-09-27 01:04:59 [info     ] braintrust_openai_client_wrapped
 2026-09-27 01:04:59 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=346640 doc_class=merger_agreement max_tokens=16384 model=qwen/qwen3-8b prompt_key=merger_agreement_specialist_v1
+2026-09-27T01:12:06Z RUN -u scripts/run_evals.py --task eval:merger_agreement --real --subset class:merger_agreement --sample 20 --seed 42 --model qwen/qwen3-8b --decode-profile qwen3-8b --require-trace-sink --prompt-source frozen --trace-backend braintrust
+
+=== QWEN-N20 2026-09-27T01:12:06Z ===
+2026-09-27 01:12:07 [info     ] evals_dojo_taxonomy_wired      doc_classes=['contract', 'corporate_record', 'correspondence', 'insurance_claim', 'merger_agreement'] source=_taxonomy_from_config
+2026-09-27 01:12:07 [info     ] evals_preflight_ok             mode=real task=eval:merger_agreement warnings=0
+hub tip ed7576b676343e0b402ec5412cded301e629bdee differs from the requested pinned revision 46a4d3c240a36671cde0182fff4960f6b8b73aca — the dataset moved upstream; this load stays on the pin, but the next publish roll will re-pin (provenance records both)
+2026-09-27 01:12:09 [info     ] evals_prompts_activated        roles=['arbiter', 'boss', 'contracts_specialist', 'corporate_records_specialist', 'correspondence_specialist', 'insurance_claims_specialist', 'intake', 'judge', 'judge-classification', 'judge-correctness', 'merger_agreement_specialist', 'pipeline_quality', 'pipeline_verdict', 'sorter', 'sorter_reviewer'] source=frozen
+2026-09-27 01:12:09 [info     ] evals_openrouter_model_override model=qwen/qwen3-8b
+2026-09-27 01:12:10 [info     ] braintrust_initialized         project=Mailroom-Evals
+2026-09-27 01:12:10 [info     ] evals_langchain_llm_tracing_enabled
+2026-09-27 01:12:10 [info     ] braintrust_experiment_opened   dataset=off experiment=20260927T011209Z-eval-merger_agreement n_cases=20 project=Mailroom-Evals
+2026-09-27 01:12:10 [info     ] braintrust_openai_client_wrapped
+2026-09-27 01:12:10 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=387592 chunk_limit=48000 chunks=8 doc_class=merger_agreement max_tokens=16384 model=qwen/qwen3-8b prompt_key=merger_agreement_specialist_v1
+2026-09-27 01:23:19 [info     ] braintrust_openai_client_wrapped
+2026-09-27 01:23:19 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=362558 chunk_limit=48000 chunks=8 doc_class=merger_agreement max_tokens=16384 model=qwen/qwen3-8b prompt_key=merger_agreement_specialist_v1
+2026-09-27T01:26:08Z RUN -u scripts/run_evals.py --task eval:merger_agreement --real --subset class:merger_agreement --sample 20 --seed 42 --model qwen/qwen3-8b --decode-profile qwen3-8b --require-trace-sink --prompt-source frozen --trace-backend braintrust
+
+=== QWEN-N20 2026-09-27T01:26:08Z ===
+2026-09-27 01:26:09 [info     ] evals_dojo_taxonomy_wired      doc_classes=['contract', 'corporate_record', 'correspondence', 'insurance_claim', 'merger_agreement'] source=_taxonomy_from_config
+2026-09-27 01:26:09 [info     ] evals_preflight_ok             mode=real task=eval:merger_agreement warnings=0
+hub tip ed7576b676343e0b402ec5412cded301e629bdee differs from the requested pinned revision 46a4d3c240a36671cde0182fff4960f6b8b73aca — the dataset moved upstream; this load stays on the pin, but the next publish roll will re-pin (provenance records both)
+2026-09-27 01:26:11 [info     ] evals_prompts_activated        roles=['arbiter', 'boss', 'contracts_specialist', 'corporate_records_specialist', 'correspondence_specialist', 'insurance_claims_specialist', 'intake', 'judge', 'judge-classification', 'judge-correctness', 'merger_agreement_specialist', 'pipeline_quality', 'pipeline_verdict', 'sorter', 'sorter_reviewer'] source=frozen
+2026-09-27 01:26:11 [info     ] evals_openrouter_model_override model=qwen/qwen3-8b
+2026-09-27 01:26:11 [info     ] braintrust_initialized         project=Mailroom-Evals
+2026-09-27 01:26:11 [info     ] evals_langchain_llm_tracing_enabled
+2026-09-27 01:26:11 [info     ] braintrust_experiment_opened   dataset=off experiment=20260927T012611Z-eval-merger_agreement n_cases=20 project=Mailroom-Evals
+2026-09-27 01:26:11 [info     ] braintrust_openai_client_wrapped
+2026-09-27 01:26:11 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=387592 chunk_limit=48000 chunks=9 doc_class=merger_agreement llm_call_budget=11 max_tokens=16384 model=qwen/qwen3-8b needed_chunks=9 prompt_key=merger_agreement_specialist_v1
+2026-09-27 01:33:44 [info     ] braintrust_openai_client_wrapped
+2026-09-27 01:33:44 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=362558 chunk_limit=48000 chunks=8 doc_class=merger_agreement llm_call_budget=10 max_tokens=16384 model=qwen/qwen3-8b needed_chunks=8 prompt_key=merger_agreement_specialist_v1
+2026-09-27 01:36:50 [info     ] braintrust_openai_client_wrapped
+2026-09-27 01:36:50 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=390026 chunk_limit=48000 chunks=9 doc_class=merger_agreement llm_call_budget=11 max_tokens=16384 model=qwen/qwen3-8b needed_chunks=9 prompt_key=merger_agreement_specialist_v1
+2026-09-27T02:27:36Z RUN -u scripts/run_evals.py --task eval:correspondence --real --subset class:correspondence --sample 20 --seed 42 --model qwen/qwen3-8b --decode-profile qwen3-8b --require-trace-sink --prompt-source frozen --trace-backend braintrust --concurrency 8
+
+=== QWEN-N20-CONCURRENCY8-RERUN 2026-09-27T02:27:36Z task=eval:correspondence subset=class:correspondence ===
+2026-09-27 02:27:36 [info     ] evals_dojo_taxonomy_wired      doc_classes=['contract', 'corporate_record', 'correspondence', 'insurance_claim', 'merger_agreement'] source=_taxonomy_from_config
+2026-09-27 02:27:36 [info     ] evals_preflight_ok             mode=real task=eval:correspondence warnings=0
+hub tip ed7576b676343e0b402ec5412cded301e629bdee differs from the requested pinned revision 46a4d3c240a36671cde0182fff4960f6b8b73aca — the dataset moved upstream; this load stays on the pin, but the next publish roll will re-pin (provenance records both)
+2026-09-27 02:27:38 [info     ] evals_prompts_activated        roles=['arbiter', 'boss', 'contracts_specialist', 'corporate_records_specialist', 'correspondence_specialist', 'insurance_claims_specialist', 'intake', 'judge', 'judge-classification', 'judge-correctness', 'merger_agreement_specialist', 'pipeline_quality', 'pipeline_verdict', 'sorter', 'sorter_reviewer'] source=frozen
+2026-09-27 02:27:38 [info     ] evals_openrouter_model_override model=qwen/qwen3-8b
+2026-09-27 02:27:39 [info     ] braintrust_initialized         project=Mailroom-Evals
+2026-09-27 02:27:39 [info     ] evals_langchain_llm_tracing_enabled
+2026-09-27 02:27:39 [info     ] braintrust_experiment_opened   dataset=off experiment=20260927T022738Z-eval-correspondence n_cases=20 project=Mailroom-Evals
+2026-09-27 02:27:39 [info     ] evals_case_pool                n=20 workers=8
+2026-09-27 02:27:39 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:39 [info     ] specialist_openrouter_call     agent=correspondence_specialist chars=882 chunk_limit=120000 chunks=1 doc_class=correspondence llm_call_budget=2 max_tokens=4096 model=qwen/qwen3-8b needed_chunks=1 prompt_key=correspondence_specialist_v1
+2026-09-27 02:27:39 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:39 [info     ] specialist_openrouter_call     agent=correspondence_specialist chars=256 chunk_limit=120000 chunks=1 doc_class=correspondence llm_call_budget=2 max_tokens=4096 model=qwen/qwen3-8b needed_chunks=1 prompt_key=correspondence_specialist_v1
+2026-09-27 02:27:39 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:39 [info     ] specialist_openrouter_call     agent=correspondence_specialist chars=1626 chunk_limit=120000 chunks=1 doc_class=correspondence llm_call_budget=2 max_tokens=4096 model=qwen/qwen3-8b needed_chunks=1 prompt_key=correspondence_specialist_v1
+2026-09-27 02:27:39 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:39 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:39 [info     ] specialist_openrouter_call     agent=correspondence_specialist chars=4477 chunk_limit=120000 chunks=1 doc_class=correspondence llm_call_budget=2 max_tokens=4096 model=qwen/qwen3-8b needed_chunks=1 prompt_key=correspondence_specialist_v1
+2026-09-27 02:27:39 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:39 [info     ] specialist_openrouter_call     agent=correspondence_specialist chars=376 chunk_limit=120000 chunks=1 doc_class=correspondence llm_call_budget=2 max_tokens=4096 model=qwen/qwen3-8b needed_chunks=1 prompt_key=correspondence_specialist_v1
+2026-09-27 02:27:39 [info     ] specialist_openrouter_call     agent=correspondence_specialist chars=22046 chunk_limit=120000 chunks=1 doc_class=correspondence llm_call_budget=2 max_tokens=4096 model=qwen/qwen3-8b needed_chunks=1 prompt_key=correspondence_specialist_v1
+2026-09-27 02:27:39 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:39 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:39 [info     ] specialist_openrouter_call     agent=correspondence_specialist chars=1359 chunk_limit=120000 chunks=1 doc_class=correspondence llm_call_budget=2 max_tokens=4096 model=qwen/qwen3-8b needed_chunks=1 prompt_key=correspondence_specialist_v1
+2026-09-27 02:27:39 [info     ] specialist_openrouter_call     agent=correspondence_specialist chars=257 chunk_limit=120000 chunks=1 doc_class=correspondence llm_call_budget=2 max_tokens=4096 model=qwen/qwen3-8b needed_chunks=1 prompt_key=correspondence_specialist_v1
+2026-09-27 02:27:48 [info     ] evals_dojo_taxonomy_wired      doc_classes=['contract', 'corporate_record', 'correspondence', 'insurance_claim', 'merger_agreement'] source=_taxonomy_from_config
+2026-09-27 02:27:48 [info     ] evals_preflight_ok             mode=real task=eval:merger_agreement warnings=0
+hub tip ed7576b676343e0b402ec5412cded301e629bdee differs from the requested pinned revision 46a4d3c240a36671cde0182fff4960f6b8b73aca — the dataset moved upstream; this load stays on the pin, but the next publish roll will re-pin (provenance records both)
+2026-09-27 02:27:50 [info     ] evals_prompts_activated        roles=['arbiter', 'boss', 'contracts_specialist', 'corporate_records_specialist', 'correspondence_specialist', 'insurance_claims_specialist', 'intake', 'judge', 'judge-classification', 'judge-correctness', 'merger_agreement_specialist', 'pipeline_quality', 'pipeline_verdict', 'sorter', 'sorter_reviewer'] source=frozen
+2026-09-27 02:27:50 [info     ] evals_openrouter_model_override model=qwen/qwen3.7-flash
+2026-09-27 02:27:51 [info     ] braintrust_initialized         project=Mailroom-Evals
+2026-09-27 02:27:51 [info     ] evals_langchain_llm_tracing_enabled
+2026-09-27 02:27:51 [info     ] braintrust_experiment_opened   dataset=off experiment=20260927T022750Z-eval-merger_agreement n_cases=20 project=Mailroom-Evals
+2026-09-27 02:27:51 [info     ] evals_case_pool                n=20 workers=8
+2026-09-27 02:27:51 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:51 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=362558 chunk_limit=480000 chunks=1 doc_class=merger_agreement llm_call_budget=2 max_tokens=16384 model=qwen/qwen3.7-flash needed_chunks=1 prompt_key=merger_agreement_specialist_v1
+2026-09-27 02:27:51 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:51 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=346640 chunk_limit=480000 chunks=1 doc_class=merger_agreement llm_call_budget=2 max_tokens=16384 model=qwen/qwen3.7-flash needed_chunks=1 prompt_key=merger_agreement_specialist_v1
+2026-09-27 02:27:51 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:51 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=390026 chunk_limit=480000 chunks=1 doc_class=merger_agreement llm_call_budget=2 max_tokens=16384 model=qwen/qwen3.7-flash needed_chunks=1 prompt_key=merger_agreement_specialist_v1
+2026-09-27 02:27:51 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:51 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=375476 chunk_limit=480000 chunks=1 doc_class=merger_agreement llm_call_budget=2 max_tokens=16384 model=qwen/qwen3.7-flash needed_chunks=1 prompt_key=merger_agreement_specialist_v1
+2026-09-27 02:27:51 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:51 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=400420 chunk_limit=480000 chunks=1 doc_class=merger_agreement llm_call_budget=2 max_tokens=16384 model=qwen/qwen3.7-flash needed_chunks=1 prompt_key=merger_agreement_specialist_v1
+2026-09-27 02:27:51 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:51 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=456659 chunk_limit=480000 chunks=1 doc_class=merger_agreement llm_call_budget=2 max_tokens=16384 model=qwen/qwen3.7-flash needed_chunks=1 prompt_key=merger_agreement_specialist_v1
+2026-09-27 02:27:51 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:51 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:51 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=387592 chunk_limit=480000 chunks=1 doc_class=merger_agreement llm_call_budget=2 max_tokens=16384 model=qwen/qwen3.7-flash needed_chunks=1 prompt_key=merger_agreement_specialist_v1
+2026-09-27 02:27:51 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=323575 chunk_limit=480000 chunks=1 doc_class=merger_agreement llm_call_budget=2 max_tokens=16384 model=qwen/qwen3.7-flash needed_chunks=1 prompt_key=merger_agreement_specialist_v1
+2026-09-27 02:27:53 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:53 [info     ] specialist_openrouter_call     agent=correspondence_specialist chars=37 chunk_limit=120000 chunks=1 doc_class=correspondence llm_call_budget=2 max_tokens=4096 model=qwen/qwen3-8b needed_chunks=1 prompt_key=correspondence_specialist_v1
+2026-09-27 02:27:54 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:54 [info     ] specialist_openrouter_call     agent=correspondence_specialist chars=4883 chunk_limit=120000 chunks=1 doc_class=correspondence llm_call_budget=2 max_tokens=4096 model=qwen/qwen3-8b needed_chunks=1 prompt_key=correspondence_specialist_v1
+2026-09-27 02:27:55 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:55 [info     ] specialist_openrouter_call     agent=correspondence_specialist chars=1758 chunk_limit=120000 chunks=1 doc_class=correspondence llm_call_budget=2 max_tokens=4096 model=qwen/qwen3-8b needed_chunks=1 prompt_key=correspondence_specialist_v1
+2026-09-27 02:27:56 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:56 [info     ] specialist_openrouter_call     agent=correspondence_specialist chars=33 chunk_limit=120000 chunks=1 doc_class=correspondence llm_call_budget=2 max_tokens=4096 model=qwen/qwen3-8b needed_chunks=1 prompt_key=correspondence_specialist_v1
+2026-09-27 02:27:57 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:57 [info     ] specialist_openrouter_call     agent=correspondence_specialist chars=1572 chunk_limit=120000 chunks=1 doc_class=correspondence llm_call_budget=2 max_tokens=4096 model=qwen/qwen3-8b needed_chunks=1 prompt_key=correspondence_specialist_v1
+2026-09-27 02:27:59 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:27:59 [info     ] specialist_openrouter_call     agent=correspondence_specialist chars=1005 chunk_limit=120000 chunks=1 doc_class=correspondence llm_call_budget=2 max_tokens=4096 model=qwen/qwen3-8b needed_chunks=1 prompt_key=correspondence_specialist_v1
+2026-09-27 02:28:07 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:07 [info     ] specialist_openrouter_call     agent=correspondence_specialist chars=1363 chunk_limit=120000 chunks=1 doc_class=correspondence llm_call_budget=2 max_tokens=4096 model=qwen/qwen3-8b needed_chunks=1 prompt_key=correspondence_specialist_v1
+2026-09-27 02:28:07 [info     ] evals_dojo_taxonomy_wired      doc_classes=['contract', 'corporate_record', 'correspondence', 'insurance_claim', 'merger_agreement'] source=_taxonomy_from_config
+2026-09-27 02:28:07 [info     ] evals_preflight_ok             mode=real task=eval:corporate_records warnings=0
+2026-09-27 02:28:08 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:08 [info     ] specialist_openrouter_call     agent=correspondence_specialist chars=525 chunk_limit=120000 chunks=1 doc_class=correspondence llm_call_budget=2 max_tokens=4096 model=qwen/qwen3-8b needed_chunks=1 prompt_key=correspondence_specialist_v1
+hub tip ed7576b676343e0b402ec5412cded301e629bdee differs from the requested pinned revision 46a4d3c240a36671cde0182fff4960f6b8b73aca — the dataset moved upstream; this load stays on the pin, but the next publish roll will re-pin (provenance records both)
+2026-09-27 02:28:10 [info     ] evals_prompts_activated        roles=['arbiter', 'boss', 'contracts_specialist', 'corporate_records_specialist', 'correspondence_specialist', 'insurance_claims_specialist', 'intake', 'judge', 'judge-classification', 'judge-correctness', 'merger_agreement_specialist', 'pipeline_quality', 'pipeline_verdict', 'sorter', 'sorter_reviewer'] source=frozen
+2026-09-27 02:28:10 [info     ] evals_openrouter_model_override model=qwen/qwen3-8b
+2026-09-27 02:28:10 [info     ] braintrust_initialized         project=Mailroom-Evals
+2026-09-27 02:28:10 [info     ] evals_langchain_llm_tracing_enabled
+2026-09-27 02:28:10 [info     ] braintrust_experiment_opened   dataset=off experiment=20260927T022810Z-eval-corporate_records n_cases=20 project=Mailroom-Evals
+2026-09-27 02:28:10 [info     ] evals_case_pool                n=20 workers=8
+2026-09-27 02:28:10 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:10 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=1942 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 02:28:10 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:10 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=5652 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 02:28:10 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:10 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=61679 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 02:28:10 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:10 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=2024 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 02:28:10 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:10 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=76768 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 02:28:10 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:10 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=30793 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 02:28:10 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:10 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=448 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 02:28:10 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:10 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=75367 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 02:28:18 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:18 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=43160 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 02:28:20 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:20 [info     ] specialist_openrouter_call     agent=correspondence_specialist chars=56 chunk_limit=120000 chunks=1 doc_class=correspondence llm_call_budget=2 max_tokens=4096 model=qwen/qwen3-8b needed_chunks=1 prompt_key=correspondence_specialist_v1
+2026-09-27 02:28:24 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:24 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=7340 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 02:28:29 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:29 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=9527 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 02:28:30 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:30 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=3699 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 02:28:32 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:32 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=436607 chunk_limit=480000 chunks=1 doc_class=merger_agreement llm_call_budget=2 max_tokens=16384 model=qwen/qwen3.7-flash needed_chunks=1 prompt_key=merger_agreement_specialist_v1
+2026-09-27 02:28:33 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:33 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=376202 chunk_limit=480000 chunks=1 doc_class=merger_agreement llm_call_budget=2 max_tokens=16384 model=qwen/qwen3.7-flash needed_chunks=1 prompt_key=merger_agreement_specialist_v1
+2026-09-27 02:28:33 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:33 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=396016 chunk_limit=480000 chunks=1 doc_class=merger_agreement llm_call_budget=2 max_tokens=16384 model=qwen/qwen3.7-flash needed_chunks=1 prompt_key=merger_agreement_specialist_v1
+2026-09-27 02:28:33 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:33 [info     ] specialist_openrouter_call     agent=correspondence_specialist chars=34310 chunk_limit=120000 chunks=1 doc_class=correspondence llm_call_budget=2 max_tokens=4096 model=qwen/qwen3-8b needed_chunks=1 prompt_key=correspondence_specialist_v1
+2026-09-27 02:28:33 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:33 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=1408 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 02:28:35 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:35 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=1400 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 02:28:37 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:37 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=312280 chunk_limit=120000 chunks=3 doc_class=corporate_record llm_call_budget=4 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=3 prompt_key=corporate_records_specialist_v1
+2026-09-27 02:28:38 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:38 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=260560 chunk_limit=480000 chunks=1 doc_class=merger_agreement llm_call_budget=2 max_tokens=16384 model=qwen/qwen3.7-flash needed_chunks=1 prompt_key=merger_agreement_specialist_v1
+2026-09-27 02:28:40 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:40 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=338706 chunk_limit=480000 chunks=1 doc_class=merger_agreement llm_call_budget=2 max_tokens=16384 model=qwen/qwen3.7-flash needed_chunks=1 prompt_key=merger_agreement_specialist_v1
+2026-09-27 02:28:40 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:40 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=445865 chunk_limit=480000 chunks=1 doc_class=merger_agreement llm_call_budget=2 max_tokens=16384 model=qwen/qwen3.7-flash needed_chunks=1 prompt_key=merger_agreement_specialist_v1
+2026-09-27 02:28:40 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:40 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=392439 chunk_limit=480000 chunks=1 doc_class=merger_agreement llm_call_budget=2 max_tokens=16384 model=qwen/qwen3.7-flash needed_chunks=1 prompt_key=merger_agreement_specialist_v1
+2026-09-27 02:28:41 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:41 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=20497 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 02:28:44 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:44 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=437603 chunk_limit=480000 chunks=1 doc_class=merger_agreement llm_call_budget=2 max_tokens=16384 model=qwen/qwen3.7-flash needed_chunks=1 prompt_key=merger_agreement_specialist_v1
+2026-09-27 02:28:47 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:47 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=21694 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 02:28:49 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:49 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=3451 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 02:28:54 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:54 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=8162 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 02:28:57 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:28:57 [info     ] specialist_openrouter_call     agent=correspondence_specialist chars=2024 chunk_limit=120000 chunks=1 doc_class=correspondence llm_call_budget=2 max_tokens=4096 model=qwen/qwen3-8b needed_chunks=1 prompt_key=correspondence_specialist_v1
+2026-09-27 02:29:00 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:29:00 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=15622 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 02:29:12 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:29:12 [info     ] specialist_openrouter_call     agent=correspondence_specialist chars=78 chunk_limit=120000 chunks=1 doc_class=correspondence llm_call_budget=2 max_tokens=4096 model=qwen/qwen3-8b needed_chunks=1 prompt_key=correspondence_specialist_v1
+2026-09-27 02:29:20 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:29:20 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=464926 chunk_limit=480000 chunks=1 doc_class=merger_agreement llm_call_budget=2 max_tokens=16384 model=qwen/qwen3.7-flash needed_chunks=1 prompt_key=merger_agreement_specialist_v1
+2026-09-27 02:29:21 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:29:21 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=270877 chunk_limit=480000 chunks=1 doc_class=merger_agreement llm_call_budget=2 max_tokens=16384 model=qwen/qwen3.7-flash needed_chunks=1 prompt_key=merger_agreement_specialist_v1
+2026-09-27 02:29:22 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:29:22 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=345354 chunk_limit=480000 chunks=1 doc_class=merger_agreement llm_call_budget=2 max_tokens=16384 model=qwen/qwen3.7-flash needed_chunks=1 prompt_key=merger_agreement_specialist_v1
+2026-09-27 02:29:23 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:29:23 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=383196 chunk_limit=480000 chunks=1 doc_class=merger_agreement llm_call_budget=2 max_tokens=16384 model=qwen/qwen3.7-flash needed_chunks=1 prompt_key=merger_agreement_specialist_v1
+2026-09-27 02:30:10 [info     ] evals_prompts_deactivated
+2026-09-27 02:30:10 [info     ] braintrust_experiment_finalized cost_cap_status=None cost_usd_est_total=0.057522 document_rows=20 duration_s=142.0 run_id=20260927T022750Z-eval-merger_agreement
+20260927T022750Z-eval-merger_agreement: n=20 errors=0 latency_ms_mean=45286.88 tokens=1422210+114281 cost=$0.057522 model=qwen/qwen3.7-flash top_agent=merger_agreement_specialist(18 calls)
+  subset manifest: data/experiments/20260927T022750Z-eval-merger_agreement/subset_manifest.json
+  scoring suite: data/experiments/20260927T022750Z-eval-merger_agreement/scoring_suite.json
+2026-09-27 02:30:47 [info     ] evals_prompts_deactivated
+2026-09-27 02:30:47 [info     ] braintrust_experiment_finalized cost_cap_status=None cost_usd_est_total=0.028723 document_rows=20 duration_s=191.0 run_id=20260927T022738Z-eval-correspondence
+20260927T022738Z-eval-correspondence: n=20 errors=0 latency_ms_mean=56321.215 tokens=48452+50672 cost=$0.028723 model=qwen/qwen3-8b top_agent=correspondence_specialist(20 calls)
+  subset manifest: data/experiments/20260927T022738Z-eval-correspondence/subset_manifest.json
+  scoring suite: data/experiments/20260927T022738Z-eval-correspondence/scoring_suite.json
+2026-09-27T02:30:48Z exit eval:correspondence code=0
+2026-09-27T02:30:48Z RUN -u scripts/run_evals.py --task eval:insurance_claims --real --subset class:insurance_claim --sample 20 --seed 42 --model qwen/qwen3-8b --decode-profile qwen3-8b --require-trace-sink --prompt-source frozen --trace-backend braintrust --concurrency 8
+
+=== QWEN-N20-CONCURRENCY8-RERUN 2026-09-27T02:30:48Z task=eval:insurance_claims subset=class:insurance_claim ===
+2026-09-27 02:30:48 [info     ] evals_dojo_taxonomy_wired      doc_classes=['contract', 'corporate_record', 'correspondence', 'insurance_claim', 'merger_agreement'] source=_taxonomy_from_config
+2026-09-27 02:30:48 [info     ] evals_preflight_ok             mode=real task=eval:insurance_claims warnings=0
+hub tip ed7576b676343e0b402ec5412cded301e629bdee differs from the requested pinned revision 46a4d3c240a36671cde0182fff4960f6b8b73aca — the dataset moved upstream; this load stays on the pin, but the next publish roll will re-pin (provenance records both)
+2026-09-27 02:30:50 [info     ] evals_prompts_activated        roles=['arbiter', 'boss', 'contracts_specialist', 'corporate_records_specialist', 'correspondence_specialist', 'insurance_claims_specialist', 'intake', 'judge', 'judge-classification', 'judge-correctness', 'merger_agreement_specialist', 'pipeline_quality', 'pipeline_verdict', 'sorter', 'sorter_reviewer'] source=frozen
+2026-09-27 02:30:50 [info     ] evals_openrouter_model_override model=qwen/qwen3-8b
+2026-09-27 02:30:51 [info     ] braintrust_initialized         project=Mailroom-Evals
+2026-09-27 02:30:51 [info     ] evals_langchain_llm_tracing_enabled
+2026-09-27 02:30:51 [info     ] braintrust_experiment_opened   dataset=off experiment=20260927T023050Z-eval-insurance_claims n_cases=20 project=Mailroom-Evals
+2026-09-27 02:30:51 [info     ] evals_case_pool                n=20 workers=8
+2026-09-27 02:30:51 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:30:51 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:30:51 [info     ] specialist_openrouter_call     agent=insurance_claims_specialist chars=1134 chunk_limit=120000 chunks=1 doc_class=insurance_claim llm_call_budget=2 max_tokens=6144 model=qwen/qwen3-8b needed_chunks=1 prompt_key=insurance_claims_specialist_v1
+2026-09-27 02:30:51 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:30:51 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:30:51 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:30:51 [info     ] specialist_openrouter_call     agent=insurance_claims_specialist chars=1115 chunk_limit=120000 chunks=1 doc_class=insurance_claim llm_call_budget=2 max_tokens=6144 model=qwen/qwen3-8b needed_chunks=1 prompt_key=insurance_claims_specialist_v1
+2026-09-27 02:30:51 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:30:51 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:30:51 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:30:51 [info     ] specialist_openrouter_call     agent=insurance_claims_specialist chars=636 chunk_limit=120000 chunks=1 doc_class=insurance_claim llm_call_budget=2 max_tokens=6144 model=qwen/qwen3-8b needed_chunks=1 prompt_key=insurance_claims_specialist_v1
+2026-09-27 02:30:51 [info     ] specialist_openrouter_call     agent=insurance_claims_specialist chars=899 chunk_limit=120000 chunks=1 doc_class=insurance_claim llm_call_budget=2 max_tokens=6144 model=qwen/qwen3-8b needed_chunks=1 prompt_key=insurance_claims_specialist_v1
+2026-09-27 02:30:51 [info     ] specialist_openrouter_call     agent=insurance_claims_specialist chars=639 chunk_limit=120000 chunks=1 doc_class=insurance_claim llm_call_budget=2 max_tokens=6144 model=qwen/qwen3-8b needed_chunks=1 prompt_key=insurance_claims_specialist_v1
+2026-09-27 02:30:51 [info     ] specialist_openrouter_call     agent=insurance_claims_specialist chars=858 chunk_limit=120000 chunks=1 doc_class=insurance_claim llm_call_budget=2 max_tokens=6144 model=qwen/qwen3-8b needed_chunks=1 prompt_key=insurance_claims_specialist_v1
+2026-09-27 02:30:51 [info     ] specialist_openrouter_call     agent=insurance_claims_specialist chars=1134 chunk_limit=120000 chunks=1 doc_class=insurance_claim llm_call_budget=2 max_tokens=6144 model=qwen/qwen3-8b needed_chunks=1 prompt_key=insurance_claims_specialist_v1
+2026-09-27 02:30:51 [info     ] specialist_openrouter_call     agent=insurance_claims_specialist chars=895 chunk_limit=120000 chunks=1 doc_class=insurance_claim llm_call_budget=2 max_tokens=6144 model=qwen/qwen3-8b needed_chunks=1 prompt_key=insurance_claims_specialist_v1
+2026-09-27 02:31:02 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:31:02 [info     ] specialist_openrouter_call     agent=insurance_claims_specialist chars=635 chunk_limit=120000 chunks=1 doc_class=insurance_claim llm_call_budget=2 max_tokens=6144 model=qwen/qwen3-8b needed_chunks=1 prompt_key=insurance_claims_specialist_v1
+2026-09-27 02:31:05 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:31:05 [info     ] specialist_openrouter_call     agent=insurance_claims_specialist chars=946 chunk_limit=120000 chunks=1 doc_class=insurance_claim llm_call_budget=2 max_tokens=6144 model=qwen/qwen3-8b needed_chunks=1 prompt_key=insurance_claims_specialist_v1
+2026-09-27 02:31:05 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:31:05 [info     ] specialist_openrouter_call     agent=insurance_claims_specialist chars=1211 chunk_limit=120000 chunks=1 doc_class=insurance_claim llm_call_budget=2 max_tokens=6144 model=qwen/qwen3-8b needed_chunks=1 prompt_key=insurance_claims_specialist_v1
+2026-09-27 02:31:06 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:31:06 [info     ] specialist_openrouter_call     agent=insurance_claims_specialist chars=646 chunk_limit=120000 chunks=1 doc_class=insurance_claim llm_call_budget=2 max_tokens=6144 model=qwen/qwen3-8b needed_chunks=1 prompt_key=insurance_claims_specialist_v1
+2026-09-27 02:31:07 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:31:07 [info     ] specialist_openrouter_call     agent=insurance_claims_specialist chars=650 chunk_limit=120000 chunks=1 doc_class=insurance_claim llm_call_budget=2 max_tokens=6144 model=qwen/qwen3-8b needed_chunks=1 prompt_key=insurance_claims_specialist_v1
+2026-09-27 02:31:12 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:31:12 [info     ] specialist_openrouter_call     agent=insurance_claims_specialist chars=858 chunk_limit=120000 chunks=1 doc_class=insurance_claim llm_call_budget=2 max_tokens=6144 model=qwen/qwen3-8b needed_chunks=1 prompt_key=insurance_claims_specialist_v1
+2026-09-27 02:31:13 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:31:13 [info     ] specialist_openrouter_call     agent=insurance_claims_specialist chars=894 chunk_limit=120000 chunks=1 doc_class=insurance_claim llm_call_budget=2 max_tokens=6144 model=qwen/qwen3-8b needed_chunks=1 prompt_key=insurance_claims_specialist_v1
+2026-09-27 02:31:14 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:31:14 [info     ] specialist_openrouter_call     agent=insurance_claims_specialist chars=1232 chunk_limit=120000 chunks=1 doc_class=insurance_claim llm_call_budget=2 max_tokens=6144 model=qwen/qwen3-8b needed_chunks=1 prompt_key=insurance_claims_specialist_v1
+2026-09-27 02:31:19 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:31:19 [info     ] specialist_openrouter_call     agent=insurance_claims_specialist chars=1452 chunk_limit=120000 chunks=1 doc_class=insurance_claim llm_call_budget=2 max_tokens=6144 model=qwen/qwen3-8b needed_chunks=1 prompt_key=insurance_claims_specialist_v1
+2026-09-27 02:31:21 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:31:21 [info     ] specialist_openrouter_call     agent=insurance_claims_specialist chars=863 chunk_limit=120000 chunks=1 doc_class=insurance_claim llm_call_budget=2 max_tokens=6144 model=qwen/qwen3-8b needed_chunks=1 prompt_key=insurance_claims_specialist_v1
+2026-09-27 02:31:22 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:31:22 [info     ] specialist_openrouter_call     agent=insurance_claims_specialist chars=1003 chunk_limit=120000 chunks=1 doc_class=insurance_claim llm_call_budget=2 max_tokens=6144 model=qwen/qwen3-8b needed_chunks=1 prompt_key=insurance_claims_specialist_v1
+2026-09-27 02:31:24 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:31:24 [info     ] specialist_openrouter_call     agent=insurance_claims_specialist chars=14607 chunk_limit=120000 chunks=1 doc_class=insurance_claim llm_call_budget=2 max_tokens=6144 model=qwen/qwen3-8b needed_chunks=1 prompt_key=insurance_claims_specialist_v1
+2026-09-27 02:33:44 [info     ] evals_prompts_deactivated
+2026-09-27 02:33:44 [info     ] braintrust_experiment_finalized cost_cap_status=None cost_usd_est_total=0.019242 document_rows=20 duration_s=175.6 run_id=20260927T023050Z-eval-insurance_claims
+20260927T023050Z-eval-insurance_claims: n=20 errors=0 latency_ms_mean=34087.465 tokens=40696+31824 cost=$0.019242 model=qwen/qwen3-8b top_agent=insurance_claims_specialist(20 calls)
+  subset manifest: data/experiments/20260927T023050Z-eval-insurance_claims/subset_manifest.json
+  scoring suite: data/experiments/20260927T023050Z-eval-insurance_claims/scoring_suite.json
+2026-09-27T02:33:44Z exit eval:insurance_claims code=0
+2026-09-27T02:33:44Z RUN -u scripts/run_evals.py --task eval:contracts --real --subset class:contract --sample 20 --seed 42 --model qwen/qwen3-8b --decode-profile qwen3-8b --require-trace-sink --prompt-source frozen --trace-backend braintrust --concurrency 8
+
+=== QWEN-N20-CONCURRENCY8-RERUN 2026-09-27T02:33:44Z task=eval:contracts subset=class:contract ===
+2026-09-27 02:33:45 [info     ] evals_dojo_taxonomy_wired      doc_classes=['contract', 'corporate_record', 'correspondence', 'insurance_claim', 'merger_agreement'] source=_taxonomy_from_config
+2026-09-27 02:33:45 [info     ] evals_preflight_ok             mode=real task=eval:contracts warnings=0
+hub tip ed7576b676343e0b402ec5412cded301e629bdee differs from the requested pinned revision 46a4d3c240a36671cde0182fff4960f6b8b73aca — the dataset moved upstream; this load stays on the pin, but the next publish roll will re-pin (provenance records both)
+2026-09-27 02:33:47 [info     ] evals_prompts_activated        roles=['arbiter', 'boss', 'contracts_specialist', 'corporate_records_specialist', 'correspondence_specialist', 'insurance_claims_specialist', 'intake', 'judge', 'judge-classification', 'judge-correctness', 'merger_agreement_specialist', 'pipeline_quality', 'pipeline_verdict', 'sorter', 'sorter_reviewer'] source=frozen
+2026-09-27 02:33:47 [info     ] evals_openrouter_model_override model=qwen/qwen3-8b
+2026-09-27 02:33:48 [info     ] braintrust_initialized         project=Mailroom-Evals
+2026-09-27 02:33:48 [info     ] evals_langchain_llm_tracing_enabled
+2026-09-27 02:33:48 [info     ] braintrust_experiment_opened   dataset=off experiment=20260927T023347Z-eval-contracts n_cases=20 project=Mailroom-Evals
+2026-09-27 02:33:48 [info     ] evals_case_pool                n=20 workers=8
+2026-09-27 02:33:48 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:33:48 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=55434 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 02:33:48 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:33:48 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:33:48 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=16153 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 02:33:48 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:33:48 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=62272 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 02:33:48 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:33:48 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:33:48 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=172142 chunk_limit=120000 chunks=2 doc_class=contract llm_call_budget=3 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=2 prompt_key=contracts_specialist_v1
+2026-09-27 02:33:48 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:33:48 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=173240 chunk_limit=120000 chunks=2 doc_class=contract llm_call_budget=3 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=2 prompt_key=contracts_specialist_v1
+2026-09-27 02:33:48 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:33:48 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=8052 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 02:33:48 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=17627 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 02:33:48 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=41501 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 02:33:59 [info     ] evals_prompts_deactivated
+2026-09-27 02:33:59 [info     ] braintrust_experiment_finalized cost_cap_status=None cost_usd_est_total=0.040274 document_rows=20 duration_s=352.0 run_id=20260927T022810Z-eval-corporate_records
+20260927T022810Z-eval-corporate_records: n=20 errors=0 latency_ms_mean=50674.82 tokens=190774+39458 cost=$0.040274 model=qwen/qwen3-8b top_agent=corporate_records_specialist(22 calls)
+  subset manifest: data/experiments/20260927T022810Z-eval-corporate_records/subset_manifest.json
+  scoring suite: data/experiments/20260927T022810Z-eval-corporate_records/scoring_suite.json
+2026-09-27 02:34:10 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:34:10 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=3760 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 02:34:13 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:34:13 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=4880 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 02:34:27 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:34:27 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=63217 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 02:34:29 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:34:29 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=21994 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 02:34:41 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:34:41 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=57254 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 02:34:58 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:34:58 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=15113 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 02:35:00 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:35:00 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=672 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 02:35:19 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:35:19 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=152649 chunk_limit=120000 chunks=2 doc_class=contract llm_call_budget=3 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=2 prompt_key=contracts_specialist_v1
+2026-09-27 02:35:25 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:35:25 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=32321 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 02:35:29 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:35:29 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=12648 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 02:35:37 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:35:37 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=121115 chunk_limit=120000 chunks=2 doc_class=contract llm_call_budget=3 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=2 prompt_key=contracts_specialist_v1
+2026-09-27 02:35:40 [info     ] braintrust_openai_client_wrapped
+2026-09-27 02:35:40 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=70625 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 02:40:49 [info     ] evals_prompts_deactivated
+2026-09-27 02:40:49 [info     ] braintrust_experiment_finalized cost_cap_status=None cost_usd_est_total=0.049772 document_rows=20 duration_s=424.4 run_id=20260927T023347Z-eval-contracts
+20260927T023347Z-eval-contracts: n=20 errors=0 latency_ms_mean=108632.14 tokens=238475+48066 cost=$0.049772 model=qwen/qwen3-8b top_agent=contracts_specialist(21 calls)
+  subset manifest: data/experiments/20260927T023347Z-eval-contracts/subset_manifest.json
+  scoring suite: data/experiments/20260927T023347Z-eval-contracts/scoring_suite.json
+2026-09-27T02:40:50Z exit eval:contracts code=0
+2026-09-27T02:40:50Z qwen n=20 concurrency=8 rerun complete

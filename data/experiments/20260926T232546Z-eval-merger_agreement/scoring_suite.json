@@ -1,0 +1,43 @@
+{
+  "scorer": "extraction",
+  "metrics_full": {
+    "n": 2,
+    "overall_score": 0.0,
+    "errors": 0,
+    "scorer_errors": 0
+  },
+  "metrics_essential": {
+    "overall_score": 0.0,
+    "needs_judge_review": 0.0
+  },
+  "essential_forwarded_to_sink": {
+    "overall_score": 0.0,
+    "needs_judge_review": 0.0
+  },
+  "performance": {
+    "latency_ms_mean": 53.8,
+    "latency_ms_p95": 89.2,
+    "tokens_prompt_total": 1080,
+    "tokens_completion_total": 540,
+    "cost_usd_est_total": 0.000103,
+    "by_agent": {
+      "merger_agreement_specialist": {
+        "calls": 9,
+        "prompt_tokens": 1080,
+        "completion_tokens": 540,
+        "total_tokens": 1620,
+        "models": [
+          "qwen/qwen3.7-flash"
+        ],
+        "cost_usd_est": 0.000103
+      }
+    }
+  },
+  "n_cases": 2,
+  "n_errors": 0,
+  "post_hoc": {
+    "recompute": "uv run python scripts/score_run.py --run-id <run_id> --recompute",
+    "judges": "uv run python scripts/score_run.py --run-id <run_id> --judge verdict,quality",
+    "compare": "uv run python scripts/compare_runs.py --a <run_a> --b <run_b>"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "n": 2,
+  "case_ids": [
+    "corpus:Lucius-Morningstar/docclass-pilot:train+test:0001062993-15-000198_s1011515_ex3z2.htm",
+    "corpus:Lucius-Morningstar/docclass-pilot:train+test:0001469709-14-000003_ex3_2apg.htm"
+  ],
+  "filenames": [
+    "0001062993-15-000198_s1011515_ex3z2.htm",
+    "0001469709-14-000003_ex3_2apg.htm"
+  ],
+  "doc_text_sha256": [
+    "36f27f8ee4d0c696abedb8f678f184003d0f9d98c108da814db0b006a72ce438",
+    "2dae15eae81616c9c315a573ecbd95209fc49fcdf3102beeb37bd1cc6321cbfe"
+  ],
+  "provenance": {
+    "subset_spec": {
+      "kind": "corpus",
+      "value": "pilot"
+    },
+    "repo": "Lucius-Morningstar/docclass-pilot",
+    "revision": null,
+    "config": "Lucius-Morningstar/docclass-pilot",
+    "split": "train+test",
+    "n_total": 138,
+    "n_selected": 2,
+    "sample": null,
+    "seed": 42,
+    "subset": "pilot",
+    "n": 2
+  },
+  "manifest_jsonl": "data/experiments/20260926T232547Z-eval-pipeline_chain/subset_manifest.jsonl"
+}

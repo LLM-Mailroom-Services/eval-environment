@@ -9,8 +9,20 @@ from evals.braintrust_experiment import (
     begin_eval_run,
     end_eval_run,
     experiments_enabled,
+    finalize_eval_run,
     log_case_scores,
 )
+
+
+class _KeyErrorGetattrExperiment:
+    """Mimics braintrust.logger.Experiment's real (broken) __getattr__: it
+    raises KeyError — not AttributeError — for unknown attribute names, so
+    hasattr()/getattr(obj, name, default) do not fail closed and instead
+    propagate the KeyError. Reproduces the live failure from run
+    20260927T014814Z (finalize_eval_run crashed probing update_metadata)."""
+
+    def __getattr__(self, name):
+        raise KeyError(name)
 
 
 def test_experiments_disabled_for_mock():
@@ -95,6 +107,52 @@ def test_log_case_scores_one_fully_scored_document_row():
     assert kw["output"]["extracted_data"] == {"parties": ["Acme"]}
     assert kw["metadata"]["specialist"] == "contracts_specialist"
     assert "document" not in kw["tags"]
+
+
+def test_finalize_eval_run_survives_sdk_getattr_raising_keyerror():
+    """hasattr(exp, "update_metadata") must not be used directly: the real
+    SDK's __getattr__ raises KeyError, which hasattr() does not catch, and
+    would otherwise blow up finalize_eval_run (caught only by the outer
+    try/except as a warning, never crashing a run, but never attaching
+    metadata either). This must resolve cleanly with no warning/log call."""
+    exp = _KeyErrorGetattrExperiment()
+    with patch("evals.braintrust_experiment._active_experiment", exp):
+        with patch("evals.braintrust_experiment.logger") as mock_logger:
+            finalize_eval_run(
+                {
+                    "run_id": "run-1",
+                    "performance": {"cost_usd_est_total": 0.01},
+                    "duration_s": 12.0,
+                    "metrics": {"n": 2, "errors": 0},
+                    "params": {"decode_profile": "qwen3-8b"},
+                }
+            )
+    mock_logger.warning.assert_not_called()
+    mock_logger.info.assert_called_once()
+    assert mock_logger.info.call_args.args[0] == "braintrust_experiment_finalized"
+
+
+def test_finalize_eval_run_calls_update_metadata_when_sdk_supports_it():
+    exp = MagicMock()
+    with patch("evals.braintrust_experiment._active_experiment", exp):
+        finalize_eval_run(
+            {
+                "run_id": "run-1",
+                "performance": {"cost_usd_est_total": 0.01},
+                "duration_s": 12.0,
+                "metrics": {"n": 2, "errors": 0},
+                "params": {"decode_profile": "qwen3-8b"},
+            }
+        )
+    exp.update_metadata.assert_called_once()
+    call_kwargs = exp.update_metadata.call_args.args[0]
+    assert call_kwargs["cost_usd_est_total"] == 0.01
+    assert call_kwargs["n"] == 2
+
+
+def test_finalize_eval_run_noop_without_active_experiment():
+    with patch("evals.braintrust_experiment._active_experiment", None):
+        finalize_eval_run({"run_id": "run-1"})  # must not raise
 
 
 def test_log_case_scores_skips_without_parent_span():

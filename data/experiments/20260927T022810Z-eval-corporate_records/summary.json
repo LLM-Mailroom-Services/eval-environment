@@ -1,0 +1,2242 @@
+{
+  "run_id": "20260927T022810Z-eval-corporate_records",
+  "family": "eval",
+  "task": "corporate_records",
+  "invoke": "agent",
+  "mode": "real",
+  "model": "qwen/qwen3-8b",
+  "prompt_version": null,
+  "prompt_lineage": "frozen",
+  "prompt_source": "frozen",
+  "prompt_versions": {
+    "arbiter": {
+      "key": "arbiter_v1",
+      "lineage": "frozen",
+      "source": "production:arbiter",
+      "sha256": "d674eb5afc1efe57342b597740e850376a68d16b7041588d09fa03e62ff9cd5e"
+    },
+    "boss": {
+      "key": "boss_v1",
+      "lineage": "frozen",
+      "source": "production:boss",
+      "sha256": "c760107a6e4abeb3a8ef078c344fd1dc2e3f4fd06b2065a4c21e7228ca39a5af"
+    },
+    "contracts_specialist": {
+      "key": "contracts_specialist_v1",
+      "lineage": "frozen",
+      "source": "sandbox:contracts_specialist_v33_simplified@303e7f0bb05d",
+      "sha256": "d91de3967cc3b12cbd222cc5a4ae167b39578125abc83be7422498dc5024fd24"
+    },
+    "corporate_records_specialist": {
+      "key": "corporate_records_specialist_v1",
+      "lineage": "frozen",
+      "source": "sandbox:corporate_records_specialist_simplified@303e7f0bb05d",
+      "sha256": "484e64dd847b7bb35afebca74edc1fb6c381f0f7d5e9367ad8673bec0b8af45c"
+    },
+    "correspondence_specialist": {
+      "key": "correspondence_specialist_v1",
+      "lineage": "frozen",
+      "source": "sandbox:correspondence_specialist_simplified@303e7f0bb05d",
+      "sha256": "eab63b5afd29906b1ad3aca2d7698bf5c15d4b7f4ce9ade3b744be535d18d4f3"
+    },
+    "insurance_claims_specialist": {
+      "key": "insurance_claims_specialist_v1",
+      "lineage": "frozen",
+      "source": "sandbox:insurance_claims_specialist_simplified@303e7f0bb05d",
+      "sha256": "6c2776bcbe00091200aecbcfd21c99f197398d929143dd0c7c722811fa100034"
+    },
+    "intake": {
+      "key": "intake_v1",
+      "lineage": "frozen",
+      "source": "production:INTAKE_SYSTEM_PROMPT",
+      "sha256": "e57c5d1a0e7f66ca25e369c6377ac855b6e5932a7126bc5bd9f963ec0bd8e139"
+    },
+    "judge": {
+      "key": "judge_v1",
+      "lineage": "frozen",
+      "source": "production:judge",
+      "sha256": "d5fcdbf544605927c4fb1ee0bf8cef571043458d55588268c3fbbc5a355fc729"
+    },
+    "judge-classification": {
+      "key": "judge-classification_v1",
+      "lineage": "frozen",
+      "source": "production:judge-classification",
+      "sha256": "a577874ec28eff0bb742491b434dd9a5cdef027f86354a8c632cf1a492eced92"
+    },
+    "judge-correctness": {
+      "key": "judge-correctness_v1",
+      "lineage": "frozen",
+      "source": "production:judge-correctness",
+      "sha256": "5f355f1f12ee6ce8b9486915299d508ff055ce489bbd7e195d21f3f30d71686b"
+    },
+    "merger_agreement_specialist": {
+      "key": "merger_agreement_specialist_v1",
+      "lineage": "frozen",
+      "source": "sandbox:merger_agreement_specialist_simplified@303e7f0bb05d",
+      "sha256": "003232584d6890054d956398135f439b86692a1123683f58914c0393b5e1a00b"
+    },
+    "pipeline_quality": {
+      "key": "pipeline_quality_v1",
+      "lineage": "frozen",
+      "source": "evaluator:QUALITY_PROMPT",
+      "sha256": "e8eab7af550f59141db00e76475dea65f7fdcdcad0dda7bcd79a6bd294e86752"
+    },
+    "pipeline_verdict": {
+      "key": "pipeline_verdict_v1",
+      "lineage": "frozen",
+      "source": "evaluator:PIPELINE_PROMPT",
+      "sha256": "375a7853f3685f4b890b62210a5d08b361e176154c8ed2f656e800fda5447487"
+    },
+    "sorter": {
+      "key": "sorter_v1",
+      "lineage": "frozen",
+      "source": "production:sorter",
+      "sha256": "2b1e69b2c0530bd967bac6f0d3097818b65858f65687a826005cd495f04be788"
+    },
+    "sorter_reviewer": {
+      "key": "sorter_reviewer_v1",
+      "lineage": "frozen",
+      "source": "production:sorter_reviewer",
+      "sha256": "db02beff97dd13f13be7965f8d389f6b2768a526a8f6c7a7688f1a86717fd7c3"
+    }
+  },
+  "trace_backend": "braintrust",
+  "started_at": "2026-09-27T02:28:10+00:00",
+  "preflight": {
+    "ok": true,
+    "mode": "real",
+    "task_id": "eval:corporate_records",
+    "checks": [
+      {
+        "name": "task_framing",
+        "ok": true
+      },
+      {
+        "name": "invoke_mode",
+        "ok": true,
+        "mode": "agent"
+      },
+      {
+        "name": "subset_grammar",
+        "ok": true,
+        "parsed": {
+          "kind": "class",
+          "value": "corporate_record"
+        }
+      },
+      {
+        "name": "model_roster",
+        "ok": true,
+        "model": "qwen/qwen3-8b"
+      },
+      {
+        "name": "prompt_version",
+        "ok": true,
+        "prompt_source": "frozen"
+      },
+      {
+        "name": "trace_backend",
+        "ok": true,
+        "requested": "braintrust",
+        "resolved": "braintrust"
+      },
+      {
+        "name": "braintrust_key",
+        "ok": true
+      },
+      {
+        "name": "llm_credentials",
+        "ok": true,
+        "source": "OPENROUTER_API_KEY"
+      },
+      {
+        "name": "agent_catalog",
+        "ok": true,
+        "node": "extract-fields",
+        "agents": [
+          "contracts_specialist",
+          "merger_agreement_specialist",
+          "corporate_records_specialist",
+          "correspondence_specialist",
+          "insurance_claims_specialist"
+        ],
+        "llm": true
+      }
+    ],
+    "issues": [],
+    "framing": {
+      "task_id": "eval:corporate_records",
+      "request": "You are the corporate_records_specialist. The sorter has classified this document as `corporate_record` (subclass may be present as sorter handoff context). Using your activated system prompt (prompt role `corporate_records_specialist`), extract the registered entities from the document text and return one complete JSON object with every live schema field (effective_date, entity_name, filing_number, intent, jurisdiction, keywords, record_type, signatories, subject_matter). Unstated values must be null or []. Never invent facts from letterhead, filename, or general knowledge.",
+      "node_name": "extract-fields",
+      "agent_roles": [
+        "corporate_records_specialist"
+      ],
+      "prompt_role": "corporate_records_specialist",
+      "doc_class": "corporate_record",
+      "entity_fields": [
+        "effective_date",
+        "entity_name",
+        "filing_number",
+        "intent",
+        "jurisdiction",
+        "keywords",
+        "record_type",
+        "signatories",
+        "subject_matter"
+      ],
+      "output_keys": [
+        "extracted_data",
+        "extraction_confidence",
+        "doc_type"
+      ],
+      "scorer": "extraction",
+      "default_subset": "class:corporate_record",
+      "supports_agent_mode": true
+    },
+    "resolved": {
+      "subset": "class:corporate_record",
+      "subset_parsed": {
+        "kind": "class",
+        "value": "corporate_record"
+      },
+      "model": "qwen/qwen3-8b",
+      "prompt_source": "frozen",
+      "trace_backend": "braintrust",
+      "llm_credential_source": "OPENROUTER_API_KEY",
+      "agents": [
+        "contracts_specialist",
+        "merger_agreement_specialist",
+        "corporate_records_specialist",
+        "correspondence_specialist",
+        "insurance_claims_specialist"
+      ]
+    }
+  },
+  "task_framing": {
+    "task_id": "eval:corporate_records",
+    "request": "You are the corporate_records_specialist. The sorter has classified this document as `corporate_record` (subclass may be present as sorter handoff context). Using your activated system prompt (prompt role `corporate_records_specialist`), extract the registered entities from the document text and return one complete JSON object with every live schema field (effective_date, entity_name, filing_number, intent, jurisdiction, keywords, record_type, signatories, subject_matter). Unstated values must be null or []. Never invent facts from letterhead, filename, or general knowledge.",
+    "node_name": "extract-fields",
+    "agent_roles": [
+      "corporate_records_specialist"
+    ],
+    "prompt_role": "corporate_records_specialist",
+    "doc_class": "corporate_record",
+    "entity_fields": [
+      "effective_date",
+      "entity_name",
+      "filing_number",
+      "intent",
+      "jurisdiction",
+      "keywords",
+      "record_type",
+      "signatories",
+      "subject_matter"
+    ],
+    "output_keys": [
+      "extracted_data",
+      "extraction_confidence",
+      "doc_type"
+    ],
+    "scorer": "extraction",
+    "default_subset": "class:corporate_record",
+    "supports_agent_mode": true
+  },
+  "params": {
+    "concurrency": 8,
+    "sample": 20,
+    "seed": 42,
+    "n": null,
+    "dry_run": false,
+    "scorer": "extraction",
+    "resumed_from": null,
+    "skipped_already_run": 0,
+    "decode_profile": "qwen3-8b",
+    "decode_budget_applied": {
+      "sampling_injected": false,
+      "max_tokens_by_agent": {
+        "contracts_specialist": 8192,
+        "merger_agreement_specialist": 16384,
+        "corporate_records_specialist": 8192,
+        "correspondence_specialist": 4096,
+        "insurance_claims_specialist": 6144
+      }
+    },
+    "thinking_recovered": 0,
+    "decode_sampling": null,
+    "decode_call_timeout_s": 600
+  },
+  "dataset": {
+    "subset_spec": {
+      "kind": "class",
+      "value": "corporate_record"
+    },
+    "repo": "Lucius-Morningstar/mailroom-dataset",
+    "revision": "46a4d3c240a36671cde0182fff4960f6b8b73aca",
+    "config": "ground_truth",
+    "split": "train",
+    "n_total": 403,
+    "n_selected": 20,
+    "sample": 20,
+    "seed": 42,
+    "subset": "class:corporate_record",
+    "case_ids": [
+      "corpus:ground_truth:train:0001047469-12-006895_a2210011zex-4_10.htm",
+      "corpus:ground_truth:train:0001047469-03-032251_a2118977zex-3_2.htm",
+      "corpus:ground_truth:train:0000950123-11-055070_h75396a4exv21w1.htm",
+      "corpus:ground_truth:train:0000898430-01-503595_dex32.txt",
+      "corpus:ground_truth:train:0001193125-11-240442_dex43.htm",
+      "corpus:ground_truth:train:0000950123-10-001751_c54716a1exv4w2.htm",
+      "corpus:ground_truth:train:0001571049-14-000599_t1400242_ex3-1.htm",
+      "corpus:ground_truth:train:0001193125-13-256819_d428632dex211.htm",
+      "corpus:ground_truth:train:0001104659-22-110926_tm2225873d4_ex3-5.htm",
+      "corpus:ground_truth:train:0001193125-08-109289_dex241.htm",
+      "corpus:ground_truth:train:0001079974-08-000839_artdimensionss1x31_9252008.htm",
+      "corpus:ground_truth:train:0001193125-05-179145_dex32.htm",
+      "corpus:ground_truth:train:0001021432-06-000035_certamendriv090106.txt",
+      "corpus:ground_truth:train:0001021432-06-000037_certamendcal092706.txt",
+      "corpus:ground_truth:train:0000950137-05-002026_c91812a1exv4w1.txt",
+      "corpus:ground_truth:train:0001104659-18-050217_a18-2297_8ex3d3.htm",
+      "corpus:ground_truth:train:0001144204-16-109616_v442647_ex3-1.htm",
+      "corpus:ground_truth:train:0001193125-10-221497_dex32.htm",
+      "corpus:ground_truth:train:0001493152-23-024269_ex4-5.htm",
+      "corpus:ground_truth:train:0001683168-23-005255_cardiff_ex0302.htm"
+    ],
+    "filenames": [
+      "0001047469-12-006895_a2210011zex-4_10.htm",
+      "0001047469-03-032251_a2118977zex-3_2.htm",
+      "0000950123-11-055070_h75396a4exv21w1.htm",
+      "0000898430-01-503595_dex32.txt",
+      "0001193125-11-240442_dex43.htm",
+      "0000950123-10-001751_c54716a1exv4w2.htm",
+      "0001571049-14-000599_t1400242_ex3-1.htm",
+      "0001193125-13-256819_d428632dex211.htm",
+      "0001104659-22-110926_tm2225873d4_ex3-5.htm",
+      "0001193125-08-109289_dex241.htm",
+      "0001079974-08-000839_artdimensionss1x31_9252008.htm",
+      "0001193125-05-179145_dex32.htm",
+      "0001021432-06-000035_certamendriv090106.txt",
+      "0001021432-06-000037_certamendcal092706.txt",
+      "0000950137-05-002026_c91812a1exv4w1.txt",
+      "0001104659-18-050217_a18-2297_8ex3d3.htm",
+      "0001144204-16-109616_v442647_ex3-1.htm",
+      "0001193125-10-221497_dex32.htm",
+      "0001493152-23-024269_ex4-5.htm",
+      "0001683168-23-005255_cardiff_ex0302.htm"
+    ],
+    "subset_manifest_path": "data/experiments/20260927T022810Z-eval-corporate_records/subset_manifest.json",
+    "subset_manifest_jsonl": "data/experiments/20260927T022810Z-eval-corporate_records/subset_manifest.jsonl"
+  },
+  "braintrust_experiment": {
+    "project": "Mailroom-Evals",
+    "experiment": "20260927T022810Z-eval-corporate_records",
+    "dataset": null,
+    "dataset_records": 0
+  },
+  "flush": {
+    "provider": "braintrust",
+    "flush_ok": 0,
+    "flush_failures": 0,
+    "healthy": true
+  },
+  "finished_at": "2026-09-27T02:33:59+00:00",
+  "duration_s": 352.0,
+  "error": null,
+  "metrics": {
+    "n": 20,
+    "overall_score": 0.1824,
+    "errors": 0,
+    "scorer_errors": 0
+  },
+  "performance": {
+    "latency_ms_mean": 50674.82,
+    "latency_ms_p95": 240418.7,
+    "tokens_prompt_total": 190774,
+    "tokens_completion_total": 39458,
+    "cost_usd_est_total": 0.040274,
+    "by_agent": {
+      "corporate_records_specialist": {
+        "calls": 22,
+        "prompt_tokens": 190774,
+        "completion_tokens": 39458,
+        "total_tokens": 230232,
+        "models": [
+          "qwen/qwen3-8b"
+        ],
+        "cost_usd_est": 0.040274
+      }
+    }
+  },
+  "trace_ids": {
+    "backend": "braintrust",
+    "project": "Mailroom-Evals",
+    "experiment": "20260927T022810Z-eval-corporate_records",
+    "dataset": null,
+    "dataset_records": 0
+  },
+  "pipeline_git": "28cb4be816fbb60e56cd3bb2ab72f8d9be1ab636",
+  "prompts_snapshot_path": "data/experiments/20260927T022810Z-eval-corporate_records/prompts_snapshot.json",
+  "scoring_suite": {
+    "scorer": "extraction",
+    "metrics_full": {
+      "n": 20,
+      "overall_score": 0.1824,
+      "errors": 0,
+      "scorer_errors": 0
+    },
+    "metrics_essential": {
+      "overall_score": 0.1824,
+      "needs_judge_review": 0.0
+    },
+    "essential_forwarded_to_sink": {
+      "overall_score": 0.1824,
+      "needs_judge_review": 0.0
+    },
+    "performance": {
+      "latency_ms_mean": 50674.82,
+      "latency_ms_p95": 240418.7,
+      "tokens_prompt_total": 190774,
+      "tokens_completion_total": 39458,
+      "cost_usd_est_total": 0.040274,
+      "by_agent": {
+        "corporate_records_specialist": {
+          "calls": 22,
+          "prompt_tokens": 190774,
+          "completion_tokens": 39458,
+          "total_tokens": 230232,
+          "models": [
+            "qwen/qwen3-8b"
+          ],
+          "cost_usd_est": 0.040274
+        }
+      }
+    },
+    "n_cases": 20,
+    "n_errors": 0,
+    "per_document": [
+      {
+        "case_id": "corpus:ground_truth:train:0001047469-12-006895_a2210011zex-4_10.htm",
+        "filename": "0001047469-12-006895_a2210011zex-4_10.htm",
+        "doc_text_sha256": "460b1d7966297ca1bf4106c2409cab5509b88a25d16dbaf3eff6c61e6ff35aee",
+        "specialist": "corporate_records_specialist",
+        "scores": {
+          "overall_score": 0.0,
+          "needs_judge_review": false,
+          "n_expected_fields": 4,
+          "extraction_precision": 0.0,
+          "extraction_recall": 0.0,
+          "extraction_f1": 0.0,
+          "extraction_f2": 0.0
+        },
+        "latency_ms": 26683.4,
+        "cost_usd": 0.00274,
+        "error": null
+      },
+      {
+        "case_id": "corpus:ground_truth:train:0001047469-03-032251_a2118977zex-3_2.htm",
+        "filename": "0001047469-03-032251_a2118977zex-3_2.htm",
+        "doc_text_sha256": "d9273770ae814076505ed9522392f8e63a6011db599b0eb05740ca266231945f",
+        "specialist": "corporate_records_specialist",
+        "scores": {
+          "overall_score": 0.55,
+          "needs_judge_review": false,
+          "n_expected_fields": 4,
+          "extraction_precision": 0.1818,
+          "extraction_recall": 0.5,
+          "extraction_f1": 0.2666,
+          "extraction_f2": 0.3704,
+          "entity_list_f1": 0.1538
+        },
+        "latency_ms": 36336.5,
+        "cost_usd": 0.002893,
+        "error": null
+      },
+      {
+        "case_id": "corpus:ground_truth:train:0000950123-11-055070_h75396a4exv21w1.htm",
+        "filename": "0000950123-11-055070_h75396a4exv21w1.htm",
+        "doc_text_sha256": "0fe14e019a6bf3d526fb60734ddd43c045c894be1c72889c0e73f549a6080de8",
+        "specialist": "corporate_records_specialist",
+        "scores": {
+          "overall_score": 0.0,
+          "needs_judge_review": false,
+          "n_expected_fields": 4,
+          "extraction_precision": 0.0,
+          "extraction_recall": 0.0,
+          "extraction_f1": 0.0,
+          "extraction_f2": 0.0
+        },
+        "latency_ms": 7802.2,
+        "cost_usd": 0.000387,
+        "error": null
+      },
+      {
+        "case_id": "corpus:ground_truth:train:0000898430-01-503595_dex32.txt",
+        "filename": "0000898430-01-503595_dex32.txt",
+        "doc_text_sha256": "b460a96a1253bff52bc389dd73fad33208d1e7572d6457ac9c3e37bd295f6460",
+        "specialist": "corporate_records_specialist",
+        "scores": {
+          "overall_score": 0.0,
+          "needs_judge_review": false,
+          "n_expected_fields": 4,
+          "extraction_precision": 0.0,
+          "extraction_recall": 0.0,
+          "extraction_f1": 0.0,
+          "extraction_f2": 0.0
+        },
+        "latency_ms": 22570.7,
+        "cost_usd": 0.0006,
+        "error": null
+      },
+      {
+        "case_id": "corpus:ground_truth:train:0001193125-11-240442_dex43.htm",
+        "filename": "0001193125-11-240442_dex43.htm",
+        "doc_text_sha256": "48831bd7900a9b71a80382ab79ece247ea21094a79a2d5e09eb7379ee23905c0",
+        "specialist": "corporate_records_specialist",
+        "scores": {
+          "overall_score": 0.5976,
+          "needs_judge_review": false,
+          "n_expected_fields": 4,
+          "extraction_precision": 0.1538,
+          "extraction_recall": 0.5,
+          "extraction_f1": 0.2352,
+          "extraction_f2": 0.3448,
+          "entity_list_f1": 0.1538
+        },
+        "latency_ms": 22109.4,
+        "cost_usd": 0.000682,
+        "error": null
+      },
+      {
+        "case_id": "corpus:ground_truth:train:0000950123-10-001751_c54716a1exv4w2.htm",
+        "filename": "0000950123-10-001751_c54716a1exv4w2.htm",
+        "doc_text_sha256": "4537aa453dcafa29491ca6072e1544a2581eb9469ec33901e2aa5ff633cea424",
+        "specialist": "corporate_records_specialist",
+        "scores": {
+          "overall_score": 0.0,
+          "needs_judge_review": false,
+          "n_expected_fields": 4,
+          "extraction_precision": 0.0,
+          "extraction_recall": 0.0,
+          "extraction_f1": 0.0,
+          "extraction_f2": 0.0
+        },
+        "latency_ms": 13485.2,
+        "cost_usd": 0.001851,
+        "error": null
+      },
+      {
+        "case_id": "corpus:ground_truth:train:0001571049-14-000599_t1400242_ex3-1.htm",
+        "filename": "0001571049-14-000599_t1400242_ex3-1.htm",
+        "doc_text_sha256": "50e8766a108db5afb209a27ffb7a2002716bb047f37bff0b18f1a56c88c75b95",
+        "specialist": "corporate_records_specialist",
+        "scores": {
+          "overall_score": 0.5857,
+          "needs_judge_review": false,
+          "n_expected_fields": 4,
+          "extraction_precision": 0.1538,
+          "extraction_recall": 0.5,
+          "extraction_f1": 0.2352,
+          "extraction_f2": 0.3448,
+          "entity_list_f1": 0.1538
+        },
+        "latency_ms": 17694.5,
+        "cost_usd": 0.001203,
+        "error": null
+      },
+      {
+        "case_id": "corpus:ground_truth:train:0001193125-13-256819_d428632dex211.htm",
+        "filename": "0001193125-13-256819_d428632dex211.htm",
+        "doc_text_sha256": "74bca4e97c748666baee25e3db1cd80f885598ec9e86b2a10ddb57b3266b2416",
+        "specialist": "corporate_records_specialist",
+        "scores": {
+          "overall_score": 0.0,
+          "needs_judge_review": false,
+          "n_expected_fields": 4,
+          "extraction_precision": 0.0,
+          "extraction_recall": 0.0,
+          "extraction_f1": 0.0,
+          "extraction_f2": 0.0
+        },
+        "latency_ms": 18603.9,
+        "cost_usd": 0.000681,
+        "error": null
+      },
+      {
+        "case_id": "corpus:ground_truth:train:0001104659-22-110926_tm2225873d4_ex3-5.htm",
+        "filename": "0001104659-22-110926_tm2225873d4_ex3-5.htm",
+        "doc_text_sha256": "8139a6f16d1dc613232f7c3d472e7bbd57e465386f37a89452317559cbd1cde3",
+        "specialist": "corporate_records_specialist",
+        "scores": {
+          "overall_score": 0.2295,
+          "needs_judge_review": false,
+          "n_expected_fields": 4,
+          "extraction_precision": 0.0,
+          "extraction_recall": 0.0,
+          "extraction_f1": 0.0,
+          "extraction_f2": 0.0,
+          "entity_list_f1": 0.1538
+        },
+        "latency_ms": 20045.8,
+        "cost_usd": 0.001492,
+        "error": null
+      },
+      {
+        "case_id": "corpus:ground_truth:train:0001193125-08-109289_dex241.htm",
+        "filename": "0001193125-08-109289_dex241.htm",
+        "doc_text_sha256": "5b7b8a4c28c63a51d54cf2fc2d2e177a8661e79821c250af4d40dd4fbd491c99",
+        "specialist": "corporate_records_specialist",
+        "scores": {
+          "overall_score": 0.0,
+          "needs_judge_review": false,
+          "n_expected_fields": 4,
+          "extraction_precision": 0.0,
+          "extraction_recall": 0.0,
+          "extraction_f1": 0.0,
+          "extraction_f2": 0.0
+        },
+        "latency_ms": 49367.0,
+        "cost_usd": 0.001401,
+        "error": null
+      },
+      {
+        "case_id": "corpus:ground_truth:train:0001079974-08-000839_artdimensionss1x31_9252008.htm",
+        "filename": "0001079974-08-000839_artdimensionss1x31_9252008.htm",
+        "doc_text_sha256": "04c0314e82da6b844f250c7ec35134947e77577077040a7b0c507c38bc5121d3",
+        "specialist": "corporate_records_specialist",
+        "scores": {
+          "overall_score": 0.0,
+          "needs_judge_review": false,
+          "n_expected_fields": 4,
+          "extraction_precision": 0.0,
+          "extraction_recall": 0.0,
+          "extraction_f1": 0.0,
+          "extraction_f2": 0.0
+        },
+        "latency_ms": 17474.1,
+        "cost_usd": 0.00085,
+        "error": null
+      },
+      {
+        "case_id": "corpus:ground_truth:train:0001193125-05-179145_dex32.htm",
+        "filename": "0001193125-05-179145_dex32.htm",
+        "doc_text_sha256": "b389c94f70fc098289f36c3a7ffce6dee33956f2051a6233e3ed3cc9a0e32247",
+        "specialist": "corporate_records_specialist",
+        "scores": {
+          "overall_score": 0.2521,
+          "needs_judge_review": false,
+          "n_expected_fields": 4,
+          "extraction_precision": 0.0,
+          "extraction_recall": 0.0,
+          "extraction_f1": 0.0,
+          "extraction_f2": 0.0,
+          "entity_list_f1": 0.1538
+        },
+        "latency_ms": 21677.5,
+        "cost_usd": 0.000574,
+        "error": null
+      },
+      {
+        "case_id": "corpus:ground_truth:train:0001021432-06-000035_certamendriv090106.txt",
+        "filename": "0001021432-06-000035_certamendriv090106.txt",
+        "doc_text_sha256": "153007c6b7fcbc0f0da9510214d3beb9e5501e3e4715038d3ed4d0e54f16c9da",
+        "specialist": "corporate_records_specialist",
+        "scores": {
+          "overall_score": 0.0,
+          "needs_judge_review": false,
+          "n_expected_fields": 4,
+          "extraction_precision": 0.0,
+          "extraction_recall": 0.0,
+          "extraction_f1": 0.0,
+          "extraction_f2": 0.0
+        },
+        "latency_ms": 240418.7,
+        "cost_usd": 0.004652,
+        "error": null
+      },
+      {
+        "case_id": "corpus:ground_truth:train:0001021432-06-000037_certamendcal092706.txt",
+        "filename": "0001021432-06-000037_certamendcal092706.txt",
+        "doc_text_sha256": "5937c7662d440d1f99c1cdfeb529a5fb7c5907c100ef2f342a78e365cf49bead",
+        "specialist": "corporate_records_specialist",
+        "scores": {
+          "overall_score": 0.223,
+          "needs_judge_review": false,
+          "n_expected_fields": 4,
+          "extraction_precision": 0.0,
+          "extraction_recall": 0.0,
+          "extraction_f1": 0.0,
+          "extraction_f2": 0.0,
+          "entity_list_f1": 0.1538
+        },
+        "latency_ms": 42686.9,
+        "cost_usd": 0.001104,
+        "error": null
+      },
+      {
+        "case_id": "corpus:ground_truth:train:0000950137-05-002026_c91812a1exv4w1.txt",
+        "filename": "0000950137-05-002026_c91812a1exv4w1.txt",
+        "doc_text_sha256": "6b92681f96caf807fc4ce1c8bebfcbfabe7b49d484850d9cded0a8d73b48cf0a",
+        "specialist": "corporate_records_specialist",
+        "scores": {
+          "overall_score": 0.4576,
+          "needs_judge_review": false,
+          "n_expected_fields": 4,
+          "extraction_precision": 0.0833,
+          "extraction_recall": 0.25,
+          "extraction_f1": 0.125,
+          "extraction_f2": 0.1785,
+          "entity_list_f1": 0.1538
+        },
+        "latency_ms": 318812.7,
+        "cost_usd": 0.014078,
+        "error": null
+      },
+      {
+        "case_id": "corpus:ground_truth:train:0001104659-18-050217_a18-2297_8ex3d3.htm",
+        "filename": "0001104659-18-050217_a18-2297_8ex3d3.htm",
+        "doc_text_sha256": "2a745d9d335bd3429af98742b4e4b2b481351c7f6684017873a8d311c8f8afbc",
+        "specialist": "corporate_records_specialist",
+        "scores": {
+          "overall_score": 0.2295,
+          "needs_judge_review": false,
+          "n_expected_fields": 4,
+          "extraction_precision": 0.0,
+          "extraction_recall": 0.0,
+          "extraction_f1": 0.0,
+          "extraction_f2": 0.0,
+          "entity_list_f1": 0.1429
+        },
+        "latency_ms": 36144.8,
+        "cost_usd": 0.001066,
+        "error": null
+      },
+      {
+        "case_id": "corpus:ground_truth:train:0001144204-16-109616_v442647_ex3-1.htm",
+        "filename": "0001144204-16-109616_v442647_ex3-1.htm",
+        "doc_text_sha256": "155c3450e66206d4ff8b114a1443c2c3f38f45d0045218c166378f0b3940ae03",
+        "specialist": "corporate_records_specialist",
+        "scores": {
+          "overall_score": 0.0,
+          "needs_judge_review": false,
+          "n_expected_fields": 4,
+          "extraction_precision": 0.0,
+          "extraction_recall": 0.0,
+          "extraction_f1": 0.0,
+          "extraction_f2": 0.0
+        },
+        "latency_ms": 47011.4,
+        "cost_usd": 0.001726,
+        "error": null
+      },
+      {
+        "case_id": "corpus:ground_truth:train:0001193125-10-221497_dex32.htm",
+        "filename": "0001193125-10-221497_dex32.htm",
+        "doc_text_sha256": "9c1f4a9c39a5cab54fef627e6feaa461888f84e226550a201f0346e1b726b347",
+        "specialist": "corporate_records_specialist",
+        "scores": {
+          "overall_score": 0.2606,
+          "needs_judge_review": false,
+          "n_expected_fields": 4,
+          "extraction_precision": 0.0,
+          "extraction_recall": 0.0,
+          "extraction_f1": 0.0,
+          "extraction_f2": 0.0,
+          "entity_list_f1": 0.1538
+        },
+        "latency_ms": 10322.4,
+        "cost_usd": 0.000549,
+        "error": null
+      },
+      {
+        "case_id": "corpus:ground_truth:train:0001493152-23-024269_ex4-5.htm",
+        "filename": "0001493152-23-024269_ex4-5.htm",
+        "doc_text_sha256": "ac92013d1381c36ac90c8c3a668c147d4eb0c6143bdb79a45426a2a526e7f198",
+        "specialist": "corporate_records_specialist",
+        "scores": {
+          "overall_score": 0.2615,
+          "needs_judge_review": false,
+          "n_expected_fields": 4,
+          "extraction_precision": 0.0,
+          "extraction_recall": 0.0,
+          "extraction_f1": 0.0,
+          "extraction_f2": 0.0,
+          "entity_list_f1": 0.1538
+        },
+        "latency_ms": 25769.6,
+        "cost_usd": 0.000812,
+        "error": null
+      },
+      {
+        "case_id": "corpus:ground_truth:train:0001683168-23-005255_cardiff_ex0302.htm",
+        "filename": "0001683168-23-005255_cardiff_ex0302.htm",
+        "doc_text_sha256": "d864df108857955c2ff1261fbd367409fbce959b5d1d9184d95a020107ad7aa6",
+        "specialist": "corporate_records_specialist",
+        "scores": {
+          "overall_score": 0.0,
+          "needs_judge_review": false,
+          "n_expected_fields": 4,
+          "extraction_precision": 0.0,
+          "extraction_recall": 0.0,
+          "extraction_f1": 0.0,
+          "extraction_f2": 0.0
+        },
+        "latency_ms": 18479.7,
+        "cost_usd": 0.000933,
+        "error": null
+      }
+    ],
+    "post_hoc": {
+      "recompute": "uv run python scripts/score_run.py --run-id <run_id> --recompute",
+      "judges": "uv run python scripts/score_run.py --run-id <run_id> --judge verdict,quality",
+      "compare": "uv run python scripts/compare_runs.py --a <run_a> --b <run_b>"
+    },
+    "path": "data/experiments/20260927T022810Z-eval-corporate_records/scoring_suite.json",
+    "per_document_jsonl": "data/experiments/20260927T022810Z-eval-corporate_records/per_document_scores.jsonl"
+  },
+  "cost_cap": {
+    "cap_usd": 1.5,
+    "cost_usd_est": 0.040274,
+    "status": "under_cap"
+  },
+  "comparison_report": "/workspace/reports/api-comparisons/qwen3-8b/RUN-20-CORPORATE_RECORD-QWEN3-8B-REPORT.md",
+  "cases_ref": "data/experiments/20260927T022810Z-eval-corporate_records/cases.jsonl",
+  "cases_embedded": [
+    {
+      "case_id": "corpus:ground_truth:train:0001047469-12-006895_a2210011zex-4_10.htm",
+      "filename": "0001047469-12-006895_a2210011zex-4_10.htm",
+      "specialist": "corporate_records_specialist",
+      "expected_doc_class": "corporate_record",
+      "expected_subclass": "indenture",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "460b1d7966297ca1bf4106c2409cab5509b88a25d16dbaf3eff6c61e6ff35aee",
+      "prediction": {
+        "extracted_data": {
+          "_parse_error": true,
+          "confidence": 0.0
+        },
+        "extraction_confidence": 0.0,
+        "doc_type": "corporate_record",
+        "specialist": "corporate_records_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "corporate_records_specialist_v1",
+        "chunks": 1,
+        "needed_chunks": 1,
+        "llm_call_budget": 2,
+        "llm_calls": 1
+      },
+      "scores": {
+        "overall_score": 0.0,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0
+      },
+      "latency_ms": 26683.4,
+      "tokens": {
+        "prompt": 19904,
+        "completion": 904,
+        "total": 20808
+      },
+      "cost_usd": 0.00274,
+      "agent_usage": {
+        "corporate_records_specialist": {
+          "calls": 1,
+          "prompt_tokens": 19904,
+          "completion_tokens": 904,
+          "total": 20808,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "f4eefeae-504f-408f-bd8a-641ed9cbe607",
+        "root_span_id": "9914dabe597f0413606f383a5bf81979"
+      },
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001047469-03-032251_a2118977zex-3_2.htm",
+      "filename": "0001047469-03-032251_a2118977zex-3_2.htm",
+      "specialist": "corporate_records_specialist",
+      "expected_doc_class": "corporate_record",
+      "expected_subclass": "bylaws",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "d9273770ae814076505ed9522392f8e63a6011db599b0eb05740ca266231945f",
+      "prediction": {
+        "extracted_data": {
+          "entity_name": "LECG Corporation",
+          "record_type": "bylaws",
+          "effective_date": null,
+          "signatories": null,
+          "jurisdiction": "Delaware",
+          "filing_number": null,
+          "intent": "governance_rules",
+          "subject_matter": "Corporate governance rules including meetings, directors, officers, and shareholder procedures",
+          "keywords": [
+            "bylaws",
+            "corporate offices",
+            "stockholders",
+            "directors",
+            "officers",
+            "meetings",
+            "indemnification",
+            "records"
+          ]
+        },
+        "extraction_confidence": null,
+        "doc_type": "corporate_record",
+        "specialist": "corporate_records_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "corporate_records_specialist_v1",
+        "chunks": 1,
+        "needed_chunks": 1,
+        "llm_call_budget": 2,
+        "llm_calls": 1
+      },
+      "scores": {
+        "overall_score": 0.55,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.1818,
+        "extraction_recall": 0.5,
+        "extraction_f1": 0.2666,
+        "extraction_f2": 0.3704,
+        "entity_list_f1": 0.1538
+      },
+      "latency_ms": 36336.5,
+      "tokens": {
+        "prompt": 20844,
+        "completion": 999,
+        "total": 21843
+      },
+      "cost_usd": 0.002893,
+      "agent_usage": {
+        "corporate_records_specialist": {
+          "calls": 1,
+          "prompt_tokens": 20844,
+          "completion_tokens": 999,
+          "total": 21843,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "7a0413db-0fe1-45a0-9b5d-5aa6a1b709b2",
+        "root_span_id": "906998b3ca43030a7f8200f7572a4538"
+      },
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0000950123-11-055070_h75396a4exv21w1.htm",
+      "filename": "0000950123-11-055070_h75396a4exv21w1.htm",
+      "specialist": "corporate_records_specialist",
+      "expected_doc_class": "corporate_record",
+      "expected_subclass": "subsidiary_list",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "0fe14e019a6bf3d526fb60734ddd43c045c894be1c72889c0e73f549a6080de8",
+      "prediction": {
+        "extracted_data": {
+          "_parse_error": true,
+          "confidence": 0.0
+        },
+        "extraction_confidence": 0.0,
+        "doc_type": "corporate_record",
+        "specialist": "corporate_records_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "corporate_records_specialist_v1",
+        "chunks": 1,
+        "needed_chunks": 1,
+        "llm_call_budget": 2,
+        "llm_calls": 1
+      },
+      "scores": {
+        "overall_score": 0.0,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0
+      },
+      "latency_ms": 7802.2,
+      "tokens": {
+        "prompt": 1920,
+        "completion": 356,
+        "total": 2276
+      },
+      "cost_usd": 0.000387,
+      "agent_usage": {
+        "corporate_records_specialist": {
+          "calls": 1,
+          "prompt_tokens": 1920,
+          "completion_tokens": 356,
+          "total": 2276,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "2b27027d-d807-4794-90b5-6620bebc0702",
+        "root_span_id": "10d5ea43e8a563e97eb732da23eece72"
+      },
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0000898430-01-503595_dex32.txt",
+      "filename": "0000898430-01-503595_dex32.txt",
+      "specialist": "corporate_records_specialist",
+      "expected_doc_class": "corporate_record",
+      "expected_subclass": "charter_amendment",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "b460a96a1253bff52bc389dd73fad33208d1e7572d6457ac9c3e37bd295f6460",
+      "prediction": {
+        "extracted_data": {
+          "_parse_error": true,
+          "confidence": 0.0
+        },
+        "extraction_confidence": 0.0,
+        "doc_type": "corporate_record",
+        "specialist": "corporate_records_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "corporate_records_specialist_v1",
+        "chunks": 1,
+        "needed_chunks": 1,
+        "llm_call_budget": 2,
+        "llm_calls": 1
+      },
+      "scores": {
+        "overall_score": 0.0,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0
+      },
+      "latency_ms": 22570.7,
+      "tokens": {
+        "prompt": 1840,
+        "completion": 846,
+        "total": 2686
+      },
+      "cost_usd": 0.0006,
+      "agent_usage": {
+        "corporate_records_specialist": {
+          "calls": 1,
+          "prompt_tokens": 1840,
+          "completion_tokens": 846,
+          "total": 2686,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "4d426497-86e9-4049-9820-ed4dacc60d7b",
+        "root_span_id": "765f3ed37384a3adf288029a498f74b2"
+      },
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001193125-11-240442_dex43.htm",
+      "filename": "0001193125-11-240442_dex43.htm",
+      "specialist": "corporate_records_specialist",
+      "expected_doc_class": "corporate_record",
+      "expected_subclass": "rights_instrument",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "48831bd7900a9b71a80382ab79ece247ea21094a79a2d5e09eb7379ee23905c0",
+      "prediction": {
+        "extracted_data": {
+          "entity_name": "North American Financial Holdings, Inc.",
+          "record_type": "rights_instrument",
+          "effective_date": "2011-03-23",
+          "signatories": [
+            "Christopher G. Marshall"
+          ],
+          "jurisdiction": "STATE OF NEW YORK",
+          "filing_number": null,
+          "intent": "investor_rights",
+          "subject_matter": "Amendment to Registration Rights Agreement regarding shelf registration and executive bonus forfeiture",
+          "keywords": [
+            "Registration Rights Agreement",
+            "Shelf Registration",
+            "Executive Bonus",
+            "Performance Bonus",
+            "Registration Default",
+            "Form S-1",
+            "Securities Act",
+            "New York"
+          ]
+        },
+        "extraction_confidence": null,
+        "doc_type": "corporate_record",
+        "specialist": "corporate_records_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "corporate_records_specialist_v1",
+        "chunks": 1,
+        "needed_chunks": 1,
+        "llm_call_budget": 2,
+        "llm_calls": 1
+      },
+      "scores": {
+        "overall_score": 0.5976,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.1538,
+        "extraction_recall": 0.5,
+        "extraction_f1": 0.2352,
+        "extraction_f2": 0.3448,
+        "entity_list_f1": 0.1538
+      },
+      "latency_ms": 22109.4,
+      "tokens": {
+        "prompt": 2657,
+        "completion": 816,
+        "total": 3473
+      },
+      "cost_usd": 0.000682,
+      "agent_usage": {
+        "corporate_records_specialist": {
+          "calls": 1,
+          "prompt_tokens": 2657,
+          "completion_tokens": 816,
+          "total": 3473,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "43d765fd-e10e-497a-86c4-a4b3924cdcc4",
+        "root_span_id": "edec2d4dadf0c76c3764a98f62906569"
+      },
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0000950123-10-001751_c54716a1exv4w2.htm",
+      "filename": "0000950123-10-001751_c54716a1exv4w2.htm",
+      "specialist": "corporate_records_specialist",
+      "expected_doc_class": "corporate_record",
+      "expected_subclass": "rights_instrument",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "4537aa453dcafa29491ca6072e1544a2581eb9469ec33901e2aa5ff633cea424",
+      "prediction": {
+        "extracted_data": {
+          "_parse_error": true,
+          "confidence": 0.0
+        },
+        "extraction_confidence": 0.0,
+        "doc_type": "corporate_record",
+        "specialist": "corporate_records_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "corporate_records_specialist_v1",
+        "chunks": 1,
+        "needed_chunks": 1,
+        "llm_call_budget": 2,
+        "llm_calls": 1
+      },
+      "scores": {
+        "overall_score": 0.0,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0
+      },
+      "latency_ms": 13485.2,
+      "tokens": {
+        "prompt": 14339,
+        "completion": 381,
+        "total": 14720
+      },
+      "cost_usd": 0.001851,
+      "agent_usage": {
+        "corporate_records_specialist": {
+          "calls": 1,
+          "prompt_tokens": 14339,
+          "completion_tokens": 381,
+          "total": 14720,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "346fb767-0aef-4e22-8e60-2748328491c4",
+        "root_span_id": "d2aad0558335ace69254236257b9d7ab"
+      },
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001571049-14-000599_t1400242_ex3-1.htm",
+      "filename": "0001571049-14-000599_t1400242_ex3-1.htm",
+      "specialist": "corporate_records_specialist",
+      "expected_doc_class": "corporate_record",
+      "expected_subclass": "articles_of_incorporation",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "50e8766a108db5afb209a27ffb7a2002716bb047f37bff0b18f1a56c88c75b95",
+      "prediction": {
+        "extracted_data": {
+          "entity_name": "Diamond S Shipping Group, Inc.",
+          "record_type": "articles_of_incorporation",
+          "effective_date": "2014-02-12",
+          "signatories": [
+            "Craig Stevenson, Jr."
+          ],
+          "jurisdiction": "Republic of the Marshall Islands",
+          "filing_number": null,
+          "intent": "entity_formation",
+          "subject_matter": "Amended and Restated Articles of Incorporation",
+          "keywords": [
+            "Amended and Restated",
+            "Articles of Incorporation",
+            "Marshall Islands",
+            "Common Shares",
+            "Preferred Shares",
+            "Voting Stock",
+            "Trigger Date",
+            "Indemnification"
+          ]
+        },
+        "extraction_confidence": null,
+        "doc_type": "corporate_record",
+        "specialist": "corporate_records_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "corporate_records_specialist_v1",
+        "chunks": 1,
+        "needed_chunks": 1,
+        "llm_call_budget": 2,
+        "llm_calls": 1
+      },
+      "scores": {
+        "overall_score": 0.5857,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.1538,
+        "extraction_recall": 0.5,
+        "extraction_f1": 0.2352,
+        "extraction_f2": 0.3448,
+        "entity_list_f1": 0.1538
+      },
+      "latency_ms": 17694.5,
+      "tokens": {
+        "prompt": 7922,
+        "completion": 607,
+        "total": 8529
+      },
+      "cost_usd": 0.001203,
+      "agent_usage": {
+        "corporate_records_specialist": {
+          "calls": 1,
+          "prompt_tokens": 7922,
+          "completion_tokens": 607,
+          "total": 8529,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "7eebee42-ae4e-4307-a036-07d19d33b826",
+        "root_span_id": "9f6f7642d9893c051bfc742a9e86ccfe"
+      },
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001193125-13-256819_d428632dex211.htm",
+      "filename": "0001193125-13-256819_d428632dex211.htm",
+      "specialist": "corporate_records_specialist",
+      "expected_doc_class": "corporate_record",
+      "expected_subclass": "subsidiary_list",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "74bca4e97c748666baee25e3db1cd80f885598ec9e86b2a10ddb57b3266b2416",
+      "prediction": {
+        "extracted_data": {
+          "_parse_error": true,
+          "confidence": 0.0
+        },
+        "extraction_confidence": 0.0,
+        "doc_type": "corporate_record",
+        "specialist": "corporate_records_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "corporate_records_specialist_v1",
+        "chunks": 1,
+        "needed_chunks": 1,
+        "llm_call_budget": 2,
+        "llm_calls": 1
+      },
+      "scores": {
+        "overall_score": 0.0,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0
+      },
+      "latency_ms": 18603.9,
+      "tokens": {
+        "prompt": 1557,
+        "completion": 1096,
+        "total": 2653
+      },
+      "cost_usd": 0.000681,
+      "agent_usage": {
+        "corporate_records_specialist": {
+          "calls": 1,
+          "prompt_tokens": 1557,
+          "completion_tokens": 1096,
+          "total": 2653,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "73cec080-2fa7-4f20-9a99-ed7a3bf7b31a",
+        "root_span_id": "1149a1046e1f01e84fc88bc365b858e9"
+      },
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001104659-22-110926_tm2225873d4_ex3-5.htm",
+      "filename": "0001104659-22-110926_tm2225873d4_ex3-5.htm",
+      "specialist": "corporate_records_specialist",
+      "expected_doc_class": "corporate_record",
+      "expected_subclass": "officer_certificate",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "8139a6f16d1dc613232f7c3d472e7bbd57e465386f37a89452317559cbd1cde3",
+      "prediction": {
+        "extracted_data": {
+          "entity_name": "NeuroBo Pharmaceuticals, Inc.",
+          "record_type": "other",
+          "effective_date": null,
+          "signatories": [
+            "Ben Gil Price, MD"
+          ],
+          "jurisdiction": "Delaware",
+          "filing_number": null,
+          "intent": "corporate_action_approval",
+          "subject_matter": "Certificate of Designation of Preferences, Rights and Limitations for Series A Convertible Preferred Stock",
+          "keywords": [
+            "Series A Convertible Preferred Stock",
+            "Certificate of Designation",
+            "Delaware General Corporation Law",
+            "Conversion Price",
+            "Automatic Conversion",
+            "Stockholder Approval",
+            "Conversion Restriction",
+            "Default Cash Dividends"
+          ]
+        },
+        "extraction_confidence": null,
+        "doc_type": "corporate_record",
+        "specialist": "corporate_records_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "corporate_records_specialist_v1",
+        "chunks": 1,
+        "needed_chunks": 1,
+        "llm_call_budget": 2,
+        "llm_calls": 1
+      },
+      "scores": {
+        "overall_score": 0.2295,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0,
+        "entity_list_f1": 0.1538
+      },
+      "latency_ms": 20045.8,
+      "tokens": {
+        "prompt": 10163,
+        "completion": 665,
+        "total": 10828
+      },
+      "cost_usd": 0.001492,
+      "agent_usage": {
+        "corporate_records_specialist": {
+          "calls": 1,
+          "prompt_tokens": 10163,
+          "completion_tokens": 665,
+          "total": 10828,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "ce142b54-4e50-4b27-93bd-a8215f4c1378",
+        "root_span_id": "1e4d979bd7b5887e1bb7a3b66dca0cc0"
+      },
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001193125-08-109289_dex241.htm",
+      "filename": "0001193125-08-109289_dex241.htm",
+      "specialist": "corporate_records_specialist",
+      "expected_doc_class": "corporate_record",
+      "expected_subclass": "powers_of_attorney",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "5b7b8a4c28c63a51d54cf2fc2d2e177a8661e79821c250af4d40dd4fbd491c99",
+      "prediction": {
+        "extracted_data": {
+          "_parse_error": true,
+          "confidence": 0.0
+        },
+        "extraction_confidence": 0.0,
+        "doc_type": "corporate_record",
+        "specialist": "corporate_records_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "corporate_records_specialist_v1",
+        "chunks": 1,
+        "needed_chunks": 1,
+        "llm_call_budget": 2,
+        "llm_calls": 1
+      },
+      "scores": {
+        "overall_score": 0.0,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0
+      },
+      "latency_ms": 49367.0,
+      "tokens": {
+        "prompt": 3614,
+        "completion": 2150,
+        "total": 5764
+      },
+      "cost_usd": 0.001401,
+      "agent_usage": {
+        "corporate_records_specialist": {
+          "calls": 1,
+          "prompt_tokens": 3614,
+          "completion_tokens": 2150,
+          "total": 5764,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "562a39fb-e7af-4bbc-a257-65c256f4d225",
+        "root_span_id": "8364eeea87b2be6fc85d6319242d2baa"
+      },
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001079974-08-000839_artdimensionss1x31_9252008.htm",
+      "filename": "0001079974-08-000839_artdimensionss1x31_9252008.htm",
+      "specialist": "corporate_records_specialist",
+      "expected_doc_class": "corporate_record",
+      "expected_subclass": "articles_of_incorporation",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "04c0314e82da6b844f250c7ec35134947e77577077040a7b0c507c38bc5121d3",
+      "prediction": {
+        "extracted_data": {
+          "_parse_error": true,
+          "confidence": 0.0
+        },
+        "extraction_confidence": 0.0,
+        "doc_type": "corporate_record",
+        "specialist": "corporate_records_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "corporate_records_specialist_v1",
+        "chunks": 1,
+        "needed_chunks": 1,
+        "llm_call_budget": 2,
+        "llm_calls": 1
+      },
+      "scores": {
+        "overall_score": 0.0,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0
+      },
+      "latency_ms": 17474.1,
+      "tokens": {
+        "prompt": 3567,
+        "completion": 950,
+        "total": 4517
+      },
+      "cost_usd": 0.00085,
+      "agent_usage": {
+        "corporate_records_specialist": {
+          "calls": 1,
+          "prompt_tokens": 3567,
+          "completion_tokens": 950,
+          "total": 4517,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "2fe36166-22e5-460f-852e-d352bd54d05e",
+        "root_span_id": "92c2706fd23d4978964a3e0d6ef0f50b"
+      },
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001193125-05-179145_dex32.htm",
+      "filename": "0001193125-05-179145_dex32.htm",
+      "specialist": "corporate_records_specialist",
+      "expected_doc_class": "corporate_record",
+      "expected_subclass": "charter_amendment",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "b389c94f70fc098289f36c3a7ffce6dee33956f2051a6233e3ed3cc9a0e32247",
+      "prediction": {
+        "extracted_data": {
+          "entity_name": "SkinMedica, Inc.",
+          "record_type": "articles_of_incorporation",
+          "effective_date": "2005-08-31",
+          "signatories": [
+            "Rex Bright"
+          ],
+          "jurisdiction": "Delaware",
+          "filing_number": null,
+          "intent": "corporate_action_approval",
+          "subject_matter": "Amends the Certificate of Incorporation to implement a 1-for-3.718 reverse stock split",
+          "keywords": [
+            "Reverse Stock Split",
+            "Certificate of Amendment",
+            "Delaware",
+            "Common Stock",
+            "stockholders' approval",
+            "General Corporation Law",
+            "amended and restated certificate",
+            "fractional shares"
+          ]
+        },
+        "extraction_confidence": null,
+        "doc_type": "corporate_record",
+        "specialist": "corporate_records_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "corporate_records_specialist_v1",
+        "chunks": 1,
+        "needed_chunks": 1,
+        "llm_call_budget": 2,
+        "llm_calls": 1
+      },
+      "scores": {
+        "overall_score": 0.2521,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0,
+        "entity_list_f1": 0.1538
+      },
+      "latency_ms": 21677.5,
+      "tokens": {
+        "prompt": 2190,
+        "completion": 698,
+        "total": 2888
+      },
+      "cost_usd": 0.000574,
+      "agent_usage": {
+        "corporate_records_specialist": {
+          "calls": 1,
+          "prompt_tokens": 2190,
+          "completion_tokens": 698,
+          "total": 2888,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "d33e0ab1-e16b-43f9-bbec-5170f734022d",
+        "root_span_id": "05191875b9e745e82fd00a6d7c3a27b8"
+      },
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001021432-06-000035_certamendriv090106.txt",
+      "filename": "0001021432-06-000035_certamendriv090106.txt",
+      "specialist": "corporate_records_specialist",
+      "expected_doc_class": "corporate_record",
+      "expected_subclass": "board_resolution",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "153007c6b7fcbc0f0da9510214d3beb9e5501e3e4715038d3ed4d0e54f16c9da",
+      "prediction": {
+        "extracted_data": {
+          "_parse_error": true,
+          "confidence": 0.0
+        },
+        "extraction_confidence": 0.0,
+        "doc_type": "corporate_record",
+        "specialist": "corporate_records_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "corporate_records_specialist_v1",
+        "chunks": 1,
+        "needed_chunks": 1,
+        "llm_call_budget": 2,
+        "llm_calls": 1
+      },
+      "scores": {
+        "overall_score": 0.0,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0
+      },
+      "latency_ms": 240418.7,
+      "tokens": {
+        "prompt": 1747,
+        "completion": 9776,
+        "total": 11523
+      },
+      "cost_usd": 0.004652,
+      "agent_usage": {
+        "corporate_records_specialist": {
+          "calls": 1,
+          "prompt_tokens": 1747,
+          "completion_tokens": 9776,
+          "total": 11523,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "7b0c4336-f9a6-49d9-94d8-fc9b56905eea",
+        "root_span_id": "5101a28416cb0bd97fbb4fe1be517c17"
+      },
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001021432-06-000037_certamendcal092706.txt",
+      "filename": "0001021432-06-000037_certamendcal092706.txt",
+      "specialist": "corporate_records_specialist",
+      "expected_doc_class": "corporate_record",
+      "expected_subclass": "board_resolution",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "5937c7662d440d1f99c1cdfeb529a5fb7c5907c100ef2f342a78e365cf49bead",
+      "prediction": {
+        "extracted_data": {
+          "entity_name": "Injet Corporation",
+          "record_type": "articles_of_incorporation",
+          "effective_date": "2006-09-25",
+          "signatories": [
+            "James M. Cassidy"
+          ],
+          "jurisdiction": "Delaware",
+          "filing_number": null,
+          "intent": "entity_formation",
+          "subject_matter": "Amendment to Certificate of Incorporation changing the corporation's name to New York Networks, Inc.",
+          "keywords": [
+            "Certificate of Amendment",
+            "Injet Corporation",
+            "New York Networks, Inc.",
+            "Delaware General Corporation Law",
+            "Board of Directors",
+            "shareholders",
+            "common stock",
+            "Article One"
+          ]
+        },
+        "extraction_confidence": null,
+        "doc_type": "corporate_record",
+        "specialist": "corporate_records_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "corporate_records_specialist_v1",
+        "chunks": 1,
+        "needed_chunks": 1,
+        "llm_call_budget": 2,
+        "llm_calls": 1
+      },
+      "scores": {
+        "overall_score": 0.223,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0,
+        "entity_list_f1": 0.1538
+      },
+      "latency_ms": 42686.9,
+      "tokens": {
+        "prompt": 1738,
+        "completion": 1979,
+        "total": 3717
+      },
+      "cost_usd": 0.001104,
+      "agent_usage": {
+        "corporate_records_specialist": {
+          "calls": 1,
+          "prompt_tokens": 1738,
+          "completion_tokens": 1979,
+          "total": 3717,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "9e85f06b-530b-45cf-89f6-bce463b42550",
+        "root_span_id": "3590b949623088b2520675d4d0a838a4"
+      },
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0000950137-05-002026_c91812a1exv4w1.txt",
+      "filename": "0000950137-05-002026_c91812a1exv4w1.txt",
+      "specialist": "corporate_records_specialist",
+      "expected_doc_class": "corporate_record",
+      "expected_subclass": "indenture",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "6b92681f96caf807fc4ce1c8bebfcbfabe7b49d484850d9cded0a8d73b48cf0a",
+      "prediction": {
+        "extracted_data": {
+          "entity_name": "VOLKSWAGEN AUTO LEASE TRUST 2005-A",
+          "record_type": "indenture",
+          "effective_date": "2005-03-03",
+          "signatories": [
+            "VOLKSWAGEN AUTO LEASE TRUST 2005-A",
+            "JPMORGAN CHASE BANK, N.A."
+          ],
+          "jurisdiction": "Delaware",
+          "filing_number": null,
+          "intent": "entity_formation",
+          "subject_matter": "Indenture between Volkswagen Auto Lease Trust 2005-A and JPMorgan Chase Bank, N.A. as Indenture Trustee governing asset-backed notes and collateral security.",
+          "keywords": [
+            "Indenture",
+            "Trustee",
+            "Issuer",
+            "Securities",
+            "Collateral",
+            "Notes",
+            "Trust Agreement",
+            "Bankruptcy Remote Party"
+          ]
+        },
+        "extraction_confidence": null,
+        "doc_type": "corporate_record",
+        "specialist": "corporate_records_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "corporate_records_specialist_v1",
+        "chunks": 3,
+        "needed_chunks": 3,
+        "llm_call_budget": 4,
+        "llm_calls": 3
+      },
+      "scores": {
+        "overall_score": 0.4576,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0833,
+        "extraction_recall": 0.25,
+        "extraction_f1": 0.125,
+        "extraction_f2": 0.1785,
+        "entity_list_f1": 0.1538
+      },
+      "latency_ms": 318812.7,
+      "tokens": {
+        "prompt": 73994,
+        "completion": 11914,
+        "total": 85908
+      },
+      "cost_usd": 0.014078,
+      "agent_usage": {
+        "corporate_records_specialist": {
+          "calls": 3,
+          "prompt_tokens": 73994,
+          "completion_tokens": 11914,
+          "total": 85908,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "c440ec9a-8645-45e9-bb6d-266d2013c4ba",
+        "root_span_id": "9c6a4b87387b568051ee187ba1d16c31"
+      },
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001104659-18-050217_a18-2297_8ex3d3.htm",
+      "filename": "0001104659-18-050217_a18-2297_8ex3d3.htm",
+      "specialist": "corporate_records_specialist",
+      "expected_doc_class": "corporate_record",
+      "expected_subclass": "officer_certificate",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "2a745d9d335bd3429af98742b4e4b2b481351c7f6684017873a8d311c8f8afbc",
+      "prediction": {
+        "extracted_data": {
+          "entity_name": "Aridis Pharmaceuticals, Inc.",
+          "record_type": "other",
+          "effective_date": "2016-08-12",
+          "signatories": [
+            "Vu Truong"
+          ],
+          "jurisdiction": "Delaware",
+          "filing_number": null,
+          "intent": "corporate_action_approval",
+          "subject_matter": "Amended and restated certificate of designation for Series A Convertible Preferred Stock, including conversion rights, dividend terms, liquidation preferences, and voting provisions.",
+          "keywords": [
+            "Series A Convertible Preferred Stock",
+            "Amended and Restated Certificate",
+            "Conversion Rights",
+            "Dividends",
+            "Liquidation Preferences",
+            "Board of Directors",
+            "Delaware Law",
+            "Preferred Stock",
+            "Common Stock"
+          ]
+        },
+        "extraction_confidence": null,
+        "doc_type": "corporate_record",
+        "specialist": "corporate_records_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "corporate_records_specialist_v1",
+        "chunks": 1,
+        "needed_chunks": 1,
+        "llm_call_budget": 2,
+        "llm_calls": 1
+      },
+      "scores": {
+        "overall_score": 0.2295,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0,
+        "entity_list_f1": 0.1429
+      },
+      "latency_ms": 36144.8,
+      "tokens": {
+        "prompt": 5789,
+        "completion": 855,
+        "total": 6644
+      },
+      "cost_usd": 0.001066,
+      "agent_usage": {
+        "corporate_records_specialist": {
+          "calls": 1,
+          "prompt_tokens": 5789,
+          "completion_tokens": 855,
+          "total": 6644,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "ed8e891a-af07-4009-a008-f657e024255c",
+        "root_span_id": "1419de90b73ed9da6e3f6a4ae2de94c3"
+      },
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001144204-16-109616_v442647_ex3-1.htm",
+      "filename": "0001144204-16-109616_v442647_ex3-1.htm",
+      "specialist": "corporate_records_specialist",
+      "expected_doc_class": "corporate_record",
+      "expected_subclass": "charter_amendment",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "155c3450e66206d4ff8b114a1443c2c3f38f45d0045218c166378f0b3940ae03",
+      "prediction": {
+        "extracted_data": {
+          "_parse_error": true,
+          "confidence": 0.0
+        },
+        "extraction_confidence": 0.0,
+        "doc_type": "corporate_record",
+        "specialist": "corporate_records_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "corporate_records_specialist_v1",
+        "chunks": 1,
+        "needed_chunks": 1,
+        "llm_call_budget": 2,
+        "llm_calls": 1
+      },
+      "scores": {
+        "overall_score": 0.0,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0
+      },
+      "latency_ms": 47011.4,
+      "tokens": {
+        "prompt": 6747,
+        "completion": 2059,
+        "total": 8806
+      },
+      "cost_usd": 0.001726,
+      "agent_usage": {
+        "corporate_records_specialist": {
+          "calls": 1,
+          "prompt_tokens": 6747,
+          "completion_tokens": 2059,
+          "total": 8806,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "f8daa239-b0e1-4424-90a7-48f7593f631f",
+        "root_span_id": "2faad0b27ba8177ced646f1d2ad49dd9"
+      },
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001193125-10-221497_dex32.htm",
+      "filename": "0001193125-10-221497_dex32.htm",
+      "specialist": "corporate_records_specialist",
+      "expected_doc_class": "corporate_record",
+      "expected_subclass": "charter_amendment",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "9c1f4a9c39a5cab54fef627e6feaa461888f84e226550a201f0346e1b726b347",
+      "prediction": {
+        "extracted_data": {
+          "entity_name": "PACIFIC BIOSCIENCES OF CALIFORNIA, INC.",
+          "record_type": "articles_of_incorporation",
+          "effective_date": "2010-09-30",
+          "signatories": [
+            "Hugh Martin"
+          ],
+          "jurisdiction": "Delaware",
+          "filing_number": null,
+          "intent": "corporate_action_approval",
+          "subject_matter": "Amends the Restated Certificate of Incorporation to revise stock classes and implement a reverse split",
+          "keywords": [
+            "Reverse Split",
+            "Common Stock",
+            "Preferred Stock",
+            "Certificate of Amendment",
+            "Delaware",
+            "Amended and Restated Certificate of Incorporation",
+            "Class of Stock",
+            "Conversion Price"
+          ]
+        },
+        "extraction_confidence": null,
+        "doc_type": "corporate_record",
+        "specialist": "corporate_records_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "corporate_records_specialist_v1",
+        "chunks": 1,
+        "needed_chunks": 1,
+        "llm_call_budget": 2,
+        "llm_calls": 1
+      },
+      "scores": {
+        "overall_score": 0.2606,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0,
+        "entity_list_f1": 0.1538
+      },
+      "latency_ms": 10322.4,
+      "tokens": {
+        "prompt": 2216,
+        "completion": 637,
+        "total": 2853
+      },
+      "cost_usd": 0.000549,
+      "agent_usage": {
+        "corporate_records_specialist": {
+          "calls": 1,
+          "prompt_tokens": 2216,
+          "completion_tokens": 637,
+          "total": 2853,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "cb4679de-7930-46df-858c-1604b01bd1d4",
+        "root_span_id": "855dea458491d2e20c0c63e5a8d73dbc"
+      },
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001493152-23-024269_ex4-5.htm",
+      "filename": "0001493152-23-024269_ex4-5.htm",
+      "specialist": "corporate_records_specialist",
+      "expected_doc_class": "corporate_record",
+      "expected_subclass": "indenture",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "ac92013d1381c36ac90c8c3a668c147d4eb0c6143bdb79a45426a2a526e7f198",
+      "prediction": {
+        "extracted_data": {
+          "entity_name": "FIRST PERSON LTD.",
+          "record_type": "other",
+          "effective_date": "2023-06-28",
+          "signatories": [
+            "Darcy Campbell",
+            "Dan Sander",
+            "Amy Douglas"
+          ],
+          "jurisdiction": "Alberta",
+          "filing_number": null,
+          "intent": "corporate_action_approval",
+          "subject_matter": "amendment to warrant expiry date and other provisions of the Warrant Indenture",
+          "keywords": [
+            "Supplemental Warrant Indenture",
+            "Expiry Date",
+            "Warrant Indenture",
+            "Amendment",
+            "Corporation",
+            "Warrant Agent",
+            "Alberta",
+            "Canada"
+          ]
+        },
+        "extraction_confidence": null,
+        "doc_type": "corporate_record",
+        "specialist": "corporate_records_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "corporate_records_specialist_v1",
+        "chunks": 1,
+        "needed_chunks": 1,
+        "llm_call_budget": 2,
+        "llm_calls": 1
+      },
+      "scores": {
+        "overall_score": 0.2615,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0,
+        "entity_list_f1": 0.1538
+      },
+      "latency_ms": 25769.6,
+      "tokens": {
+        "prompt": 3340,
+        "completion": 925,
+        "total": 4265
+      },
+      "cost_usd": 0.000812,
+      "agent_usage": {
+        "corporate_records_specialist": {
+          "calls": 1,
+          "prompt_tokens": 3340,
+          "completion_tokens": 925,
+          "total": 4265,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "72cc0469-81ff-4c88-bc0e-7537c6a2953b",
+        "root_span_id": "7f5ad73dbf52a0f396bdae36bfbf98ec"
+      },
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001683168-23-005255_cardiff_ex0302.htm",
+      "filename": "0001683168-23-005255_cardiff_ex0302.htm",
+      "specialist": "corporate_records_specialist",
+      "expected_doc_class": "corporate_record",
+      "expected_subclass": "officer_certificate",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "d864df108857955c2ff1261fbd367409fbce959b5d1d9184d95a020107ad7aa6",
+      "prediction": {
+        "extracted_data": {
+          "_parse_error": true,
+          "confidence": 0.0
+        },
+        "extraction_confidence": 0.0,
+        "doc_type": "corporate_record",
+        "specialist": "corporate_records_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "corporate_records_specialist_v1",
+        "chunks": 1,
+        "needed_chunks": 1,
+        "llm_call_budget": 2,
+        "llm_calls": 1
+      },
+      "scores": {
+        "overall_score": 0.0,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0
+      },
+      "latency_ms": 18479.7,
+      "tokens": {
+        "prompt": 4686,
+        "completion": 845,
+        "total": 5531
+      },
+      "cost_usd": 0.000933,
+      "agent_usage": {
+        "corporate_records_specialist": {
+          "calls": 1,
+          "prompt_tokens": 4686,
+          "completion_tokens": 845,
+          "total": 5531,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "4c509580-6d45-4478-9f66-c2814dab4ccc",
+        "root_span_id": "66409af298c536a31edc71bb6eec9ba0"
+      },
+      "error": null
+    }
+  ],
+  "record_kind": "run_summary",
+  "schema_version": 3,
+  "git": {
+    "commit": "fd6a220",
+    "dirty": true
+  }
+}

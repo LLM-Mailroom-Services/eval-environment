@@ -1,0 +1,34 @@
+{
+  "scorer": "archivist",
+  "metrics_full": {
+    "n": 2,
+    "archived_ok": 1.0,
+    "audit_ok": 1.0,
+    "sha256_ok": 1.0,
+    "stage_ok": 1.0,
+    "errors": 0,
+    "scorer_errors": 0
+  },
+  "metrics_essential": {
+    "archived_ok": 1.0,
+    "stage_ok": 1.0
+  },
+  "essential_forwarded_to_sink": {
+    "archived_ok": 1.0,
+    "stage_ok": 1.0
+  },
+  "performance": {
+    "latency_ms_mean": 95.6,
+    "latency_ms_p95": 106.3,
+    "tokens_prompt_total": 0,
+    "tokens_completion_total": 0,
+    "cost_usd_est_total": null
+  },
+  "n_cases": 2,
+  "n_errors": 0,
+  "post_hoc": {
+    "recompute": "uv run python scripts/score_run.py --run-id <run_id> --recompute",
+    "judges": "uv run python scripts/score_run.py --run-id <run_id> --judge verdict,quality",
+    "compare": "uv run python scripts/compare_runs.py --a <run_a> --b <run_b>"
+  }
+}

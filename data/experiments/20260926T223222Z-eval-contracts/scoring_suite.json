@@ -1,0 +1,43 @@
+{
+  "scorer": "extraction",
+  "metrics_full": {
+    "n": 1,
+    "overall_score": 0.7,
+    "errors": 0,
+    "scorer_errors": 0
+  },
+  "metrics_essential": {
+    "overall_score": 0.7,
+    "needs_judge_review": 0.0
+  },
+  "essential_forwarded_to_sink": {
+    "overall_score": 0.7,
+    "needs_judge_review": 0.0
+  },
+  "performance": {
+    "latency_ms_mean": 12445.4,
+    "latency_ms_p95": 12445.4,
+    "tokens_prompt_total": 10825,
+    "tokens_completion_total": 1519,
+    "cost_usd_est_total": 0.000522,
+    "by_agent": {
+      "contracts_specialist": {
+        "calls": 1,
+        "prompt_tokens": 10825,
+        "completion_tokens": 1519,
+        "total_tokens": 12344,
+        "models": [
+          "qwen/qwen3.7-flash"
+        ],
+        "cost_usd_est": 0.000522
+      }
+    }
+  },
+  "n_cases": 1,
+  "n_errors": 0,
+  "post_hoc": {
+    "recompute": "uv run python scripts/score_run.py --run-id <run_id> --recompute",
+    "judges": "uv run python scripts/score_run.py --run-id <run_id> --judge verdict,quality",
+    "compare": "uv run python scripts/compare_runs.py --a <run_a> --b <run_b>"
+  }
+}

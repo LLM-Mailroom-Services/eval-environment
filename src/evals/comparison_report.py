@@ -87,6 +87,8 @@ _SLUG_RE = re.compile(r"[^a-z0-9.]+")
 # Slugified OpenRouter ids → the same filing keys used by decode profiles.
 MODEL_FILE_ALIASES: dict[str, str] = {
     "qwen-qwen3-8b": "qwen3-8b",
+    "qwen-qwen3.7-flash": "qwen3.7-flash",
+    "deepseek-deepseek-v4.1-flash": "deepseek-v4.1-flash",
     "ibm-granite-granite-4.2-8b": "granite-4.2-8b",
 }
 

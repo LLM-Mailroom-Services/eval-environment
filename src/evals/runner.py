@@ -717,7 +717,22 @@ def _execute_cases(
                 prediction = invoke_mod.invoke(spec.name, case, mode=invoke_mode) or {}
             except Exception as exc:
                 error = f"{type(exc).__name__}: {exc}"
-                logger.warning("evals_case_failed", case=case.get("id"), error=error)
+                if _huge_int_parse_error(exc):
+                    # Truncated model JSON (8192-token cap) — score as parse
+                    # miss, do not mark the case as a runner exception.
+                    logger.warning(
+                        "evals_truncated_json_parse",
+                        case=case.get("id"),
+                        error=error,
+                    )
+                    prediction = {
+                        "extracted_data": {"_parse_error": True, "confidence": 0.0},
+                        "extraction_confidence": 0.0,
+                        "error": "truncated_json_integer",
+                    }
+                    error = None
+                else:
+                    logger.warning("evals_case_failed", case=case.get("id"), error=error)
             latency = timer.ms()
             recovered_pred, recovered = decode_budget.recover_prediction(
                 prediction if isinstance(prediction, dict) else None
@@ -799,6 +814,11 @@ def _execute_cases(
             experiment_log.append_case_row(run_dir, run_id, rows[-1])
         tracing.flush(backend)
     return rows
+
+
+def _huge_int_parse_error(exc: BaseException) -> bool:
+    msg = str(exc).lower()
+    return "integer string conversion" in msg or "int_max_str_digits" in msg
 
 
 def _last_usage() -> dict[str, Any] | None:

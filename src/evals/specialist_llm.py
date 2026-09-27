@@ -56,6 +56,7 @@ CHUNK_HEADER_CHARS = 3_500
 # error — not a license to fan out. 8 needed → 10 max; 1 needed → 2 max.
 CALL_HEADROOM = 0.15
 
+_HUGE_INT_RE = re.compile(r"-?\d{4001,}")
 _ARTICLE_SPLIT = re.compile(
     r"(?=\n[ \t]*(?:ARTICLE|Article|SECTION|Section)\s+(?:[IVXLCDM]+|\d+))",
 )
@@ -483,14 +484,18 @@ def _parse_json(raw: str) -> dict[str, Any]:
     if content.startswith("```"):
         content = content.strip("`")
         content = content.removeprefix("json").strip()
+    # Truncated completions often end on a 8k-digit "number". Python 3.11+
+    # raises ValueError (not JSONDecodeError) at 4300 digits — that must
+    # never escape as evals_case_failed.
+    content = _HUGE_INT_RE.sub("null", content)
     try:
         parsed = json.loads(content)
-    except (json.JSONDecodeError, ValueError):
+    except (json.JSONDecodeError, ValueError, RecursionError):
         start, end = content.find("{"), content.rfind("}")
         if start >= 0 and end > start:
             try:
                 parsed = json.loads(content[start : end + 1])
-            except (json.JSONDecodeError, ValueError):
+            except (json.JSONDecodeError, ValueError, RecursionError):
                 return {"_parse_error": True, "confidence": 0.0}
         else:
             return {"_parse_error": True, "confidence": 0.0}

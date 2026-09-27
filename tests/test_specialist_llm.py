@@ -219,6 +219,58 @@ def test_needed_chunks_and_call_budget_include_15_percent_headroom():
     assert all(len(p) <= 48_000 for p in pieces[:-1])
 
 
+def test_truncated_8191_digit_json_does_not_raise():
+    activate("frozen")
+    try:
+        def _create(**kwargs):
+            mock = MagicMock()
+            mock.choices[0].message.content = (
+                '{"document_name": "Plan", "parties": ["Parent"], "n": '
+                + ("9" * 8191)
+                + "}"
+            )
+            mock.usage.prompt_tokens = 4
+            mock.usage.completion_tokens = 8192
+            return mock
+
+        client = MagicMock()
+        client.chat.completions.create.side_effect = lambda **kw: _create(**kw)
+        set_mock_client(client)
+        out = extract_entities(
+            "merger_agreement_specialist",
+            {"text": "PLAN OF MERGER", "expected_doc_class": "merger_agreement"},
+        )
+        assert out["extracted_data"].get("document_name") == "Plan"
+        assert out["extracted_data"].get("parties") == ["Parent"]
+        assert "_parse_error" not in out["extracted_data"]
+    finally:
+        set_mock_client(None)
+        deactivate()
+
+
+def test_unterminated_huge_int_json_is_parse_error_not_exception():
+    activate("frozen")
+    try:
+        def _create(**kwargs):
+            mock = MagicMock()
+            mock.choices[0].message.content = '{"document_name": "Plan", "n": ' + ("9" * 8191)
+            mock.usage.prompt_tokens = 4
+            mock.usage.completion_tokens = 8192
+            return mock
+
+        client = MagicMock()
+        client.chat.completions.create.side_effect = lambda **kw: _create(**kw)
+        set_mock_client(client)
+        out = extract_entities(
+            "merger_agreement_specialist",
+            {"text": "PLAN OF MERGER", "expected_doc_class": "merger_agreement"},
+        )
+        assert out["extracted_data"].get("_parse_error") is True
+    finally:
+        set_mock_client(None)
+        deactivate()
+
+
 def test_row_llm_call_budget_blocks_retry_runaway():
     activate("frozen")
     try:

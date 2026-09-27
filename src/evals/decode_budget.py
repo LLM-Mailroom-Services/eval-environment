@@ -102,7 +102,7 @@ def recover_prediction(prediction: dict[str, Any] | None) -> tuple[dict[str, Any
     cleaned = strip_thinking_spans(raw)
     try:
         parsed = json.loads(cleaned)
-    except (json.JSONDecodeError, TypeError):
+    except (json.JSONDecodeError, TypeError, ValueError, RecursionError):
         return prediction, False
     if not isinstance(parsed, dict):
         return prediction, False

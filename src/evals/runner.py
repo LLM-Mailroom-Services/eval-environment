@@ -573,24 +573,38 @@ def run_meta_stub(spec: TaskSpec, summary: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# The five extraction tasks share one node_name ("extract-fields") in
+# AGENT_CATALOG, whose "agents" list therefore names all five specialists
+# together. Any lookup that walks that shared list and returns the first
+# hit (rather than the one THIS task is designated to) silently reports
+# "contracts_specialist" for every other extraction task, since it is
+# listed first — each specialist must map to exactly one class/task, never
+# stand in for another (issue: merger_agreement/corporate_records/
+# correspondence/insurance_claims run metadata reported
+# prompt_version=contracts_specialist_v1 despite the actual OpenRouter call
+# correctly using the designated specialist — confirmed live on Braintrust
+# experiment 20260927T020724Z-eval-merger_agreement).
+EXTRACTION_TASK_SPECIALIST: dict[str, str] = {
+    "contracts": "contracts_specialist",
+    "merger_agreement": "merger_agreement_specialist",
+    "corporate_records": "corporate_records_specialist",
+    "correspondence": "correspondence_specialist",
+    "insurance_claims": "insurance_claims_specialist",
+}
+
+
 def _specialist_name(spec: TaskSpec, agent_usage: dict[str, Any] | None) -> str | None:
     """The specialist that evaluated this document (one agent per extraction case)."""
+    designated = EXTRACTION_TASK_SPECIALIST.get(spec.name)
+    if designated:
+        return designated
     catalog = AGENT_CATALOG.get(spec.node_name) or {}
     specialists = list(catalog.get("agents") or [])
     usage = agent_usage or {}
     hits = [name for name in specialists if name in usage]
-    if len(hits) == 1:
-        return hits[0]
     if hits:
         return hits[0]
-    task_map = {
-        "contracts": "contracts_specialist",
-        "merger_agreement": "merger_agreement_specialist",
-        "corporate_records": "corporate_records_specialist",
-        "correspondence": "correspondence_specialist",
-        "insurance_claims": "insurance_claims_specialist",
-    }
-    return task_map.get(spec.name)
+    return None
 
 
 def _primary_prompt_key(spec: TaskSpec, summary: dict[str, Any]) -> str | None:
@@ -598,8 +612,17 @@ def _primary_prompt_key(spec: TaskSpec, summary: dict[str, Any]) -> str | None:
 
     ``summary["prompt_version"]`` only carries an explicit --prompt-version
     override; the per-role snapshot (prompt_versions) is what actually ran.
+    Extraction tasks resolve to their ONE designated specialist first
+    (``EXTRACTION_TASK_SPECIALIST``) rather than the first entry in the
+    shared "extract-fields" catalog list, which is always
+    ``contracts_specialist`` regardless of the task.
     """
     versions = summary.get("prompt_versions") or {}
+    designated = EXTRACTION_TASK_SPECIALIST.get(spec.name)
+    if designated:
+        slot = versions.get(designated)
+        if isinstance(slot, dict) and slot.get("key"):
+            return slot["key"]
     catalog = AGENT_CATALOG.get(spec.node_name) or {}
     for role in catalog.get("agents") or []:
         slot = versions.get(role)

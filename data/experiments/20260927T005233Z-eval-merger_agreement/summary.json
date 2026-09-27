@@ -1,0 +1,225 @@
+{
+  "run_id": "20260927T005233Z-eval-merger_agreement",
+  "family": "eval",
+  "task": "merger_agreement",
+  "invoke": "agent",
+  "mode": "real",
+  "model": "qwen/qwen3-8b",
+  "prompt_version": "merger_agreement_specialist_v1",
+  "prompt_lineage": "frozen",
+  "prompt_source": "frozen",
+  "trace_backend": "braintrust",
+  "dataset": {
+    "subset": "class:merger_agreement",
+    "repo": "Lucius-Morningstar/mailroom-dataset",
+    "revision": "46a4d3c240a36671cde0182fff4960f6b8b73aca"
+  },
+  "started_at": "2026-09-27T00:52:33+00:00",
+  "finished_at": "2026-09-27T01:09:03+00:00",
+  "duration_s": 900,
+  "params": {
+    "sample": 20,
+    "seed": 42,
+    "decode_profile": "qwen3-8b"
+  },
+  "metrics": {
+    "n": 3,
+    "overall_score": 0.0,
+    "errors": 1,
+    "scorer_errors": 0
+  },
+  "performance": {
+    "latency_ms_mean": 247912.7333,
+    "latency_ms_p95": 289547.9,
+    "tokens_prompt_total": 239586,
+    "tokens_completion_total": 24585,
+    "cost_usd_est_total": 0.039217,
+    "by_agent": {
+      "merger_agreement_specialist": {
+        "calls": 3,
+        "prompt_tokens": 239586,
+        "completion_tokens": 24585,
+        "total_tokens": 264171,
+        "models": [
+          "qwen/qwen3-8b"
+        ],
+        "cost_usd_est": 0.039218
+      }
+    }
+  },
+  "error": "Interrupted 3/20: unchunked ~350k-char merger text truncated JSON (parse_error / 8191-digit int). Restarting with article-aware chunking; not resumed.",
+  "cases_ref": "data/experiments/20260927T005233Z-eval-merger_agreement/cases.jsonl",
+  "cases_embedded": [
+    {
+      "case_id": "corpus:ground_truth:train:contract_128_merger_agreement.txt",
+      "filename": "contract_128_merger_agreement.txt",
+      "specialist": "merger_agreement_specialist",
+      "expected_doc_class": "merger_agreement",
+      "expected_subclass": "other",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "e3a39e4c3d5a2b7645f89adb3f85627158999c6981b93861e508918a53da2eb0",
+      "prediction": {
+        "extracted_data": {
+          "_parse_error": true,
+          "confidence": 0.0
+        },
+        "extraction_confidence": 0.0,
+        "doc_type": "merger_agreement",
+        "specialist": "merger_agreement_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "merger_agreement_specialist_v1"
+      },
+      "scores": {
+        "overall_score": 0.0,
+        "needs_judge_review": false,
+        "n_expected_fields": 2,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0
+      },
+      "latency_ms": 234100.5,
+      "tokens": {
+        "prompt": 81257,
+        "completion": 8195,
+        "total": 89452
+      },
+      "cost_usd": 0.013236,
+      "agent_usage": {
+        "merger_agreement_specialist": {
+          "calls": 1,
+          "prompt_tokens": 81257,
+          "completion_tokens": 8195,
+          "total": 89452,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "1ef1256c-2d77-4dcc-9e06-080c5fd8e2a5",
+        "root_span_id": "aebc78ce8c3f99bce1029eb66603a320"
+      },
+      "error": null,
+      "run_id": "20260927T005233Z-eval-merger_agreement",
+      "record_kind": "case",
+      "schema_version": 3
+    },
+    {
+      "case_id": "corpus:ground_truth:train:contract_31_merger_agreement.txt",
+      "filename": "contract_31_merger_agreement.txt",
+      "specialist": "merger_agreement_specialist",
+      "expected_doc_class": "merger_agreement",
+      "expected_subclass": "other",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "263cad3e71c33d035ffe1a78f7a5ba73c78c76835ca069b683d3dd845eb25e79",
+      "prediction": null,
+      "scores": {},
+      "latency_ms": 220089.8,
+      "tokens": {
+        "prompt": 76331,
+        "completion": 8195,
+        "total": 84526
+      },
+      "cost_usd": 0.012659,
+      "agent_usage": {
+        "merger_agreement_specialist": {
+          "calls": 1,
+          "prompt_tokens": 76331,
+          "completion_tokens": 8195,
+          "total": 84526,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "0887b6fe-c345-481d-ae48-4eb010752bfb",
+        "root_span_id": "210594e84d535e72a3fb5fda31d832a0"
+      },
+      "error": "ValueError: Exceeds the limit (4300 digits) for integer string conversion: value has 8191 digits; use sys.set_int_max_str_digits() to increase the limit",
+      "run_id": "20260927T005233Z-eval-merger_agreement",
+      "record_kind": "case",
+      "schema_version": 3
+    },
+    {
+      "case_id": "corpus:ground_truth:train:contract_99_merger_agreement.txt",
+      "filename": "contract_99_merger_agreement.txt",
+      "specialist": "merger_agreement_specialist",
+      "expected_doc_class": "merger_agreement",
+      "expected_subclass": "all_cash",
+      "review_expected": false,
+      "retry_expected": false,
+      "fixture_kind": null,
+      "fixture_cell": null,
+      "fixture_outcome": null,
+      "failure_stage": null,
+      "doc_text_sha256": "79d9818a22941835253713cc81fc981c2f271d31bb708036257bb6112549d2f8",
+      "prediction": {
+        "extracted_data": {
+          "_parse_error": true,
+          "confidence": 0.0
+        },
+        "extraction_confidence": 0.0,
+        "doc_type": "merger_agreement",
+        "specialist": "merger_agreement_specialist",
+        "model": "qwen/qwen3-8b",
+        "prompt_key": "merger_agreement_specialist_v1"
+      },
+      "scores": {
+        "overall_score": 0.0,
+        "needs_judge_review": false,
+        "n_expected_fields": 2,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0
+      },
+      "latency_ms": 289547.9,
+      "tokens": {
+        "prompt": 81998,
+        "completion": 8195,
+        "total": 90193
+      },
+      "cost_usd": 0.013322,
+      "agent_usage": {
+        "merger_agreement_specialist": {
+          "calls": 1,
+          "prompt_tokens": 81998,
+          "completion_tokens": 8195,
+          "total": 90193,
+          "models": [
+            "qwen/qwen3-8b"
+          ]
+        }
+      },
+      "trace": {
+        "backend": "braintrust",
+        "span_id": "12fa2f95-f740-490e-bc62-5bd7b7c28fdc",
+        "root_span_id": "05fd93ae47a08bfaab786ee5761a6d7e"
+      },
+      "error": null,
+      "run_id": "20260927T005233Z-eval-merger_agreement",
+      "record_kind": "case",
+      "schema_version": 3
+    }
+  ],
+  "record_kind": "run_summary",
+  "schema_version": 3,
+  "git": {
+    "commit": "533b371",
+    "dirty": true
+  }
+}

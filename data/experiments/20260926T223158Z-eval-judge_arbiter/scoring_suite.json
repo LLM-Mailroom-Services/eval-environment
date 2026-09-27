@@ -1,0 +1,52 @@
+{
+  "scorer": "judge",
+  "metrics_full": {
+    "n": 2,
+    "judge_agrees": 0.5,
+    "judge_score": 1.0,
+    "errors": 0,
+    "scorer_errors": 0
+  },
+  "metrics_essential": {
+    "judge_agrees": 0.5
+  },
+  "essential_forwarded_to_sink": {
+    "judge_agrees": 0.5
+  },
+  "performance": {
+    "latency_ms_mean": 1.3,
+    "latency_ms_p95": 2.0,
+    "tokens_prompt_total": 250,
+    "tokens_completion_total": 130,
+    "cost_usd_est_total": 2.4e-05,
+    "by_agent": {
+      "contracts_specialist": {
+        "calls": 2,
+        "prompt_tokens": 240,
+        "completion_tokens": 120,
+        "total_tokens": 360,
+        "models": [
+          "qwen/qwen3.7-flash"
+        ],
+        "cost_usd_est": 2.3e-05
+      },
+      "judge": {
+        "calls": 1,
+        "prompt_tokens": 10,
+        "completion_tokens": 10,
+        "total_tokens": 20,
+        "models": [
+          "mock-model"
+        ],
+        "cost_usd_est": null
+      }
+    }
+  },
+  "n_cases": 2,
+  "n_errors": 0,
+  "post_hoc": {
+    "recompute": "uv run python scripts/score_run.py --run-id <run_id> --recompute",
+    "judges": "uv run python scripts/score_run.py --run-id <run_id> --judge verdict,quality",
+    "compare": "uv run python scripts/compare_runs.py --a <run_a> --b <run_b>"
+  }
+}

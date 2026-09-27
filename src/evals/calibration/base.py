@@ -9,6 +9,7 @@ bootstrap CIs → write JSON+MD under ``reports/calibration/<task>/``.
 from __future__ import annotations
 
 import json
+import os
 import random
 from collections.abc import Callable
 from datetime import UTC, datetime
@@ -138,6 +139,16 @@ def bootstrap_ci(
     }
 
 
+def calibration_reports_root() -> Path:
+    """Report root — ``EVALS_CALIBRATION_REPORTS_DIR`` override (tests redirect,
+    mirroring ``evals.comparison_report``'s ``EVALS_COMPARISON_REPORTS_DIR``).
+    Without this override every mock-mode pytest run of a calibration task
+    litters real, git-tracked ``reports/calibration/`` with throwaway
+    timestamped dirs."""
+    override = os.environ.get("EVALS_CALIBRATION_REPORTS_DIR")
+    return Path(override) if override else Path("reports") / "calibration"
+
+
 def write_report(
     task: str,
     payload: dict[str, Any],
@@ -146,7 +157,7 @@ def write_report(
 ) -> tuple[Path, Path]:
     """Write the calibration JSON+MD report; returns (json_path, md_path)."""
     stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
-    base = (report_dir or Path("reports") / "calibration" / task) / stamp
+    base = (report_dir or calibration_reports_root() / task) / stamp
     base.mkdir(parents=True, exist_ok=True)
     json_path = base / "report.json"
     json_path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")

@@ -1,0 +1,62 @@
+{
+  "scorer": "pipeline",
+  "metrics_full": {
+    "n": 2,
+    "class_accuracy": 0.0,
+    "overall_score": 0.0,
+    "errors": 0,
+    "scorer_errors": 0
+  },
+  "metrics_essential": {
+    "class_correct": 0.0
+  },
+  "essential_forwarded_to_sink": {
+    "class_correct": 0.0
+  },
+  "performance": {
+    "latency_ms_mean": 193.55,
+    "latency_ms_p95": 225.3,
+    "tokens_prompt_total": 780,
+    "tokens_completion_total": 420,
+    "cost_usd_est_total": null,
+    "by_agent": {
+      "sorter": {
+        "calls": 6,
+        "prompt_tokens": 720,
+        "completion_tokens": 360,
+        "total_tokens": 1080,
+        "models": [
+          "qwen/qwen3.7-flash"
+        ],
+        "cost_usd_est": 6.8e-05
+      },
+      "intake": {
+        "calls": 4,
+        "prompt_tokens": 40,
+        "completion_tokens": 40,
+        "total_tokens": 80,
+        "models": [
+          "mock-model"
+        ],
+        "cost_usd_est": null
+      },
+      "sorter_reviewer": {
+        "calls": 2,
+        "prompt_tokens": 20,
+        "completion_tokens": 20,
+        "total_tokens": 40,
+        "models": [
+          "mock-model"
+        ],
+        "cost_usd_est": null
+      }
+    }
+  },
+  "n_cases": 2,
+  "n_errors": 0,
+  "post_hoc": {
+    "recompute": "uv run python scripts/score_run.py --run-id <run_id> --recompute",
+    "judges": "uv run python scripts/score_run.py --run-id <run_id> --judge verdict,quality",
+    "compare": "uv run python scripts/compare_runs.py --a <run_a> --b <run_b>"
+  }
+}

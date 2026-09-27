@@ -1,0 +1,11 @@
+{
+  "task": "contracts",
+  "task_id": "eval:contracts",
+  "model": "qwen/qwen3-8b",
+  "decode_profile": "qwen3-8b",
+  "prompt_version": null,
+  "prompt_source": "frozen",
+  "sample": 20,
+  "seed": 42,
+  "subset": "class:contract"
+}

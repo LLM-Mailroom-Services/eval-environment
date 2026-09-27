@@ -1,7 +1,7 @@
 {
  "schema": "eval-site-snapshot",
  "version": 1,
- "generated_at": "2026-09-27T08:44:54+00:00",
+ "generated_at": "2026-09-27T09:09:00+00:00",
  "health": {
   "log_valid": true,
   "log_problems": [],
@@ -1034,7 +1034,7 @@
     "experiment_record.v2",
     "experiment_record.v3"
    ],
-   "test_count": 267
+   "test_count": 271
   },
   "openrouter_models": {
    "provider": "openrouter",

@@ -137,6 +137,28 @@ def main() -> int:
         encoding="utf-8",
     )
     print(comparison_report.repo_relative_path(index_path))
+
+    canonical_summaries = [s for s, _ in canonical_latest.values()]
+    master_path = reports_root / "API-LEG-MASTER-REPORT.md"
+    master_path.write_text(
+        comparison_report.render_master_report(
+            canonical_summaries, index_entries, reports_root
+        ),
+        encoding="utf-8",
+    )
+    print(comparison_report.repo_relative_path(master_path))
+
+    for model_key in ("qwen3-8b", "granite-4.2-8b"):
+        readme = reports_root / model_key / "README.md"
+        readme.parent.mkdir(parents=True, exist_ok=True)
+        readme.write_text(
+            comparison_report.render_model_suite_readme(
+                model_key, canonical_summaries, reports_root
+            ),
+            encoding="utf-8",
+        )
+        print(comparison_report.repo_relative_path(readme))
+
     print(f"rendered {len(index_entries)} run write-up(s); {len(canonical_latest)} canonical stem(s)")
     return 0
 

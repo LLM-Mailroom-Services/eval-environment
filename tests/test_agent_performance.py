@@ -163,3 +163,23 @@ def test_snapshot_agent_catalog(monkeypatch, sample_case):
     assert any("eval:classification" in a["evaluated_by"] for a in sorter_entries)
     archivist = [a for a in catalog if "archivist" in a["agent"] or "archive" in a["node"]]
     assert archivist and any(a["llm"] is False for a in archivist)
+
+
+def test_specialist_eval_parent_name_is_unique_per_class():
+    from evals.registry import get_task
+    from evals.runner import _specialist_name
+
+    names = {
+        task: _specialist_name(get_task(f"eval:{task}"), None)
+        for task in (
+            "contracts",
+            "merger_agreement",
+            "corporate_records",
+            "correspondence",
+            "insurance_claims",
+        )
+    }
+    assert names["contracts"] == "contracts_specialist"
+    assert names["insurance_claims"] == "insurance_claims_specialist"
+    assert len(set(names.values())) == 5
+    assert "extract-fields" not in names.values()

@@ -18,16 +18,23 @@ BRAINTRUST_PROJECT=mailroom-evals   # default project for eval runs
 ## How this repo uses it
 
 - `evals.tracing` initializes via `mailroom.observability.braintrust_setup.configure()`
-  (`init_logger` → Logs/Traces view; NEVER `init()` — that routes to
-  Experiments and empties the trace page).
+  (`init_logger` → nested LLM spans). Real eval runs also open a per-run
+  **Experiment** via `evals.braintrust_experiment` (`braintrust.init` +
+  `init_dataset`) linked to the pinned HF corpus (`BRAINTRUST_EXPERIMENTS=auto`,
+  disable with `BRAINTRUST_EXPERIMENTS=off`).
 - The runner sets `OBSERVABILITY_PROVIDER=braintrust` so llm-mailroom's
   `llm/client.py:get_llm` wraps the OpenAI client (`braintrust.wrap_openai`)
   and every LLM call auto-logs as a `type=llm` span.
-- One root span per case: name = the task's node observation name
-  (e.g. `classify-document`), `input` = curated case summary (ids + class +
-  chars, never raw doc text), `output` = prediction + scores, `metadata` =
-  run_id, dataset config/split/revision, subset, invoke mode, model,
-  prompt_version. Scorer results land via `span.log(metrics=...)`.
+- One **Experiment row per document** (20 docs → 20 rows). The parent
+  span is named for the specialist (`contracts_specialist`, …) or the
+  node when there is no specialist. Nested extract-fields / LLM spans
+  stay children of that row. Scores attach via `span.log` — never a
+  second `Experiment.log(..., allow_concurrent_with_spans=True)` which
+  duplicates the specialist invocation. `input` = curated case summary
+  (ids + chars, never raw doc text). Scorer results: span `metrics` use
+  `ESSENTIAL_SCORES`; the parent row `scores` use the 0–1
+  `row_score_metrics` surface. Dataset rows upsert on `doc_text_sha256`
+  with HF repo/revision metadata.
 - `evals.tracing.flush()` after each case; `flush_health()` counters surface
   dropped events (never fail a run on tracing errors).
 

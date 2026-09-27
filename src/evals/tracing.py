@@ -11,15 +11,20 @@ first agent instantiation so llm-mailroom's ``llm/client.get_llm`` wraps the
 OpenAI client with the matching instrumentation — every LLM call inside a
 node/agent invocation auto-traces.
 
-One root span per case, named after the node's stable observation name
-(`classify-document`, `extract-fields`, …). Input/output are CURATED
-(identifiers + scores, never raw document text). Scorer metrics attach to
-the span (Braintrust ``log(metrics=...)`` / Phoenix span attributes).
+One Experiment row per case: the parent span is named after the specialist
+(or node when there is no specialist), and nested node/LLM spans attach
+under it. Do not also ``Experiment.log`` the same document — that duplicates
+rows. Input/output are CURATED:
+no raw document text, no ground-truth labels, and no filename-bearing
+``case_id`` strings (use ``public_case_ref`` + ``doc_text_sha256`` to
+join back to the experiment log). Scorer metrics attach to the span
+(Braintrust ``log(metrics=...)`` / Phoenix span attributes).
 Tracing failures log warnings and never fail a run.
 """
 
 from __future__ import annotations
 
+import hashlib
 import os
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -296,12 +301,32 @@ def _install_langchain_llm_spans() -> None:
         logger.warning("evals_langchain_callback_register_failed", exc_info=True)
 
 
+def doc_text_sha256(case: dict[str, Any]) -> str:
+    """sha256 of the case document text (experiment-log join key)."""
+    return hashlib.sha256(str(case.get("text") or "").encode("utf-8")).hexdigest()
+
+
+def public_case_ref(case: dict[str, Any]) -> str:
+    """Trace-safe case reference: corpus position without filename or GT tokens.
+
+    Full ``case["id"]`` values embed the corpus filename (often revealing
+    doc type / subtype). Sinks use this ref; the append-only experiment log
+    keeps the canonical ``case_id``.
+    """
+    raw = str(case.get("id") or "")
+    digest = doc_text_sha256(case)[:12]
+    if raw.startswith("corpus:"):
+        parts = raw.split(":", 3)
+        if len(parts) == 4:
+            return f"{parts[0]}:{parts[1]}:{parts[2]}:doc#{digest}"
+    id_digest = hashlib.sha256(raw.encode("utf-8")).hexdigest()[:12]
+    return f"eval-case:doc#{id_digest}"
+
+
 def _curate_case_input(case: dict[str, Any]) -> dict[str, Any]:
     return {
-        "case_id": case.get("id"),
-        "filename": case.get("filename"),
-        "expected_doc_class": case.get("expected_doc_class"),
-        "expected_subclass": case.get("expected_subclass"),
+        "case_ref": public_case_ref(case),
+        "doc_text_sha256": doc_text_sha256(case),
         "chars": len(str(case.get("text") or "")),
         "config": case.get("config"),
         "split": case.get("split"),
@@ -319,6 +344,9 @@ class _NoopSpan:
 
     def update_metadata(self, metadata: dict[str, Any]) -> Any:
         return self
+
+    def log_document_row(self, **_event: Any) -> None:
+        return None
 
     @property
     def trace_ref(self) -> dict[str, Any] | None:
@@ -341,34 +369,67 @@ def case_span(
     node_name: str,
     case: dict[str, Any],
     run_meta: dict[str, Any],
+    span_name: str | None = None,
+    specialist: str | None = None,
 ) -> Iterator[Any]:
-    """One root span per case with curated input; yields a span handle with
-    ``set_output`` / ``set_metrics``. Yields a no-op when backend is none."""
+    """One parent Experiment row per document.
+
+    ``span_name`` / ``specialist`` name the row (one specialist invocation).
+    Nested extract-fields / LLM spans belong under this parent — they must
+    not be logged as sibling Experiment rows.
+    """
     if backend == "none":
         yield _noop
         return
+    parent_name = span_name or specialist or node_name
     as_type = NODE_OBSERVATION_TYPES.get(node_name, "span")
     meta = dict(run_meta or {})
-    meta.setdefault("case_id", case.get("id"))
-    meta.setdefault("filename", case.get("filename"))
+    meta.setdefault("case_ref", public_case_ref(case))
+    meta.setdefault("doc_text_sha256", doc_text_sha256(case))
+    meta.setdefault("pipeline_node", node_name)
+    if specialist:
+        meta.setdefault("specialist", specialist)
+    row_id = doc_text_sha256(case)
     try:
         if backend == "braintrust":
             import braintrust
 
-            with braintrust.start_span(
-                name=node_name,
-                type=as_type,
-                input=_curate_case_input(case),
-                metadata=meta or None,
-                tags=list(meta.get("tags") or []) or None,
-            ) as span:
+            from evals.braintrust_experiment import current_experiment, dataset_record_id
+
+            exp = current_experiment()
+            record_id = dataset_record_id(case)
+            span_kwargs: dict[str, Any] = {
+                "name": parent_name,
+                "type": as_type,
+                "input": _curate_case_input(case),
+                "metadata": {
+                    **(meta or {}),
+                    **({"dataset_record_id": record_id} if record_id else {}),
+                },
+                "tags": list(meta.get("tags") or []) or None,
+                "id": row_id,
+            }
+            if record_id:
+                span_kwargs["dataset_record_id"] = record_id
+            span_cm = (
+                exp.start_span(**span_kwargs)
+                if exp is not None
+                else braintrust.start_span(
+                    name=parent_name,
+                    type=as_type,
+                    input=_curate_case_input(case),
+                    metadata=meta or None,
+                    tags=list(meta.get("tags") or []) or None,
+                )
+            )
+            with span_cm as span:
                 yield _BraintrustHandle(span)
             return
         if backend == "phoenix":
             from opentelemetry import trace
 
             tracer = trace.get_tracer("mailroom-evals")
-            with tracer.start_as_current_span(node_name) as span:
+            with tracer.start_as_current_span(parent_name) as span:
                 _otel_attrs(span, as_type, _curate_case_input(case), meta)
                 yield _PhoenixHandle(span)
             return
@@ -433,6 +494,16 @@ class _BraintrustHandle:
             pass
         return self
 
+    def log_document_row(self, **event: Any) -> None:
+        """Attach scores/output to this case's Experiment row (never a sibling)."""
+        payload = {key: value for key, value in event.items() if value is not None}
+        if not payload:
+            return
+        try:
+            self._span.log(**payload)
+        except Exception:
+            pass
+
 
 class _PhoenixHandle:
     def __init__(self, span: Any) -> None:
@@ -478,6 +549,9 @@ class _PhoenixHandle:
         except Exception:
             pass
         return self
+
+    def log_document_row(self, **_event: Any) -> None:
+        return None
 
 
 def flush(backend: str) -> None:

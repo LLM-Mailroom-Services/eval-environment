@@ -5,7 +5,7 @@ The viewer (web/) is a zero-dependency static site: this script bakes the
 append-only experiment log, the task catalog, the corpus pin, the frozen
 prompt lineage, and environment health into ONE tracked JSON file that
 Vercel serves. Refresh discipline: run this whenever the experiment log
-changes, then commit the result (the raw log stays local per .gitignore).
+changes, then commit `reports/` and the snapshot together.
 
     uv run python scripts/export_site_snapshot.py            # write snapshot
     uv run python scripts/export_site_snapshot.py --check    # exit 1 if stale

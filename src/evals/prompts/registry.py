@@ -50,6 +50,10 @@ def default_keys(source: str) -> dict[str, str]:
         from . import archived_production
 
         for key in archived_production.VERSIONS:
+            # Default archived injection is *_v0 only. Modal-parity keys
+            # (e.g. contracts_specialist_v33) are explicit --prompt-version pins.
+            if not key.endswith("_v0"):
+                continue
             role = key.rsplit("_v", 1)[0]
             keys[role] = key
         return keys

@@ -38,6 +38,10 @@ ESSENTIAL_SCORES: dict[str, tuple[str, ...]] = {
     "pipeline": ("stage_agrees", "class_correct"),
 }
 
+# Max headline scores forwarded to Braintrust ``scores=`` (quota). Span metrics
+# use the full ESSENTIAL_SCORES set; experiment ``scores`` stay tighter.
+SINK_SCORE_METRICS_MAX = 2
+
 
 # Calibration probe scorers reuse their eval node's essential set (the
 # per-case scores are the node's own) — applied in essential_metrics /
@@ -56,6 +60,41 @@ CALIBRATION_ESSENTIAL_ALIAS: dict[str, str] = {
 def essential_scorer(scorer: str) -> str:
     """Resolve a calibration probe scorer to its eval node's scorer."""
     return CALIBRATION_ESSENTIAL_ALIAS.get(scorer, scorer)
+
+
+# Numeric 0–1 score keys forwarded as Braintrust experiment ``scores`` on
+# *each document row*. Count/flags stay in metadata (quota + 0–1 contract).
+_BT_SCORE_SKIP = frozenset({"n_expected_fields", "scorer_error"})
+
+
+def row_score_metrics(scores: dict[str, Any] | None) -> dict[str, float]:
+    """One document's full 0–1 score surface for a Braintrust experiment row."""
+    out: dict[str, float] = {}
+    for key, value in (scores or {}).items():
+        if key in _BT_SCORE_SKIP:
+            continue
+        if isinstance(value, bool):
+            out[key] = 1.0 if value else 0.0
+            continue
+        if isinstance(value, (int, float)):
+            f = float(value)
+            if 0.0 <= f <= 1.0:
+                out[key] = f
+    return out
+
+
+def sink_score_metrics(scorer: str, scores: dict[str, Any], *, max_scores: int | None = None) -> dict[str, float]:
+    """Minimal headline scores for Braintrust experiment scoring (quota-safe)."""
+    limit = max_scores if max_scores is not None else SINK_SCORE_METRICS_MAX
+    wanted = ESSENTIAL_SCORES.get(essential_scorer(scorer), ())[: max(0, limit)]
+    out: dict[str, float] = {}
+    for key in wanted:
+        value = scores.get(key)
+        if isinstance(value, bool):
+            out[key] = float(value)
+        elif isinstance(value, (int, float)) and not isinstance(value, bool):
+            out[key] = float(value)
+    return out
 
 
 def essential_metrics(scorer: str, scores: dict[str, Any]) -> dict[str, float]:

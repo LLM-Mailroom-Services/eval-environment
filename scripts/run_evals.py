@@ -29,6 +29,7 @@ from pipeline.env import load_env
 
 load_env()
 
+from evals.decode_budget import COMPARISON_PROFILES as DECODE_PROFILES
 from evals.registry import list_tasks
 from evals.runner import run_task
 
@@ -67,6 +68,9 @@ def main() -> int:
                         help="fail preflight when a real run would resolve to trace backend=none")
     parser.add_argument("--skip-preflight", action="store_true",
                         help="skip preflight checks (not recommended for --real)")
+    parser.add_argument("--decode-profile", default=None, choices=sorted(DECODE_PROFILES),
+                        help="comparison decode profile: per-agent completion budgets, "
+                             "mandated sampling (granite), 600s call timeout, thinking-strip")
     parser.add_argument("--json", action="store_true", help="print the run summary as JSON")
     args = parser.parse_args()
 
@@ -125,6 +129,7 @@ def main() -> int:
                 resume_run_id=args.resume,
                 require_trace_sink=args.require_trace_sink,
                 skip_preflight=args.skip_preflight,
+                decode_profile=args.decode_profile,
             )
         except Exception as exc:
             # PreflightError and other setup failures before a run record exists.

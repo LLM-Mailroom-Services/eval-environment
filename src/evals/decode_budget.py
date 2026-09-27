@@ -69,6 +69,37 @@ def get_profile(key: str | None) -> dict[str, Any] | None:
     return COMPARISON_PROFILES.get(key.strip().lower())
 
 
+# Active profile contexts (innermost last), pushed on entry to
+# ``apply_decode_budget`` when the profile carries sampling. This exists for
+# call paths that bypass BOTH wrapped families in
+# ``_install_sampling_injection`` — notably the specialist direct-client path
+# (``evals.specialist_llm._complete_json`` calls
+# ``client.chat.completions.create`` directly, never
+# ``llm.retry.retry_chat_completion`` and never a LangChain ``ChatOpenAI``).
+# Without this hook the mandated sampling (e.g. Granite T=1.0/top_p=0.95/
+# seed=42) silently never reached the wire for specialist runs while the
+# report still printed the override — the fix for that gap.
+_ACTIVE_SAMPLING: list[tuple[dict[str, Any], dict[str, Any]]] = []
+
+
+def active_sampling() -> dict[str, Any] | None:
+    """Sampling params of the innermost active profile context, if any."""
+    if not _ACTIVE_SAMPLING:
+        return None
+    return _ACTIVE_SAMPLING[-1][0]
+
+
+def mark_sampling_consumed() -> None:
+    """Record that a direct-client call honored the active profile sampling.
+
+    Mirrors what the ``retry_chat_completion`` / ``ChatOpenAI`` wrappers do
+    via ``applied["sampling_injected"] = True`` so the comparison report's
+    "sampling injected on wire" cell reflects reality for every call family.
+    """
+    for _, applied in _ACTIVE_SAMPLING:
+        applied["sampling_injected"] = True
+
+
 def strip_thinking_spans(text: str) -> str:
     """Strip Granite-style thinking spans and unwrap <response> envelopes.
 
@@ -123,7 +154,12 @@ def apply_decode_budget(profile: dict[str, Any] | None) -> Iterator[dict[str, An
        agents) and the LangChain ``ChatOpenAI`` constructor so the profile's
        temperature/top_p/seed reach the wire even past explicit call-site
        values. ``None`` sampling (Qwen twin) injects nothing.
-    3. Inert by default: ``profile=None`` yields immediately.
+    3. Active-sampling hook: profiles WITH sampling are additionally visible
+       via ``active_sampling()`` for direct-client call paths that bypass
+       both wrapped families (``evals.specialist_llm``); those paths apply
+       the override at call time and report back via
+       ``mark_sampling_consumed()``.
+    4. Inert by default: ``profile=None`` yields immediately.
     """
     applied: dict[str, Any] = {"sampling_injected": False, "max_tokens_by_agent": {}}
     if not profile:
@@ -162,9 +198,16 @@ def apply_decode_budget(profile: dict[str, Any] | None) -> Iterator[dict[str, An
     if sampling:
         restore_fns.append(_install_sampling_injection(sampling, applied))
 
+    if sampling:
+        _ACTIVE_SAMPLING.append((sampling, applied))
     try:
         yield applied
     finally:
+        if sampling:
+            try:
+                _ACTIVE_SAMPLING.remove((sampling, applied))
+            except ValueError:
+                pass
         for restore in restore_fns:
             try:
                 restore()

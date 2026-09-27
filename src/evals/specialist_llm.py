@@ -17,7 +17,12 @@ from typing import Any
 
 import structlog
 
-from evals.decode_budget import CLASS_BUDGETS, strip_thinking_spans
+from evals.decode_budget import (
+    CLASS_BUDGETS,
+    active_sampling,
+    mark_sampling_consumed,
+    strip_thinking_spans,
+)
 from evals.extraction_scope import LIVE_SCHEMA_FIELDS
 from evals.prompts import registry as prompts_registry
 from evals.prompts.lineage import resolve, roles
@@ -232,6 +237,21 @@ def extract_entities(
     assert_prompt_matches_class(specialist, doc_class, system)
     system = system + _JSON_NOTE
     client, model, max_tokens, temperature = _client_for(specialist)
+    # Mandated profile sampling (e.g. Granite T=1.0/top_p=0.95/seed=42) must
+    # reach the wire here too: this direct-client path bypasses both wrapped
+    # families in ``decode_budget._install_sampling_injection``, so without
+    # this call-time override specialists would silently run at the taxonomy
+    # temperature (0.1) while the report printed the profile override.
+    top_p: float | None = None
+    seed: int | None = None
+    sampling = active_sampling()
+    if sampling:
+        temperature = float(sampling.get("temperature", temperature))
+        if sampling.get("top_p") is not None:
+            top_p = float(sampling["top_p"])
+        if sampling.get("seed") is not None:
+            seed = int(sampling["seed"])
+        mark_sampling_consumed()
     limit = _chunk_limit_for(doc_class, model)
     needed = needed_chunks(len(text), limit)
     budget = llm_call_budget(needed)
@@ -293,6 +313,8 @@ def extract_entities(
                 model=model,
                 max_tokens=max_tokens,
                 temperature=temperature,
+                top_p=top_p,
+                seed=seed,
                 agent=specialist,
                 meter=meter,
             )
@@ -425,6 +447,8 @@ def _completion_kwargs(
     max_tokens: int,
     temperature: float,
     json_object: bool,
+    top_p: float | None = None,
+    seed: int | None = None,
 ) -> dict[str, Any]:
     kwargs: dict[str, Any] = {
         "model": model,
@@ -435,6 +459,12 @@ def _completion_kwargs(
         "temperature": temperature,
         "max_tokens": max_tokens,
     }
+    # Profile-mandated sampling (Granite leg); omitted entirely when no
+    # profile is active so default-decode runs keep their exact wire shape.
+    if top_p is not None:
+        kwargs["top_p"] = top_p
+    if seed is not None:
+        kwargs["seed"] = seed
     if json_object:
         kwargs["response_format"] = {"type": "json_object"}
     # Qwen3 defaults thinking ON; <think> blobs poison json_object parse and
@@ -475,6 +505,8 @@ def _complete_json(
     temperature: float,
     agent: str,
     meter: _RowCallBudget,
+    top_p: float | None = None,
+    seed: int | None = None,
 ) -> dict[str, Any]:
     """One chat completion, JSON-parsed, with a single meter-gated retry.
 
@@ -503,6 +535,8 @@ def _complete_json(
                 max_tokens=max_tokens,
                 temperature=temperature,
                 json_object=not plain_fallback,
+                top_p=top_p,
+                seed=seed,
             )
         )
         _record(response, model=model, agent=agent)

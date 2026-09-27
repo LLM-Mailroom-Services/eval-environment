@@ -41,7 +41,9 @@ n_selected/n_total/seed; **v3:** `case_ids`, `filenames`,
 `subset_manifest_path`, `subset_manifest_jsonl` — the locked case set),
 `git` (commit/dirty), `started_at`/`finished_at`/
 `duration_s`, `params`, `metrics` (task-specific), `performance`
-(latency_ms mean/p95, token totals, cost_usd_est, `by_agent` per-agent
+(latency_ms mean/p95, token totals, `expected_cost_usd` when a decode
+profile drove the wave, `cost_usd_total` actual sum of case rows,
+`cost_usd_est_total` roster-priced aggregate, `by_agent` per-agent
 calls/tokens/models/cost), `calibration` (family=
 calibration only: cells, ece, recommended_thresholds), `judging` (v2:
 post-hoc local judge block — dimensions, judge_model, mock, metrics,

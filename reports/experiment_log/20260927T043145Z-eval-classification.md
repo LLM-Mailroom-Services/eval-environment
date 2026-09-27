@@ -9,7 +9,24 @@
 | git | commit: 782ddeb · dirty: True |
 | started / finished | 2026-09-27T04:31:45+00:00 → 2026-09-27T04:34:57+00:00 |
 | duration_s | 194.3 |
+| comparison report | reports/api-comparisons/qwen3-8b/classification/runs/202609… |
 | error | — |
+
+### Run configuration
+
+| Param | Value |
+|---|---|
+| concurrency | 8 |
+| decode_budget_applied | sampling_injected: False · max_tokens_by_agent: {} |
+| decode_profile | — |
+| dry_run | ✗ |
+| n | — |
+| resumed_from | — |
+| sample | 20 |
+| scorer | classification |
+| seed | 42 |
+| skipped_already_run | 0 |
+| thinking_recovered | 0 |
 
 ### Dataset
 
@@ -45,6 +62,7 @@
 | Metric | Value |
 |---|---|
 | cost_usd_est_total | 0.1493 |
+| cost_usd_total | 0.1493 |
 | latency_ms_mean | 33056.525 |
 | latency_ms_p95 | 133971.5 |
 | tokens_completion_total | 16132 |

@@ -9,4 +9,4 @@ Generated from the experiment log; report root: `reports/api-comparisons`.
 
 | run_id | task | model | n | write-up | canonical stem |
 |---|---|---|---:|---|---|
-| `20260927T082404Z-eval-merger_agreement` | merger_agreement | ibm-granite/granite-4.2-8b | 20 | [20260927T082404Z-eval-merger_agreement.md](granite-4.2-8b/merger_agreement/runs/20260927T082404Z-eval-merger_agreement.md) | [RUN-20-MERGER_AGREEMENT-GRANITE-4.2-8B-REPORT.md](granite-4.2-8b/merger_agreement/RUN-20-MERGER_AGREEMENT-GRANITE-4.2-8B-REPORT.md) |
+| `20260927T033031Z-eval-correspondence` | correspondence | qwen/qwen3-8b | 20 | [20260927T033031Z-eval-correspondence.md](qwen3-8b/correspondence/runs/20260927T033031Z-eval-correspondence.md) | [RUN-20-CORRESPONDENCE-QWEN3-8B-REPORT.md](qwen3-8b/correspondence/RUN-20-CORRESPONDENCE-QWEN3-8B-REPORT.md) |

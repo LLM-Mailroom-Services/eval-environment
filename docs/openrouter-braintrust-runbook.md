@@ -179,6 +179,42 @@ re-verifying the retry-rescue rate first (see §6, in-process diagnostic).
 
 ## 5. The specialist runbook (N=20, concurrency=8, single job at a time)
 
+### One coverage call per document (default — not merger-only)
+
+**Source chunking** splits one document's text across multiple completions.
+**JSON retries** re-call the *same* coverage span after garbled output or a
+network error. Do not confuse them when reading `performance.by_agent.calls`.
+
+| task | pinned N=20 max source size | source chunks | expected specialist calls (N=20) |
+|---|---:|---|---|
+| `eval:correspondence` | 34,310 chars | **always 1** | **~20** (one coverage call per doc) |
+| `eval:insurance_claims` | 14,607 chars | **always 1** | **~20** |
+| `eval:contracts` | 173,240 chars | usually 1 (120K default span) | ~20–24 |
+| `eval:corporate_records` | 312,280 chars | 1–3 on qwen3-8b (120K spans) | ~20–40 when chunked |
+| `eval:merger_agreement` | 464,926 chars | model-specific (below) | model-specific |
+
+**Never** point a non-merger task at merger-only chunk policy (48K qwen3-8b
+merger spans, Granite 280K merger spans, etc.). Code enforces this via
+`SINGLE_COVERAGE_CHUNK_CLASSES` for correspondence and insurance.
+
+**Sanity-check every API report before you treat it as canonical:**
+
+1. Run log / case rows: `needed_chunks=1` and `chunks=1` for correspondence
+   and insurance (always on pinned draws).
+2. **~39 calls on correspondence for 20 docs is not chunking** — it is almost
+   always **retries** under `--concurrency 8` (see §4). The contaminated
+   baseline `20260926T234358Z` had **20 calls** at concurrency=1; the
+   post-retry-fix wave `20260927T033031Z` has **39 calls** with **0 parse
+   errors** but ~2× API spend. Prefer the run with **~20 calls and 0 parse
+   errors** when both exist; do not “fix” correspondence by shrinking chunk
+   sizes.
+3. Merger is the only class where multi-chunk coverage is **normal** for
+   `qwen/qwen3-8b` (48K spans). Granite / qwen3.7-flash use merger-specific
+   large spans (§5 below).
+
+Comparison reports auto-append caveats when call counts or `needed_chunks`
+look wrong (`evals.comparison_report`).
+
 Task ids, model, and profile are the only per-class variables:
 
 ```bash
@@ -202,7 +238,7 @@ run_specialist eval:corporate_records  corporate_record   qwen/qwen3-8b qwen3-8b
 run_specialist eval:merger_agreement   merger_agreement   qwen/qwen3-8b qwen3-8b
 ```
 
-### Merger agreement: one LLM call per document (default)
+### Merger agreement: minimize coverage chunks (model-specific)
 
 The pinned corpus includes merger agreements up to **464,926 characters**.
 **Default posture is one specialist completion per document** — not 48K

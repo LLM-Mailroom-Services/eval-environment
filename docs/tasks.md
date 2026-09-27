@@ -17,6 +17,12 @@ correspondence / insurance_claims):
 > entities from the sorter-handed document and return one complete JSON
 > object. Unstated values are null or [].
 
+OpenRouter API waves (specialists + sorter): read
+[`docs/openrouter-braintrust-runbook.md`](openrouter-braintrust-runbook.md) —
+especially **§5 one coverage call per document**. Correspondence and
+insurance must never be source-chunked on pinned draws; high call counts on
+those tasks are usually JSON retries, not merger-style chunking.
+
 After every run the harness:
 
 1. Forwards **essential** span metrics to the trace sink; on Braintrust, real

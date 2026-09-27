@@ -102,11 +102,21 @@ def wave_size(summary: dict[str, Any]) -> int:
     return int(params.get("sample") or params.get("n") or 0)
 
 
+def _modal_contracts_v33(summary: dict[str, Any]) -> bool:
+    """True when the contracts specialist ran the sandbox v33 prompt (Modal parity)."""
+    if summary.get("prompt_version") == "contracts_specialist_v33":
+        return True
+    slot = (summary.get("prompt_versions") or {}).get("contracts_specialist") or {}
+    return slot.get("key") == "contracts_specialist_v33"
+
+
 def report_path(summary: dict[str, Any], base_dir: Path | None = None) -> Path:
     """Deterministic report path for a run summary."""
     base = base_dir or reports_dir()
     short = model_short(summary)
-    stem = f"RUN-{wave_size(summary)}-{classify((summary.get('dataset') or {}).get('subset'))}-{short.upper()}"
+    cls = classify((summary.get("dataset") or {}).get("subset"))
+    v33 = "-V33" if cls == "CONTRACT" and _modal_contracts_v33(summary) else ""
+    stem = f"RUN-{wave_size(summary)}-{cls}{v33}-{short.upper()}"
     return base / short / f"{stem}-REPORT.md"
 
 

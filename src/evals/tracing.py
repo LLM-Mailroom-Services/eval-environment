@@ -11,8 +11,10 @@ first agent instantiation so llm-mailroom's ``llm/client.get_llm`` wraps the
 OpenAI client with the matching instrumentation — every LLM call inside a
 node/agent invocation auto-traces.
 
-One root span per case, named after the node's stable observation name
-(`classify-document`, `extract-fields`, …). Input/output are CURATED:
+One Experiment row per specialist (or node) invocation — never a document
+inventory row, and never a sibling extract-fields / pipeline-node row.
+Nested LLM spans attach under the specialist parent. Do not
+``Experiment.log`` a second row. Input/output are CURATED:
 no raw document text, no ground-truth labels, and no filename-bearing
 ``case_id`` strings (use ``public_case_ref`` + ``doc_text_sha256`` to
 join back to the experiment log). Scorer metrics attach to the span
@@ -343,6 +345,9 @@ class _NoopSpan:
     def update_metadata(self, metadata: dict[str, Any]) -> Any:
         return self
 
+    def log_document_row(self, **_event: Any) -> None:
+        return None
+
     @property
     def trace_ref(self) -> dict[str, Any] | None:
         return None
@@ -364,41 +369,50 @@ def case_span(
     node_name: str,
     case: dict[str, Any],
     run_meta: dict[str, Any],
+    span_name: str | None = None,
+    specialist: str | None = None,
 ) -> Iterator[Any]:
-    """One root span per case with curated input; yields a span handle with
-    ``set_output`` / ``set_metrics``. Yields a no-op when backend is none."""
+    """One parent Experiment row per specialist (or node) call.
+
+    ``span_name`` / ``specialist`` name the row. Nested LLM spans belong
+    under this parent. Documents are not logged as their own rows; extract-fields
+    and other pipeline nodes must not appear as sibling Experiment rows.
+    """
     if backend == "none":
         yield _noop
         return
+    parent_name = span_name or specialist or node_name
     as_type = NODE_OBSERVATION_TYPES.get(node_name, "span")
     meta = dict(run_meta or {})
     meta.setdefault("case_ref", public_case_ref(case))
     meta.setdefault("doc_text_sha256", doc_text_sha256(case))
+    if specialist:
+        meta.setdefault("specialist", specialist)
+        meta["eval_target"] = specialist
+    else:
+        meta.setdefault("eval_target", node_name)
     try:
         if backend == "braintrust":
             import braintrust
 
-            from evals.braintrust_experiment import current_experiment, dataset_record_id
+            from evals.braintrust_experiment import current_experiment
 
             exp = current_experiment()
+            # Specialist (or node) parent only. Do not key the row by document
+            # sha / dataset_record_id — that surfaces the corpus document as
+            # its own Braintrust row beside the specialist call.
+            span_kwargs: dict[str, Any] = {
+                "name": parent_name,
+                "type": "eval",
+                "input": _curate_case_input(case),
+                "metadata": meta or {},
+                "tags": list(meta.get("tags") or []) or None,
+            }
             span_cm = (
-                exp.start_span(
-                    name=node_name,
-                    type=as_type,
-                    input=_curate_case_input(case),
-                    metadata={
-                        **(meta or {}),
-                        **(
-                            {"dataset_record_id": dataset_record_id(case)}
-                            if dataset_record_id(case)
-                            else {}
-                        ),
-                    },
-                    tags=list(meta.get("tags") or []) or None,
-                )
+                exp.start_span(**span_kwargs)
                 if exp is not None
                 else braintrust.start_span(
-                    name=node_name,
+                    name=parent_name,
                     type=as_type,
                     input=_curate_case_input(case),
                     metadata=meta or None,
@@ -412,7 +426,7 @@ def case_span(
             from opentelemetry import trace
 
             tracer = trace.get_tracer("mailroom-evals")
-            with tracer.start_as_current_span(node_name) as span:
+            with tracer.start_as_current_span(parent_name) as span:
                 _otel_attrs(span, as_type, _curate_case_input(case), meta)
                 yield _PhoenixHandle(span)
             return
@@ -477,6 +491,16 @@ class _BraintrustHandle:
             pass
         return self
 
+    def log_document_row(self, **event: Any) -> None:
+        """Attach scores/output to this case's Experiment row (never a sibling)."""
+        payload = {key: value for key, value in event.items() if value is not None}
+        if not payload:
+            return
+        try:
+            self._span.log(**payload)
+        except Exception:
+            pass
+
 
 class _PhoenixHandle:
     def __init__(self, span: Any) -> None:
@@ -523,6 +547,9 @@ class _PhoenixHandle:
             pass
         return self
 
+    def log_document_row(self, **_event: Any) -> None:
+        return None
+
 
 def flush(backend: str) -> None:
     """Force-export buffered spans for the backend. Never raises."""
@@ -555,6 +582,13 @@ def run_span(
         return
     try:
         if backend == "braintrust":
+            from evals.braintrust_experiment import current_experiment
+
+            # An open Experiment already has one row per specialist call. A
+            # sibling evals-run span shows up as an extra root in the UI.
+            if current_experiment() is not None:
+                yield _noop
+                return
             import braintrust
 
             with braintrust.start_span(

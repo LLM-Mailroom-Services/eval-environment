@@ -28,6 +28,12 @@
       "source_key": "insurance_claims_specialist",
       "sha256": "6b951641038c248a39fb2bf8d7a3a7eabd759a12977d5b1fc87485e962b85af8",
       "chars": 3762
+    },
+    "contracts_specialist_v33": {
+      "source_kind": "sandbox",
+      "source_key": "contracts_specialist_v33@303e7f0bb05d",
+      "note": "Modal Leg A parity prompt (full v33, not the concise simplified v1 freeze)",
+      "chars": 32736
     }
   }
 }

@@ -90,6 +90,21 @@ def test_report_path_mirrors_modal_naming():
     # Grandparent = reports root; conftest redirects it (EVALS_COMPARISON_REPORTS_DIR).
 
 
+def test_report_path_v33_contracts_does_not_clobber_frozen_stem():
+    summary = _summary()
+    summary["task"] = "contracts"
+    summary["prompt_version"] = "contracts_specialist_v33"
+    summary["dataset"] = {"subset": "class:contract"}
+    summary["params"]["decode_profile"] = "qwen3-8b"
+    p = comparison_report.report_path(summary)
+    assert p.name == "RUN-20-CONTRACT-V33-QWEN3-8B-REPORT.md"
+    frozen = dict(summary)
+    frozen["prompt_version"] = "contracts_specialist_v1"
+    frozen["prompt_versions"] = {"contracts_specialist": {"key": "contracts_specialist_v1"}}
+    p2 = comparison_report.report_path(frozen)
+    assert p2.name == "RUN-20-CONTRACT-QWEN3-8B-REPORT.md"
+
+
 def test_report_path_falls_back_to_model_slug():
     summary = _summary()
     summary["params"] = {"sample": 50}

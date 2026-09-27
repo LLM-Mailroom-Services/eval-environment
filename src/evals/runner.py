@@ -126,6 +126,10 @@ def run_task(
     """Execute one task. Returns the run summary + per-case rows."""
     spec = get_task(task_id)
     subset = subset or spec.default_subset
+    if spec.name in invoke_mod.TASK_SPECIALIST:
+        # Merger (and the other class specialists) are agent calls. extract_node
+        # is not the eval path — it emits extra pipeline nodes and can CUAD-enrich.
+        invoke_mode = "agent"
 
     # Preflight BEFORE any corpus load / prompt injection / LLM spend.
     # Real mode hard-fails on missing credentials, bad model/prompt/subset,
@@ -221,6 +225,23 @@ def run_task(
     run_id = resume_run_id or experiment_log.new_run_id(spec.family, spec.name)
     effective_run_dir = run_dir or (experiment_log.experiments_dir() / run_id)
     effective_run_dir.mkdir(parents=True, exist_ok=True)
+    (effective_run_dir / "wave_lock.json").write_text(
+        json.dumps(
+            {
+                "task": spec.name,
+                "task_id": spec.task_id,
+                "model": model or DEFAULT_MODEL,
+                "decode_profile": decode_profile,
+                "prompt_version": prompt_version,
+                "prompt_source": prompt_source,
+                "sample": sample,
+                "seed": seed,
+                "subset": subset,
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
 
     # Lock the exact case set BEFORE any LLM spend (reproducibility).
     # On resume the manifest already exists in the run dir and is the locked
@@ -312,6 +333,8 @@ def run_task(
                                 spec, cases, invoke_mode=invoke_mode, backend=backend,
                                 mock=mock, model=model, prompt_version=prompt_version,
                                 summary=summary,
+                                run_dir=effective_run_dir,
+                                run_id=run_id,
                             )
                             # Granite thinking envelopes zero cases at the JSON
                             # parse (issue #18 §4); strip + re-parse any
@@ -328,10 +351,7 @@ def run_task(
                                     row["scores"] = _score_case(spec.name, spec.scorer, row, recovered_pred)
                                     thinking_recovered += 1
                         finally:
-                            if backend == "braintrust":
-                                from .braintrust_experiment import end_eval_run
-
-                                end_eval_run()
+                            pass  # Braintrust finalize+flush after run summary is built
                         # Off-path writes (relations daemon, async-deferred audit/catalog
                         # coroutines) must land inside the isolated base dir — drain
                         # before the env is restored, for every task.
@@ -384,10 +404,14 @@ def run_task(
 
     # Run-level rollup span: the sink's per-run dashboard entry (essential
     # aggregates only). Emitted even on run error, so the sink shows the run.
+    perf = summary.get("performance") or {}
     with tracing.run_span(backend, run_meta={**run_meta_stub(spec, summary)}) as span:
         span.set_output({
             "metrics": {k: summary["metrics"].get(k) for k in _essential_keys(spec)},
-            "performance": {"latency_ms_mean": summary["performance"].get("latency_ms_mean")},
+            "performance": perf,
+            "duration_s": summary.get("duration_s"),
+            "cost_usd_est_total": perf.get("cost_usd_est_total"),
+            "cost_cap": summary.get("cost_cap"),
             "error": error,
         })
         rollup = scoring.essential_rollup(spec.scorer, case_rows)
@@ -395,7 +419,22 @@ def run_task(
             **scoring.sink_score_metrics(spec.scorer, rollup, max_scores=scoring.SINK_SCORE_METRICS_MAX),
             **({"ece": summary["calibration"]["ece"]}
                if isinstance(summary.get("calibration"), dict) and isinstance(summary["calibration"].get("ece"), (int, float)) else {}),
+            **(
+                {
+                    "duration_s": float(summary["duration_s"]),
+                    "cost_usd_est_total": float(perf["cost_usd_est_total"]),
+                }
+                if isinstance(summary.get("duration_s"), (int, float))
+                and isinstance(perf.get("cost_usd_est_total"), (int, float))
+                else {}
+            ),
         })
+
+    if backend == "braintrust" and summary.get("braintrust_experiment") and not dry_run:
+        from .braintrust_experiment import end_eval_run, finalize_eval_run
+
+        finalize_eval_run(summary)
+        end_eval_run()
 
     # Comparison report (Modal-comparable, filed by model): emitted whenever a
     # decode profile drove the run and cases executed; never fails the run.
@@ -533,6 +572,26 @@ def run_meta_stub(spec: TaskSpec, summary: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _specialist_name(spec: TaskSpec, agent_usage: dict[str, Any] | None) -> str | None:
+    """The specialist that evaluated this document (one agent per extraction case)."""
+    catalog = AGENT_CATALOG.get(spec.node_name) or {}
+    specialists = list(catalog.get("agents") or [])
+    usage = agent_usage or {}
+    hits = [name for name in specialists if name in usage]
+    if len(hits) == 1:
+        return hits[0]
+    if hits:
+        return hits[0]
+    task_map = {
+        "contracts": "contracts_specialist",
+        "merger_agreement": "merger_agreement_specialist",
+        "corporate_records": "corporate_records_specialist",
+        "correspondence": "correspondence_specialist",
+        "insurance_claims": "insurance_claims_specialist",
+    }
+    return task_map.get(spec.name)
+
+
 def _primary_prompt_key(spec: TaskSpec, summary: dict[str, Any]) -> str | None:
     """The task's primary agent-role prompt key (span metadata provenance).
 
@@ -614,6 +673,8 @@ def _execute_cases(
     model: str | None,
     prompt_version: str | None,
     summary: dict[str, Any],
+    run_dir: Path | None = None,
+    run_id: str | None = None,
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     run_meta = {
@@ -641,13 +702,46 @@ def _execute_cases(
             reset_run_usage()  # per-case token accounting
         except Exception:
             pass
-        with tracing.case_span(backend, node_name=spec.node_name, case=case, run_meta=run_meta) as span:
+        # Name the parent Experiment row after the specialist *before* invoke so
+        # nested LLM spans attach under that specialist call (not a document row).
+        specialist = _specialist_name(spec, None)
+        with tracing.case_span(
+            backend,
+            node_name=spec.node_name,
+            case=case,
+            run_meta=run_meta,
+            span_name=specialist or spec.node_name,
+            specialist=specialist,
+        ) as span:
             try:
                 prediction = invoke_mod.invoke(spec.name, case, mode=invoke_mode) or {}
             except Exception as exc:
                 error = f"{type(exc).__name__}: {exc}"
-                logger.warning("evals_case_failed", case=case.get("id"), error=error)
+                if _huge_int_parse_error(exc):
+                    # Truncated model JSON (8192-token cap) — score as parse
+                    # miss, do not mark the case as a runner exception.
+                    logger.warning(
+                        "evals_truncated_json_parse",
+                        case=case.get("id"),
+                        error=error,
+                    )
+                    prediction = {
+                        "extracted_data": {"_parse_error": True, "confidence": 0.0},
+                        "extraction_confidence": 0.0,
+                        "error": "truncated_json_integer",
+                    }
+                    error = None
+                else:
+                    logger.warning("evals_case_failed", case=case.get("id"), error=error)
             latency = timer.ms()
+            recovered_pred, recovered = decode_budget.recover_prediction(
+                prediction if isinstance(prediction, dict) else None
+            )
+            if recovered and recovered_pred is not None:
+                prediction = recovered_pred
+                summary["params"]["thinking_recovered"] = int(
+                    summary.get("params", {}).get("thinking_recovered") or 0
+                ) + 1
             scores = {} if error else _score_case(spec.name, spec.scorer, case, prediction)
             usage = _last_usage()
             case_model = model or next(
@@ -656,20 +750,43 @@ def _execute_cases(
             )
             if case_model:
                 span.update_metadata({"model": case_model})
+            if isinstance(prediction, dict) and prediction.get("prompt_key"):
+                span.update_metadata({
+                    "prompt_key": prediction["prompt_key"],
+                    "specialist": prediction.get("specialist") or specialist,
+                })
             perf = scoring.performance_row(latency, usage, case_model)
-            headline = scoring.sink_score_metrics(spec.scorer, scores)
-            span.set_output({"scores": headline, "error": error})
-            # Span metrics: essentials; Braintrust experiment scores: headline only.
+            span.set_output({"scores": scores, "error": error})
+            # Span metrics: essentials; Braintrust experiment: one specialist row.
             span.set_metrics(scoring.essential_metrics(spec.scorer, scores))
+            agent_usage = _agent_usage()
+            specialist = _specialist_name(spec, agent_usage) or specialist
+            tokens = {
+                "prompt": perf["prompt_tokens"],
+                "completion": perf["completion_tokens"],
+                "total": perf["total_tokens"],
+            }
             if backend == "braintrust":
                 from .braintrust_experiment import log_case_scores
 
-                log_case_scores(case, scorer=spec.scorer, scores=scores, error=error)
+                log_case_scores(
+                    case,
+                    scorer=spec.scorer,
+                    scores=scores,
+                    error=error,
+                    prediction=prediction if isinstance(prediction, dict) else None,
+                    specialist=specialist,
+                    latency_ms=perf["latency_ms"],
+                    cost_usd=perf["cost_usd_est"],
+                    tokens=tokens,
+                    span=span,
+                )
             case_trace = getattr(span, "trace_ref", None)
         rows.append(
             {
                 "case_id": case.get("id"),
                 "filename": case.get("filename"),
+                "specialist": specialist,
                 "expected_doc_class": case.get("expected_doc_class"),
                 "expected_subclass": case.get("expected_subclass"),
                 "review_expected": case.get("review_expected"),
@@ -684,11 +801,7 @@ def _execute_cases(
                 "prediction": prediction or None,
                 "scores": scores,
                 "latency_ms": perf["latency_ms"],
-                "tokens": {
-                    "prompt": perf["prompt_tokens"],
-                    "completion": perf["completion_tokens"],
-                    "total": perf["total_tokens"],
-                },
+                "tokens": tokens,
                 "cost_usd": perf["cost_usd_est"],
                 # per-agent token/call attribution for this case (the
                 # accumulator's by_agent map — every agent that fired)
@@ -697,8 +810,15 @@ def _execute_cases(
                 "error": error,
             }
         )
+        if run_dir is not None and run_id and not mock:
+            experiment_log.append_case_row(run_dir, run_id, rows[-1])
         tracing.flush(backend)
     return rows
+
+
+def _huge_int_parse_error(exc: BaseException) -> bool:
+    msg = str(exc).lower()
+    return "integer string conversion" in msg or "int_max_str_digits" in msg
 
 
 def _last_usage() -> dict[str, Any] | None:

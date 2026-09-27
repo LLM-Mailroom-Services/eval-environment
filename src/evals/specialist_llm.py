@@ -468,44 +468,63 @@ def _complete_json(
     agent: str,
     meter: _RowCallBudget,
 ) -> dict[str, Any]:
+    """One chat completion, JSON-parsed, with a single meter-gated retry.
+
+    The retry fires on EITHER a network exception OR a "successful" 200
+    response that still fails to parse as JSON. The latter is not
+    hypothetical: under concurrent load (multiple simultaneous OpenRouter
+    requests for a cheap/free-tier model like qwen/qwen3-8b), the provider
+    can return coherent-looking but non-JSON placeholder text (e.g.
+    ``// JSON output here (as per the instructions) //``) even with
+    ``response_format=json_object`` and thinking explicitly disabled —
+    confirmed via a concurrency=8 repro that showed 0 parse errors at
+    concurrency=1 vs. 18/20 at concurrency=8 on the same model/prompts/docs.
+    A single retry (falling back to a plain, non-json_object completion
+    with an explicit "reply with ONLY a JSON object" instruction) is cheap
+    insurance against that provider-side flakiness.
+    """
     if not meter.consume():
         return {"_parse_error": True, "confidence": 0.0, "_budget_exhausted": True}
-    try:
+
+    def _attempt(*, plain_fallback: bool) -> dict[str, Any]:
         response = client.chat.completions.create(
             **_completion_kwargs(
                 model=model,
-                system=system,
+                system=system if not plain_fallback else system + "\nReply with ONLY a JSON object.",
                 user=user,
                 max_tokens=max_tokens,
                 temperature=temperature,
-                json_object=True,
+                json_object=not plain_fallback,
             )
         )
+        _record(response, model=model, agent=agent)
+        return _parse_json(_message_content(response))
+
+    try:
+        parsed = _attempt(plain_fallback=False)
+        needs_retry = bool(parsed.get("_parse_error"))
     except Exception:
-        if not meter.consume():
-            logger.warning(
-                "specialist_llm_retry_blocked_by_budget",
-                agent=agent,
-                used=meter.used,
-                budget=meter.limit,
-            )
-            return {"_parse_error": True, "confidence": 0.0, "_budget_exhausted": True}
-        try:
-            response = client.chat.completions.create(
-                **_completion_kwargs(
-                    model=model,
-                    system=system + "\nReply with ONLY a JSON object.",
-                    user=user,
-                    max_tokens=max_tokens,
-                    temperature=temperature,
-                    json_object=False,
-                )
-            )
-        except Exception:
-            logger.warning("specialist_llm_retry_failed", agent=agent, exc_info=True)
-            return {"_parse_error": True, "confidence": 0.0}
-    _record(response, model=model, agent=agent)
-    return _parse_json(_message_content(response))
+        parsed = {"_parse_error": True, "confidence": 0.0}
+        needs_retry = True
+
+    if not needs_retry:
+        return parsed
+
+    if not meter.consume():
+        logger.warning(
+            "specialist_llm_retry_blocked_by_budget",
+            agent=agent,
+            used=meter.used,
+            budget=meter.limit,
+        )
+        parsed["_budget_exhausted"] = True
+        return parsed
+
+    try:
+        return _attempt(plain_fallback=True)
+    except Exception:
+        logger.warning("specialist_llm_retry_failed", agent=agent, exc_info=True)
+        return {"_parse_error": True, "confidence": 0.0}
 
 
 def _client_for(specialist: str) -> tuple[Any, str, int, float]:

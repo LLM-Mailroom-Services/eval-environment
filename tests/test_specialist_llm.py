@@ -365,3 +365,74 @@ def test_row_llm_call_budget_blocks_retry_runaway():
     finally:
         set_mock_client(None)
         deactivate()
+
+
+def test_complete_json_retries_on_garbled_non_json_200_response():
+    """Regression for the concurrency=8 qwen3-8b repro: a 200 response whose
+    content is coherent-looking placeholder text (not JSON) must trigger the
+    same meter-gated retry as a network exception, not just be scored 0."""
+    activate("frozen")
+    try:
+        calls: list[dict] = []
+
+        def _create(**kwargs):
+            calls.append(kwargs)
+            mock = MagicMock()
+            if len(calls) == 1:
+                mock.choices[0].message.content = (
+                    '">// JSON output here (as per the instructions) //</json>'
+                )
+            else:
+                mock.choices[0].message.content = (
+                    '{"document_name": "Plan of Merger", "confidence": 0.6}'
+                )
+            mock.usage.prompt_tokens = 11
+            mock.usage.completion_tokens = 5
+            return mock
+
+        client = MagicMock()
+        client.chat.completions.create.side_effect = lambda **kw: _create(**kw)
+        set_mock_client(client)
+        out = extract_entities(
+            "merger_agreement_specialist",
+            {"text": "AGREEMENT AND PLAN OF MERGER", "expected_doc_class": "merger_agreement"},
+        )
+        assert len(calls) == 2
+        assert out["llm_calls"] == 2
+        assert out["extracted_data"].get("_parse_error") is not True
+        assert out["extracted_data"]["document_name"] == "Plan of Merger"
+        # The retry falls back to a plain (non-json_object) completion with
+        # an explicit instruction, same strategy as the exception-retry path.
+        assert calls[1].get("response_format") is None
+        assert "Reply with ONLY a JSON object." in calls[1]["messages"][0]["content"]
+    finally:
+        set_mock_client(None)
+        deactivate()
+
+
+def test_complete_json_gives_up_when_retry_also_garbled():
+    activate("frozen")
+    try:
+        calls: list[dict] = []
+
+        def _create(**kwargs):
+            calls.append(kwargs)
+            mock = MagicMock()
+            mock.choices[0].message.content = "still not json, sorry"
+            mock.usage.prompt_tokens = 11
+            mock.usage.completion_tokens = 5
+            return mock
+
+        client = MagicMock()
+        client.chat.completions.create.side_effect = lambda **kw: _create(**kw)
+        set_mock_client(client)
+        out = extract_entities(
+            "merger_agreement_specialist",
+            {"text": "AGREEMENT AND PLAN OF MERGER", "expected_doc_class": "merger_agreement"},
+        )
+        assert len(calls) == 2
+        assert out["llm_calls"] == 2
+        assert out["extracted_data"].get("_parse_error") is True
+    finally:
+        set_mock_client(None)
+        deactivate()

@@ -5,6 +5,16 @@ All notable changes to mailroom-evals are documented here. Format based on
 
 ## [Unreleased]
 
+### Changed
+
+- **Corpus pin → v9.1** — document and skill citations for
+  `Lucius-Morningstar/mailroom-dataset` now target revision
+  `ed7576b676343e0b402ec5412cded301e629bdee` (supersedes GT-closure
+  `46a4d3c240a36671cde0182fff4960f6b8b73aca`; Hub tag `v9.1` not published
+  yet). Eval harness runtime still reads `FULL_CORPUS_REVISION` from the
+  `mailroom` dependency until the coordinated llm-mailroom pin lands
+  ([#57](https://github.com/LLM-Mailroom-Services/eval-environment/issues/57)).
+
 ## [0.5.0] — 2026-09-27
 
 SAND-027 Leg B (OpenRouter API) vs Modal parity, Braintrust experiment rows,

@@ -1,0 +1,93 @@
+{
+  "modernbert": {
+    "serving_kind": "modernbert",
+    "provider": "onnx-cpu",
+    "profile": "modernbert",
+    "model": "Lucius-Morningstar/mailroom-modernbert-classifier",
+    "task": "sorter",
+    "classifier": "modernbert",
+    "n": 323,
+    "e2e_latency_seconds": 0.075,
+    "cost_per_document": 1e-06,
+    "estimated_cost_usd": 0.000323,
+    "scores": {
+      "accuracy": 0.8947,
+      "exact_match": 0.8947,
+      "doc_type_accuracy": 0.8947,
+      "subclass_accuracy": 0.526
+    },
+    "artifact_sha": "56a4e8919cc3ae11d6bcfc13ec012677409afff99daf167cdd4fb70a6e1754f9"
+  },
+  "sorter_api_qwen3_8b": {
+    "serving_kind": "api",
+    "provider": "openrouter",
+    "profile": "openrouter",
+    "model": "qwen/qwen3-8b",
+    "task": "classification",
+    "classifier": "llm_sorter",
+    "n": 323,
+    "cost_per_document": 0.0075,
+    "estimated_cost_usd": 2.4225,
+    "e2e_latency_seconds": 33.0565,
+    "scores": {
+      "accuracy": 0.7,
+      "class_accuracy": 0.7
+    },
+    "cost_source": "eval-environment 20260927T043145Z-eval-classification ($0.1493/20)",
+    "accuracy_source": "same run, n=20 \u2014 not 323-doc paired"
+  },
+  "comparison": {
+    "agent": "sorter_vs_modernbert",
+    "sorter": {
+      "model": "qwen/qwen3-8b",
+      "serving_kind": "api",
+      "profile": "openrouter",
+      "n": 323,
+      "classifier": "llm_sorter"
+    },
+    "modernbert": {
+      "model": "Lucius-Morningstar/mailroom-modernbert-classifier",
+      "serving_kind": "modernbert",
+      "n": 323,
+      "classifier": "modernbert"
+    },
+    "quality": {
+      "accuracy": {
+        "sorter": 0.7,
+        "modernbert": 0.8947,
+        "delta_sorter_minus_modernbert": -0.1947
+      },
+      "doc_type_accuracy": {
+        "sorter": null,
+        "modernbert": 0.8947,
+        "delta_sorter_minus_modernbert": null
+      },
+      "exact_match": {
+        "sorter": null,
+        "modernbert": 0.8947,
+        "delta_sorter_minus_modernbert": null
+      },
+      "subclass_accuracy": {
+        "sorter": null,
+        "modernbert": 0.526,
+        "delta_sorter_minus_modernbert": null
+      }
+    },
+    "latency": {
+      "sorter_e2e_s": 33.0565,
+      "modernbert_e2e_s": 0.075,
+      "delta_sorter_minus_modernbert": 32.9815,
+      "pct_sorter_vs_modernbert": 43975.3
+    },
+    "cost": {
+      "sorter_cost_per_document": 0.0075,
+      "modernbert_cost_per_document": 1e-06,
+      "delta_sorter_minus_modernbert": 0.007499,
+      "sorter_estimated_cost_usd": 2.4225,
+      "sorter_estimated_gpu_cost_usd": null,
+      "modernbert_estimated_cost_usd": 0.000323
+    },
+    "honest_gaps": [],
+    "markdown": "## Sorter vs ModernBERT (classification)\n\n| side | model | n | e2e (s) | $/doc |\n| --- | --- | --- | --- | --- |\n| sorter | qwen/qwen3-8b | 323 | 33.0565 | 0.0075 |\n| modernbert | Lucius-Morningstar/mailroom-modernbert-classifier | 323 | 0.075 | 1e-06 |\n\n### Quality\n| metric | sorter | modernbert | \u0394 (sorter \u2212 modernbert) |\n| --- | --- | --- | --- |\n| accuracy | 0.7 | 0.8947 | -0.1947 |\n| doc_type_accuracy | - | 0.8947 | - |\n| exact_match | - | 0.8947 | - |\n| subclass_accuracy | - | 0.526 | - |"
+  }
+}

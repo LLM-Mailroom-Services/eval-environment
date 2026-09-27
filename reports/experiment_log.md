@@ -2,10 +2,11 @@
 
 One row per run (append-only source of truth: `reports/experiment_log.jsonl`). Each run's full detail (dataset provenance, metrics, per-agent performance, case table) lives in its own file under `reports/experiment_log/<run_id>.md` — this index never grows a per-run section inline, so it stays readable regardless of history size. OpenRouter/Braintrust N-doc waves also get a standalone, Modal-comparable report under `reports/api-comparisons/<model>/`.
 
-## Real evaluation waves (real mode, n≥10 cases) — 12
+## Real evaluation waves (real mode, n≥10 cases) — 13
 
 | run_id | family | task | mode | model | subset | n | key metric | errors |
 |---|---|---|---|---|---|---|---|---|
+| [20260927T043145Z-eval-classification](experiment_log/20260927T043145Z-eval-classification.md) | eval | classification | real | qwen/qwen3-8b | full | 20 | class_accuracy=0.7 | 0 |
 | [20260927T042239Z-eval-corporate_records](experiment_log/20260927T042239Z-eval-corporate_records.md) | eval | corporate_records | real | qwen/qwen3-8b | class:corporate_record | 20 | — | 0 |
 | [20260927T035621Z-eval-contracts](experiment_log/20260927T035621Z-eval-contracts.md) | eval | contracts | real | qwen/qwen3-8b | class:contract | 20 | — | 0 |
 | [20260927T035135Z-eval-insurance_claims](experiment_log/20260927T035135Z-eval-insurance_claims.md) | eval | insurance_claims | real | qwen/qwen3-8b | class:insurance_claim | 20 | — | 0 |

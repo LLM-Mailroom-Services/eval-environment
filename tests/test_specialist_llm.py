@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from unittest.mock import MagicMock
 
+from evals.decode_budget import apply_decode_budget, get_profile
 from evals.prompts import frozen_v1
 from evals.prompts.registry import activate, deactivate
 from evals.specialist_llm import (
@@ -433,6 +434,67 @@ def test_complete_json_gives_up_when_retry_also_garbled():
         assert len(calls) == 2
         assert out["llm_calls"] == 2
         assert out["extracted_data"].get("_parse_error") is True
+    finally:
+        set_mock_client(None)
+        deactivate()
+
+
+def _mock_extract_client(calls: list[dict]) -> MagicMock:
+    def _create(**kwargs):
+        calls.append(kwargs)
+        mock = MagicMock()
+        mock.choices[0].message.content = '{"document_name": "Memo", "confidence": 0.5}'
+        mock.usage.prompt_tokens = 11
+        mock.usage.completion_tokens = 5
+        return mock
+
+    client = MagicMock()
+    client.chat.completions.create.side_effect = lambda **kw: _create(**kw)
+    return client
+
+
+def test_extract_entities_applies_active_profile_sampling_to_wire():
+    """Mandated profile sampling must reach the specialist direct-client path.
+
+    Regression: ``apply_decode_budget`` only wrapped ``retry_chat_completion``
+    + LangChain ``ChatOpenAI``, which ``specialist_llm._complete_json`` never
+    uses — so the Granite T=1.0/top_p=0.95/seed=42 mandate silently stayed at
+    the taxonomy temperature (0.1) while the report printed the override.
+    """
+    activate("frozen")
+    try:
+        calls: list[dict] = []
+        set_mock_client(_mock_extract_client(calls))
+        with apply_decode_budget(get_profile("granite-4.2-8b")) as applied:
+            out = extract_entities(
+                "correspondence_specialist",
+                {"text": "MEMO", "expected_doc_class": "correspondence"},
+            )
+            assert out["extracted_data"]["document_name"] == "Memo"
+            assert calls[0]["temperature"] == 1.0
+            assert calls[0]["top_p"] == 0.95
+            assert calls[0]["seed"] == 42
+            assert applied["sampling_injected"] is True
+    finally:
+        set_mock_client(None)
+        deactivate()
+
+
+def test_extract_entities_wire_shape_unchanged_without_profile():
+    """No active profile: taxonomy temperature, no top_p/seed keys on the wire."""
+    activate("frozen")
+    try:
+        calls: list[dict] = []
+        set_mock_client(_mock_extract_client(calls))
+        with apply_decode_budget(get_profile("qwen3-8b")) as applied:
+            extract_entities(
+                "correspondence_specialist",
+                {"text": "MEMO", "expected_doc_class": "correspondence"},
+            )
+            assert calls[0]["temperature"] == 0.1
+            assert "top_p" not in calls[0]
+            assert "seed" not in calls[0]
+            assert applied["sampling_injected"] is False
     finally:
         set_mock_client(None)
         deactivate()

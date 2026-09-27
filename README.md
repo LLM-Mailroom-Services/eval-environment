@@ -473,8 +473,14 @@ Real runs can pin a single OpenRouter model for every pipeline agent with
 
 ```bash
 uv run python scripts/run_evals.py --task eval:classification --real \
-  --model ibm-granite/granite-4.2-8b --subset class:contract --sample 10 --seed 42
+  --model ibm-granite/granite-4.2-8b --decode-profile granite-4.2-8b \
+  --subset full --sample 10 --seed 42
 ```
+
+Granite's decode profile is required even for sorter/classification: it
+injects IBM's mandated `temperature=1.0`, `top_p=0.95`, `seed=42` sampling
+on the wire. Specialist tasks additionally receive Granite-specific
+thinking-ON completion budgets.
 
 > [!WARNING]
 > Archive/intake/chain evals write real bins, manifests, SQLite catalogs, and

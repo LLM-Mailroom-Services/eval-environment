@@ -35,6 +35,7 @@ After every run the harness:
 uv run python scripts/run_evals.py --task eval:contracts --real \
     --subset class:contract --sample 25 --seed 42 \
     --model ibm-granite/granite-4.2-8b \
+    --decode-profile granite-4.2-8b \
     --prompt-version contracts_specialist_v1 \
     --trace-backend braintrust --require-trace-sink
 ```

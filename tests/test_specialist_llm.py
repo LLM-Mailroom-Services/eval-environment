@@ -123,6 +123,7 @@ def test_extract_entities_openrouter_shape_not_langchain():
         assert out["chunks"] == 1
         assert out["llm_calls"] == 1
         assert out["llm_call_budget"] == 2
+        assert "extra_body" not in captured  # mock-model is not qwen
     finally:
         set_mock_client(None)
         deactivate()
@@ -219,7 +220,45 @@ def test_needed_chunks_and_call_budget_include_15_percent_headroom():
     assert all(len(p) <= 48_000 for p in pieces[:-1])
 
 
-def test_truncated_8191_digit_json_does_not_raise():
+def test_qwen_think_span_stripped_before_json_parse():
+    activate("frozen")
+    try:
+        def _create(**kwargs):
+            mock = MagicMock()
+            mock.choices[0].message.content = (
+                '<think>{"not": "the answer"}</think>{"document_name": "Plan", "confidence": 0.4}'
+            )
+            mock.usage.prompt_tokens = 4
+            mock.usage.completion_tokens = 8
+            return mock
+
+        client = MagicMock()
+        client.chat.completions.create.side_effect = lambda **kw: _create(**kw)
+        set_mock_client(client)
+        out = extract_entities(
+            "merger_agreement_specialist",
+            {"text": "PLAN OF MERGER", "expected_doc_class": "merger_agreement"},
+        )
+        assert out["extracted_data"]["document_name"] == "Plan"
+        assert "_parse_error" not in out["extracted_data"]
+    finally:
+        set_mock_client(None)
+        deactivate()
+
+
+def test_qwen_completion_disables_thinking():
+    from evals.specialist_llm import _completion_kwargs
+
+    kw = _completion_kwargs(
+        model="qwen/qwen3-8b",
+        system="sys",
+        user="usr",
+        max_tokens=16,
+        temperature=0.1,
+        json_object=True,
+    )
+    assert kw["extra_body"]["chat_template_kwargs"]["enable_thinking"] is False
+    assert kw["extra_body"]["reasoning"]["exclude"] is True
     activate("frozen")
     try:
         def _create(**kwargs):

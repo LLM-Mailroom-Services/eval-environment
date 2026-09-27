@@ -33,7 +33,7 @@ CLASS_BUDGETS: dict[str, int] = {
 # sandbox pins 600 s for exactly this reason — DMR-072 overlay comment).
 COMPARISON_CALL_TIMEOUT_S = 600
 
-THINKING_RE = re.compile(r"<thinking>.*?</thinking>", re.DOTALL | re.IGNORECASE)
+THINKING_RE = re.compile(r"<think(?:ing)?>.*?</think(?:ing)?>", re.DOTALL | re.IGNORECASE)
 RESPONSE_OPEN_RE = re.compile(r"<response>\s*", re.IGNORECASE)
 RESPONSE_CLOSE_RE = re.compile(r"\s*</response>", re.IGNORECASE)
 

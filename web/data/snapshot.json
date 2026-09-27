@@ -1,11 +1,11 @@
 {
  "schema": "eval-site-snapshot",
  "version": 1,
- "generated_at": "2026-09-27T01:11:43+00:00",
+ "generated_at": "2026-09-27T01:25:53+00:00",
  "health": {
   "log_valid": true,
   "log_problems": [],
-  "log_records": 34,
+  "log_records": 35,
   "lineage_drift_free": true,
   "lineage_detail": {
    "ok": true,
@@ -1020,7 +1020,7 @@
     "experiment_record.v2",
     "experiment_record.v3"
    ],
-   "test_count": 235
+   "test_count": 241
   },
   "openrouter_models": {
    "provider": "openrouter",
@@ -1077,27 +1077,27 @@
   }
  },
  "totals": {
-  "total_runs": 34,
+  "total_runs": 35,
   "by_family": {
-   "eval": 34
+   "eval": 35
   },
   "by_mode": {
-   "real": 10,
+   "real": 11,
    "mock": 24
   },
   "by_day": {
    "2026-09-26": 32,
-   "2026-09-27": 2
+   "2026-09-27": 3
   },
   "by_task": {
    "merger_agreement": {
-    "runs": 4,
+    "runs": 5,
     "latest": {
-     "run_id": "20260927T005233Z-eval-merger_agreement",
-     "started_at": "2026-09-27T00:52:33+00:00",
+     "run_id": "20260927T011209Z-eval-merger_agreement",
+     "started_at": "2026-09-27T01:12:09+00:00",
      "mode": "real",
      "headline": 0.0,
-     "n_cases": 3
+     "n_cases": 1
     }
    },
    "contracts": {
@@ -1213,6 +1213,64 @@
   }
  },
  "runs": [
+  {
+   "run_id": "20260927T011209Z-eval-merger_agreement",
+   "family": "eval",
+   "task": "merger_agreement",
+   "invoke": "agent",
+   "mode": "real",
+   "model": "qwen/qwen3-8b",
+   "prompt_version": "merger_agreement_specialist_v1",
+   "prompt_lineage": "frozen",
+   "prompt_source": "frozen",
+   "trace_backend": "braintrust",
+   "started_at": "2026-09-27T01:12:09+00:00",
+   "finished_at": "2026-09-27T01:25:51+00:00",
+   "duration_s": 780,
+   "error": "Interrupted 1/20: 8 chunks still returned unparseable JSON (Qwen <think> / json_object). Restarting with thinking excluded; not resumed.",
+   "metrics": {
+    "n": 1,
+    "overall_score": 0.0,
+    "errors": 0,
+    "scorer_errors": 0
+   },
+   "performance": {
+    "latency_ms_mean": 669067.9,
+    "latency_ms_p95": 669067.9,
+    "tokens_prompt_total": 100682,
+    "tokens_completion_total": 22641,
+    "cost_usd_est_total": 0.022081,
+    "by_agent": {
+     "merger_agreement_specialist": {
+      "calls": 8,
+      "prompt_tokens": 100682,
+      "completion_tokens": 22641,
+      "total_tokens": 123323,
+      "models": [
+       "qwen/qwen3-8b"
+      ],
+      "cost_usd_est": 0.022081
+     }
+    }
+   },
+   "dataset": {
+    "subset": "class:merger_agreement",
+    "repo": "Lucius-Morningstar/mailroom-dataset",
+    "revision": "46a4d3c240a36671cde0182fff4960f6b8b73aca"
+   },
+   "git": {
+    "commit": "f75ccd9",
+    "dirty": true
+   },
+   "schema_version": 3,
+   "calibration": null,
+   "trace_ids": null,
+   "judging": null,
+   "pipeline_git": null,
+   "prompt_versions": null,
+   "headline": 0.0,
+   "n_cases": 1
+  },
   {
    "run_id": "20260927T005233Z-eval-merger_agreement",
    "family": "eval",
@@ -6887,6 +6945,35 @@
   }
  ],
  "cases": {
+  "20260927T011209Z-eval-merger_agreement": [
+   {
+    "case_id": "corpus:ground_truth:train:contract_128_merger_agreement.txt",
+    "filename": "contract_128_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "other",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "e3a39e4c3d5a2b7645f89adb3f85627158999c6981b93861e508918a53da2eb0",
+    "scores": {
+     "overall_score": 0.0,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0
+    },
+    "latency_ms": 669067.9,
+    "prediction": {
+     "extraction_confidence": 0.0,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "qwen/qwen3-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 8
+    }
+   }
+  ],
   "20260927T005233Z-eval-merger_agreement": [
    {
     "case_id": "corpus:ground_truth:train:contract_128_merger_agreement.txt",

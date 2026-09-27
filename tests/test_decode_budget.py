@@ -24,6 +24,11 @@ def test_strip_thinking_spans_unwraps_granite_envelope():
     assert strip_thinking_spans(raw) == '{"confidence": 0.9}'
 
 
+def test_strip_thinking_spans_unwraps_qwen_think():
+    raw = '<think>step by step {not json}</think>\n{"confidence": 0.9}'
+    assert strip_thinking_spans(raw) == '{"confidence": 0.9}'
+
+
 def test_strip_thinking_spans_is_noop_on_clean_text():
     assert strip_thinking_spans('{"confidence": 0.9}') == '{"confidence": 0.9}'
 

@@ -382,6 +382,36 @@ def _windows(text: str, *, max_chars: int, overlap: int) -> list[str]:
     return chunks
 
 
+def _completion_kwargs(
+    *,
+    model: str,
+    system: str,
+    user: str,
+    max_tokens: int,
+    temperature: float,
+    json_object: bool,
+) -> dict[str, Any]:
+    kwargs: dict[str, Any] = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ],
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+    }
+    if json_object:
+        kwargs["response_format"] = {"type": "json_object"}
+    # Qwen3 defaults thinking ON; <think> blobs poison json_object parse and
+    # burn the completion budget. Ask OpenRouter to exclude reasoning tokens.
+    if "qwen" in (model or "").lower():
+        kwargs["extra_body"] = {
+            "reasoning": {"exclude": True},
+            "chat_template_kwargs": {"enable_thinking": False},
+        }
+    return kwargs
+
+
 class _RowCallBudget:
     """Hard stop on OpenRouter create() calls for one scored document row."""
 
@@ -415,14 +445,14 @@ def _complete_json(
         return {"_parse_error": True, "confidence": 0.0, "_budget_exhausted": True}
     try:
         response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
-            response_format={"type": "json_object"},
-            temperature=temperature,
-            max_tokens=max_tokens,
+            **_completion_kwargs(
+                model=model,
+                system=system,
+                user=user,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                json_object=True,
+            )
         )
     except Exception:
         if not meter.consume():
@@ -435,13 +465,14 @@ def _complete_json(
             return {"_parse_error": True, "confidence": 0.0, "_budget_exhausted": True}
         try:
             response = client.chat.completions.create(
-                model=model,
-                messages=[
-                    {"role": "system", "content": system + "\nReply with ONLY a JSON object."},
-                    {"role": "user", "content": user},
-                ],
-                temperature=temperature,
-                max_tokens=max_tokens,
+                **_completion_kwargs(
+                    model=model,
+                    system=system + "\nReply with ONLY a JSON object.",
+                    user=user,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    json_object=False,
+                )
             )
         except Exception:
             logger.warning("specialist_llm_retry_failed", agent=agent, exc_info=True)

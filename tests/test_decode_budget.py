@@ -56,9 +56,11 @@ def test_profiles_match_issue_18_budgets():
     assert CLASS_BUDGETS["insurance_claims_specialist"] == 6144
     assert CLASS_BUDGETS["contracts_specialist"] == 8192
     assert CLASS_BUDGETS["merger_agreement_specialist"] == 16384
-    assert GRANITE_CLASS_BUDGETS == {
+    expected_granite = {
         agent: budget * 2 for agent, budget in CLASS_BUDGETS.items()
     }
+    expected_granite["correspondence_specialist"] = 16_384
+    assert GRANITE_CLASS_BUDGETS == expected_granite
     assert (
         COMPARISON_PROFILES["granite-4.2-8b"]["max_tokens_by_agent"]
         == GRANITE_CLASS_BUDGETS

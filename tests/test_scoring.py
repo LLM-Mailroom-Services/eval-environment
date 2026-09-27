@@ -137,6 +137,36 @@ def test_granite_agent_usage_counts_every_call_and_uses_roster_price():
     assert agent["models"] == ["ibm-granite/granite-4.2-8b"]
 
 
+def test_run_cost_prices_aggregate_tokens_not_rounded_case_costs():
+    """N tiny case costs must not round to zero before run aggregation."""
+    rows = [
+        {
+            "latency_ms": 1.0,
+            "tokens": {"prompt": 1, "completion": 1},
+            # Case storage rounds this $0.00000031 estimate to six decimals.
+            "cost_usd": 0.0,
+            "agent_usage": {
+                "correspondence_specialist": {
+                    "calls": 1,
+                    "prompt_tokens": 1,
+                    "completion_tokens": 1,
+                    "total": 2,
+                    "models": ["ibm-granite/granite-4.2-8b"],
+                }
+            },
+        }
+        for _ in range(20)
+    ]
+    summary = scoring.summarize_performance(rows)
+    # Aggregate: 20 input × $0.06/M + 20 output × $0.25/M = $0.0000062,
+    # rounded once at the run boundary.
+    assert summary["cost_usd_est_total"] == pytest.approx(0.000006)
+    assert (
+        summary["by_agent"]["correspondence_specialist"]["cost_usd_est"]
+        == pytest.approx(0.000006)
+    )
+
+
 def test_summarize_scores_keys():
     rows = [
         {"scores": {"class_correct": 1}, "error": None},

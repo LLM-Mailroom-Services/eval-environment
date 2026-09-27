@@ -61,9 +61,11 @@ Agents that always keep taxonomy defaults regardless of `--model`:
 `--decode-profile {qwen3-8b,granite-4.2-8b}` lifts each specialist's
 completion budget for thinking-ON decodes and raises the per-call timeout to
 600s (`src/evals/decode_budget.py`, `CLASS_BUDGETS` keyed by specialist agent
-name). Granite uses model-specific budgets at 2x the Qwen specialist budgets
-because its thinking-ON chat template consumes reasoning tokens inside
-`max_tokens`; this changes only the decode ceiling, not the prompt/schema.
+name). Granite starts at 2x the Qwen specialist budgets because its
+thinking-ON chat template consumes reasoning tokens inside `max_tokens`;
+correspondence uses 16K after its full N=20 validation proved 8K still
+truncated two documents. This changes only the decode ceiling, not the
+prompt/schema.
 
 The sampling part applies to **all LLM call families**, including sorter:
 Granite requires `temperature=1.0`, `top_p=0.95`, `seed=42`; Qwen keeps its
@@ -162,10 +164,13 @@ The direct-client path now consumes the active decode profile and sends
 `temperature=1.0`, `top_p=0.95`, `seed=42` on the wire. A controlled
 three-document canonical-draw probe under that exact posture found 4096
 failed on 2/3 docs, while 8192 completed all 3 in one call
-(6291/7103/6875 completion tokens). Granite specialist budgets are therefore
-2x the Qwen class budgets. The invalid wave remains in the append-only log;
-its deterministic N=20 report filename is replaced only when the corrected
-rerun finishes.
+(6291/7103/6875 completion tokens). A subsequent full N=20 run at 8192
+(`20260927T052637Z`) still found two harder documents whose first and retry
+attempts both stopped at exactly 8192 without valid JSON. Correspondence is
+therefore 16K per attempt; the other Granite classes remain at 2x pending
+their own full-wave evidence. Both superseded waves remain in the append-only
+log; the deterministic N=20 report filename is replaced only when the next
+corrected rerun finishes.
 
 If you see `specialist_llm_retry_blocked_by_budget` warnings in logs at any
 non-trivial rate, that is a signal the model/load combination needs a larger

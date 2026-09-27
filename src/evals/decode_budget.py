@@ -42,6 +42,12 @@ CLASS_BUDGETS: dict[str, int] = {
 GRANITE_CLASS_BUDGETS: dict[str, int] = {
     agent: budget * 2 for agent, budget in CLASS_BUDGETS.items()
 }
+# Full canonical N=20 validation at 8192 still produced two correspondence
+# rows whose first AND retry attempts each stopped at exactly 8192 tokens
+# (16,384 aggregate) without JSON. Give this class 16K per attempt. The other
+# classes retain the evidence-backed 2x posture until their own full waves
+# prove a larger cap necessary.
+GRANITE_CLASS_BUDGETS["correspondence_specialist"] = 16_384
 
 # Thinking-ON decodes blow past the vendored 120 s per-call default (the
 # sandbox pins 600 s for exactly this reason — DMR-072 overlay comment).

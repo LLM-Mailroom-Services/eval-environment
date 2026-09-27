@@ -248,6 +248,20 @@ def test_merger_granite_uses_large_context_chunks_not_qwen3_8b_penalty():
     assert needed_chunks(200_000, limit) == 1
 
 
+def test_deepseek_v41_one_coverage_call_all_pinned_n20_maxima():
+    import evals.specialist_llm as sl
+
+    model = "deepseek/deepseek-v4.1-flash"
+    for doc_class, n_chars in (
+        ("contract", 173_240),
+        ("corporate_record", 312_280),
+        ("merger_agreement", 464_926),
+    ):
+        limit = sl._chunk_limit_for(doc_class, model)
+        assert needed_chunks(n_chars, limit) == 1
+        assert llm_call_budget(1) == 2
+
+
 def test_correspondence_never_inherits_merger_large_completion_span():
     import evals.specialist_llm as sl
 

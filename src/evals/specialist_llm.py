@@ -86,14 +86,26 @@ LARGE_COMPLETION_MODELS: dict[str, int] = {
     # merger rows and at most two coverage chunks for the 464,926-char outlier
     # (not the qwen3-8b 48K → 8–10 chunk path).
     "ibm-granite/granite-4.2-8b": 280_000,
+    # OpenRouter: 1M context / 384K max completion — covers pinned N=20 maxima
+    # (merger 464,926 chars; corporate_record 312,280) in one coverage call.
+    "deepseek/deepseek-v4.1-flash": 480_000,
 }
+
+# Models that must never source-split on the pinned seed-42 N=20 draws (one
+# coverage call per doc; ``llm_call_budget(1) == 2`` for a single retry).
+FULL_DOCUMENT_SPECIALIST_MODELS: frozenset[str] = frozenset(
+    {"deepseek/deepseek-v4.1-flash"}
+)
 
 
 def _chunk_limit_for(doc_class: str, model: str | None) -> int:
     if doc_class in SINGLE_COVERAGE_CHUNK_CLASSES:
         return SINGLE_COVERAGE_CHUNK_LIMIT
+    model_key = (model or "").strip().lower()
+    if model_key in FULL_DOCUMENT_SPECIALIST_MODELS:
+        return LARGE_COMPLETION_MODELS[model_key]
     if doc_class == "merger_agreement":
-        override = LARGE_COMPLETION_MODELS.get((model or "").strip().lower())
+        override = LARGE_COMPLETION_MODELS.get(model_key)
         if override is not None:
             return override
         return CHUNK_CHARS["merger_agreement"]

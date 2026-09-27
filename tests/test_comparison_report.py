@@ -86,8 +86,9 @@ def test_report_path_mirrors_modal_naming():
     p = comparison_report.report_path(_summary())
     # Modal twin: RUN-20-CORRESPONDENCE-AWQ-REPORT.md (sandbox reports/)
     assert p.name == "RUN-20-CORRESPONDENCE-QWEN3-8B-REPORT.md"
-    assert p.parent.name == "qwen3-8b"  # filed by model
-    # Grandparent = reports root; conftest redirects it (EVALS_COMPARISON_REPORTS_DIR).
+    assert p.parent.name == "correspondence"  # filed by task/specialist
+    assert p.parent.parent.name == "qwen3-8b"  # ...within the model dir
+    # Great-grandparent = reports root; conftest redirects it (EVALS_COMPARISON_REPORTS_DIR).
 
 
 def test_report_path_v33_contracts_does_not_clobber_frozen_stem():
@@ -98,11 +99,13 @@ def test_report_path_v33_contracts_does_not_clobber_frozen_stem():
     summary["params"]["decode_profile"] = "qwen3-8b"
     p = comparison_report.report_path(summary)
     assert p.name == "RUN-20-CONTRACT-V33-QWEN3-8B-REPORT.md"
+    assert p.parent.name == "contracts"
     frozen = dict(summary)
     frozen["prompt_version"] = "contracts_specialist_v1"
     frozen["prompt_versions"] = {"contracts_specialist": {"key": "contracts_specialist_v1"}}
     p2 = comparison_report.report_path(frozen)
     assert p2.name == "RUN-20-CONTRACT-QWEN3-8B-REPORT.md"
+    assert p2.parent.name == "contracts"
 
 
 def test_report_path_falls_back_to_model_slug():
@@ -112,6 +115,16 @@ def test_report_path_falls_back_to_model_slug():
     p = comparison_report.report_path(summary)
     # No decode profile -> slugified model id; subset class still names the stem.
     assert p.name == "RUN-50-CORRESPONDENCE-IBM-GRANITE-GRANITE-4.2-8B-REPORT.md"
+    assert p.parent.name == "correspondence"
+    assert p.parent.parent.name == "ibm-granite-granite-4.2-8b"
+
+
+def test_report_path_separates_by_task_within_same_model_dir():
+    correspondence = comparison_report.report_path(_summary())
+    insurance = comparison_report.report_path(_summary(task="insurance_claims"))
+    assert correspondence.parent.parent == insurance.parent.parent  # same model dir
+    assert correspondence.parent != insurance.parent  # different task subdir
+    assert insurance.parent.name == "insurance_claims"
 
 
 # ── comparable metric surface ─────────────────────────────────────────────────

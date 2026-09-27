@@ -13,7 +13,8 @@ One canonical, versioned record schema for ALL task families (`eval`,
 
 ```text
 reports/experiment_log.jsonl      # THE index — one line per RUN (summary + pointers)
-reports/experiment_log.md         # human-readable tables, rebuildable from the JSONL
+reports/experiment_log.md         # short grouped index (waves / debug real / mock), rebuilt from the JSONL
+reports/experiment_log/<run_id>.md  # ONE file per run — full detail, never appended into the index
 data/experiments/<run_id>/cases.jsonl   # one line per CASE (full fidelity)
 data/experiments/<run_id>/summary.json  # same run-summary record, self-contained
 data/experiments/<run_id>/prompts_snapshot.json  # exact rendered prompts used
@@ -66,6 +67,15 @@ ids), `error`.
   optional `--export parquet|csv`.
 - **Human**: markdown is TABLES only (never raw JSON dumps); floats 4dp,
   bools ✓/✗; rebuilt idempotently via `scripts/render_experiment_log.py`.
+  `reports/experiment_log.md` is a SHORT index only (three grouped tables —
+  real waves at `n≥10`, exploratory/debug real runs, mock/CI-smoke runs —
+  each row linking to its own `reports/experiment_log/<run_id>.md`). It
+  never grows a per-run detail section inline, however large the JSONL
+  history gets. Substantive OpenRouter/Braintrust N-doc waves additionally
+  get a standalone, Modal-comparable report under
+  `reports/api-comparisons/<model>/<task>/` (see the braintrust skill) —
+  that is the primary human-facing artifact for "our reports"; the
+  experiment-log index/detail files are the full audit trail underneath it.
 - **Traced**: every record carries Braintrust/Phoenix trace ids so log rows ↔
   traces cross-reference.
 

@@ -65,7 +65,8 @@ name). **This profile map has no entry for `sorter`** — passing
 `--decode-profile` on `eval:classification` is harmless but does nothing
 useful; omit it for sorter runs. Passing `--decode-profile` is also what
 triggers the auto-written Modal-comparable report
-(`reports/api-comparisons/<model>/RUN-<wave>-<CLASS>-<MODEL>-REPORT.md`) —
+(`reports/api-comparisons/<model>/<task>/RUN-<wave>-<CLASS>-<MODEL>-REPORT.md`
+— always separated by specialist/task, never flat across a model dir) —
 without it, no comparison report is emitted for that run.
 
 ## 3. Braintrust as the trace sink
@@ -157,7 +158,7 @@ run_specialist () {  # $1=task-id  $2=class  $3=model  $4=decode-profile
     --model "$3" --decode-profile "$4" \
     --require-trace-sink --prompt-source frozen \
     --trace-backend braintrust --concurrency 8 \
-    2>&1 | tee -a reports/api-comparisons/sand027-n20-run.log
+    2>&1 | tee -a /tmp/run.log
 }
 
 run_specialist eval:correspondence     correspondence     qwen/qwen3-8b qwen3-8b
@@ -184,12 +185,20 @@ uv run python -u scripts/run_evals.py \
   --model qwen/qwen3-8b \
   --require-trace-sink --prompt-source frozen \
   --trace-backend braintrust --concurrency 8 \
-  2>&1 | tee -a reports/api-comparisons/sand027-n20-run.log
+  2>&1 | tee -a /tmp/run.log
 ```
 
 `--sample 20` draws a stratified sample across all five doc classes (not a
 single-class N=20 like the specialist waves); use `--subset class:<name>`
 instead of `full` if a single-class classification slice is wanted.
+
+Pipe raw `tee` output to a scratch path outside the repo (e.g. `/tmp/run.log`
+as above), not under `reports/`. `reports/` is git-tracked and reserved for
+polished, self-contained deliverables (the experiment-log index/detail files
+and `reports/api-comparisons/**`); a raw structured-log capture of a whole
+session's job output is exactly the kind of unbounded, hard-to-read artifact
+that does not belong there — see the `.gitignore` comment above
+`data/experiments/` for the same reasoning applied to raw run dirs.
 
 ## 7. Verifying a run before trusting the number
 

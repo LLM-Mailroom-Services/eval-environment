@@ -9,10 +9,14 @@ Modal leg and an API leg of the same wave can be read side by side:
 
 Naming schema
 -------------
-``reports/api-comparisons/<model_short>/RUN-<wave>-<CLASS>-<MODEL_SHORT>-REPORT.md``
+``reports/api-comparisons/<model_short>/<task>/RUN-<wave>-<CLASS>-<MODEL_SHORT>-REPORT.md``
 
-- ``model_short``  directory filed by the tested model (decode-profile key when
-  set, else a slugified model id: ``qwen/qwen3-8b`` -> ``qwen-qwen3-8b``).
+- ``model_short``  top-level directory filed by the tested model (decode-profile
+  key when set, else a slugified model id: ``qwen/qwen3-8b`` -> ``qwen-qwen3-8b``).
+- ``task``         second-level directory: the eval task id (``contracts``,
+  ``insurance_claims``, ``correspondence``, ``corporate_records``,
+  ``merger_agreement``, ``classification``, …) — reports are always
+  separated by specialist/task, never dumped flat across a model directory.
 - ``wave``         draw size: ``params.sample`` when set, else ``params.n``.
 - ``CLASS``        subset class uppercased (``class:correspondence`` ->
   ``CORRESPONDENCE``; whole-dataset runs -> ``ALL``).
@@ -96,6 +100,17 @@ def model_short(summary: dict[str, Any]) -> str:
     return _SLUG_RE.sub("-", model.lower()).strip("-")
 
 
+def task_slug(summary: dict[str, Any]) -> str:
+    """Task filing key: the eval task id (registry name), sanitized.
+
+    Underscores are preserved (unlike ``model_short``'s dots-only slug) so
+    ``insurance_claims`` files under ``insurance_claims/``, matching the
+    task id used everywhere else (CLI ``--task``, experiment-log ``task``).
+    """
+    task = str(summary.get("task") or "unknown")
+    return re.sub(r"[^a-z0-9_]+", "-", task.lower()).strip("-_") or "unknown"
+
+
 def wave_size(summary: dict[str, Any]) -> int:
     """Draw size for the filename: sample when set, else n."""
     params = summary.get("params") or {}
@@ -111,13 +126,15 @@ def _modal_contracts_v33(summary: dict[str, Any]) -> bool:
 
 
 def report_path(summary: dict[str, Any], base_dir: Path | None = None) -> Path:
-    """Deterministic report path for a run summary."""
+    """Deterministic report path for a run summary — always filed under
+    ``<model>/<task>/`` so reports never pile up flat across specialists."""
     base = base_dir or reports_dir()
     short = model_short(summary)
+    task = task_slug(summary)
     cls = classify((summary.get("dataset") or {}).get("subset"))
     v33 = "-V33" if cls == "CONTRACT" and _modal_contracts_v33(summary) else ""
     stem = f"RUN-{wave_size(summary)}-{cls}{v33}-{short.upper()}"
-    return base / short / f"{stem}-REPORT.md"
+    return base / short / task / f"{stem}-REPORT.md"
 
 
 def cap_status(summary: dict[str, Any], profile: dict[str, Any]) -> dict[str, Any] | None:

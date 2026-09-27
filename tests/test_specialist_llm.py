@@ -208,6 +208,36 @@ def test_long_merger_issues_one_call_per_chunk_same_system_prompt(monkeypatch):
         deactivate()
 
 
+def test_merger_chunk_chars_stays_small_for_qwen3_8b_real_completion_cap():
+    """qwen/qwen3-8b truncates completions at ~8,192 tokens regardless of
+    max_tokens (confirmed live: run 20260927T014814Z, a single unchunked
+    ~390k-char merger call truncated at exactly 8,195 completion tokens on
+    both docs -> parse_error -> 0 score). CHUNK_CHARS must stay small enough
+    that per-chunk completions land far under that ceiling — do not let this
+    silently balloon back toward "one call per doc" for this model."""
+    import evals.specialist_llm as sl
+
+    assert sl.CHUNK_CHARS["merger_agreement"] == 48_000
+    assert needed_chunks(464_926, sl.CHUNK_CHARS["merger_agreement"]) > 1
+
+
+def test_merger_large_completion_model_covers_pinned_corpus_in_one_call():
+    """qwen/qwen3.7-flash (1M context / 65,536 completion tokens per
+    OpenRouter) safely covers the largest pinned merger doc (464,926 chars)
+    in a single completion — the model-specific override that lets it stand
+    in without the qwen3-8b chunking penalty."""
+    import evals.specialist_llm as sl
+
+    limit = sl._chunk_limit_for("merger_agreement", "qwen/qwen3.7-flash")
+    assert limit >= 465_000
+    assert needed_chunks(464_926, limit) == 1
+    assert llm_call_budget(1) == 2
+    # Model-agnostic default (or an unrecognized model) keeps the small,
+    # validated chunk size — no accidental inheritance of the override.
+    assert sl._chunk_limit_for("merger_agreement", "qwen/qwen3-8b") == 48_000
+    assert sl._chunk_limit_for("merger_agreement", None) == 48_000
+
+
 def test_needed_chunks_and_call_budget_include_15_percent_headroom():
     assert needed_chunks(48_000, 48_000) == 1
     assert llm_call_budget(1) == 2

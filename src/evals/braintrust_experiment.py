@@ -159,8 +159,15 @@ def finalize_eval_run(summary: dict[str, Any]) -> None:
             "decode_profile": (summary.get("params") or {}).get("decode_profile"),
         }
         # Prefer metadata merge when the SDK exposes it; never log a fake case.
-        if hasattr(exp, "update_metadata"):
-            exp.update_metadata(extra)
+        # Braintrust's Experiment.__getattr__ raises KeyError (not
+        # AttributeError) for unknown names, which hasattr()/getattr() do not
+        # swallow — probe with a try/except instead of hasattr().
+        try:
+            update_metadata = exp.update_metadata
+        except (AttributeError, KeyError):
+            update_metadata = None
+        if update_metadata is not None:
+            update_metadata(extra)
         logger.info(
             "braintrust_experiment_finalized",
             run_id=summary.get("run_id"),

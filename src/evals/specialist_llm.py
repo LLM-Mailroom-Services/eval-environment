@@ -42,14 +42,39 @@ CLASS_PROMPT_STEM: dict[str, str] = {
     "insurance_claim": "You are the insurance-claims specialist.",
 }
 
-# Soft cap on source chars sent in one completion. Merger agreements in the
-# pinned corpus run 300k–400k chars; a single call truncates JSON and can
-# trip Python's int-digit limit on the broken number. Other classes stay
-# whole unless they blow past the fallback cap.
+# Soft cap on source chars sent in one completion. Confirmed by a real n=2
+# smoke test (run 20260927T014814Z): qwen/qwen3-8b has a 131,072-token
+# *context* window, but its actual *completion* ceiling is ~8,192 tokens
+# regardless of the requested max_tokens (OpenRouter's model page states
+# "supports up to 8,192 completion tokens"). A single unchunked call for a
+# ~390k-char merger doc truncated at exactly 8,195 completion tokens on both
+# smoke-test docs -> parse_error -> 0 score. So for qwen3-8b, keep the small
+# chunk size: each 48k-char chunk's extraction stays far under that ceiling
+# (~1,800 completion tokens/chunk observed), which is what actually scored
+# (0.529 f1 on contract_128). Do not raise this for qwen3-8b without
+# re-validating against the real completion cap, not just the context window.
 CHUNK_CHARS: dict[str, int] = {
     "merger_agreement": 48_000,
 }
 DEFAULT_CHUNK_CHARS = 120_000
+
+# Some models have a much larger real completion ceiling than qwen3-8b's
+# ~8,192 tokens, so the whole document fits in one call safely. Per
+# OpenRouter's model pages: qwen/qwen3.7-flash has a 1,000,000-token context
+# window and supports up to 65,536 completion tokens — 465k chars (the
+# largest doc in the pinned merger_agreement N=20) is a small fraction of
+# either budget. Keyed by exact model id (not a substring match) so a future
+# lower-budget "qwen3.7-*" variant does not inherit this by accident.
+LARGE_COMPLETION_MODELS: dict[str, int] = {
+    "qwen/qwen3.7-flash": 480_000,
+}
+
+
+def _chunk_limit_for(doc_class: str, model: str | None) -> int:
+    override = LARGE_COMPLETION_MODELS.get((model or "").strip().lower())
+    if override is not None:
+        return override
+    return CHUNK_CHARS.get(doc_class, DEFAULT_CHUNK_CHARS)
 CHUNK_OVERLAP = 1_500
 CHUNK_HEADER_CHARS = 3_500
 # Extra LLM calls allowed beyond the coverage count, for split-math
@@ -65,7 +90,9 @@ _JSON_NOTE = (
     "\n\nOutput must be a single json object conforming to the provided "
     "json schema (response_format is json_object). Keep values compact: "
     "clause answers are short labels or quotes of at most 80 characters; "
-    "never transcribe an article; never emit a number longer than 20 digits."
+    "never transcribe an article; never emit a number longer than 20 digits. "
+    "List fields (e.g. maud_clauses, keywords, parties) must contain at most "
+    "10 of the most salient items each, not an exhaustive enumeration."
 )
 
 # Set by invoke.install_mocks — never hits the network in mock mode.
@@ -197,7 +224,7 @@ def extract_entities(
     assert_prompt_matches_class(specialist, doc_class, system)
     system = system + _JSON_NOTE
     client, model, max_tokens, temperature = _client_for(specialist)
-    limit = CHUNK_CHARS.get(doc_class, DEFAULT_CHUNK_CHARS)
+    limit = _chunk_limit_for(doc_class, model)
     needed = needed_chunks(len(text), limit)
     budget = llm_call_budget(needed)
     pieces = chunk_document(text, max_chars=limit)

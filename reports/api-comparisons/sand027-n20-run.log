@@ -454,3 +454,35 @@ hub tip ed7576b676343e0b402ec5412cded301e629bdee differs from the requested pinn
 2026-09-27 01:00:09 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=390026 doc_class=merger_agreement max_tokens=16384 model=qwen/qwen3-8b prompt_key=merger_agreement_specialist_v1
 2026-09-27 01:04:59 [info     ] braintrust_openai_client_wrapped
 2026-09-27 01:04:59 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=346640 doc_class=merger_agreement max_tokens=16384 model=qwen/qwen3-8b prompt_key=merger_agreement_specialist_v1
+2026-09-27T01:12:06Z RUN -u scripts/run_evals.py --task eval:merger_agreement --real --subset class:merger_agreement --sample 20 --seed 42 --model qwen/qwen3-8b --decode-profile qwen3-8b --require-trace-sink --prompt-source frozen --trace-backend braintrust
+
+=== QWEN-N20 2026-09-27T01:12:06Z ===
+2026-09-27 01:12:07 [info     ] evals_dojo_taxonomy_wired      doc_classes=['contract', 'corporate_record', 'correspondence', 'insurance_claim', 'merger_agreement'] source=_taxonomy_from_config
+2026-09-27 01:12:07 [info     ] evals_preflight_ok             mode=real task=eval:merger_agreement warnings=0
+hub tip ed7576b676343e0b402ec5412cded301e629bdee differs from the requested pinned revision 46a4d3c240a36671cde0182fff4960f6b8b73aca — the dataset moved upstream; this load stays on the pin, but the next publish roll will re-pin (provenance records both)
+2026-09-27 01:12:09 [info     ] evals_prompts_activated        roles=['arbiter', 'boss', 'contracts_specialist', 'corporate_records_specialist', 'correspondence_specialist', 'insurance_claims_specialist', 'intake', 'judge', 'judge-classification', 'judge-correctness', 'merger_agreement_specialist', 'pipeline_quality', 'pipeline_verdict', 'sorter', 'sorter_reviewer'] source=frozen
+2026-09-27 01:12:09 [info     ] evals_openrouter_model_override model=qwen/qwen3-8b
+2026-09-27 01:12:10 [info     ] braintrust_initialized         project=Mailroom-Evals
+2026-09-27 01:12:10 [info     ] evals_langchain_llm_tracing_enabled
+2026-09-27 01:12:10 [info     ] braintrust_experiment_opened   dataset=off experiment=20260927T011209Z-eval-merger_agreement n_cases=20 project=Mailroom-Evals
+2026-09-27 01:12:10 [info     ] braintrust_openai_client_wrapped
+2026-09-27 01:12:10 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=387592 chunk_limit=48000 chunks=8 doc_class=merger_agreement max_tokens=16384 model=qwen/qwen3-8b prompt_key=merger_agreement_specialist_v1
+2026-09-27 01:23:19 [info     ] braintrust_openai_client_wrapped
+2026-09-27 01:23:19 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=362558 chunk_limit=48000 chunks=8 doc_class=merger_agreement max_tokens=16384 model=qwen/qwen3-8b prompt_key=merger_agreement_specialist_v1
+2026-09-27T01:26:08Z RUN -u scripts/run_evals.py --task eval:merger_agreement --real --subset class:merger_agreement --sample 20 --seed 42 --model qwen/qwen3-8b --decode-profile qwen3-8b --require-trace-sink --prompt-source frozen --trace-backend braintrust
+
+=== QWEN-N20 2026-09-27T01:26:08Z ===
+2026-09-27 01:26:09 [info     ] evals_dojo_taxonomy_wired      doc_classes=['contract', 'corporate_record', 'correspondence', 'insurance_claim', 'merger_agreement'] source=_taxonomy_from_config
+2026-09-27 01:26:09 [info     ] evals_preflight_ok             mode=real task=eval:merger_agreement warnings=0
+hub tip ed7576b676343e0b402ec5412cded301e629bdee differs from the requested pinned revision 46a4d3c240a36671cde0182fff4960f6b8b73aca — the dataset moved upstream; this load stays on the pin, but the next publish roll will re-pin (provenance records both)
+2026-09-27 01:26:11 [info     ] evals_prompts_activated        roles=['arbiter', 'boss', 'contracts_specialist', 'corporate_records_specialist', 'correspondence_specialist', 'insurance_claims_specialist', 'intake', 'judge', 'judge-classification', 'judge-correctness', 'merger_agreement_specialist', 'pipeline_quality', 'pipeline_verdict', 'sorter', 'sorter_reviewer'] source=frozen
+2026-09-27 01:26:11 [info     ] evals_openrouter_model_override model=qwen/qwen3-8b
+2026-09-27 01:26:11 [info     ] braintrust_initialized         project=Mailroom-Evals
+2026-09-27 01:26:11 [info     ] evals_langchain_llm_tracing_enabled
+2026-09-27 01:26:11 [info     ] braintrust_experiment_opened   dataset=off experiment=20260927T012611Z-eval-merger_agreement n_cases=20 project=Mailroom-Evals
+2026-09-27 01:26:11 [info     ] braintrust_openai_client_wrapped
+2026-09-27 01:26:11 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=387592 chunk_limit=48000 chunks=9 doc_class=merger_agreement llm_call_budget=11 max_tokens=16384 model=qwen/qwen3-8b needed_chunks=9 prompt_key=merger_agreement_specialist_v1
+2026-09-27 01:33:44 [info     ] braintrust_openai_client_wrapped
+2026-09-27 01:33:44 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=362558 chunk_limit=48000 chunks=8 doc_class=merger_agreement llm_call_budget=10 max_tokens=16384 model=qwen/qwen3-8b needed_chunks=8 prompt_key=merger_agreement_specialist_v1
+2026-09-27 01:36:50 [info     ] braintrust_openai_client_wrapped
+2026-09-27 01:36:50 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=390026 chunk_limit=48000 chunks=9 doc_class=merger_agreement llm_call_budget=11 max_tokens=16384 model=qwen/qwen3-8b needed_chunks=9 prompt_key=merger_agreement_specialist_v1

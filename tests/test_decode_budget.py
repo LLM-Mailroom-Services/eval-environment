@@ -9,6 +9,7 @@ import pytest
 from evals.decode_budget import (
     CLASS_BUDGETS,
     COMPARISON_PROFILES,
+    GRANITE_CLASS_BUDGETS,
     apply_decode_budget,
     get_profile,
     recover_prediction,
@@ -55,6 +56,15 @@ def test_profiles_match_issue_18_budgets():
     assert CLASS_BUDGETS["insurance_claims_specialist"] == 6144
     assert CLASS_BUDGETS["contracts_specialist"] == 8192
     assert CLASS_BUDGETS["merger_agreement_specialist"] == 16384
+    expected_granite = {
+        agent: budget * 2 for agent, budget in CLASS_BUDGETS.items()
+    }
+    expected_granite["correspondence_specialist"] = 16_384
+    assert GRANITE_CLASS_BUDGETS == expected_granite
+    assert (
+        COMPARISON_PROFILES["granite-4.2-8b"]["max_tokens_by_agent"]
+        == GRANITE_CLASS_BUDGETS
+    )
     assert COMPARISON_PROFILES["granite-4.2-8b"]["sampling"] == {
         "temperature": 1.0, "top_p": 0.95, "seed": 42,
     }
@@ -120,6 +130,34 @@ def test_apply_decode_budget_injects_sampling(monkeypatch):
     # Restored: post-context call no longer sees mandated values.
     llm_retry.retry_chat_completion(object(), model="x", temperature=0.1)
     assert calls[1] == {"model": "x", "temperature": 0.1}
+
+
+def test_apply_decode_budget_overrides_langchain_constructor_sampling(monkeypatch):
+    """Taxonomy temperature must not defeat IBM's mandated Granite posture."""
+    import langchain_agents.base_agent as lc_base
+
+    calls: list[dict] = []
+
+    class FakeChatOpenAI:
+        def __init__(self, *args, **kwargs):
+            calls.append(kwargs)
+
+    monkeypatch.setattr(lc_base, "ChatOpenAI", FakeChatOpenAI)
+    with apply_decode_budget(get_profile("granite-4.2-8b")) as applied:
+        lc_base.ChatOpenAI(
+            model="ibm-granite/granite-4.2-8b",
+            temperature=0.1,
+            top_p=0.2,
+            model_kwargs={"seed": 7},
+        )
+        assert calls == [{
+            "model": "ibm-granite/granite-4.2-8b",
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "seed": 42,
+        }]
+        assert applied["sampling_injected"] is True
+    assert lc_base.ChatOpenAI is FakeChatOpenAI
 
 
 def test_apply_decode_budget_none_is_inert():

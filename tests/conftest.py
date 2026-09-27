@@ -20,8 +20,10 @@ def _hermetic_env(monkeypatch):
     monkeypatch.delenv("LANGFUSE_SECRET_KEY", raising=False)
     monkeypatch.setenv("EXPERIMENT_LOG_PATH", str(Path(tmp) / "experiment_log.jsonl"))
     monkeypatch.setenv("EXPERIMENT_LOG_MD_PATH", str(Path(tmp) / "experiment_log.md"))
+    monkeypatch.setenv("EXPERIMENT_LOG_RUNS_DIR", str(Path(tmp) / "experiment_log"))
     monkeypatch.setenv("EVALS_EXPERIMENTS_DIR", str(Path(tmp) / "experiments"))
     monkeypatch.setenv("EVALS_COMPARISON_REPORTS_DIR", str(Path(tmp) / "comparison-reports"))
+    monkeypatch.setenv("EVALS_CALIBRATION_REPORTS_DIR", str(Path(tmp) / "calibration-reports"))
     yield
 
 

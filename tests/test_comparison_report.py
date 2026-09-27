@@ -26,6 +26,8 @@ def _summary(**overrides):
             "latency_ms_p95": 30000.0,
             "tokens_prompt_total": 4000,
             "tokens_completion_total": 300,
+            "expected_cost_usd": 0.12,
+            "cost_usd_total": 0.0009,
             "cost_usd_est_total": 0.0009,
             "by_agent": {
                 "correspondence_specialist": {
@@ -86,8 +88,9 @@ def test_report_path_mirrors_modal_naming():
     p = comparison_report.report_path(_summary())
     # Modal twin: RUN-20-CORRESPONDENCE-AWQ-REPORT.md (sandbox reports/)
     assert p.name == "RUN-20-CORRESPONDENCE-QWEN3-8B-REPORT.md"
-    assert p.parent.name == "qwen3-8b"  # filed by model
-    # Grandparent = reports root; conftest redirects it (EVALS_COMPARISON_REPORTS_DIR).
+    assert p.parent.name == "correspondence"  # filed by task/specialist
+    assert p.parent.parent.name == "qwen3-8b"  # ...within the model dir
+    # Great-grandparent = reports root; conftest redirects it (EVALS_COMPARISON_REPORTS_DIR).
 
 
 def test_report_path_v33_contracts_does_not_clobber_frozen_stem():
@@ -98,11 +101,13 @@ def test_report_path_v33_contracts_does_not_clobber_frozen_stem():
     summary["params"]["decode_profile"] = "qwen3-8b"
     p = comparison_report.report_path(summary)
     assert p.name == "RUN-20-CONTRACT-V33-QWEN3-8B-REPORT.md"
+    assert p.parent.name == "contracts"
     frozen = dict(summary)
     frozen["prompt_version"] = "contracts_specialist_v1"
     frozen["prompt_versions"] = {"contracts_specialist": {"key": "contracts_specialist_v1"}}
     p2 = comparison_report.report_path(frozen)
     assert p2.name == "RUN-20-CONTRACT-QWEN3-8B-REPORT.md"
+    assert p2.parent.name == "contracts"
 
 
 def test_report_path_falls_back_to_model_slug():
@@ -111,7 +116,34 @@ def test_report_path_falls_back_to_model_slug():
     summary["model"] = "ibm-granite/granite-4.2-8b"
     p = comparison_report.report_path(summary)
     # No decode profile -> slugified model id; subset class still names the stem.
-    assert p.name == "RUN-50-CORRESPONDENCE-IBM-GRANITE-GRANITE-4.2-8B-REPORT.md"
+    assert p.name == "RUN-50-CORRESPONDENCE-GRANITE-4.2-8B-REPORT.md"
+    assert p.parent.name == "correspondence"
+    assert p.parent.parent.name == "granite-4.2-8b"
+
+
+def test_model_short_aliases_qwen_slug_to_decode_profile_dir():
+    summary = _summary()
+    summary["params"] = {"sample": 20, "n": 2}
+    p = comparison_report.report_path(summary)
+    assert p.parent.parent.name == "qwen3-8b"
+    summary["params"] = {"sample": 20}
+    summary["model"] = "qwen/qwen3-8b"
+    p2 = comparison_report.report_path(summary)
+    assert p2.parent.parent.name == "qwen3-8b"
+
+
+def test_run_report_path_lives_under_runs_subdir():
+    p = comparison_report.run_report_path(_summary())
+    assert p.parent.name == "runs"
+    assert p.name.endswith("-test-a1b2c3.md") or "eval" in p.name
+
+
+def test_report_path_separates_by_task_within_same_model_dir():
+    correspondence = comparison_report.report_path(_summary())
+    insurance = comparison_report.report_path(_summary(task="insurance_claims"))
+    assert correspondence.parent.parent == insurance.parent.parent  # same model dir
+    assert correspondence.parent != insurance.parent  # different task subdir
+    assert insurance.parent.name == "insurance_claims"
 
 
 # ── comparable metric surface ─────────────────────────────────────────────────
@@ -123,9 +155,12 @@ def test_render_report_carries_modal_comparable_metrics():
     for needle in (
         "wall (run duration)", "concurrency",
         "cold boot | N/A", "gpu_seconds | N/A",
-        "cost per document", "latency e2e / p50 / p95 / max",
+        "cost expected (wave planning)", "cost actual (derived from case rows)",
+        "cost estimated (roster token rates)", "cost per document (actual)",
+        "latency e2e / p50 / p95 / max",
         "prompt / completion / total tokens", "cost cap",
         "Serial-vs-batched", "Decode posture",
+        "Run configuration", "Runtime performance",
         "Per-agent usage", "Per-document scores",
         "docs ok / total",
     ):
@@ -139,9 +174,15 @@ def test_render_report_carries_modal_comparable_metrics():
 
 def test_cap_status_flags_over_cap():
     summary = _summary()
+    summary["performance"]["cost_usd_total"] = 2.0
     summary["performance"]["cost_usd_est_total"] = 2.0
     status = comparison_report.cap_status(summary, {"cost_cap_usd": 1.5})
-    assert status == {"cap_usd": 1.5, "cost_usd_est": 2.0, "status": "over_cap"}
+    assert status == {
+        "cap_usd": 1.5,
+        "cost_usd_est": 2.0,
+        "cost_usd_total": 2.0,
+        "status": "over_cap",
+    }
     assert comparison_report.cap_status(summary, {}) is None
 
 
@@ -169,7 +210,9 @@ def test_run_task_decode_profile_writes_report(monkeypatch, sample_case):
     assert summary["comparison_report"]
     report = Path(summary["comparison_report"])
     assert report.exists()
-    assert report.name.startswith("RUN-1-")
+    assert report.parent.name == "runs"
+    canonical = report.parent.parent / "RUN-1-CONTRACT-QWEN3-8B-REPORT.md"
+    assert canonical.exists()
     assert "Decode posture" in report.read_text(encoding="utf-8")
     assert summary["cost_cap"]["status"] == "under_cap"
     # No profile -> no report (pipeline-default runs don't emit it).

@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import threading
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -25,11 +26,19 @@ from typing import Any
 SCHEMA_VERSION = 3
 JSONL_ENV = "EXPERIMENT_LOG_PATH"
 MD_ENV = "EXPERIMENT_LOG_MD_PATH"
+RUNS_DIR_ENV = "EXPERIMENT_LOG_RUNS_DIR"
 DIR_ENV = "EVALS_EXPERIMENTS_DIR"
 DEFAULT_JSONL = "reports/experiment_log.jsonl"
 DEFAULT_MD = "reports/experiment_log.md"
+DEFAULT_RUNS_DIR = "reports/experiment_log"
+# A run counts as a "wave" (the substantive, report-worthy unit) once it
+# clears this many cases — smoke/debug real runs and the `--mock --n 2` CI
+# gate stay well under it. Purely a markdown-layout threshold; the JSONL
+# index is unaffected and still carries every run regardless of size.
+WAVE_MIN_N = 10
 DEFAULT_DIR = "data/experiments"
 EMBED_LIMIT = 50  # inline case rows into the summary up to this many
+_CASE_IO = threading.Lock()
 
 REQUIRED_KEYS: tuple[str, ...] = (
     "schema_version",
@@ -92,6 +101,11 @@ def jsonl_path() -> Path:
 
 def md_path() -> Path:
     return Path(os.environ.get(MD_ENV, DEFAULT_MD))
+
+
+def runs_dir() -> Path:
+    """One rendered markdown file per run_id — never appended-to-forever."""
+    return Path(os.environ.get(RUNS_DIR_ENV, DEFAULT_RUNS_DIR))
 
 
 def experiments_dir() -> Path:
@@ -211,16 +225,17 @@ def append_case_row(run_dir: Path, run_id: str, row: dict[str, Any]) -> None:
     """Checkpoint one case row (resume-safe; survives interrupted runs)."""
     run_dir.mkdir(parents=True, exist_ok=True)
     path = run_dir / "cases.jsonl"
-    if row.get("case_id"):
-        existing = {r.get("case_id") for r in _read_cases_file(path) if r.get("case_id")}
-        if row.get("case_id") in existing:
-            return
     payload = dict(row)
     payload.setdefault("run_id", run_id)
     payload.setdefault("record_kind", "case")
     payload.setdefault("schema_version", SCHEMA_VERSION)
-    with path.open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps(payload, default=str) + "\n")
+    with _CASE_IO:
+        if payload.get("case_id"):
+            existing = {r.get("case_id") for r in _read_cases_file(path) if r.get("case_id")}
+            if payload.get("case_id") in existing:
+                return
+        with path.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(payload, default=str) + "\n")
 
 
 def write_run(
@@ -341,6 +356,16 @@ def _table(headers: list[str], rows: list[list[Any]]) -> list[str]:
     return lines
 
 
+def _comparison_report_link(summary: dict[str, Any]) -> str | None:
+    from evals import comparison_report
+
+    path = comparison_report.resolve_report_path(summary)
+    if path:
+        return comparison_report.repo_relative_path(path)
+    stored = summary.get("comparison_report")
+    return str(stored) if stored else None
+
+
 def render_run_md(summary: dict[str, Any]) -> str:
     """One run as markdown sections (metadata, data, metrics, performance)."""
     lines = [f"## {summary.get('run_id')}", ""]
@@ -354,9 +379,18 @@ def render_run_md(summary: dict[str, Any]) -> str:
             ["git", summary.get("git")],
             ["started / finished", f"{summary.get('started_at')} → {summary.get('finished_at')}"],
             ["duration_s", summary.get("duration_s")],
+            ["comparison report", _comparison_report_link(summary)],
             ["error", summary.get("error")],
         ],
     )
+    params = summary.get("params") or {}
+    if params:
+        lines += ["", "### Run configuration", ""]
+        lines += _table(["Param", "Value"], sorted(params.items()))
+    cost_cap = summary.get("cost_cap") or {}
+    if cost_cap:
+        lines += ["", "### Cost cap", ""]
+        lines += _table(["Key", "Value"], sorted(cost_cap.items()))
     lines += ["", "### Dataset", ""]
     lines += _table(["Key", "Value"], sorted((summary.get("dataset") or {}).items()))
     lines += ["", "### Metrics", ""]
@@ -415,29 +449,80 @@ def render_run_md(summary: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _run_link(run_id: str) -> str:
+    return f"[{run_id}](experiment_log/{run_id}.md)"
+
+
+def _index_table(runs: list[dict[str, Any]]) -> list[str]:
+    """Like :func:`_table`, but the run_id column is a markdown link that
+    must NOT go through ``_fmt``'s 60-char truncation (it would mangle the
+    link syntax itself, e.g. ``[id](experiment_log/id…`` with no closing
+    paren)."""
+    headers = ["run_id", "family", "task", "mode", "model", "subset", "n", "key metric", "errors"]
+    lines = ["| " + " | ".join(headers) + " |", "|" + "|".join("---" for _ in headers) + "|"]
+    for r in runs:
+        cells = [
+            _run_link(r.get("run_id")),
+            _fmt(r.get("family")),
+            _fmt(r.get("task")),
+            _fmt(r.get("mode")),
+            _fmt(r.get("model")),
+            _fmt((r.get("dataset") or {}).get("subset")),
+            _fmt((r.get("metrics") or {}).get("n")),
+            _fmt(_headline_metric(r)),
+            _fmt((r.get("metrics") or {}).get("errors")),
+        ]
+        lines.append("| " + " | ".join(cells) + " |")
+    return lines
+
+
+def _is_wave(run: dict[str, Any]) -> bool:
+    """A report-worthy run: real mode, at or above ``WAVE_MIN_N`` cases."""
+    n = (run.get("metrics") or {}).get("n") or 0
+    return run.get("mode") == "real" and n >= WAVE_MIN_N
+
+
 def render_full_log(path: Path | None = None) -> str:
-    """Title + experiment index over the whole history."""
+    """Title + a short, grouped experiment index — never the full per-run
+    detail dump (that lives one file per run under ``runs_dir()``, see
+    :func:`write_run_detail_files`). Grouping keeps the substantive N-doc
+    real waves ("our reports") visually separate from mock CI-smoke and
+    small real debug/exploratory runs, so the index stays scannable no
+    matter how much calibration/debug history accumulates underneath it.
+    """
     runs = load_runs(path)
     run_records = [r for r in runs if r.get("record_kind") in ("run_summary", None)]
     comparisons = [r for r in runs if r.get("record_kind") == "comparison_result"]
-    lines = ["# mailroom-evals — experiment log", ""]
-    lines += _table(
-        ["run_id", "family", "task", "mode", "model", "subset", "n", "key metric", "errors"],
-        [
-            [
-                r.get("run_id"),
-                r.get("family"),
-                r.get("task"),
-                r.get("mode"),
-                r.get("model"),
-                (r.get("dataset") or {}).get("subset"),
-                (r.get("metrics") or {}).get("n"),
-                _headline_metric(r),
-                (r.get("metrics") or {}).get("errors"),
-            ]
-            for r in run_records
-        ],
-    )
+
+    waves = [r for r in run_records if _is_wave(r)]
+    debug_real = [r for r in run_records if r.get("mode") == "real" and not _is_wave(r)]
+    mock_runs = [r for r in run_records if r.get("mode") != "real"]
+
+    lines = [
+        "# mailroom-evals — experiment log",
+        "",
+        f"One row per run (append-only source of truth: `{jsonl_path()}`). "
+        "Each run's full detail (dataset provenance, metrics, per-agent "
+        "performance, case table) lives in its own file under "
+        f"`{runs_dir()}/<run_id>.md` — this index never grows a per-run "
+        "section inline, so it stays readable regardless of history size. "
+        "OpenRouter/Braintrust N-doc waves also get a standalone, "
+        "Modal-comparable write-ups under `reports/api-comparisons/` "
+        "(see `INDEX.md`; per-run files under `<model>/<task>/runs/`).",
+        "",
+        f"## Real evaluation waves (real mode, n≥{WAVE_MIN_N} cases) — {len(waves)}",
+        "",
+    ]
+    lines += _index_table(sorted(waves, key=lambda r: r.get("run_id") or "", reverse=True))
+    lines += [
+        "",
+        f"## Exploratory / debug real runs (real mode, n<{WAVE_MIN_N} cases) — {len(debug_real)}",
+        "",
+    ]
+    lines += _index_table(sorted(debug_real, key=lambda r: r.get("run_id") or "", reverse=True))
+    lines += ["", f"## Mock / CI-smoke runs — {len(mock_runs)}", ""]
+    lines += _index_table(sorted(mock_runs, key=lambda r: r.get("run_id") or "", reverse=True))
+
     if comparisons:
         lines += ["", "## A/B comparisons", ""]
         lines += _table(
@@ -453,11 +538,7 @@ def render_full_log(path: Path | None = None) -> str:
                 for c in comparisons
             ],
         )
-    lines += ["", "---", ""]
-    for run in run_records:
-        lines.append(render_run_md(run))
-        lines.append("")
-    return "\n".join(lines)
+    return "\n".join(lines) + "\n"
 
 
 def _headline_metric(run: dict[str, Any]) -> Any:
@@ -471,11 +552,82 @@ def _headline_metric(run: dict[str, Any]) -> Any:
     return "—"
 
 
+def _enrich_run_view(run: dict[str, Any]) -> dict[str, Any]:
+    """Recompute performance cost fields from on-disk case rows when available."""
+    run_id = run.get("run_id")
+    if not run_id:
+        return run
+    try:
+        case_rows = load_cases(run_id)
+    except Exception:
+        return run
+    if not case_rows:
+        return run
+    from evals import scoring
+    from evals.decode_budget import expected_cost_for_wave
+
+    out = dict(run)
+    params = out.get("params") or {}
+    wave = int(
+        params.get("sample")
+        or params.get("n")
+        or (out.get("metrics") or {}).get("n")
+        or 0
+    )
+    model = out.get("model")
+    if not model:
+        by_agent = scoring.summarize_agent_usage(
+            [r.get("agent_usage") for r in case_rows if r.get("agent_usage")]
+        )
+        dominant = max(
+            by_agent.items(),
+            key=lambda kv: kv[1].get("total_tokens") or 0,
+            default=(None, {}),
+        )[0]
+        model = ((by_agent.get(dominant) or {}).get("models") or [None])[0]
+    out["performance"] = scoring.summarize_performance(
+        case_rows,
+        run_model=model,
+        expected_cost_usd=expected_cost_for_wave(params.get("decode_profile"), wave),
+    )
+    return out
+
+
+def write_run_detail_files(path: Path | None = None, out_dir: Path | None = None) -> list[Path]:
+    """One markdown file per run_id (idempotent, overwrite-in-place).
+
+    Follow-up records (e.g. post-hoc judging appends — same ``run_id``,
+    later in the JSONL) render into the SAME file, keeping only the latest,
+    most-complete state; the immutable append-only history stays in the
+    JSONL regardless. This is a rendered *view*, not the source of truth.
+    """
+    runs = load_runs(path)
+    run_records = [r for r in runs if r.get("record_kind") in ("run_summary", None)]
+    latest_by_id: dict[str, dict[str, Any]] = {}
+    for r in run_records:
+        run_id = r.get("run_id")
+        if run_id:
+            latest_by_id[run_id] = r  # later records in file order win
+
+    target_dir = out_dir or runs_dir()
+    target_dir.mkdir(parents=True, exist_ok=True)
+    written = []
+    for run_id, run in latest_by_id.items():
+        detail_path = target_dir / f"{run_id}.md"
+        detail_path.write_text(render_run_md(_enrich_run_view(run)), encoding="utf-8")
+        written.append(detail_path)
+    return written
+
+
 def write_markdown(path: Path | None = None) -> Path:
-    """Rebuild the markdown log from the JSONL (idempotent)."""
+    """Rebuild the markdown log from the JSONL (idempotent): a short grouped
+    index at ``path`` (default ``reports/experiment_log.md``) plus one
+    detail file per run under ``runs_dir()``.
+    """
     target = path or md_path()
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(render_full_log(), encoding="utf-8")
+    write_run_detail_files()
     return target
 
 

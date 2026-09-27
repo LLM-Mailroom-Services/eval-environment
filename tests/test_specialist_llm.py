@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from unittest.mock import MagicMock
 
+from evals.decode_budget import apply_decode_budget, get_profile
 from evals.prompts import frozen_v1
 from evals.prompts.registry import activate, deactivate
 from evals.specialist_llm import (
@@ -208,12 +209,51 @@ def test_long_merger_issues_one_call_per_chunk_same_system_prompt(monkeypatch):
         deactivate()
 
 
-def test_needed_chunks_and_call_budget_include_15_percent_headroom():
+def test_merger_chunk_chars_stays_small_for_qwen3_8b_real_completion_cap():
+    """qwen/qwen3-8b truncates completions at ~8,192 tokens regardless of
+    max_tokens (confirmed live: run 20260927T014814Z, a single unchunked
+    ~390k-char merger call truncated at exactly 8,195 completion tokens on
+    both docs -> parse_error -> 0 score). CHUNK_CHARS must stay small enough
+    that per-chunk completions land far under that ceiling — do not let this
+    silently balloon back toward "one call per doc" for this model."""
+    import evals.specialist_llm as sl
+
+    assert sl.CHUNK_CHARS["merger_agreement"] == 48_000
+    assert needed_chunks(464_926, sl.CHUNK_CHARS["merger_agreement"]) > 1
+
+
+def test_merger_large_completion_model_covers_pinned_corpus_in_one_call():
+    """qwen/qwen3.7-flash (1M context / 65,536 completion tokens per
+    OpenRouter) safely covers the largest pinned merger doc (464,926 chars)
+    in a single completion — the model-specific override that lets it stand
+    in without the qwen3-8b chunking penalty."""
+    import evals.specialist_llm as sl
+
+    limit = sl._chunk_limit_for("merger_agreement", "qwen/qwen3.7-flash")
+    assert limit >= 465_000
+    assert needed_chunks(464_926, limit) == 1
+    assert llm_call_budget(1) == 2
+    # Model-agnostic default (or an unrecognized model) keeps the small,
+    # validated chunk size — no accidental inheritance of the override.
+    assert sl._chunk_limit_for("merger_agreement", "qwen/qwen3-8b") == 48_000
+    assert sl._chunk_limit_for("merger_agreement", None) == 48_000
+
+
+def test_merger_granite_uses_large_context_chunks_not_qwen3_8b_penalty():
+    import evals.specialist_llm as sl
+
+    limit = sl._chunk_limit_for("merger_agreement", "ibm-granite/granite-4.2-8b")
+    assert limit > sl.CHUNK_CHARS["merger_agreement"]
+    assert needed_chunks(464_926, limit) <= 2
+    assert needed_chunks(200_000, limit) == 1
+
+
+def test_needed_chunks_and_call_budget_grant_one_retry_per_chunk():
     assert needed_chunks(48_000, 48_000) == 1
     assert llm_call_budget(1) == 2
     assert needed_chunks(387_592, 48_000) == 9
-    assert llm_call_budget(9) == 11
-    assert llm_call_budget(8) == 10
+    assert llm_call_budget(9) == 18
+    assert llm_call_budget(8) == 16
     text = "y" * 387_592
     pieces = chunk_document(text, max_chars=48_000)
     assert len(pieces) == 9
@@ -332,6 +372,138 @@ def test_row_llm_call_budget_blocks_retry_runaway():
         assert captured["n"] == 2
         assert out["llm_calls"] == 2
         assert out["extracted_data"].get("_parse_error") is True
+    finally:
+        set_mock_client(None)
+        deactivate()
+
+
+def test_complete_json_retries_on_garbled_non_json_200_response():
+    """Regression for the concurrency=8 qwen3-8b repro: a 200 response whose
+    content is coherent-looking placeholder text (not JSON) must trigger the
+    same meter-gated retry as a network exception, not just be scored 0."""
+    activate("frozen")
+    try:
+        calls: list[dict] = []
+
+        def _create(**kwargs):
+            calls.append(kwargs)
+            mock = MagicMock()
+            if len(calls) == 1:
+                mock.choices[0].message.content = (
+                    '">// JSON output here (as per the instructions) //</json>'
+                )
+            else:
+                mock.choices[0].message.content = (
+                    '{"document_name": "Plan of Merger", "confidence": 0.6}'
+                )
+            mock.usage.prompt_tokens = 11
+            mock.usage.completion_tokens = 5
+            return mock
+
+        client = MagicMock()
+        client.chat.completions.create.side_effect = lambda **kw: _create(**kw)
+        set_mock_client(client)
+        out = extract_entities(
+            "merger_agreement_specialist",
+            {"text": "AGREEMENT AND PLAN OF MERGER", "expected_doc_class": "merger_agreement"},
+        )
+        assert len(calls) == 2
+        assert out["llm_calls"] == 2
+        assert out["extracted_data"].get("_parse_error") is not True
+        assert out["extracted_data"]["document_name"] == "Plan of Merger"
+        # The retry falls back to a plain (non-json_object) completion with
+        # an explicit instruction, same strategy as the exception-retry path.
+        assert calls[1].get("response_format") is None
+        assert "Reply with ONLY a JSON object." in calls[1]["messages"][0]["content"]
+    finally:
+        set_mock_client(None)
+        deactivate()
+
+
+def test_complete_json_gives_up_when_retry_also_garbled():
+    activate("frozen")
+    try:
+        calls: list[dict] = []
+
+        def _create(**kwargs):
+            calls.append(kwargs)
+            mock = MagicMock()
+            mock.choices[0].message.content = "still not json, sorry"
+            mock.usage.prompt_tokens = 11
+            mock.usage.completion_tokens = 5
+            return mock
+
+        client = MagicMock()
+        client.chat.completions.create.side_effect = lambda **kw: _create(**kw)
+        set_mock_client(client)
+        out = extract_entities(
+            "merger_agreement_specialist",
+            {"text": "AGREEMENT AND PLAN OF MERGER", "expected_doc_class": "merger_agreement"},
+        )
+        assert len(calls) == 2
+        assert out["llm_calls"] == 2
+        assert out["extracted_data"].get("_parse_error") is True
+    finally:
+        set_mock_client(None)
+        deactivate()
+
+
+def _mock_extract_client(calls: list[dict]) -> MagicMock:
+    def _create(**kwargs):
+        calls.append(kwargs)
+        mock = MagicMock()
+        mock.choices[0].message.content = '{"document_name": "Memo", "confidence": 0.5}'
+        mock.usage.prompt_tokens = 11
+        mock.usage.completion_tokens = 5
+        return mock
+
+    client = MagicMock()
+    client.chat.completions.create.side_effect = lambda **kw: _create(**kw)
+    return client
+
+
+def test_extract_entities_applies_active_profile_sampling_to_wire():
+    """Mandated profile sampling must reach the specialist direct-client path.
+
+    Regression: ``apply_decode_budget`` only wrapped ``retry_chat_completion``
+    + LangChain ``ChatOpenAI``, which ``specialist_llm._complete_json`` never
+    uses — so the Granite T=1.0/top_p=0.95/seed=42 mandate silently stayed at
+    the taxonomy temperature (0.1) while the report printed the override.
+    """
+    activate("frozen")
+    try:
+        calls: list[dict] = []
+        set_mock_client(_mock_extract_client(calls))
+        with apply_decode_budget(get_profile("granite-4.2-8b")) as applied:
+            out = extract_entities(
+                "correspondence_specialist",
+                {"text": "MEMO", "expected_doc_class": "correspondence"},
+            )
+            assert out["extracted_data"]["document_name"] == "Memo"
+            assert calls[0]["temperature"] == 1.0
+            assert calls[0]["top_p"] == 0.95
+            assert calls[0]["seed"] == 42
+            assert applied["sampling_injected"] is True
+    finally:
+        set_mock_client(None)
+        deactivate()
+
+
+def test_extract_entities_wire_shape_unchanged_without_profile():
+    """No active profile: taxonomy temperature, no top_p/seed keys on the wire."""
+    activate("frozen")
+    try:
+        calls: list[dict] = []
+        set_mock_client(_mock_extract_client(calls))
+        with apply_decode_budget(get_profile("qwen3-8b")) as applied:
+            extract_entities(
+                "correspondence_specialist",
+                {"text": "MEMO", "expected_doc_class": "correspondence"},
+            )
+            assert calls[0]["temperature"] == 0.1
+            assert "top_p" not in calls[0]
+            assert "seed" not in calls[0]
+            assert applied["sampling_injected"] is False
     finally:
         set_mock_client(None)
         deactivate()

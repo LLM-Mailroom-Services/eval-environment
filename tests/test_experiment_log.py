@@ -89,9 +89,51 @@ def test_render_markdown_tables_only():
     path = experiment_log.write_markdown()
     text = path.read_text()
     assert "| run_id |" in text or "run_id" in text
-    assert "## " in text  # per-run sections
-    # never a raw JSON dump of the whole record
+    assert "## " in text  # grouped index sections (real waves / debug / mock)
+    # the index itself never grows a full per-run detail dump inline
     assert '"record_kind": "run_summary"' not in text
+    assert "### Dataset" not in text
+
+
+def test_render_markdown_groups_waves_debug_and_mock_separately():
+    wave = _summary()
+    wave["run_id"] = "20260101T000001Z-eval-classification"
+    wave["mode"] = "real"
+    wave["metrics"] = {"n": 20, "errors": 0, "class_accuracy": 0.9}
+    experiment_log.write_run(wave, _case_rows(wave["run_id"]))
+
+    debug = _summary()
+    debug["run_id"] = "20260101T000002Z-eval-classification"
+    debug["mode"] = "real"
+    debug["metrics"] = {"n": 1, "errors": 0}
+    experiment_log.write_run(debug, _case_rows(debug["run_id"]))
+
+    mock = _summary()
+    mock["run_id"] = "20260101T000003Z-eval-classification"  # mode="mock" from _summary()
+    experiment_log.write_run(mock, _case_rows(mock["run_id"]))
+
+    path = experiment_log.write_markdown()
+    text = path.read_text()
+    assert "Real evaluation waves" in text
+    assert "Exploratory / debug real runs" in text
+    assert "Mock / CI-smoke runs" in text
+    # each run_id is a link into the per-run detail dir, not an inline section
+    assert f"({wave['run_id']}).md" not in text  # sanity: no malformed link
+    assert f"experiment_log/{wave['run_id']}.md" in text
+    assert f"experiment_log/{debug['run_id']}.md" in text
+    assert f"experiment_log/{mock['run_id']}.md" in text
+
+
+def test_write_run_detail_files_one_per_run_with_full_detail():
+    summary = _summary()
+    experiment_log.write_run(summary, _case_rows(summary["run_id"]))
+    experiment_log.write_markdown()
+    detail_path = experiment_log.runs_dir() / f"{summary['run_id']}.md"
+    assert detail_path.is_file()
+    text = detail_path.read_text()
+    assert f"## {summary['run_id']}" in text
+    assert "### Dataset" in text
+    assert "### Metrics" in text
 
 
 def test_torn_tail_tolerated(tmp_path):

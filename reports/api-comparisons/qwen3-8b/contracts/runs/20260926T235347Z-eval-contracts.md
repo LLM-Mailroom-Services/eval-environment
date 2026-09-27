@@ -15,6 +15,35 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | timestamp | `2026-09-26T23:53:47+00:00` |
 | pipeline git | `28cb4be816fbb60e56cd3bb2ab72f8d9be1ab636` |
 | subset manifest | `data/experiments/20260926T235347Z-eval-contracts/subset_manifest.json` |
+| eval git | `d386cde` |
+| finished | `2026-09-27T00:15:10+00:00` |
+
+## Run configuration
+
+| control | value |
+|---|---|
+| family / invoke | eval / node |
+| mode | real |
+| concurrency | 1 |
+| seed | 42 |
+| sample / n | 20 / None |
+| scorer | extraction |
+| decode profile | qwen3-8b |
+| prompt source / lineage | frozen / frozen |
+| trace backend | braintrust |
+| resumed_from | — |
+| dry_run | False |
+| trace ids | `{'backend': 'braintrust', 'project': 'Mailroom-Evals', 'experiment': '20260926T235347Z-eval-contracts', 'dataset': 'mailroom-hf-46a4d3c2', 'dataset_records': 20}` |
+
+## Runtime performance
+
+| metric | value |
+|---|---|
+| started_at | `2026-09-26T23:53:47+00:00` |
+| finished_at | `2026-09-27T00:15:10+00:00` |
+| duration_s (wall) | 1284.9 |
+| latency_ms_mean | 56685.5 |
+| latency_ms_p95 | 111956.8 |
 
 ## Headline results
 
@@ -34,8 +63,11 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | concurrency | 1 |
 | cold boot | N/A (serverless API — no cold boot) |
 | gpu_seconds | N/A (no local GPU) |
-| cost (token-priced, roster rates) | **0.0584** USD est |
-| cost per document | 0.0029 USD est |
+| cost expected (wave planning) | **0.1200** USD |
+| cost actual (derived from case rows) | **0.0584** USD |
+| cost estimated (roster token rates) | **0.0584** USD |
+| cost per document (actual) | 0.0029 USD |
+| cost per document (estimated) | 0.0029 USD |
 | latency e2e / p50 / p95 / max | 1284.9 / 55.6418 / 111.9568 / 119.6383 s |
 | prompt / completion / total tokens | 339923 / 40872 / 380795 |
 | cost cap | 1.5000 USD (profile) -> **under_cap** |

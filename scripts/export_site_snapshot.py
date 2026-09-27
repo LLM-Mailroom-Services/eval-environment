@@ -130,7 +130,15 @@ def _prompts() -> dict:
         for key, meta in sorted(manifest["versions"].items())
     ]
     mutations_path = REPO_ROOT / "prompts" / "mutations.json"
-    mutations = json.loads(mutations_path.read_text()) if mutations_path.exists() else []
+    mutations_raw = json.loads(mutations_path.read_text()) if mutations_path.exists() else []
+    # Current file schema is {"mutations": [...]}; accept the legacy bare
+    # list too. Passing the wrapper object through made the viewer render
+    # `mutations.length` as undefined and fail its smoke test.
+    mutations = (
+        mutations_raw.get("mutations", [])
+        if isinstance(mutations_raw, dict)
+        else mutations_raw
+    )
     return {
         "lineage_id": manifest["lineage_id"],
         "frozen_version": manifest["frozen_version"],

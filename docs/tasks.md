@@ -35,6 +35,7 @@ After every run the harness:
 uv run python scripts/run_evals.py --task eval:contracts --real \
     --subset class:contract --sample 25 --seed 42 \
     --model ibm-granite/granite-4.2-8b \
+    --decode-profile granite-4.2-8b \
     --prompt-version contracts_specialist_v1 \
     --trace-backend braintrust --require-trace-sink
 ```
@@ -85,6 +86,11 @@ uv run python scripts/run_evals.py --task pilot:pipeline_chain --real    # pre-s
 | `calibration:archivist` | archive | `failure_stage=archival` | conformance rates |
 
 See [calibration.md](calibration.md) for the methodology and report shape.
+
+For the OpenRouter-provider + Braintrust-sink path specifically — model
+roster, decode profiles, concurrency reliability, the full-corpus Dataset
+sync, and exact per-task commands — see
+[openrouter-braintrust-runbook.md](openrouter-braintrust-runbook.md).
 
 ## CLI reference
 

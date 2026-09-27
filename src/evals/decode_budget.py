@@ -29,6 +29,26 @@ CLASS_BUDGETS: dict[str, int] = {
     "corporate_records_specialist": 8192,
 }
 
+# Granite 4.2's OpenRouter chat template runs thinking ON. Those reasoning
+# tokens count against ``max_tokens`` even though the JSON answer is compact.
+# The first real Granite correspondence wave at the Qwen budget (4096) had
+# 14/20 rows consume their retry slot and 13/20 still exhaust 8192 aggregate
+# completion tokens. A controlled canonical-draw probe with the mandated
+# T=1.0/top_p=0.95/seed=42 posture showed 4096 fail on 2/3 docs, while 8192
+# completed all 3 in one call (6291/7103/6875 tokens). Give every Granite
+# specialist 2x its Qwen completion allowance to preserve the same extraction
+# prompt/schema while accommodating model-specific hidden reasoning. This is
+# decode-cap parity, not prompt/output-semantic drift.
+GRANITE_CLASS_BUDGETS: dict[str, int] = {
+    agent: budget * 2 for agent, budget in CLASS_BUDGETS.items()
+}
+# Full canonical N=20 validation at 8192 still produced two correspondence
+# rows whose first AND retry attempts each stopped at exactly 8192 tokens
+# (16,384 aggregate) without JSON. Give this class 16K per attempt. The other
+# classes retain the evidence-backed 2x posture until their own full waves
+# prove a larger cap necessary.
+GRANITE_CLASS_BUDGETS["correspondence_specialist"] = 16_384
+
 # Thinking-ON decodes blow past the vendored 120 s per-call default (the
 # sandbox pins 600 s for exactly this reason — DMR-072 overlay comment).
 COMPARISON_CALL_TIMEOUT_S = 600
@@ -43,12 +63,14 @@ COMPARISON_PROFILES: dict[str, dict[str, Any]] = {
     # best-effort. Applied on BOTH legs so the comparison stays paired.
     "granite-4.2-8b": {
         "model": "ibm-granite/granite-4.2-8b",
-        "max_tokens_by_agent": dict(CLASS_BUDGETS),
+        "max_tokens_by_agent": dict(GRANITE_CLASS_BUDGETS),
         "sampling": {"temperature": 1.0, "top_p": 0.95, "seed": 42},
         "call_timeout_s": COMPARISON_CALL_TIMEOUT_S,
         # N=20 probe wave hard cap (SAND-027 doctrine; 50-doc waves are
         # board-gated — the report will read over_cap until re-capped).
         "cost_cap_usd": 1.50,
+        # SAND-027 planning figure for N=20 (Modal Leg A derivation; scales linearly).
+        "expected_cost_usd_n20": 0.80,
     },
     # Qwen twin keeps the pipeline call-site decode posture (temperature 0.1 —
     # what the Modal Qwen/Qwen3-8B leg ran) and only lifts budgets + timeout.
@@ -58,8 +80,20 @@ COMPARISON_PROFILES: dict[str, dict[str, Any]] = {
         "sampling": None,
         "call_timeout_s": COMPARISON_CALL_TIMEOUT_S,
         "cost_cap_usd": 1.50,
+        "expected_cost_usd_n20": 0.12,
     },
 }
+
+
+def expected_cost_for_wave(profile_key: str | None, wave_n: int) -> float | None:
+    """Pre-run planning cost for a wave (None when unknown or wave size is zero)."""
+    profile = get_profile(profile_key)
+    if not profile or wave_n <= 0:
+        return None
+    base = profile.get("expected_cost_usd_n20")
+    if not isinstance(base, (int, float)):
+        return None
+    return round(float(base) * (wave_n / 20.0), 6)
 
 
 def get_profile(key: str | None) -> dict[str, Any] | None:
@@ -67,6 +101,37 @@ def get_profile(key: str | None) -> dict[str, Any] | None:
     if not key:
         return None
     return COMPARISON_PROFILES.get(key.strip().lower())
+
+
+# Active profile contexts (innermost last), pushed on entry to
+# ``apply_decode_budget`` when the profile carries sampling. This exists for
+# call paths that bypass BOTH wrapped families in
+# ``_install_sampling_injection`` — notably the specialist direct-client path
+# (``evals.specialist_llm._complete_json`` calls
+# ``client.chat.completions.create`` directly, never
+# ``llm.retry.retry_chat_completion`` and never a LangChain ``ChatOpenAI``).
+# Without this hook the mandated sampling (e.g. Granite T=1.0/top_p=0.95/
+# seed=42) silently never reached the wire for specialist runs while the
+# report still printed the override — the fix for that gap.
+_ACTIVE_SAMPLING: list[tuple[dict[str, Any], dict[str, Any]]] = []
+
+
+def active_sampling() -> dict[str, Any] | None:
+    """Sampling params of the innermost active profile context, if any."""
+    if not _ACTIVE_SAMPLING:
+        return None
+    return _ACTIVE_SAMPLING[-1][0]
+
+
+def mark_sampling_consumed() -> None:
+    """Record that a direct-client call honored the active profile sampling.
+
+    Mirrors what the ``retry_chat_completion`` / ``ChatOpenAI`` wrappers do
+    via ``applied["sampling_injected"] = True`` so the comparison report's
+    "sampling injected on wire" cell reflects reality for every call family.
+    """
+    for _, applied in _ACTIVE_SAMPLING:
+        applied["sampling_injected"] = True
 
 
 def strip_thinking_spans(text: str) -> str:
@@ -123,7 +188,12 @@ def apply_decode_budget(profile: dict[str, Any] | None) -> Iterator[dict[str, An
        agents) and the LangChain ``ChatOpenAI`` constructor so the profile's
        temperature/top_p/seed reach the wire even past explicit call-site
        values. ``None`` sampling (Qwen twin) injects nothing.
-    3. Inert by default: ``profile=None`` yields immediately.
+    3. Active-sampling hook: profiles WITH sampling are additionally visible
+       via ``active_sampling()`` for direct-client call paths that bypass
+       both wrapped families (``evals.specialist_llm``); those paths apply
+       the override at call time and report back via
+       ``mark_sampling_consumed()``.
+    4. Inert by default: ``profile=None`` yields immediately.
     """
     applied: dict[str, Any] = {"sampling_injected": False, "max_tokens_by_agent": {}}
     if not profile:
@@ -162,9 +232,16 @@ def apply_decode_budget(profile: dict[str, Any] | None) -> Iterator[dict[str, An
     if sampling:
         restore_fns.append(_install_sampling_injection(sampling, applied))
 
+    if sampling:
+        _ACTIVE_SAMPLING.append((sampling, applied))
     try:
         yield applied
     finally:
+        if sampling:
+            try:
+                _ACTIVE_SAMPLING.remove((sampling, applied))
+            except ValueError:
+                pass
         for restore in restore_fns:
             try:
                 restore()
@@ -198,14 +275,26 @@ def _install_sampling_injection(sampling: dict[str, Any], applied: dict[str, Any
 
         class _SamplingChatOpenAI(original_cls):  # type: ignore[misc, valid-type]
             def __init__(self, *args: Any, **kwargs: Any) -> None:
-                kwargs.setdefault("temperature", sampling.get("temperature"))
+                # Mandated profile values override taxonomy/call-site values.
+                # ``setdefault`` here was incorrect: BaseAgent always passes
+                # its taxonomy temperature (0.1), so Granite's required 1.0
+                # silently never reached sorter/native LangChain calls.
+                if sampling.get("temperature") is not None:
+                    kwargs["temperature"] = sampling["temperature"]
                 if sampling.get("top_p") is not None:
-                    kwargs.setdefault("top_p", sampling["top_p"])
+                    kwargs["top_p"] = sampling["top_p"]
                 model_kwargs = dict(kwargs.get("model_kwargs") or {})
                 if sampling.get("seed") is not None:
-                    model_kwargs.setdefault("seed", sampling["seed"])
+                    # Current langchain-openai exposes seed explicitly. Putting
+                    # it in model_kwargs still reaches OpenRouter, but emits a
+                    # warning on every sorter construction and obscures
+                    # whether the setting is first-class; pass it directly.
+                    kwargs["seed"] = sampling["seed"]
+                    model_kwargs.pop("seed", None)
                 if model_kwargs:
                     kwargs["model_kwargs"] = model_kwargs
+                else:
+                    kwargs.pop("model_kwargs", None)
                 applied["sampling_injected"] = True
                 super().__init__(*args, **kwargs)
 

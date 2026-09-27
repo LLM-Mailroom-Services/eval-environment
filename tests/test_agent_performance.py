@@ -91,6 +91,36 @@ def test_summarize_performance_omits_empty_by_agent():
     assert "by_agent" not in summary
 
 
+def test_summarize_performance_splits_actual_and_estimated_cost():
+    rows = [
+        {
+            "latency_ms": 10.0,
+            "tokens": {"prompt": 1000, "completion": 500},
+            "cost_usd": 0.001,
+            "agent_usage": {
+                "sorter": {
+                    "calls": 1,
+                    "prompt_tokens": 1000,
+                    "completion_tokens": 500,
+                    "total": 1500,
+                    "models": ["qwen/qwen3-8b"],
+                }
+            },
+        },
+        {
+            "latency_ms": 20.0,
+            "tokens": {"prompt": 2000, "completion": 1000},
+            "cost_usd": 0.002,
+        },
+    ]
+    summary = summarize_performance(
+        rows, run_model="qwen/qwen3-8b", expected_cost_usd=0.12
+    )
+    assert summary["cost_usd_total"] == 0.003
+    assert isinstance(summary["cost_usd_est_total"], float)
+    assert summary["expected_cost_usd"] == 0.12
+
+
 # ── registry catalog ─────────────────────────────────────────────────
 def test_agent_catalog_covers_every_eval_node():
     node_names = {t.node_name for t in list_tasks()}

@@ -877,3 +877,300 @@ hub tip ed7576b676343e0b402ec5412cded301e629bdee differs from the requested pinn
 20260927T035135Z-eval-insurance_claims: n=20 errors=0 latency_ms_mean=50681.595 tokens=75955+50885 cost=$0.032040 model=qwen/qwen3-8b top_agent=insurance_claims_specialist(37 calls)
   subset manifest: data/experiments/20260927T035135Z-eval-insurance_claims/subset_manifest.json
   scoring suite: data/experiments/20260927T035135Z-eval-insurance_claims/scoring_suite.json
+2026-09-27 03:56:19 [info     ] evals_dojo_taxonomy_wired      doc_classes=['contract', 'corporate_record', 'correspondence', 'insurance_claim', 'merger_agreement'] source=_taxonomy_from_config
+2026-09-27 03:56:19 [info     ] evals_preflight_ok             mode=real task=eval:contracts warnings=0
+hub tip ed7576b676343e0b402ec5412cded301e629bdee differs from the requested pinned revision 46a4d3c240a36671cde0182fff4960f6b8b73aca — the dataset moved upstream; this load stays on the pin, but the next publish roll will re-pin (provenance records both)
+2026-09-27 03:56:21 [info     ] evals_prompts_activated        roles=['arbiter', 'boss', 'contracts_specialist', 'corporate_records_specialist', 'correspondence_specialist', 'insurance_claims_specialist', 'intake', 'judge', 'judge-classification', 'judge-correctness', 'merger_agreement_specialist', 'pipeline_quality', 'pipeline_verdict', 'sorter', 'sorter_reviewer'] source=frozen
+2026-09-27 03:56:21 [info     ] evals_openrouter_model_override model=qwen/qwen3-8b
+2026-09-27 03:56:21 [info     ] braintrust_initialized         project=Mailroom-Evals
+2026-09-27 03:56:21 [info     ] evals_langchain_llm_tracing_enabled
+2026-09-27 03:56:21 [info     ] braintrust_experiment_opened   dataset=off experiment=20260927T035621Z-eval-contracts n_cases=20 project=Mailroom-Evals
+2026-09-27 03:56:21 [info     ] evals_case_pool                n=20 workers=8
+2026-09-27 03:56:22 [info     ] braintrust_openai_client_wrapped
+2026-09-27 03:56:22 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=17627 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 03:56:22 [info     ] braintrust_openai_client_wrapped
+2026-09-27 03:56:22 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=55434 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 03:56:22 [info     ] braintrust_openai_client_wrapped
+2026-09-27 03:56:22 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=62272 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 03:56:22 [info     ] braintrust_openai_client_wrapped
+2026-09-27 03:56:22 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=16153 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 03:56:22 [info     ] braintrust_openai_client_wrapped
+2026-09-27 03:56:22 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=41501 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 03:56:22 [info     ] braintrust_openai_client_wrapped
+2026-09-27 03:56:22 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=173240 chunk_limit=120000 chunks=2 doc_class=contract llm_call_budget=4 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=2 prompt_key=contracts_specialist_v1
+2026-09-27 03:56:22 [info     ] braintrust_openai_client_wrapped
+2026-09-27 03:56:22 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=172142 chunk_limit=120000 chunks=2 doc_class=contract llm_call_budget=4 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=2 prompt_key=contracts_specialist_v1
+2026-09-27 03:56:22 [info     ] braintrust_openai_client_wrapped
+2026-09-27 03:56:22 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=8052 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 03:57:22 [info     ] braintrust_openai_client_wrapped
+2026-09-27 03:57:22 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=3760 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 03:57:41 [info     ] braintrust_openai_client_wrapped
+2026-09-27 03:57:41 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=4880 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 03:57:54 [info     ] braintrust_openai_client_wrapped
+2026-09-27 03:57:54 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=63217 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 03:58:13 [info     ] braintrust_openai_client_wrapped
+2026-09-27 03:58:13 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=21994 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 03:58:16 [info     ] braintrust_openai_client_wrapped
+2026-09-27 03:58:16 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=57254 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 03:58:35 [info     ] braintrust_openai_client_wrapped
+2026-09-27 03:58:35 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=15113 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 03:58:43 [info     ] braintrust_openai_client_wrapped
+2026-09-27 03:58:43 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=672 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 03:58:49 [info     ] braintrust_openai_client_wrapped
+2026-09-27 03:58:49 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=152649 chunk_limit=120000 chunks=2 doc_class=contract llm_call_budget=4 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=2 prompt_key=contracts_specialist_v1
+2026-09-27 03:59:45 [info     ] braintrust_openai_client_wrapped
+2026-09-27 03:59:45 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=32321 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 03:59:53 [info     ] braintrust_openai_client_wrapped
+2026-09-27 03:59:53 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=12648 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 03:59:56 [info     ] braintrust_openai_client_wrapped
+2026-09-27 03:59:56 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=70625 chunk_limit=120000 chunks=1 doc_class=contract llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=contracts_specialist_v1
+2026-09-27 03:59:56 [info     ] braintrust_openai_client_wrapped
+2026-09-27 03:59:56 [info     ] specialist_openrouter_call     agent=contracts_specialist chars=121115 chunk_limit=120000 chunks=2 doc_class=contract llm_call_budget=4 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=2 prompt_key=contracts_specialist_v1
+2026-09-27 04:20:36 [info     ] evals_prompts_deactivated
+2026-09-27 04:20:36 [info     ] braintrust_experiment_finalized cost_cap_status=None cost_usd_est_total=0.114086 document_rows=20 duration_s=1457.5 run_id=20260927T035621Z-eval-contracts
+20260927T035621Z-eval-contracts: n=20 errors=0 latency_ms_mean=177560.88 tokens=546225+110286 cost=$0.114086 model=qwen/qwen3-8b top_agent=contracts_specialist(44 calls)
+  subset manifest: data/experiments/20260927T035621Z-eval-contracts/subset_manifest.json
+  scoring suite: data/experiments/20260927T035621Z-eval-contracts/scoring_suite.json
+2026-09-27 04:22:37 [info     ] evals_dojo_taxonomy_wired      doc_classes=['contract', 'corporate_record', 'correspondence', 'insurance_claim', 'merger_agreement'] source=_taxonomy_from_config
+2026-09-27 04:22:37 [info     ] evals_preflight_ok             mode=real task=eval:corporate_records warnings=0
+hub tip ed7576b676343e0b402ec5412cded301e629bdee differs from the requested pinned revision 46a4d3c240a36671cde0182fff4960f6b8b73aca — the dataset moved upstream; this load stays on the pin, but the next publish roll will re-pin (provenance records both)
+2026-09-27 04:22:39 [info     ] evals_prompts_activated        roles=['arbiter', 'boss', 'contracts_specialist', 'corporate_records_specialist', 'correspondence_specialist', 'insurance_claims_specialist', 'intake', 'judge', 'judge-classification', 'judge-correctness', 'merger_agreement_specialist', 'pipeline_quality', 'pipeline_verdict', 'sorter', 'sorter_reviewer'] source=frozen
+2026-09-27 04:22:39 [info     ] evals_openrouter_model_override model=qwen/qwen3-8b
+2026-09-27 04:22:39 [info     ] braintrust_initialized         project=Mailroom-Evals
+2026-09-27 04:22:39 [info     ] evals_langchain_llm_tracing_enabled
+2026-09-27 04:22:39 [info     ] braintrust_experiment_opened   dataset=off experiment=20260927T042239Z-eval-corporate_records n_cases=20 project=Mailroom-Evals
+2026-09-27 04:22:39 [info     ] evals_case_pool                n=20 workers=8
+2026-09-27 04:22:40 [info     ] braintrust_openai_client_wrapped
+2026-09-27 04:22:40 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=75367 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 04:22:40 [info     ] braintrust_openai_client_wrapped
+2026-09-27 04:22:40 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=2024 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 04:22:40 [info     ] braintrust_openai_client_wrapped
+2026-09-27 04:22:40 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=448 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 04:22:40 [info     ] braintrust_openai_client_wrapped
+2026-09-27 04:22:40 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=61679 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 04:22:40 [info     ] braintrust_openai_client_wrapped
+2026-09-27 04:22:40 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=76768 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 04:22:40 [info     ] braintrust_openai_client_wrapped
+2026-09-27 04:22:40 [info     ] braintrust_openai_client_wrapped
+2026-09-27 04:22:40 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=5652 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 04:22:40 [info     ] braintrust_openai_client_wrapped
+2026-09-27 04:22:40 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=30793 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 04:22:40 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=1942 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 04:22:55 [info     ] braintrust_openai_client_wrapped
+2026-09-27 04:22:55 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=43160 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 04:23:11 [info     ] braintrust_openai_client_wrapped
+2026-09-27 04:23:11 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=7340 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 04:23:12 [info     ] braintrust_openai_client_wrapped
+2026-09-27 04:23:12 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=9527 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 04:23:13 [info     ] braintrust_openai_client_wrapped
+2026-09-27 04:23:13 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=3699 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 04:23:14 [info     ] braintrust_openai_client_wrapped
+2026-09-27 04:23:14 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=1408 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 04:23:17 [info     ] braintrust_openai_client_wrapped
+2026-09-27 04:23:17 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=1400 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 04:23:18 [info     ] braintrust_openai_client_wrapped
+2026-09-27 04:23:18 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=312280 chunk_limit=120000 chunks=3 doc_class=corporate_record llm_call_budget=6 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=3 prompt_key=corporate_records_specialist_v1
+2026-09-27 04:23:30 [info     ] braintrust_openai_client_wrapped
+2026-09-27 04:23:30 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=20497 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 04:23:47 [info     ] braintrust_openai_client_wrapped
+2026-09-27 04:23:47 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=21694 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 04:23:47 [info     ] braintrust_openai_client_wrapped
+2026-09-27 04:23:47 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=3451 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 04:23:59 [info     ] braintrust_openai_client_wrapped
+2026-09-27 04:23:59 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=8162 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 04:24:05 [info     ] braintrust_openai_client_wrapped
+2026-09-27 04:24:05 [info     ] specialist_openrouter_call     agent=corporate_records_specialist chars=15622 chunk_limit=120000 chunks=1 doc_class=corporate_record llm_call_budget=2 max_tokens=8192 model=qwen/qwen3-8b needed_chunks=1 prompt_key=corporate_records_specialist_v1
+2026-09-27 04:29:53 [info     ] evals_prompts_deactivated
+2026-09-27 04:29:53 [info     ] braintrust_experiment_finalized cost_cap_status=None cost_usd_est_total=0.060215 document_rows=20 duration_s=436.5 run_id=20260927T042239Z-eval-corporate_records
+20260927T042239Z-eval-corporate_records: n=20 errors=0 latency_ms_mean=81193.54 tokens=301916+54703 cost=$0.060215 model=qwen/qwen3-8b top_agent=corporate_records_specialist(34 calls)
+  subset manifest: data/experiments/20260927T042239Z-eval-corporate_records/subset_manifest.json
+  scoring suite: data/experiments/20260927T042239Z-eval-corporate_records/scoring_suite.json
+2026-09-27 04:31:42 [info     ] evals_dojo_taxonomy_wired      doc_classes=['contract', 'corporate_record', 'correspondence', 'insurance_claim', 'merger_agreement'] source=_taxonomy_from_config
+2026-09-27 04:31:42 [info     ] evals_preflight_ok             mode=real task=eval:classification warnings=0
+hub tip ed7576b676343e0b402ec5412cded301e629bdee differs from the requested pinned revision 46a4d3c240a36671cde0182fff4960f6b8b73aca — the dataset moved upstream; this load stays on the pin, but the next publish roll will re-pin (provenance records both)
+2026-09-27 04:31:45 [info     ] evals_prompts_activated        roles=['arbiter', 'boss', 'contracts_specialist', 'corporate_records_specialist', 'correspondence_specialist', 'insurance_claims_specialist', 'intake', 'judge', 'judge-classification', 'judge-correctness', 'merger_agreement_specialist', 'pipeline_quality', 'pipeline_verdict', 'sorter', 'sorter_reviewer'] source=frozen
+2026-09-27 04:31:45 [info     ] evals_openrouter_model_override model=qwen/qwen3-8b
+2026-09-27 04:31:45 [info     ] braintrust_initialized         project=Mailroom-Evals
+2026-09-27 04:31:45 [info     ] evals_langchain_llm_tracing_enabled
+2026-09-27 04:31:45 [info     ] braintrust_experiment_opened   dataset=off experiment=20260927T043145Z-eval-classification n_cases=20 project=Mailroom-Evals
+2026-09-27 04:31:45 [info     ] evals_case_pool                n=20 workers=8
+2026-09-27 04:31:45 [debug    ] score_configs_validated        count=59 registry=llm-dojo-scoring
+2026-09-27 04:31:45 [warning  ] input_truncated                agent=sorter cap=12000 chars=12075 tail_fraction=0.4
+2026-09-27 04:31:46 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:46 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:46 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:46 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:46 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:46 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:46 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:46 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:50 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:31:50 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=insurance_claim
+2026-09-27 04:31:50 [warning  ] classification_guardrail_triggered confidence_after=0.5 confidence_before=0.95 issues=['doc_subclass_missing']
+2026-09-27 04:31:50 [info     ] classified                     attempts=1 confidence=0.5 contract_subtype=None doc_subclass=None doc_type=insurance_claim
+2026-09-27 04:31:50 [info     ] schema_ready                   url=sqlite+aiosqlite:////tmp/mailroom-evals-nx4ffoz5/mailroom.db
+2026-09-27 04:31:50 [info     ] audit_entry_written            entry_id=26438e04-a888-47cd-a663-87e280cf498b event_name=classified
+2026-09-27 04:31:50 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:50 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:31:50 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=insurance_claim
+2026-09-27 04:31:50 [warning  ] classification_guardrail_triggered confidence_after=0.5 confidence_before=0.95 issues=['doc_subclass_missing']
+2026-09-27 04:31:50 [info     ] classified                     attempts=1 confidence=0.5 contract_subtype=None doc_subclass=None doc_type=insurance_claim
+2026-09-27 04:31:50 [info     ] audit_entry_written            entry_id=df7f62d7-50c2-4cb6-8570-3f98f9f96b20 event_name=classified
+2026-09-27 04:31:50 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:31:50 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=correspondence
+2026-09-27 04:31:50 [warning  ] classification_guardrail_triggered confidence_after=0.5 confidence_before=0.95 issues=['doc_subclass_missing']
+2026-09-27 04:31:50 [info     ] classified                     attempts=1 confidence=0.5 contract_subtype=None doc_subclass=None doc_type=correspondence
+2026-09-27 04:31:50 [info     ] audit_entry_written            entry_id=bb5b7d84-5fc5-4ea1-bb2a-371c68ba70be event_name=classified
+2026-09-27 04:31:50 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:31:50 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=correspondence
+2026-09-27 04:31:50 [warning  ] classification_guardrail_triggered confidence_after=0.5 confidence_before=0.95 issues=['doc_subclass_missing']
+2026-09-27 04:31:50 [info     ] classified                     attempts=1 confidence=0.5 contract_subtype=None doc_subclass=None doc_type=correspondence
+2026-09-27 04:31:50 [info     ] audit_entry_written            entry_id=b57ca727-2b84-463b-ac92-9d93300b244f event_name=classified
+2026-09-27 04:31:51 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:31:51 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=subsidiary_list doc_type=corporate_record
+2026-09-27 04:31:51 [info     ] classified                     attempts=1 confidence=0.95 contract_subtype=None doc_subclass=subsidiary_list doc_type=corporate_record
+2026-09-27 04:31:51 [info     ] audit_entry_written            entry_id=8fae9568-95cb-41f4-ac40-ba324e912a50 event_name=classified
+2026-09-27 04:31:51 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:31:51 [info     ] classified                     confidence=0.95 contract_subtype=license doc_subclass=license doc_type=contract
+2026-09-27 04:31:51 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:51 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:51 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:31:51 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=correspondence
+2026-09-27 04:31:51 [warning  ] classification_guardrail_triggered confidence_after=0.5 confidence_before=0.95 issues=['doc_subclass_missing']
+2026-09-27 04:31:51 [info     ] classified                     attempts=1 confidence=0.5 contract_subtype=None doc_subclass=None doc_type=correspondence
+2026-09-27 04:31:51 [info     ] audit_entry_written            entry_id=a898a39d-a193-4f50-91bf-c8a98a5923e2 event_name=classified
+2026-09-27 04:31:51 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:31:51 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=insurance_claim
+2026-09-27 04:31:51 [warning  ] classification_guardrail_triggered confidence_after=0.5 confidence_before=0.95 issues=['doc_subclass_missing']
+2026-09-27 04:31:51 [info     ] classified                     attempts=1 confidence=0.5 contract_subtype=None doc_subclass=None doc_type=insurance_claim
+2026-09-27 04:31:51 [info     ] audit_entry_written            entry_id=062fd33d-c964-4b00-8492-e0136728c7a1 event_name=classified
+2026-09-27 04:31:51 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:51 [warning  ] input_truncated                agent=sorter cap=12000 chars=12143 tail_fraction=0.4
+2026-09-27 04:31:51 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:51 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:52 [warning  ] input_truncated                agent=sorter cap=12000 chars=12143 tail_fraction=0.4
+2026-09-27 04:31:52 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:52 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:54 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:31:54 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=corporate_record
+2026-09-27 04:31:54 [info     ] classified                     attempts=1 confidence=0.95 contract_subtype=license doc_subclass=license doc_type=contract
+2026-09-27 04:31:54 [info     ] audit_entry_written            entry_id=d52ea8a3-f492-4aa8-8470-a5c9810a8b7f event_name=classified
+2026-09-27 04:31:55 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:55 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:31:55 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=insurance_claim
+2026-09-27 04:31:55 [warning  ] classification_guardrail_triggered confidence_after=0.5 confidence_before=0.95 issues=['doc_subclass_missing']
+2026-09-27 04:31:55 [info     ] classified                     attempts=1 confidence=0.5 contract_subtype=None doc_subclass=None doc_type=insurance_claim
+2026-09-27 04:31:55 [info     ] audit_entry_written            entry_id=9c67c840-431d-47e8-a4ae-40ec80f84667 event_name=classified
+2026-09-27 04:31:55 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:31:55 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=insurance_claim
+2026-09-27 04:31:55 [warning  ] classification_guardrail_triggered confidence_after=0.5 confidence_before=0.95 issues=['doc_subclass_missing']
+2026-09-27 04:31:55 [info     ] classified                     attempts=1 confidence=0.5 contract_subtype=None doc_subclass=None doc_type=insurance_claim
+2026-09-27 04:31:55 [info     ] audit_entry_written            entry_id=5b7dc6ff-0909-45d2-901c-c7904289115f event_name=classified
+2026-09-27 04:31:55 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:55 [warning  ] input_truncated                agent=sorter cap=12000 chars=12143 tail_fraction=0.4
+2026-09-27 04:31:55 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:56 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:31:56 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=insurance_claim
+2026-09-27 04:31:56 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:56 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:31:56 [info     ] classified                     confidence=0.99 contract_subtype=None doc_subclass=None doc_type=merger_agreement
+2026-09-27 04:31:56 [warning  ] input_truncated                agent=sorter cap=12000 chars=13945 tail_fraction=0.4
+2026-09-27 04:31:56 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:57 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:31:57 [info     ] classified                     confidence=0.95 contract_subtype=other doc_subclass=other doc_type=contract
+2026-09-27 04:31:57 [info     ] classified                     attempts=1 confidence=0.95 contract_subtype=other doc_subclass=other doc_type=contract
+2026-09-27 04:31:57 [info     ] audit_entry_written            entry_id=fd4c0ab5-be4a-483b-9d79-fb1a305066b1 event_name=classified
+2026-09-27 04:31:57 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:57 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:31:57 [info     ] classified                     confidence=0.95 contract_subtype=other doc_subclass=other doc_type=contract
+2026-09-27 04:31:57 [warning  ] input_truncated                agent=sorter cap=12000 chars=12220 tail_fraction=0.4
+2026-09-27 04:31:57 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:58 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:31:58 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=insurance_claim
+2026-09-27 04:31:58 [warning  ] classification_guardrail_triggered confidence_after=0.5 confidence_before=0.95 issues=['doc_subclass_missing']
+2026-09-27 04:31:58 [info     ] classified                     attempts=1 confidence=0.5 contract_subtype=None doc_subclass=None doc_type=insurance_claim
+2026-09-27 04:31:58 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:31:58 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=merger_agreement
+2026-09-27 04:31:58 [warning  ] input_truncated                agent=sorter cap=12000 chars=13945 tail_fraction=0.4
+2026-09-27 04:31:58 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:31:58 [info     ] audit_entry_written            entry_id=f56d7b01-93c2-4bdd-8d18-17eb140f31d0 event_name=classified
+2026-09-27 04:31:58 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:32:00 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:32:00 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=insurance_claim
+2026-09-27 04:32:00 [warning  ] classification_guardrail_triggered confidence_after=0.5 confidence_before=0.95 issues=['doc_subclass_missing']
+2026-09-27 04:32:00 [info     ] classified                     attempts=1 confidence=0.5 contract_subtype=None doc_subclass=None doc_type=insurance_claim
+2026-09-27 04:32:00 [info     ] audit_entry_written            entry_id=ac8d593e-c019-4373-804e-3567fdc31100 event_name=classified
+2026-09-27 04:32:00 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:32:00 [info     ] classified                     confidence=0.99 contract_subtype=None doc_subclass=None doc_type=merger_agreement
+2026-09-27 04:32:00 [warning  ] input_truncated                agent=sorter cap=12000 chars=13945 tail_fraction=0.4
+2026-09-27 04:32:00 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:32:00 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:32:00 [info     ] classified                     confidence=0.95 contract_subtype=other doc_subclass=other doc_type=contract
+2026-09-27 04:32:00 [warning  ] input_truncated                agent=sorter cap=12000 chars=13945 tail_fraction=0.4
+2026-09-27 04:32:00 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:32:01 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:32:01 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=insurance_claim
+2026-09-27 04:32:01 [warning  ] classification_guardrail_triggered confidence_after=0.5 confidence_before=0.95 issues=['doc_subclass_missing']
+2026-09-27 04:32:01 [info     ] classified                     attempts=1 confidence=0.5 contract_subtype=None doc_subclass=None doc_type=insurance_claim
+2026-09-27 04:32:01 [info     ] audit_entry_written            entry_id=03a9ca15-2be9-48b1-8962-5d29d9a4fb1a event_name=classified
+2026-09-27 04:32:01 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:32:01 [info     ] classified                     confidence=0.95 contract_subtype=other doc_subclass=other doc_type=contract
+2026-09-27 04:32:01 [warning  ] input_truncated                agent=sorter cap=12000 chars=13273 tail_fraction=0.4
+2026-09-27 04:32:01 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:32:01 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:32:01 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=corporate_record
+2026-09-27 04:32:01 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:32:02 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:32:02 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=insurance_claim
+2026-09-27 04:32:02 [warning  ] classification_guardrail_triggered confidence_after=0.5 confidence_before=0.95 issues=['doc_subclass_missing']
+2026-09-27 04:32:02 [info     ] classified                     attempts=1 confidence=0.5 contract_subtype=None doc_subclass=None doc_type=insurance_claim
+2026-09-27 04:32:02 [info     ] audit_entry_written            entry_id=c095d877-a572-41d9-97fe-24d91074df7d event_name=classified
+2026-09-27 04:32:03 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:32:03 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=merger_agreement
+2026-09-27 04:32:03 [warning  ] input_truncated                agent=sorter cap=12000 chars=13945 tail_fraction=0.4
+2026-09-27 04:32:03 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:32:04 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:32:04 [info     ] classified                     confidence=0.95 contract_subtype=license doc_subclass=license doc_type=contract
+2026-09-27 04:32:04 [warning  ] input_truncated                agent=sorter cap=12000 chars=13945 tail_fraction=0.4
+2026-09-27 04:32:04 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:32:05 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:32:05 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=corporate_record
+2026-09-27 04:32:05 [warning  ] classification_guardrail_triggered confidence_after=0.5 confidence_before=0.95 issues=['doc_subclass_missing']
+2026-09-27 04:32:05 [info     ] classified                     attempts=1 confidence=0.5 contract_subtype=None doc_subclass=None doc_type=corporate_record
+2026-09-27 04:32:05 [info     ] audit_entry_written            entry_id=09a43718-7152-4e7c-9a8e-c5b87bfb9526 event_name=classified
+2026-09-27 04:32:05 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:32:05 [info     ] classified                     confidence=0.98 contract_subtype=None doc_subclass=None doc_type=merger_agreement
+2026-09-27 04:32:05 [warning  ] input_truncated                agent=sorter cap=12000 chars=13945 tail_fraction=0.4
+2026-09-27 04:32:05 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:32:06 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:32:06 [info     ] classified                     confidence=0.95 contract_subtype=license doc_subclass=license doc_type=contract
+2026-09-27 04:32:06 [warning  ] input_truncated                agent=sorter cap=12000 chars=13347 tail_fraction=0.4
+2026-09-27 04:32:06 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:32:07 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:32:07 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=merger_agreement
+2026-09-27 04:32:07 [warning  ] input_truncated                agent=sorter cap=12000 chars=13945 tail_fraction=0.4
+2026-09-27 04:32:07 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:32:09 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:32:09 [info     ] classified                     confidence=0.95 contract_subtype=other doc_subclass=other doc_type=contract
+2026-09-27 04:32:09 [warning  ] input_truncated                agent=sorter cap=12000 chars=13945 tail_fraction=0.4
+2026-09-27 04:32:09 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:32:09 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:32:09 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=merger_agreement
+2026-09-27 04:32:09 [warning  ] input_truncated                agent=sorter cap=12000 chars=13945 tail_fraction=0.4
+2026-09-27 04:32:09 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:32:11 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:32:11 [info     ] classified                     confidence=0.95 contract_subtype=other doc_subclass=other doc_type=contract
+2026-09-27 04:32:11 [warning  ] input_truncated                agent=sorter cap=12000 chars=13134 tail_fraction=0.4
+2026-09-27 04:32:11 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:32:12 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:32:12 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=merger_agreement
+2026-09-27 04:32:12 [warning  ] input_truncated                agent=sorter cap=12000 chars=13945 tail_fraction=0.4
+2026-09-27 04:32:12 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:32:13 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:32:13 [info     ] classified                     confidence=0.95 contract_subtype=None doc_subclass=None doc_type=merger_agreement
+2026-09-27 04:32:13 [warning  ] input_truncated                agent=sorter cap=12000 chars=13945 tail_fraction=0.4
+2026-09-27 04:32:13 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None
+2026-09-27 04:32:13 [info     ] llm_structured_response        agent=sorter keys=['doc_type', 'contract_subtype', 'confidence', 'reasoning']
+2026-09-27 04:32:13 [info     ] classified                     confidence=0.95 contract_subtype=other doc_subclass=other doc_type=contract
+2026-09-27 04:32:13 [warning  ] input_truncated                agent=sorter cap=12000 chars=13945 tail_fraction=0.4
+2026-09-27 04:32:13 [info     ] llm_structured_call            agent=sorter model=qwen/qwen3-8b pages=None

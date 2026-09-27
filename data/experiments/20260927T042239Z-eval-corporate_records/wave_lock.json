@@ -1,0 +1,11 @@
+{
+  "task": "corporate_records",
+  "task_id": "eval:corporate_records",
+  "model": "qwen/qwen3-8b",
+  "decode_profile": "qwen3-8b",
+  "prompt_version": null,
+  "prompt_source": "frozen",
+  "sample": 20,
+  "seed": 42,
+  "subset": "class:corporate_record"
+}

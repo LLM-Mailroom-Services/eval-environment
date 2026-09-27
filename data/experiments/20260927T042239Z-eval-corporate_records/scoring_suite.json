@@ -1,0 +1,425 @@
+{
+  "scorer": "extraction",
+  "metrics_full": {
+    "n": 20,
+    "overall_score": 0.4004,
+    "errors": 0,
+    "scorer_errors": 0
+  },
+  "metrics_essential": {
+    "overall_score": 0.4004,
+    "needs_judge_review": 0.0
+  },
+  "essential_forwarded_to_sink": {
+    "overall_score": 0.4004,
+    "needs_judge_review": 0.0
+  },
+  "performance": {
+    "latency_ms_mean": 81193.54,
+    "latency_ms_p95": 337727.3,
+    "tokens_prompt_total": 301916,
+    "tokens_completion_total": 54703,
+    "cost_usd_est_total": 0.060215,
+    "by_agent": {
+      "corporate_records_specialist": {
+        "calls": 34,
+        "prompt_tokens": 301916,
+        "completion_tokens": 54703,
+        "total_tokens": 356619,
+        "models": [
+          "qwen/qwen3-8b"
+        ],
+        "cost_usd_est": 0.060214
+      }
+    }
+  },
+  "n_cases": 20,
+  "n_errors": 0,
+  "per_document": [
+    {
+      "case_id": "corpus:ground_truth:train:0001047469-12-006895_a2210011zex-4_10.htm",
+      "filename": "0001047469-12-006895_a2210011zex-4_10.htm",
+      "doc_text_sha256": "460b1d7966297ca1bf4106c2409cab5509b88a25d16dbaf3eff6c61e6ff35aee",
+      "specialist": "corporate_records_specialist",
+      "scores": {
+        "overall_score": 0.3605,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.1,
+        "extraction_recall": 0.25,
+        "extraction_f1": 0.1429,
+        "extraction_f2": 0.1923,
+        "entity_list_f1": 0.1538
+      },
+      "latency_ms": 65579.3,
+      "cost_usd": 0.005529,
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001047469-03-032251_a2118977zex-3_2.htm",
+      "filename": "0001047469-03-032251_a2118977zex-3_2.htm",
+      "doc_text_sha256": "d9273770ae814076505ed9522392f8e63a6011db599b0eb05740ca266231945f",
+      "specialist": "corporate_records_specialist",
+      "scores": {
+        "overall_score": 0.55,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.1667,
+        "extraction_recall": 0.5,
+        "extraction_f1": 0.25,
+        "extraction_f2": 0.3572,
+        "entity_list_f1": 0.1429
+      },
+      "latency_ms": 32597.6,
+      "cost_usd": 0.00293,
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0000950123-11-055070_h75396a4exv21w1.htm",
+      "filename": "0000950123-11-055070_h75396a4exv21w1.htm",
+      "doc_text_sha256": "0fe14e019a6bf3d526fb60734ddd43c045c894be1c72889c0e73f549a6080de8",
+      "specialist": "corporate_records_specialist",
+      "scores": {
+        "overall_score": 0.4808,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.125,
+        "extraction_recall": 0.25,
+        "extraction_f1": 0.1667,
+        "extraction_f2": 0.2083,
+        "entity_list_f1": 0.3077
+      },
+      "latency_ms": 337727.3,
+      "cost_usd": 0.004736,
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0000898430-01-503595_dex32.txt",
+      "filename": "0000898430-01-503595_dex32.txt",
+      "doc_text_sha256": "b460a96a1253bff52bc389dd73fad33208d1e7572d6457ac9c3e37bd295f6460",
+      "specialist": "corporate_records_specialist",
+      "scores": {
+        "overall_score": 0.2554,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0,
+        "entity_list_f1": 0.1538
+      },
+      "latency_ms": 30866.8,
+      "cost_usd": 0.000525,
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001193125-11-240442_dex43.htm",
+      "filename": "0001193125-11-240442_dex43.htm",
+      "doc_text_sha256": "48831bd7900a9b71a80382ab79ece247ea21094a79a2d5e09eb7379ee23905c0",
+      "specialist": "corporate_records_specialist",
+      "scores": {
+        "overall_score": 0.4599,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0833,
+        "extraction_recall": 0.25,
+        "extraction_f1": 0.125,
+        "extraction_f2": 0.1785,
+        "entity_list_f1": 0.1538
+      },
+      "latency_ms": 13010.6,
+      "cost_usd": 0.000598,
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0000950123-10-001751_c54716a1exv4w2.htm",
+      "filename": "0000950123-10-001751_c54716a1exv4w2.htm",
+      "doc_text_sha256": "4537aa453dcafa29491ca6072e1544a2581eb9469ec33901e2aa5ff633cea424",
+      "specialist": "corporate_records_specialist",
+      "scores": {
+        "overall_score": 0.5678,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.1538,
+        "extraction_recall": 0.5,
+        "extraction_f1": 0.2352,
+        "extraction_f2": 0.3448,
+        "entity_list_f1": 0.1538
+      },
+      "latency_ms": 37420.2,
+      "cost_usd": 0.003934,
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001571049-14-000599_t1400242_ex3-1.htm",
+      "filename": "0001571049-14-000599_t1400242_ex3-1.htm",
+      "doc_text_sha256": "50e8766a108db5afb209a27ffb7a2002716bb047f37bff0b18f1a56c88c75b95",
+      "specialist": "corporate_records_specialist",
+      "scores": {
+        "overall_score": 0.5857,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.1538,
+        "extraction_recall": 0.5,
+        "extraction_f1": 0.2352,
+        "extraction_f2": 0.3448,
+        "entity_list_f1": 0.1538
+      },
+      "latency_ms": 28675.0,
+      "cost_usd": 0.002325,
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001193125-13-256819_d428632dex211.htm",
+      "filename": "0001193125-13-256819_d428632dex211.htm",
+      "doc_text_sha256": "74bca4e97c748666baee25e3db1cd80f885598ec9e86b2a10ddb57b3266b2416",
+      "specialist": "corporate_records_specialist",
+      "scores": {
+        "overall_score": 0.4636,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.1111,
+        "extraction_recall": 0.25,
+        "extraction_f1": 0.1538,
+        "extraction_f2": 0.2,
+        "entity_list_f1": 0.1667
+      },
+      "latency_ms": 30869.0,
+      "cost_usd": 0.001109,
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001104659-22-110926_tm2225873d4_ex3-5.htm",
+      "filename": "0001104659-22-110926_tm2225873d4_ex3-5.htm",
+      "doc_text_sha256": "8139a6f16d1dc613232f7c3d472e7bbd57e465386f37a89452317559cbd1cde3",
+      "specialist": "corporate_records_specialist",
+      "scores": {
+        "overall_score": 0.1602,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0,
+        "entity_list_f1": 0.0
+      },
+      "latency_ms": 18804.6,
+      "cost_usd": 0.001505,
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001193125-08-109289_dex241.htm",
+      "filename": "0001193125-08-109289_dex241.htm",
+      "doc_text_sha256": "5b7b8a4c28c63a51d54cf2fc2d2e177a8661e79821c250af4d40dd4fbd491c99",
+      "specialist": "corporate_records_specialist",
+      "scores": {
+        "overall_score": 0.55,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.1667,
+        "extraction_recall": 0.5,
+        "extraction_f1": 0.25,
+        "extraction_f2": 0.3572,
+        "entity_list_f1": 0.1538
+      },
+      "latency_ms": 64008.9,
+      "cost_usd": 0.002216,
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001079974-08-000839_artdimensionss1x31_9252008.htm",
+      "filename": "0001079974-08-000839_artdimensionss1x31_9252008.htm",
+      "doc_text_sha256": "04c0314e82da6b844f250c7ec35134947e77577077040a7b0c507c38bc5121d3",
+      "specialist": "corporate_records_specialist",
+      "scores": {
+        "overall_score": 0.75,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.75,
+        "extraction_recall": 0.75,
+        "extraction_f1": 0.75,
+        "extraction_f2": 0.75,
+        "entity_list_f1": 1.0
+      },
+      "latency_ms": 242776.6,
+      "cost_usd": 0.004987,
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001193125-05-179145_dex32.htm",
+      "filename": "0001193125-05-179145_dex32.htm",
+      "doc_text_sha256": "b389c94f70fc098289f36c3a7ffce6dee33956f2051a6233e3ed3cc9a0e32247",
+      "specialist": "corporate_records_specialist",
+      "scores": {
+        "overall_score": 0.2521,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0,
+        "entity_list_f1": 0.1538
+      },
+      "latency_ms": 14995.1,
+      "cost_usd": 0.000576,
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001021432-06-000035_certamendriv090106.txt",
+      "filename": "0001021432-06-000035_certamendriv090106.txt",
+      "doc_text_sha256": "153007c6b7fcbc0f0da9510214d3beb9e5501e3e4715038d3ed4d0e54f16c9da",
+      "specialist": "corporate_records_specialist",
+      "scores": {
+        "overall_score": 0.4098,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0909,
+        "extraction_recall": 0.25,
+        "extraction_f1": 0.1333,
+        "extraction_f2": 0.1852,
+        "entity_list_f1": 0.1667
+      },
+      "latency_ms": 397685.4,
+      "cost_usd": 0.005131,
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001021432-06-000037_certamendcal092706.txt",
+      "filename": "0001021432-06-000037_certamendcal092706.txt",
+      "doc_text_sha256": "5937c7662d440d1f99c1cdfeb529a5fb7c5907c100ef2f342a78e365cf49bead",
+      "specialist": "corporate_records_specialist",
+      "scores": {
+        "overall_score": 0.3484,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0833,
+        "extraction_recall": 0.25,
+        "extraction_f1": 0.125,
+        "extraction_f2": 0.1785,
+        "entity_list_f1": 0.1538
+      },
+      "latency_ms": 27742.4,
+      "cost_usd": 0.00102,
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0000950137-05-002026_c91812a1exv4w1.txt",
+      "filename": "0000950137-05-002026_c91812a1exv4w1.txt",
+      "doc_text_sha256": "6b92681f96caf807fc4ce1c8bebfcbfabe7b49d484850d9cded0a8d73b48cf0a",
+      "specialist": "corporate_records_specialist",
+      "scores": {
+        "overall_score": 0.5392,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0455,
+        "extraction_recall": 0.25,
+        "extraction_f1": 0.077,
+        "extraction_f2": 0.1317,
+        "entity_list_f1": 0.1667
+      },
+      "latency_ms": 130368.7,
+      "cost_usd": 0.015967,
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001104659-18-050217_a18-2297_8ex3d3.htm",
+      "filename": "0001104659-18-050217_a18-2297_8ex3d3.htm",
+      "doc_text_sha256": "2a745d9d335bd3429af98742b4e4b2b481351c7f6684017873a8d311c8f8afbc",
+      "specialist": "corporate_records_specialist",
+      "scores": {
+        "overall_score": 0.2294,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0,
+        "entity_list_f1": 0.1538
+      },
+      "latency_ms": 32521.2,
+      "cost_usd": 0.002054,
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001144204-16-109616_v442647_ex3-1.htm",
+      "filename": "0001144204-16-109616_v442647_ex3-1.htm",
+      "doc_text_sha256": "155c3450e66206d4ff8b114a1443c2c3f38f45d0045218c166378f0b3940ae03",
+      "specialist": "corporate_records_specialist",
+      "scores": {
+        "overall_score": 0.2329,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0,
+        "entity_list_f1": 0.1538
+      },
+      "latency_ms": 47372.9,
+      "cost_usd": 0.001663,
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001193125-10-221497_dex32.htm",
+      "filename": "0001193125-10-221497_dex32.htm",
+      "doc_text_sha256": "9c1f4a9c39a5cab54fef627e6feaa461888f84e226550a201f0346e1b726b347",
+      "specialist": "corporate_records_specialist",
+      "scores": {
+        "overall_score": 0.2606,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0,
+        "entity_list_f1": 0.1538
+      },
+      "latency_ms": 10660.0,
+      "cost_usd": 0.000549,
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001493152-23-024269_ex4-5.htm",
+      "filename": "0001493152-23-024269_ex4-5.htm",
+      "doc_text_sha256": "ac92013d1381c36ac90c8c3a668c147d4eb0c6143bdb79a45426a2a526e7f198",
+      "specialist": "corporate_records_specialist",
+      "scores": {
+        "overall_score": 0.3115,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0,
+        "entity_list_f1": 0.3077
+      },
+      "latency_ms": 30491.8,
+      "cost_usd": 0.001592,
+      "error": null
+    },
+    {
+      "case_id": "corpus:ground_truth:train:0001683168-23-005255_cardiff_ex0302.htm",
+      "filename": "0001683168-23-005255_cardiff_ex0302.htm",
+      "doc_text_sha256": "d864df108857955c2ff1261fbd367409fbce959b5d1d9184d95a020107ad7aa6",
+      "specialist": "corporate_records_specialist",
+      "scores": {
+        "overall_score": 0.241,
+        "needs_judge_review": false,
+        "n_expected_fields": 4,
+        "extraction_precision": 0.0,
+        "extraction_recall": 0.0,
+        "extraction_f1": 0.0,
+        "extraction_f2": 0.0,
+        "entity_list_f1": 0.0
+      },
+      "latency_ms": 29697.4,
+      "cost_usd": 0.001269,
+      "error": null
+    }
+  ],
+  "post_hoc": {
+    "recompute": "uv run python scripts/score_run.py --run-id <run_id> --recompute",
+    "judges": "uv run python scripts/score_run.py --run-id <run_id> --judge verdict,quality",
+    "compare": "uv run python scripts/compare_runs.py --a <run_a> --b <run_b>"
+  }
+}

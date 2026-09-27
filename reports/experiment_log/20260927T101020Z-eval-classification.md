@@ -9,7 +9,7 @@
 | git | commit: 53a9d88 · dirty: True |
 | started / finished | 2026-09-27T10:10:20+00:00 → 2026-09-27T10:15:12+00:00 |
 | duration_s | 293.7 |
-| comparison report | reports/api-comparisons/qwen-qwen3.7-flash/classification/r… |
+| comparison report | reports/api-comparisons/qwen3.7-flash/classification/runs/2… |
 | error | — |
 
 ### Run configuration

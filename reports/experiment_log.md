@@ -2,10 +2,15 @@
 
 One row per run (append-only source of truth: `reports/experiment_log.jsonl`). Each run's full detail (dataset provenance, metrics, per-agent performance, case table) lives in its own file under `reports/experiment_log/<run_id>.md` — this index never grows a per-run section inline, so it stays readable regardless of history size. OpenRouter/Braintrust N-doc waves also get a standalone, Modal-comparable write-ups under `reports/api-comparisons/` (see `INDEX.md`; per-run files under `<model>/<task>/runs/`).
 
-## Real evaluation waves (real mode, n≥10 cases) — 25
+## Real evaluation waves (real mode, n≥10 cases) — 30
 
 | run_id | family | task | mode | model | subset | n | key metric | errors |
 |---|---|---|---|---|---|---|---|---|
+| [20260927T110828Z-eval-corporate_records](experiment_log/20260927T110828Z-eval-corporate_records.md) | eval | corporate_records | real | deepseek/deepseek-v4.1-flash | class:corporate_record | 20 | — | 0 |
+| [20260927T110153Z-eval-merger_agreement](experiment_log/20260927T110153Z-eval-merger_agreement.md) | eval | merger_agreement | real | deepseek/deepseek-v4.1-flash | class:merger_agreement | 20 | — | 0 |
+| [20260927T105549Z-eval-contracts](experiment_log/20260927T105549Z-eval-contracts.md) | eval | contracts | real | deepseek/deepseek-v4.1-flash | class:contract | 20 | — | 0 |
+| [20260927T105400Z-eval-insurance_claims](experiment_log/20260927T105400Z-eval-insurance_claims.md) | eval | insurance_claims | real | deepseek/deepseek-v4.1-flash | class:insurance_claim | 20 | — | 0 |
+| [20260927T105317Z-eval-correspondence](experiment_log/20260927T105317Z-eval-correspondence.md) | eval | correspondence | real | deepseek/deepseek-v4.1-flash | class:correspondence | 20 | — | 0 |
 | [20260927T101544Z-eval-classification](experiment_log/20260927T101544Z-eval-classification.md) | eval | classification | real | deepseek/deepseek-v4.1-flash | full | 100 | class_accuracy=0.95 | 0 |
 | [20260927T101020Z-eval-classification](experiment_log/20260927T101020Z-eval-classification.md) | eval | classification | real | qwen/qwen3.7-flash | full | 100 | class_accuracy=0.91 | 0 |
 | [20260927T100340Z-eval-classification](experiment_log/20260927T100340Z-eval-classification.md) | eval | classification | real | ibm-granite/granite-4.2-8b | full | 100 | class_accuracy=0.94 | 0 |

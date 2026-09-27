@@ -6,12 +6,16 @@ against the Modal/vLLM leg reports kept in the sandbox repo
 
 ## Naming schema
 
+    <this dir>/<model_short>/<task>/runs/<run_id>.md
     <this dir>/<model_short>/<task>/RUN-<wave>-<CLASS>-<MODEL_SHORT>-REPORT.md
+    <this dir>/INDEX.md
 
 | slot | meaning | example |
 |---|---|---|
 | `model_short/` | decode-profile key, else slugified model id | `qwen3-8b`, `granite-4.2-8b` |
 | `task/` | the eval task id — reports are always separated by specialist/task, never flat across a model dir | `contracts`, `insurance_claims`, `correspondence`, `corporate_records`, `merger_agreement`, `classification` |
+| `runs/` | immutable per-run write-up (one markdown file per experiment-log run id) | `20260927T033031Z-eval-correspondence.md` |
+| `INDEX.md` | catalog of every run write-up + link to its canonical wave stem when present | — |
 | `wave` | draw size: `--sample` when set, else `--n` | `20`, `50` |
 | `CLASS` | subset class uppercased | `CORRESPONDENCE`, `INSURANCE_CLAIM`, `CONTRACT`, `MERGER_AGREEMENT`, `CORPORATE_RECORD`; `ALL` for whole-corpus runs |
 | stem | `RUN-<wave>-<CLASS>` | pairs with the Modal report of the same stem |

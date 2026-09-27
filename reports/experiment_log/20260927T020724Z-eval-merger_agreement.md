@@ -9,7 +9,7 @@
 | git | commit: 53ffee5 · dirty: True |
 | started / finished | 2026-09-27T02:07:24+00:00 → 2026-09-27T02:09:08+00:00 |
 | duration_s | 106.5 |
-| comparison report | /workspace/reports/api-comparisons/qwen3-8b/RUN-2-MERGER_AG… |
+| comparison report | reports/api-comparisons/qwen3-8b/merger_agreement/runs/2026… |
 | error | — |
 
 ### Run configuration

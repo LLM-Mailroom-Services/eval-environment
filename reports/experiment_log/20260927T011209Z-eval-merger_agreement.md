@@ -9,7 +9,7 @@
 | git | commit: f75ccd9 · dirty: True |
 | started / finished | 2026-09-27T01:12:09+00:00 → 2026-09-27T01:25:51+00:00 |
 | duration_s | 780 |
-| comparison report | — |
+| comparison report | reports/api-comparisons/qwen3-8b/merger_agreement/runs/2026… |
 | error | Interrupted 1/20: 8 chunks still returned unparseable JSON … |
 
 ### Run configuration

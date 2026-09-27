@@ -356,6 +356,16 @@ def _table(headers: list[str], rows: list[list[Any]]) -> list[str]:
     return lines
 
 
+def _comparison_report_link(summary: dict[str, Any]) -> str | None:
+    from evals import comparison_report
+
+    path = comparison_report.resolve_report_path(summary)
+    if path:
+        return comparison_report.repo_relative_path(path)
+    stored = summary.get("comparison_report")
+    return str(stored) if stored else None
+
+
 def render_run_md(summary: dict[str, Any]) -> str:
     """One run as markdown sections (metadata, data, metrics, performance)."""
     lines = [f"## {summary.get('run_id')}", ""]
@@ -369,7 +379,7 @@ def render_run_md(summary: dict[str, Any]) -> str:
             ["git", summary.get("git")],
             ["started / finished", f"{summary.get('started_at')} → {summary.get('finished_at')}"],
             ["duration_s", summary.get("duration_s")],
-            ["comparison report", summary.get("comparison_report")],
+            ["comparison report", _comparison_report_link(summary)],
             ["error", summary.get("error")],
         ],
     )
@@ -497,7 +507,8 @@ def render_full_log(path: Path | None = None) -> str:
         f"`{runs_dir()}/<run_id>.md` — this index never grows a per-run "
         "section inline, so it stays readable regardless of history size. "
         "OpenRouter/Braintrust N-doc waves also get a standalone, "
-        "Modal-comparable report under `reports/api-comparisons/<model>/`.",
+        "Modal-comparable write-ups under `reports/api-comparisons/` "
+        "(see `INDEX.md`; per-run files under `<model>/<task>/runs/`).",
         "",
         f"## Real evaluation waves (real mode, n≥{WAVE_MIN_N} cases) — {len(waves)}",
         "",

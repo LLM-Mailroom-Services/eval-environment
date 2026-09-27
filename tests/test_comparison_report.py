@@ -116,9 +116,26 @@ def test_report_path_falls_back_to_model_slug():
     summary["model"] = "ibm-granite/granite-4.2-8b"
     p = comparison_report.report_path(summary)
     # No decode profile -> slugified model id; subset class still names the stem.
-    assert p.name == "RUN-50-CORRESPONDENCE-IBM-GRANITE-GRANITE-4.2-8B-REPORT.md"
+    assert p.name == "RUN-50-CORRESPONDENCE-GRANITE-4.2-8B-REPORT.md"
     assert p.parent.name == "correspondence"
-    assert p.parent.parent.name == "ibm-granite-granite-4.2-8b"
+    assert p.parent.parent.name == "granite-4.2-8b"
+
+
+def test_model_short_aliases_qwen_slug_to_decode_profile_dir():
+    summary = _summary()
+    summary["params"] = {"sample": 20, "n": 2}
+    p = comparison_report.report_path(summary)
+    assert p.parent.parent.name == "qwen3-8b"
+    summary["params"] = {"sample": 20}
+    summary["model"] = "qwen/qwen3-8b"
+    p2 = comparison_report.report_path(summary)
+    assert p2.parent.parent.name == "qwen3-8b"
+
+
+def test_run_report_path_lives_under_runs_subdir():
+    p = comparison_report.run_report_path(_summary())
+    assert p.parent.name == "runs"
+    assert p.name.endswith("-test-a1b2c3.md") or "eval" in p.name
 
 
 def test_report_path_separates_by_task_within_same_model_dir():
@@ -193,7 +210,9 @@ def test_run_task_decode_profile_writes_report(monkeypatch, sample_case):
     assert summary["comparison_report"]
     report = Path(summary["comparison_report"])
     assert report.exists()
-    assert report.name.startswith("RUN-1-")
+    assert report.parent.name == "runs"
+    canonical = report.parent.parent / "RUN-1-CONTRACT-QWEN3-8B-REPORT.md"
+    assert canonical.exists()
     assert "Decode posture" in report.read_text(encoding="utf-8")
     assert summary["cost_cap"]["status"] == "under_cap"
     # No profile -> no report (pipeline-default runs don't emit it).

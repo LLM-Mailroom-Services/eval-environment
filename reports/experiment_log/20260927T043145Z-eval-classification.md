@@ -9,7 +9,7 @@
 | git | commit: 782ddeb · dirty: True |
 | started / finished | 2026-09-27T04:31:45+00:00 → 2026-09-27T04:34:57+00:00 |
 | duration_s | 194.3 |
-| comparison report | — |
+| comparison report | reports/api-comparisons/qwen3-8b/classification/runs/202609… |
 | error | — |
 
 ### Run configuration

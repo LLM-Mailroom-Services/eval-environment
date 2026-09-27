@@ -9,7 +9,7 @@
 | git | commit: 533b371 · dirty: True |
 | started / finished | 2026-09-27T00:52:33+00:00 → 2026-09-27T01:09:03+00:00 |
 | duration_s | 900 |
-| comparison report | — |
+| comparison report | reports/api-comparisons/qwen3-8b/merger_agreement/runs/2026… |
 | error | Interrupted 3/20: unchunked ~350k-char merger text truncate… |
 
 ### Run configuration

@@ -9,7 +9,7 @@
 | git | commit: fd6a220 · dirty: True |
 | started / finished | 2026-09-27T02:33:47+00:00 → 2026-09-27T02:40:49+00:00 |
 | duration_s | 424.4 |
-| comparison report | /workspace/reports/api-comparisons/qwen3-8b/RUN-20-CONTRACT… |
+| comparison report | reports/api-comparisons/qwen3-8b/contracts/runs/20260927T02… |
 | error | — |
 
 ### Run configuration

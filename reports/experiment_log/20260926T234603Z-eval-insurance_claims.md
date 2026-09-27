@@ -9,7 +9,7 @@
 | git | commit: fe120a8 · dirty: True |
 | started / finished | 2026-09-26T23:46:03+00:00 → 2026-09-26T23:49:16+00:00 |
 | duration_s | 195 |
-| comparison report | /workspace/reports/api-comparisons/qwen3-8b/RUN-20-INSURANC… |
+| comparison report | reports/api-comparisons/qwen3-8b/insurance_claims/runs/2026… |
 | error | — |
 
 ### Run configuration

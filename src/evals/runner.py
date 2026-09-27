@@ -469,7 +469,9 @@ def run_task(
             if cap:
                 summary["cost_cap"] = cap
             report_file = comparison_report.write_report(summary, case_rows)
-            summary["comparison_report"] = str(report_file) if report_file else None
+            summary["comparison_report"] = (
+                comparison_report.repo_relative_path(report_file) if report_file else None
+            )
         except Exception as exc:  # report is auxiliary — log and move on
             logger.warning("comparison_report_failed", task=spec.task_id, error=str(exc))
             summary["comparison_report"] = None

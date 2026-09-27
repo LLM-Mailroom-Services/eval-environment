@@ -9,7 +9,7 @@
 | git | commit: b949149 · dirty: True |
 | started / finished | 2026-09-27T04:22:39+00:00 → 2026-09-27T04:29:53+00:00 |
 | duration_s | 436.5 |
-| comparison report | /workspace/reports/api-comparisons/qwen3-8b/RUN-20-CORPORAT… |
+| comparison report | reports/api-comparisons/qwen3-8b/corporate_records/runs/202… |
 | error | — |
 
 ### Run configuration

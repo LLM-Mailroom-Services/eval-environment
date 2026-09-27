@@ -9,7 +9,7 @@
 | git | commit: fe120a8 · dirty: True |
 | started / finished | 2026-09-26T23:43:58+00:00 → 2026-09-26T23:46:00+00:00 |
 | duration_s | 123.4 |
-| comparison report | /workspace/reports/api-comparisons/qwen3-8b/RUN-20-CORRESPO… |
+| comparison report | reports/api-comparisons/qwen3-8b/correspondence/runs/202609… |
 | error | — |
 
 ### Run configuration

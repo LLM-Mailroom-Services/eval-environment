@@ -9,7 +9,7 @@
 | git | commit: 4b973b7 · dirty: True |
 | started / finished | 2026-09-27T03:30:31+00:00 → 2026-09-27T03:50:59+00:00 |
 | duration_s | 1230.1 |
-| comparison report | /workspace/reports/api-comparisons/qwen3-8b/RUN-20-CORRESPO… |
+| comparison report | reports/api-comparisons/qwen3-8b/correspondence/runs/202609… |
 | error | — |
 
 ### Run configuration

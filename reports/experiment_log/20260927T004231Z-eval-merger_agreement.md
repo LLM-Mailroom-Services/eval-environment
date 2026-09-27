@@ -9,7 +9,7 @@
 | git | commit: 5bdab8d · dirty: True |
 | started / finished | 2026-09-27T00:42:31+00:00 → 2026-09-27T00:52:00+00:00 |
 | duration_s | 420 |
-| comparison report | — |
+| comparison report | reports/api-comparisons/qwen3-8b/merger_agreement/runs/2026… |
 | error | Interrupted after 1/20: completion budget 8192 truncated me… |
 
 ### Run configuration

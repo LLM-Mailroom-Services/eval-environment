@@ -39,6 +39,11 @@
 | 20260927T011209Z-eval-merger_agreement | eval | merger_agreement | real | qwen/qwen3-8b | class:merger_agreement | 1 | — | 0 |
 | 20260927T014814Z-eval-merger_agreement | eval | merger_agreement | real | qwen/qwen3-8b | class:merger_agreement | 2 | — | 0 |
 | 20260927T020724Z-eval-merger_agreement | eval | merger_agreement | real | qwen/qwen3.7-flash | class:merger_agreement | 2 | — | 0 |
+| 20260927T022750Z-eval-merger_agreement | eval | merger_agreement | real | qwen/qwen3.7-flash | class:merger_agreement | 20 | — | 0 |
+| 20260927T022738Z-eval-correspondence | eval | correspondence | real | qwen/qwen3-8b | class:correspondence | 20 | — | 0 |
+| 20260927T023050Z-eval-insurance_claims | eval | insurance_claims | real | qwen/qwen3-8b | class:insurance_claim | 20 | — | 0 |
+| 20260927T022810Z-eval-corporate_records | eval | corporate_records | real | qwen/qwen3-8b | class:corporate_record | 20 | — | 0 |
+| 20260927T023347Z-eval-contracts | eval | contracts | real | qwen/qwen3-8b | class:contract | 20 | — | 0 |
 
 ---
 
@@ -2424,4 +2429,419 @@
 |---|---|---|---|
 | corpus:ground_truth:train:contract_128_merger_agreement.txt | overall_score: 0.3221 · needs_judge_review: False · n_expec… | 45956.1 | — |
 | corpus:ground_truth:train:contract_31_merger_agreement.txt | overall_score: 0.37 · needs_judge_review: True · n_expected… | 47783.9 | — |
+
+
+## 20260927T022750Z-eval-merger_agreement
+
+| Key | Value |
+|---|---|
+| family / task | eval / merger_agreement |
+| invoke / mode | agent / real |
+| model / prompt | qwen/qwen3.7-flash / None |
+| trace backend | braintrust |
+| git | commit: fd6a220 · dirty: True |
+| started / finished | 2026-09-27T02:27:50+00:00 → 2026-09-27T02:30:10+00:00 |
+| duration_s | 142 |
+| error | — |
+
+### Dataset
+
+| Key | Value |
+|---|---|
+| case_ids | corpus:ground_truth:train:contract_128_merger_agreement.txt… |
+| config | ground_truth |
+| filenames | contract_128_merger_agreement.txt, contract_31_merger_agree… |
+| n_selected | 20 |
+| n_total | 135 |
+| repo | Lucius-Morningstar/mailroom-dataset |
+| revision | 46a4d3c240a36671cde0182fff4960f6b8b73aca |
+| sample | 20 |
+| seed | 42 |
+| split | train |
+| subset | class:merger_agreement |
+| subset_manifest_jsonl | data/experiments/20260927T022750Z-eval-merger_agreement/sub… |
+| subset_manifest_path | data/experiments/20260927T022750Z-eval-merger_agreement/sub… |
+| subset_spec | kind: class · value: merger_agreement |
+
+### Metrics
+
+| Metric | Value |
+|---|---|
+| errors | 0 |
+| n | 20 |
+| overall_score | 0.3748 |
+| scorer_errors | 0 |
+
+### Performance
+
+| Metric | Value |
+|---|---|
+| cost_usd_est_total | 0.0575 |
+| latency_ms_mean | 45286.88 |
+| latency_ms_p95 | 52445.4 |
+| tokens_completion_total | 114281 |
+| tokens_prompt_total | 1422210 |
+
+### Per-agent performance
+
+| agent | calls | prompt_tokens | completion_tokens | total_tokens | cost_usd_est | models |
+|---|---|---|---|---|---|---|
+| merger_agreement_specialist | 18 | 1422210 | 114281 | 1536491 | 0.0575 | qwen/qwen3.7-flash |
+
+### Cases
+
+| case_id | scores | latency_ms | error |
+|---|---|---|---|
+| corpus:ground_truth:train:contract_128_merger_agreement.txt | overall_score: 0.2633 · needs_judge_review: False · n_expec… | 47418.8 | — |
+| corpus:ground_truth:train:contract_31_merger_agreement.txt | overall_score: 0.2986 · needs_judge_review: False · n_expec… | 37790.1 | — |
+| corpus:ground_truth:train:contract_99_merger_agreement.txt | overall_score: 0.6333 · needs_judge_review: False · n_expec… | 40572.7 | — |
+| corpus:ground_truth:train:contract_114_merger_agreement.txt | overall_score: 0.1751 · needs_judge_review: False · n_expec… | 37713.3 | — |
+| corpus:ground_truth:train:contract_94_merger_agreement.txt | overall_score: 0.0 · needs_judge_review: False · n_expected… | 46588.4 | — |
+| corpus:ground_truth:train:contract_120_merger_agreement.txt | overall_score: 0.2927 · needs_judge_review: False · n_expec… | 47017.2 | — |
+| corpus:ground_truth:train:contract_41_merger_agreement.txt | overall_score: 0.6177 · needs_judge_review: False · n_expec… | 46987.2 | — |
+| corpus:ground_truth:train:contract_62_merger_agreement.txt | overall_score: 0.6945 · needs_judge_review: False · n_expec… | 51732.2 | — |
+| corpus:ground_truth:train:contract_51_merger_agreement.txt | overall_score: 0.2201 · needs_judge_review: False · n_expec… | 46723.5 | — |
+| corpus:ground_truth:train:contract_70_merger_agreement.txt | overall_score: 0.1441 · needs_judge_review: False · n_expec… | 48939.5 | — |
+| corpus:ground_truth:train:contract_100_merger_agreement.txt | overall_score: 0.5584 · needs_judge_review: True · n_expect… | 52445.4 | — |
+| corpus:ground_truth:train:contract_97_merger_agreement.txt | overall_score: 0.5 · needs_judge_review: True · n_expected_… | 46754.6 | — |
+| corpus:ground_truth:train:contract_71_merger_agreement.txt | overall_score: 0.6111 · needs_judge_review: False · n_expec… | 40362.2 | — |
+| corpus:ground_truth:train:contract_66_merger_agreement.txt | overall_score: 0.6177 · needs_judge_review: False · n_expec… | 54764.6 | — |
+| corpus:ground_truth:train:contract_34_merger_agreement.txt | overall_score: 0.1873 · needs_judge_review: False · n_expec… | 41083 | — |
+| corpus:ground_truth:train:contract_5_merger_agreement.txt | overall_score: 0.0 · needs_judge_review: False · n_expected… | 43248.3 | — |
+| corpus:ground_truth:train:contract_76_merger_agreement.txt | overall_score: 0.2755 · needs_judge_review: False · n_expec… | 45097.6 | — |
+| corpus:ground_truth:train:contract_136_merger_agreement.txt | overall_score: 0.5938 · needs_judge_review: False · n_expec… | 39142.3 | — |
+| corpus:ground_truth:train:contract_122_merger_agreement.txt | overall_score: 0.2377 · needs_judge_review: False · n_expec… | 46538 | — |
+| corpus:ground_truth:train:contract_19_merger_agreement.txt | overall_score: 0.575 · needs_judge_review: False · n_expect… | 44818.7 | — |
+
+
+## 20260927T022738Z-eval-correspondence
+
+| Key | Value |
+|---|---|
+| family / task | eval / correspondence |
+| invoke / mode | agent / real |
+| model / prompt | qwen/qwen3-8b / None |
+| trace backend | braintrust |
+| git | commit: fd6a220 · dirty: True |
+| started / finished | 2026-09-27T02:27:38+00:00 → 2026-09-27T02:30:47+00:00 |
+| duration_s | 191 |
+| error | — |
+
+### Dataset
+
+| Key | Value |
+|---|---|
+| case_ids | corpus:ground_truth:train:blair-l/meetings/608., corpus:gro… |
+| config | ground_truth |
+| filenames | blair-l/meetings/608., lokey-t/inbox/250., kean-s/all_docum… |
+| n_selected | 20 |
+| n_total | 915 |
+| repo | Lucius-Morningstar/mailroom-dataset |
+| revision | 46a4d3c240a36671cde0182fff4960f6b8b73aca |
+| sample | 20 |
+| seed | 42 |
+| split | train |
+| subset | class:correspondence |
+| subset_manifest_jsonl | data/experiments/20260927T022738Z-eval-correspondence/subse… |
+| subset_manifest_path | data/experiments/20260927T022738Z-eval-correspondence/subse… |
+| subset_spec | kind: class · value: correspondence |
+
+### Metrics
+
+| Metric | Value |
+|---|---|
+| errors | 0 |
+| n | 20 |
+| overall_score | 0.0 |
+| scorer_errors | 0 |
+
+### Performance
+
+| Metric | Value |
+|---|---|
+| cost_usd_est_total | 0.0287 |
+| latency_ms_mean | 56321.215 |
+| latency_ms_p95 | 133521.6 |
+| tokens_completion_total | 50672 |
+| tokens_prompt_total | 48452 |
+
+### Per-agent performance
+
+| agent | calls | prompt_tokens | completion_tokens | total_tokens | cost_usd_est | models |
+|---|---|---|---|---|---|---|
+| correspondence_specialist | 20 | 48452 | 50672 | 99124 | 0.0287 | qwen/qwen3-8b |
+
+### Cases
+
+| case_id | scores | latency_ms | error |
+|---|---|---|---|
+| corpus:ground_truth:train:blair-l/meetings/608. | overall_score: 0.0 · needs_judge_review: False · n_expected… | 15188 | — |
+| corpus:ground_truth:train:lokey-t/inbox/250. | overall_score: 0.0 · needs_judge_review: False · n_expected… | 13655.3 | — |
+| corpus:ground_truth:train:kean-s/all_documents/849. | overall_score: 0.0 · needs_judge_review: False · n_expected… | 15726.7 | — |
+| corpus:ground_truth:train:may-l/all_documents/41. | overall_score: 0.0 · needs_judge_review: False · n_expected… | 98922.4 | — |
+| corpus:ground_truth:train:skilling-j/inbox/1555. | overall_score: 0.0 · needs_judge_review: False · n_expected… | 19837.6 | — |
+| corpus:ground_truth:train:sanders-r/sent_items/261. | overall_score: 0.0 · needs_judge_review: False · n_expected… | 16800 | — |
+| corpus:ground_truth:train:mcconnell-m/all_documents/227. | overall_score: 0.0 · needs_judge_review: False · n_expected… | 18517.7 | — |
+| corpus:ground_truth:train:thomas-p/deleted_items/292. | overall_score: 0.0 · needs_judge_review: False · n_expected… | 92858.7 | — |
+| corpus:ground_truth:train:nemec-g/all_documents/906. | overall_score: 0.0 · needs_judge_review: False · n_expected… | 14052.5 | — |
+| corpus:ground_truth:train:dasovich-j/all_documents/13056. | overall_score: 0.0 · needs_judge_review: False · n_expected… | 123945.1 | — |
+| corpus:ground_truth:train:kaminski-v/all_documents/5470. | overall_score: 0.0 · needs_judge_review: False · n_expected… | 25086.7 | — |
+| corpus:ground_truth:train:parks-j/sent_items/425. | overall_score: 0.0 · needs_judge_review: False · n_expected… | 11648.6 | — |
+| corpus:ground_truth:train:campbell-l/inbox/81. | overall_score: 0.0 · needs_judge_review: False · n_expected… | 99540.6 | — |
+| corpus:ground_truth:train:donoho-l/inbox/35. | overall_score: 0.0 · needs_judge_review: False · n_expected… | 147604.4 | — |
+| corpus:ground_truth:train:kitchen-l/sent_items/613. | overall_score: 0.0 · needs_judge_review: False · n_expected… | 50105.2 | — |
+| corpus:ground_truth:train:derrick-j/deleted_items/79. | overall_score: 0.0 · needs_judge_review: False · n_expected… | 118640.7 | — |
+| corpus:ground_truth:train:rogers-b/_sent_mail/358. | overall_score: 0.0 · needs_judge_review: False · n_expected… | 12548.1 | — |
+| corpus:ground_truth:train:dasovich-j/all_documents/10751. | overall_score: 0.0 · needs_judge_review: False · n_expected… | 133521.6 | — |
+| corpus:ground_truth:train:motley-m/deleted_items/63. | overall_score: 0.0 · needs_judge_review: False · n_expected… | 15670 | — |
+| corpus:ground_truth:train:dorland-c/_sent_mail/78. | overall_score: 0.0 · needs_judge_review: False · n_expected… | 82554.4 | — |
+
+
+## 20260927T023050Z-eval-insurance_claims
+
+| Key | Value |
+|---|---|
+| family / task | eval / insurance_claims |
+| invoke / mode | agent / real |
+| model / prompt | qwen/qwen3-8b / None |
+| trace backend | braintrust |
+| git | commit: fd6a220 · dirty: True |
+| started / finished | 2026-09-27T02:30:50+00:00 → 2026-09-27T02:33:44+00:00 |
+| duration_s | 175.6 |
+| error | — |
+
+### Dataset
+
+| Key | Value |
+|---|---|
+| case_ids | corpus:ground_truth:train:pde:233384494245864.txt, corpus:g… |
+| config | ground_truth |
+| filenames | pde:233384494245864.txt, insurbias-624.txt, carrier:8874733… |
+| n_selected | 20 |
+| n_total | 986 |
+| repo | Lucius-Morningstar/mailroom-dataset |
+| revision | 46a4d3c240a36671cde0182fff4960f6b8b73aca |
+| sample | 20 |
+| seed | 42 |
+| split | train |
+| subset | class:insurance_claim |
+| subset_manifest_jsonl | data/experiments/20260927T023050Z-eval-insurance_claims/sub… |
+| subset_manifest_path | data/experiments/20260927T023050Z-eval-insurance_claims/sub… |
+| subset_spec | kind: class · value: insurance_claim |
+
+### Metrics
+
+| Metric | Value |
+|---|---|
+| errors | 0 |
+| n | 20 |
+| overall_score | 0.202 |
+| scorer_errors | 0 |
+
+### Performance
+
+| Metric | Value |
+|---|---|
+| cost_usd_est_total | 0.0192 |
+| latency_ms_mean | 34087.465 |
+| latency_ms_p95 | 155975.6 |
+| tokens_completion_total | 31824 |
+| tokens_prompt_total | 40696 |
+
+### Per-agent performance
+
+| agent | calls | prompt_tokens | completion_tokens | total_tokens | cost_usd_est | models |
+|---|---|---|---|---|---|---|
+| insurance_claims_specialist | 20 | 40696 | 31824 | 72520 | 0.0192 | qwen/qwen3-8b |
+
+### Cases
+
+| case_id | scores | latency_ms | error |
+|---|---|---|---|
+| corpus:ground_truth:train:pde:233384494245864.txt | overall_score: 0.0 · needs_judge_review: False · n_expected… | 14192.7 | — |
+| corpus:ground_truth:train:insurbias-624.txt | overall_score: 0.8428 · needs_judge_review: False · n_expec… | 27512 | — |
+| corpus:ground_truth:train:carrier:887473385855273.txt | overall_score: 0.0 · needs_judge_review: False · n_expected… | 11072 | — |
+| corpus:ground_truth:train:carrier:887453386193813.txt | overall_score: 0.0 · needs_judge_review: False · n_expected… | 15367.8 | — |
+| corpus:ground_truth:train:outpatient:542872281350908:1.txt | overall_score: 0.0 · needs_judge_review: False · n_expected… | 155975.6 | — |
+| corpus:ground_truth:train:pde:233724491332182.txt | overall_score: 0.7034 · needs_judge_review: True · n_expect… | 21359.7 | — |
+| corpus:ground_truth:train:auto:CLM-000145.txt | overall_score: 0.8333 · needs_judge_review: False · n_expec… | 15778.7 | — |
+| corpus:ground_truth:train:insurbias-163.txt | overall_score: 0.0 · needs_judge_review: False · n_expected… | 14478.1 | — |
+| corpus:ground_truth:train:insurbias-1111.txt | overall_score: 0.0 · needs_judge_review: False · n_expected… | 9325.9 | — |
+| corpus:ground_truth:train:pde:233184493359051.txt | overall_score: 0.0 · needs_judge_review: False · n_expected… | 158081.2 | — |
+| corpus:ground_truth:train:outpatient:542152281286913:1.txt | overall_score: 0.0 · needs_judge_review: False · n_expected… | 8805.9 | — |
+| corpus:ground_truth:train:insurbias-385.txt | overall_score: 0.8424 · needs_judge_review: False · n_expec… | 15052.8 | — |
+| corpus:ground_truth:train:insurbias-310.txt | overall_score: 0.8182 · needs_judge_review: False · n_expec… | 17154.5 | — |
+| corpus:ground_truth:train:auto:CLM-000322.txt | overall_score: 0.0 · needs_judge_review: False · n_expected… | 8780.8 | — |
+| corpus:ground_truth:train:pde:233614493105212.txt | overall_score: 0.0 · needs_judge_review: False · n_expected… | 15097.6 | — |
+| corpus:ground_truth:train:carrier:887623388590174.txt | overall_score: 0.0 · needs_judge_review: False · n_expected… | 11298.6 | — |
+| corpus:ground_truth:train:inpatient:196411177017295:1.txt | overall_score: 0.0 · needs_judge_review: False · n_expected… | 18761 | — |
+| corpus:ground_truth:train:auto:CLM-000611.txt | overall_score: 0.0 · needs_judge_review: False · n_expected… | 6566.8 | — |
+| corpus:ground_truth:train:pde:233364488871784.txt | overall_score: 0.0 · needs_judge_review: False · n_expected… | 126405.9 | — |
+| corpus:ground_truth:train:property:266855223.txt | overall_score: 0.0 · needs_judge_review: False · n_expected… | 10681.7 | — |
+
+
+## 20260927T022810Z-eval-corporate_records
+
+| Key | Value |
+|---|---|
+| family / task | eval / corporate_records |
+| invoke / mode | agent / real |
+| model / prompt | qwen/qwen3-8b / None |
+| trace backend | braintrust |
+| git | commit: fd6a220 · dirty: True |
+| started / finished | 2026-09-27T02:28:10+00:00 → 2026-09-27T02:33:59+00:00 |
+| duration_s | 352 |
+| error | — |
+
+### Dataset
+
+| Key | Value |
+|---|---|
+| case_ids | corpus:ground_truth:train:0001047469-12-006895_a2210011zex-… |
+| config | ground_truth |
+| filenames | 0001047469-12-006895_a2210011zex-4_10.htm, 0001047469-03-03… |
+| n_selected | 20 |
+| n_total | 403 |
+| repo | Lucius-Morningstar/mailroom-dataset |
+| revision | 46a4d3c240a36671cde0182fff4960f6b8b73aca |
+| sample | 20 |
+| seed | 42 |
+| split | train |
+| subset | class:corporate_record |
+| subset_manifest_jsonl | data/experiments/20260927T022810Z-eval-corporate_records/su… |
+| subset_manifest_path | data/experiments/20260927T022810Z-eval-corporate_records/su… |
+| subset_spec | kind: class · value: corporate_record |
+
+### Metrics
+
+| Metric | Value |
+|---|---|
+| errors | 0 |
+| n | 20 |
+| overall_score | 0.1824 |
+| scorer_errors | 0 |
+
+### Performance
+
+| Metric | Value |
+|---|---|
+| cost_usd_est_total | 0.0403 |
+| latency_ms_mean | 50674.82 |
+| latency_ms_p95 | 240418.7 |
+| tokens_completion_total | 39458 |
+| tokens_prompt_total | 190774 |
+
+### Per-agent performance
+
+| agent | calls | prompt_tokens | completion_tokens | total_tokens | cost_usd_est | models |
+|---|---|---|---|---|---|---|
+| corporate_records_specialist | 22 | 190774 | 39458 | 230232 | 0.0403 | qwen/qwen3-8b |
+
+### Cases
+
+| case_id | scores | latency_ms | error |
+|---|---|---|---|
+| corpus:ground_truth:train:0001047469-12-006895_a2210011zex-… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 26683.4 | — |
+| corpus:ground_truth:train:0001047469-03-032251_a2118977zex-… | overall_score: 0.55 · needs_judge_review: False · n_expecte… | 36336.5 | — |
+| corpus:ground_truth:train:0000950123-11-055070_h75396a4exv2… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 7802.2 | — |
+| corpus:ground_truth:train:0000898430-01-503595_dex32.txt | overall_score: 0.0 · needs_judge_review: False · n_expected… | 22570.7 | — |
+| corpus:ground_truth:train:0001193125-11-240442_dex43.htm | overall_score: 0.5976 · needs_judge_review: False · n_expec… | 22109.4 | — |
+| corpus:ground_truth:train:0000950123-10-001751_c54716a1exv4… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 13485.2 | — |
+| corpus:ground_truth:train:0001571049-14-000599_t1400242_ex3… | overall_score: 0.5857 · needs_judge_review: False · n_expec… | 17694.5 | — |
+| corpus:ground_truth:train:0001193125-13-256819_d428632dex21… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 18603.9 | — |
+| corpus:ground_truth:train:0001104659-22-110926_tm2225873d4_… | overall_score: 0.2295 · needs_judge_review: False · n_expec… | 20045.8 | — |
+| corpus:ground_truth:train:0001193125-08-109289_dex241.htm | overall_score: 0.0 · needs_judge_review: False · n_expected… | 49367 | — |
+| corpus:ground_truth:train:0001079974-08-000839_artdimension… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 17474.1 | — |
+| corpus:ground_truth:train:0001193125-05-179145_dex32.htm | overall_score: 0.2521 · needs_judge_review: False · n_expec… | 21677.5 | — |
+| corpus:ground_truth:train:0001021432-06-000035_certamendriv… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 240418.7 | — |
+| corpus:ground_truth:train:0001021432-06-000037_certamendcal… | overall_score: 0.223 · needs_judge_review: False · n_expect… | 42686.9 | — |
+| corpus:ground_truth:train:0000950137-05-002026_c91812a1exv4… | overall_score: 0.4576 · needs_judge_review: False · n_expec… | 318812.7 | — |
+| corpus:ground_truth:train:0001104659-18-050217_a18-2297_8ex… | overall_score: 0.2295 · needs_judge_review: False · n_expec… | 36144.8 | — |
+| corpus:ground_truth:train:0001144204-16-109616_v442647_ex3-… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 47011.4 | — |
+| corpus:ground_truth:train:0001193125-10-221497_dex32.htm | overall_score: 0.2606 · needs_judge_review: False · n_expec… | 10322.4 | — |
+| corpus:ground_truth:train:0001493152-23-024269_ex4-5.htm | overall_score: 0.2615 · needs_judge_review: False · n_expec… | 25769.6 | — |
+| corpus:ground_truth:train:0001683168-23-005255_cardiff_ex03… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 18479.7 | — |
+
+
+## 20260927T023347Z-eval-contracts
+
+| Key | Value |
+|---|---|
+| family / task | eval / contracts |
+| invoke / mode | agent / real |
+| model / prompt | qwen/qwen3-8b / None |
+| trace backend | braintrust |
+| git | commit: fd6a220 · dirty: True |
+| started / finished | 2026-09-27T02:33:47+00:00 → 2026-09-27T02:40:49+00:00 |
+| duration_s | 424.4 |
+| error | — |
+
+### Dataset
+
+| Key | Value |
+|---|---|
+| case_ids | corpus:ground_truth:train:MOVADOGROUPINC_04_30_2003-EX-10.2… |
+| config | ground_truth |
+| filenames | MOVADOGROUPINC_04_30_2003-EX-10.28-ENDORSEMENT AGREEMENT.PD… |
+| n_selected | 20 |
+| n_total | 540 |
+| repo | Lucius-Morningstar/mailroom-dataset |
+| revision | 46a4d3c240a36671cde0182fff4960f6b8b73aca |
+| sample | 20 |
+| seed | 42 |
+| split | train |
+| subset | class:contract |
+| subset_manifest_jsonl | data/experiments/20260927T023347Z-eval-contracts/subset_man… |
+| subset_manifest_path | data/experiments/20260927T023347Z-eval-contracts/subset_man… |
+| subset_spec | kind: class · value: contract |
+
+### Metrics
+
+| Metric | Value |
+|---|---|
+| errors | 0 |
+| n | 20 |
+| overall_score | 0.0762 |
+| scorer_errors | 0 |
+
+### Performance
+
+| Metric | Value |
+|---|---|
+| cost_usd_est_total | 0.0498 |
+| latency_ms_mean | 108632.14 |
+| latency_ms_p95 | 365572.6 |
+| tokens_completion_total | 48066 |
+| tokens_prompt_total | 238475 |
+
+### Per-agent performance
+
+| agent | calls | prompt_tokens | completion_tokens | total_tokens | cost_usd_est | models |
+|---|---|---|---|---|---|---|
+| contracts_specialist | 21 | 238475 | 48066 | 286541 | 0.0498 | qwen/qwen3-8b |
+
+### Cases
+
+| case_id | scores | latency_ms | error |
+|---|---|---|---|
+| corpus:ground_truth:train:MOVADOGROUPINC_04_30_2003-EX-10.2… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 41025.8 | — |
+| corpus:ground_truth:train:GOLDRESOURCECORP_12_11_2008-EX-10… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 38844.1 | — |
+| corpus:ground_truth:train:MorganStanleyDirectLendingFund_20… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 365572.6 | — |
+| corpus:ground_truth:train:SUCAMPOPHARMACEUTICALS,INC_11_04_… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 25336.3 | — |
+| corpus:ground_truth:train:FOUNDATIONMEDICINE,INC_02_02_2015… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 72349.4 | — |
+| corpus:ground_truth:train:EcoScienceSolutionsInc_20180406_8… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 21737.4 | — |
+| corpus:ground_truth:train:NETGEAR,INC_04_21_2003-EX-10.16-D… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 266975 | — |
+| corpus:ground_truth:train:KINGPHARMACEUTICALSINC_08_09_2006… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 260779.7 | — |
+| corpus:ground_truth:train:0001047469-05-021628_a2161868zex-… | overall_score: 1.0 · needs_judge_review: False · n_expected… | 30970.1 | — |
+| corpus:ground_truth:train:0000721748-15-000083_ncmf02121510… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 395455.6 | — |
+| corpus:ground_truth:train:ConformisInc_20191101_10-Q_EX-10.… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 61586.8 | — |
+| corpus:ground_truth:train:NEONSYSTEMSINC_03_01_1999-EX-10.5… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 89018.8 | — |
+| corpus:ground_truth:train:VERTEXENERGYINC_08_14_2014-EX-10.… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 17135.9 | — |
+| corpus:ground_truth:train:LEGACYTECHNOLOGYHOLDINGS,INC_12_0… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 26165.1 | — |
+| corpus:ground_truth:train:0001582718-14-000092_ex-10_1.htm | overall_score: 0.0 · needs_judge_review: False · n_expected… | 18878.5 | — |
+| corpus:ground_truth:train:PfHospitalityGroupInc_20150923_10… | overall_score: 0.5238 · needs_judge_review: False · n_expec… | 73212.6 | — |
+| corpus:ground_truth:train:TodosMedicalLtd_20190328_20-F_EX-… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 15677.4 | — |
+| corpus:ground_truth:train:TURNKEYCAPITAL,INC_07_20_2017-EX-… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 8563.3 | — |
+| corpus:ground_truth:train:ROCKYMOUNTAINCHOCOLATEFACTORY,INC… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 195448.8 | — |
+| corpus:ground_truth:train:IGENEBIOTECHNOLOGYINC_05_13_2003-… | overall_score: 0.0 · needs_judge_review: False · n_expected… | 147909.6 | — |
 

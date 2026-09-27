@@ -9,7 +9,34 @@
 | git | commit: fd6a220 · dirty: True |
 | started / finished | 2026-09-27T02:28:10+00:00 → 2026-09-27T02:33:59+00:00 |
 | duration_s | 352 |
+| comparison report | /workspace/reports/api-comparisons/qwen3-8b/RUN-20-CORPORAT… |
 | error | — |
+
+### Run configuration
+
+| Param | Value |
+|---|---|
+| concurrency | 8 |
+| decode_budget_applied | sampling_injected: False · max_tokens_by_agent: {'contracts… |
+| decode_call_timeout_s | 600 |
+| decode_profile | qwen3-8b |
+| decode_sampling | — |
+| dry_run | ✗ |
+| n | — |
+| resumed_from | — |
+| sample | 20 |
+| scorer | extraction |
+| seed | 42 |
+| skipped_already_run | 0 |
+| thinking_recovered | 0 |
+
+### Cost cap
+
+| Key | Value |
+|---|---|
+| cap_usd | 1.5 |
+| cost_usd_est | 0.0403 |
+| status | under_cap |
 
 ### Dataset
 
@@ -44,6 +71,8 @@
 | Metric | Value |
 |---|---|
 | cost_usd_est_total | 0.0403 |
+| cost_usd_total | 0.0403 |
+| expected_cost_usd | 0.12 |
 | latency_ms_mean | 50674.82 |
 | latency_ms_p95 | 240418.7 |
 | tokens_completion_total | 39458 |

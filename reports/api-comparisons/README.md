@@ -27,19 +27,27 @@ model variant is always the final token. E.g.
 ## Comparable metric surface
 
 Each Modal metric has an explicit analog (or an explicit N/A row, so the two
-tables share a vocabulary): wall duration, concurrency, cost (roster-priced)
-+ cost per document, latency e2e/p50/p95/max, prompt/completion/total tokens,
-cost-cap status, docs-ok/total + score metrics, per-agent usage,
-per-document score table, decode posture (budgets/sampling/timeout),
-dataset provenance + subset-manifest paths. Engine-only metrics (cold boot,
-gpu_seconds) are recorded as `N/A (serverless API)`.
+tables share a vocabulary): wall duration, concurrency, **expected cost**
+(wave planning from the decode profile), **actual cost** (sum of per-case
+`cost_usd` from the run), **estimated cost** (roster token rates on aggregate
+usage), cost per document (actual + estimated), latency e2e/p50/p95/max,
+prompt/completion/total tokens, cost-cap status, docs-ok/total + score
+metrics, per-agent usage, per-document score table, **run configuration**
+(concurrency/seed/scorer/trace), **runtime performance** (duration + latency
+rollups), decode posture (budgets/sampling/timeout), dataset provenance +
+subset-manifest paths. Engine-only metrics (cold boot, gpu_seconds) are
+recorded as `N/A (serverless API)`.
 
 ## Generation
 
 Reports are emitted automatically by `run_task` whenever `--decode-profile`
-is active, before the experiment-log record lands
-(`summary.comparison_report` holds the path). Regenerate a smoke artifact
-with:
+is active **or** the run is a substantive real eval wave (n≥20), before the
+experiment-log record lands (`summary.comparison_report` holds the path).
+Backfill or refresh all report-worthy runs from the log with:
+
+    uv run python scripts/render_comparison_reports.py
+
+Regenerate a smoke artifact with:
 
     EVALS_TRACE_BACKEND=none uv run python scripts/run_evals.py \
         --task eval:correspondence --mock --n 2 --decode-profile qwen3-8b

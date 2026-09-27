@@ -9,7 +9,21 @@
 | git | commit: 7ec9e59 · dirty: False |
 | started / finished | 2026-09-26T23:25:56+00:00 → 2026-09-26T23:25:56+00:00 |
 | duration_s | 2.1 |
+| comparison report | — |
 | error | — |
+
+### Run configuration
+
+| Param | Value |
+|---|---|
+| concurrency | 1 |
+| dry_run | ✓ |
+| n | 1 |
+| resumed_from | — |
+| sample | — |
+| scorer | extraction |
+| seed | 42 |
+| skipped_already_run | 0 |
 
 ### Dataset
 

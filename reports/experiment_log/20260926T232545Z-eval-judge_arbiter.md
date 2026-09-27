@@ -9,7 +9,21 @@
 | git | commit: 7ec9e59 · dirty: False |
 | started / finished | 2026-09-26T23:25:45+00:00 → 2026-09-26T23:25:45+00:00 |
 | duration_s | 0.6 |
+| comparison report | — |
 | error | — |
+
+### Run configuration
+
+| Param | Value |
+|---|---|
+| concurrency | 1 |
+| dry_run | ✗ |
+| n | 2 |
+| resumed_from | — |
+| sample | — |
+| scorer | judge |
+| seed | 42 |
+| skipped_already_run | 0 |
 
 ### Dataset
 
@@ -45,6 +59,7 @@
 | Metric | Value |
 |---|---|
 | cost_usd_est_total | 0 |
+| cost_usd_total | 0 |
 | latency_ms_mean | 0.95 |
 | latency_ms_p95 | 1.4 |
 | tokens_completion_total | 130 |

@@ -9,7 +9,34 @@
 | git | commit: fe120a8 · dirty: True |
 | started / finished | 2026-09-26T23:46:03+00:00 → 2026-09-26T23:49:16+00:00 |
 | duration_s | 195 |
+| comparison report | /workspace/reports/api-comparisons/qwen3-8b/RUN-20-INSURANC… |
 | error | — |
+
+### Run configuration
+
+| Param | Value |
+|---|---|
+| concurrency | 1 |
+| decode_budget_applied | sampling_injected: False · max_tokens_by_agent: {'contracts… |
+| decode_call_timeout_s | 600 |
+| decode_profile | qwen3-8b |
+| decode_sampling | — |
+| dry_run | ✗ |
+| n | — |
+| resumed_from | — |
+| sample | 20 |
+| scorer | extraction |
+| seed | 42 |
+| skipped_already_run | 0 |
+| thinking_recovered | 0 |
+
+### Cost cap
+
+| Key | Value |
+|---|---|
+| cap_usd | 1.5 |
+| cost_usd_est | 0.0095 |
+| status | under_cap |
 
 ### Dataset
 
@@ -44,6 +71,8 @@
 | Metric | Value |
 |---|---|
 | cost_usd_est_total | 0.0095 |
+| cost_usd_total | 0.0095 |
+| expected_cost_usd | 0.12 |
 | latency_ms_mean | 8608.955 |
 | latency_ms_p95 | 11533 |
 | tokens_completion_total | 7641 |

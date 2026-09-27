@@ -9,7 +9,16 @@
 | git | commit: 533b371 · dirty: True |
 | started / finished | 2026-09-27T00:52:33+00:00 → 2026-09-27T01:09:03+00:00 |
 | duration_s | 900 |
+| comparison report | — |
 | error | Interrupted 3/20: unchunked ~350k-char merger text truncate… |
+
+### Run configuration
+
+| Param | Value |
+|---|---|
+| decode_profile | qwen3-8b |
+| sample | 20 |
+| seed | 42 |
 
 ### Dataset
 
@@ -33,6 +42,8 @@
 | Metric | Value |
 |---|---|
 | cost_usd_est_total | 0.0392 |
+| cost_usd_total | 0.0392 |
+| expected_cost_usd | 0.12 |
 | latency_ms_mean | 247912.7333 |
 | latency_ms_p95 | 289547.9 |
 | tokens_completion_total | 24585 |

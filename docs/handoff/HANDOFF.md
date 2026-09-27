@@ -42,7 +42,7 @@
 | Qwen comparator | `qwen/qwen3-8b` (roster price 0.117/0.455 per 1M, verified 2026-09-26) | HF id `Qwen/Qwen3-8B` byte-equal to Modal leg; **roster listing expires 2026-10-09 — re-verify before any later wave** |
 | Qwen decode posture | pipeline defaults (T=0.1 call sites), only budgets+timeout lifted | match what the Modal Qwen leg actually ran |
 | Granite comparator | `ibm-granite/granite-4.2-8b` (0.06/0.25) | mandated T=1.0/top_p=0.95/seed=42 on BOTH legs eventually (Modal leg must adopt it for pairing — note in #18) |
-| Waves | 20 → 50 (prefix-nested draws, seed 42) | issue #18 (20/50/100); 50 is **board-gated**, not pre-authorized |
+| Waves | 20 → 50 (seed 42) | issue #18 (20/50/100). **Nesting verified on the committed manifests: 20 ⊂ 50 for all 5 classes.** Issue #38 doctrine wants every size sliced from ONE locked 100-draw — 100-slice equality could not be network-verified at handoff (HF datasets-server 500 on the pinned revision); it is a **pre-N=50 gate** below. N=20 pairing needs only the 20-draw itself (deterministic loader + committed manifest) and is unblocked. 50 is **board-gated**, not pre-authorized |
 | Wave caps | $1.50 hard cap per 20-doc profile wave; ≈$0.80 expected (Granite leg) | derived from Leg A costs in sandbox `RUN-COST-DERIVATION.md` |
 | Keys | in `.env` (gitignored): `OPENROUTER_API_KEY`, `BRAINTRUST_API_KEY`, `BRAINTRUST_PROJECT=mailroom-sandbox` | **rotate both keys when the program closes** |
 | Trace sink | Braintrust auto-when-keyed; `--require-trace-sink` for real runs | issue #21 coverage |
@@ -108,7 +108,7 @@ Wrap-up duties after all 10 waves: `uv run python scripts/export_site_snapshot.p
 
 - Per-class cost > 3× its N=20 measured cost at the next wave → stop, raise a `needs_attention` note.
 - Any `over_cap` at N=20 → stop that leg, report, wait.
-- N=50 wave requires board sign-off (the report will read `over_cap` under the current $1.50 profile cap — that is the intended tripwire, not a bug).
+- N=50 wave requires board sign-off (the report will read `over_cap` under the current $1.50 profile cap — that is the intended tripwire, not a bug) **and** the #38 slice gate: once `datasets-server.huggingface.co` recovers, draw each class at n=100 seed 42 and confirm `s100[:50] == n50-manifest.filenames` and `s100[:20] == n20-manifest.filenames` for all 5 classes (same snippet shape as the draw check; HF was 500 at handoff). If any class mismatches, redraw ALL sizes for that class from the locked 100-draw slices, recommit, and note the break in #20 before proceeding.
 
 ### Pairing with the Modal legs
 

@@ -116,3 +116,10 @@ Follow `.opencode/skills/eval-engineering/SKILL.md`: register a `TaskSpec` in
 modes unless procedural), scoring in `src/evals/scoring.py`, then mock smoke
 (`--mock --n 3`) before any real run. One-off scripts outside the registry
 are not acceptable.
+
+## Cursor Cloud specific instructions
+
+- Bootstrap with `bash scripts/cloud-agent-install.sh` (also the Cloud Agent `install` command). It installs `uv` into `/usr/local/bin` (no shell-profile edits), clones the gitignored pipeline path from `[tool.uv.sources] mailroom`, and runs `uv sync --extra dev --frozen`. Re-running it is safe.
+- This branch pins `Digital-Mailroom` at `e5eeac603edf27f9fe4f306cf086aa9c31965d9a` (`mailroom` 0.7.1, workspace `llm-dojo-scoring` 0.15.0). `main` uses `../llm-mailroom` and the script pins that clone at `28cb4be816fbb60e56cd3bb2ab72f8d9be1ab636`. On that standalone checkout the script removes `[tool.uv.sources]` so `uv run` uses the git pin instead of a workspace member that is not present. Do not rewrite `uv.lock` to follow a newer pipeline tip.
+- Hermetic checks: `uv run pytest tests/ -q`, `uv run python scripts/freeze_prompts.py --check`, `node scripts/viewer_smoke.js`. Product smoke: `uv run python scripts/run_evals.py --list`, then `uv run python scripts/run_evals.py --task eval:classification --mock --n 3`. `--mock` does not call an LLM. `--real` needs `OPENROUTER_API_KEY`.
+- The eval viewer is static. The environment terminal `eval-viewer` serves `web/` on port 4173 (`http://localhost:4173/`, snapshot at `data/snapshot.json`). Do not export `OBSERVABILITY_PROVIDER` or `MAILROOM_BASE_DIR`.

@@ -63,6 +63,8 @@ COMPARISON_PROFILES: dict[str, dict[str, Any]] = {
         # N=20 probe wave hard cap (SAND-027 doctrine; 50-doc waves are
         # board-gated — the report will read over_cap until re-capped).
         "cost_cap_usd": 1.50,
+        # SAND-027 planning figure for N=20 (Modal Leg A derivation; scales linearly).
+        "expected_cost_usd_n20": 0.80,
     },
     # Qwen twin keeps the pipeline call-site decode posture (temperature 0.1 —
     # what the Modal Qwen/Qwen3-8B leg ran) and only lifts budgets + timeout.
@@ -72,8 +74,20 @@ COMPARISON_PROFILES: dict[str, dict[str, Any]] = {
         "sampling": None,
         "call_timeout_s": COMPARISON_CALL_TIMEOUT_S,
         "cost_cap_usd": 1.50,
+        "expected_cost_usd_n20": 0.12,
     },
 }
+
+
+def expected_cost_for_wave(profile_key: str | None, wave_n: int) -> float | None:
+    """Pre-run planning cost for a wave (None when unknown or wave size is zero)."""
+    profile = get_profile(profile_key)
+    if not profile or wave_n <= 0:
+        return None
+    base = profile.get("expected_cost_usd_n20")
+    if not isinstance(base, (int, float)):
+        return None
+    return round(float(base) * (wave_n / 20.0), 6)
 
 
 def get_profile(key: str | None) -> dict[str, Any] | None:

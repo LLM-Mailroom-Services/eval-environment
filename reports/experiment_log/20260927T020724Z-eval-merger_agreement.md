@@ -9,7 +9,34 @@
 | git | commit: 53ffee5 · dirty: True |
 | started / finished | 2026-09-27T02:07:24+00:00 → 2026-09-27T02:09:08+00:00 |
 | duration_s | 106.5 |
+| comparison report | reports/api-comparisons/qwen3-8b/merger_agreement/runs/2026… |
 | error | — |
+
+### Run configuration
+
+| Param | Value |
+|---|---|
+| concurrency | 1 |
+| decode_budget_applied | sampling_injected: False · max_tokens_by_agent: {'contracts… |
+| decode_call_timeout_s | 600 |
+| decode_profile | qwen3-8b |
+| decode_sampling | — |
+| dry_run | ✗ |
+| n | — |
+| resumed_from | — |
+| sample | 2 |
+| scorer | extraction |
+| seed | 42 |
+| skipped_already_run | 0 |
+| thinking_recovered | 0 |
+
+### Cost cap
+
+| Key | Value |
+|---|---|
+| cap_usd | 1.5 |
+| cost_usd_est | 0.0064 |
+| status | under_cap |
 
 ### Dataset
 
@@ -44,6 +71,8 @@
 | Metric | Value |
 |---|---|
 | cost_usd_est_total | 0.0064 |
+| cost_usd_total | 0.0064 |
+| expected_cost_usd | 0.012 |
 | latency_ms_mean | 46870 |
 | latency_ms_p95 | 47783.9 |
 | tokens_completion_total | 13016 |

@@ -9,7 +9,16 @@
 | git | commit: 5bdab8d · dirty: True |
 | started / finished | 2026-09-27T00:42:31+00:00 → 2026-09-27T00:52:00+00:00 |
 | duration_s | 420 |
+| comparison report | reports/api-comparisons/qwen3-8b/merger_agreement/runs/2026… |
 | error | Interrupted after 1/20: completion budget 8192 truncated me… |
+
+### Run configuration
+
+| Param | Value |
+|---|---|
+| decode_profile | qwen3-8b |
+| sample | 20 |
+| seed | 42 |
 
 ### Dataset
 
@@ -33,6 +42,8 @@
 | Metric | Value |
 |---|---|
 | cost_usd_est_total | 0.0132 |
+| cost_usd_total | 0.0132 |
+| expected_cost_usd | 0.12 |
 | latency_ms_mean | 268266.4 |
 | latency_ms_p95 | 268266.4 |
 | tokens_completion_total | 8195 |

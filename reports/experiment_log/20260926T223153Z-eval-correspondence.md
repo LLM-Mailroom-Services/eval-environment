@@ -9,7 +9,21 @@
 | git | commit: 00082ce · dirty: True |
 | started / finished | 2026-09-26T22:31:53+00:00 → 2026-09-26T22:31:53+00:00 |
 | duration_s | 1.3 |
+| comparison report | — |
 | error | — |
+
+### Run configuration
+
+| Param | Value |
+|---|---|
+| concurrency | 1 |
+| dry_run | ✗ |
+| n | 2 |
+| resumed_from | — |
+| sample | — |
+| scorer | extraction |
+| seed | 42 |
+| skipped_already_run | 0 |
 
 ### Dataset
 
@@ -44,6 +58,7 @@
 | Metric | Value |
 |---|---|
 | cost_usd_est_total | — |
+| cost_usd_total | — |
 | latency_ms_mean | 39.6 |
 | latency_ms_p95 | 62.9 |
 | tokens_completion_total | 20 |

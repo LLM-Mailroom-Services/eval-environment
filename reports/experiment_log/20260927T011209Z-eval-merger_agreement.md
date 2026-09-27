@@ -9,7 +9,17 @@
 | git | commit: f75ccd9 · dirty: True |
 | started / finished | 2026-09-27T01:12:09+00:00 → 2026-09-27T01:25:51+00:00 |
 | duration_s | 780 |
+| comparison report | reports/api-comparisons/qwen3-8b/merger_agreement/runs/2026… |
 | error | Interrupted 1/20: 8 chunks still returned unparseable JSON … |
+
+### Run configuration
+
+| Param | Value |
+|---|---|
+| chunks | 8 |
+| decode_profile | qwen3-8b |
+| sample | 20 |
+| seed | 42 |
 
 ### Dataset
 
@@ -33,6 +43,8 @@
 | Metric | Value |
 |---|---|
 | cost_usd_est_total | 0.0221 |
+| cost_usd_total | 0.0221 |
+| expected_cost_usd | 0.12 |
 | latency_ms_mean | 669067.9 |
 | latency_ms_p95 | 669067.9 |
 | tokens_completion_total | 22641 |

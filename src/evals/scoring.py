@@ -381,24 +381,47 @@ def performance_row(latency_ms: float, usage: dict[str, Any] | None, model: str 
     }
 
 
-def summarize_performance(rows: list[dict[str, Any]]) -> dict[str, Any]:
+def summarize_performance(
+    rows: list[dict[str, Any]],
+    *,
+    run_model: str | None = None,
+    expected_cost_usd: float | None = None,
+) -> dict[str, Any]:
     latencies = [r["latency_ms"] for r in rows if isinstance(r.get("latency_ms"), (int, float))]
     prompt = sum(int(_row_tokens(r, "prompt")) for r in rows)
     completion = sum(int(_row_tokens(r, "completion")) for r in rows)
-    costs = [
-        r.get(cost_key)
-        for r in rows
-        for cost_key in ("cost_usd", "cost_usd_est")
-        if isinstance(r.get(cost_key), (int, float))
+    actual_costs = [
+        r.get("cost_usd") for r in rows if isinstance(r.get("cost_usd"), (int, float))
     ]
-    summary = {
+    cost_usd_total = round(sum(actual_costs), 6) if actual_costs else None
+
+    by_agent = summarize_agent_usage([r.get("agent_usage") for r in rows if r.get("agent_usage")])
+    est_from_agents: float | None = None
+    if by_agent:
+        agent_est = [
+            slot.get("cost_usd_est")
+            for slot in by_agent.values()
+            if isinstance(slot.get("cost_usd_est"), (int, float))
+        ]
+        if agent_est:
+            est_from_agents = round(sum(agent_est), 6)
+
+    cost_usd_est_total = cost_for(prompt, completion, run_model) if run_model else None
+    if cost_usd_est_total is None:
+        cost_usd_est_total = est_from_agents
+    if cost_usd_est_total is None:
+        cost_usd_est_total = cost_usd_total
+
+    summary: dict[str, Any] = {
         "latency_ms_mean": _mean([float(v) for v in latencies]),
         "latency_ms_p95": _p95([float(v) for v in latencies]),
         "tokens_prompt_total": prompt,
         "tokens_completion_total": completion,
-        "cost_usd_est_total": round(sum(costs), 6) if costs else None,
+        "cost_usd_total": cost_usd_total,
+        "cost_usd_est_total": cost_usd_est_total,
     }
-    by_agent = summarize_agent_usage([r.get("agent_usage") for r in rows if r.get("agent_usage")])
+    if expected_cost_usd is not None:
+        summary["expected_cost_usd"] = expected_cost_usd
     if by_agent:
         summary["by_agent"] = by_agent
     return summary

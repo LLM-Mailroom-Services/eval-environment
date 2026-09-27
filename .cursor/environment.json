@@ -1,0 +1,17 @@
+{
+  "name": "mailroom-evals",
+  "install": "bash scripts/cloud-agent-install.sh",
+  "terminals": [
+    {
+      "name": "eval-viewer",
+      "command": "python3 -m http.server 4173 --bind 0.0.0.0 --directory web",
+      "description": "Static eval viewer at http://localhost:4173/ (web/index.html and web/data/snapshot.json)."
+    }
+  ],
+  "ports": [
+    {
+      "name": "eval-viewer",
+      "port": 4173
+    }
+  ]
+}

@@ -374,17 +374,35 @@ def run_task(
     summary["duration_s"] = round(time.time() - started, 1)
     summary["error"] = error
     summary["metrics"] = scoring.summarize_scores(case_rows) if case_rows else {"n": 0, "errors": 0}
-    summary["performance"] = scoring.summarize_performance(case_rows) if case_rows else {}
-    if not summary["model"]:
-        # Provenance: the model that actually dominated the run's token spend
-        # (agent models resolve per-agent from the pipeline taxonomy).
-        by_agent = (summary["performance"] or {}).get("by_agent") or {}
+    if not summary["model"] and case_rows:
+        # Provenance: dominant model by token spend (needed before cost rollup).
+        by_agent_preview = scoring.summarize_agent_usage(
+            [r.get("agent_usage") for r in case_rows if r.get("agent_usage")]
+        )
         dominant = max(
-            by_agent.items(),
+            by_agent_preview.items(),
             key=lambda kv: kv[1].get("total_tokens") or 0,
             default=(None, {}),
         )[0]
-        summary["model"] = ((by_agent.get(dominant) or {}).get("models") or [None])[0]
+        summary["model"] = ((by_agent_preview.get(dominant) or {}).get("models") or [None])[0]
+    params_for_perf = summary.get("params") or {}
+    wave_n = int(
+        params_for_perf.get("sample")
+        or params_for_perf.get("n")
+        or (summary.get("metrics") or {}).get("n")
+        or 0
+    )
+    from .decode_budget import expected_cost_for_wave
+
+    summary["performance"] = (
+        scoring.summarize_performance(
+            case_rows,
+            run_model=summary.get("model"),
+            expected_cost_usd=expected_cost_for_wave(params_for_perf.get("decode_profile"), wave_n),
+        )
+        if case_rows
+        else {}
+    )
     trace_ids = _trace_ids(backend) or {}
     if summary.get("braintrust_experiment"):
         trace_ids = {**trace_ids, **summary["braintrust_experiment"]}
@@ -437,17 +455,23 @@ def run_task(
         finalize_eval_run(summary)
         end_eval_run()
 
-    # Comparison report (Modal-comparable, filed by model): emitted whenever a
-    # decode profile drove the run and cases executed; never fails the run.
-    if budget and case_rows and not dry_run:
+    # Comparison report (Modal-comparable, filed by model/task): emitted for
+    # decode-profile runs and substantive real eval waves (n≥20); never fails the run.
+    if (budget or comparison_report.is_wave_run(summary)) and case_rows and not dry_run:
         try:
-            summary["params"]["decode_sampling"] = budget.get("sampling")
-            summary["params"]["decode_call_timeout_s"] = budget.get("call_timeout_s")
-            cap = comparison_report.cap_status(summary, budget)
+            from .decode_budget import get_profile
+
+            profile_for_report = budget or get_profile(summary["params"].get("decode_profile")) or {}
+            if budget:
+                summary["params"]["decode_sampling"] = budget.get("sampling")
+                summary["params"]["decode_call_timeout_s"] = budget.get("call_timeout_s")
+            cap = comparison_report.cap_status(summary, profile_for_report)
             if cap:
                 summary["cost_cap"] = cap
             report_file = comparison_report.write_report(summary, case_rows)
-            summary["comparison_report"] = str(report_file) if report_file else None
+            summary["comparison_report"] = (
+                comparison_report.repo_relative_path(report_file) if report_file else None
+            )
         except Exception as exc:  # report is auxiliary — log and move on
             logger.warning("comparison_report_failed", task=spec.task_id, error=str(exc))
             summary["comparison_report"] = None

@@ -11,6 +11,7 @@ parent span; scoring still sees one merged prediction per document.
 from __future__ import annotations
 
 import json
+import math
 import re
 from typing import Any
 
@@ -51,7 +52,9 @@ CHUNK_CHARS: dict[str, int] = {
 DEFAULT_CHUNK_CHARS = 120_000
 CHUNK_OVERLAP = 1_500
 CHUNK_HEADER_CHARS = 3_500
-MAX_CHUNKS = 8
+# Extra LLM calls allowed beyond the coverage count, for split-math
+# error — not a license to fan out. 8 needed → 10 max; 1 needed → 2 max.
+CALL_HEADROOM = 0.15
 
 _ARTICLE_SPLIT = re.compile(
     r"(?=\n[ \t]*(?:ARTICLE|Article|SECTION|Section)\s+(?:[IVXLCDM]+|\d+))",
@@ -149,16 +152,35 @@ def user_extract_message(
     )
 
 
+def needed_chunks(n_chars: int, max_chars: int) -> int:
+    """Minimum windows to cover ``n_chars`` without exceeding ``max_chars``."""
+    if n_chars <= 0 or max_chars <= 0:
+        return 1
+    if n_chars <= max_chars:
+        return 1
+    return math.ceil(n_chars / max_chars)
+
+
+def llm_call_budget(needed: int) -> int:
+    """Hard per-row LLM call cap: coverage count + 15% calculation headroom."""
+    needed = max(int(needed), 1)
+    return max(needed, math.ceil(needed * (1 + CALL_HEADROOM)))
+
+
 def chunk_document(text: str, *, max_chars: int, overlap: int = CHUNK_OVERLAP) -> list[str]:
-    """Split a long source into overlapping windows, preferring ARTICLE breaks."""
+    """Split a long source into the minimum covering windows (ARTICLE-aware)."""
     if max_chars <= 0 or len(text) <= max_chars:
         return [text] if text else [""]
+    needed = needed_chunks(len(text), max_chars)
     overlap = _clamp_overlap(max_chars, overlap)
     packed = _pack_articles(text, max_chars=max_chars, overlap=overlap)
     pieces = packed if packed else _windows(text, max_chars=max_chars, overlap=overlap)
-    if len(pieces) > MAX_CHUNKS:
-        size = max(max_chars, (len(text) + MAX_CHUNKS - 1) // MAX_CHUNKS)
+    if len(pieces) != needed or any(len(p) > max_chars for p in pieces):
+        size = max(1, (len(text) + needed - 1) // needed)
         pieces = [text[i : i + size] for i in range(0, len(text), size)]
+    if len(pieces) > needed:
+        pieces = pieces[:needed]
+        pieces[-1] = text[sum(len(p) for p in pieces[:-1]) :]
     return pieces
 
 
@@ -175,7 +197,11 @@ def extract_entities(
     system = system + _JSON_NOTE
     client, model, max_tokens, temperature = _client_for(specialist)
     limit = CHUNK_CHARS.get(doc_class, DEFAULT_CHUNK_CHARS)
+    needed = needed_chunks(len(text), limit)
+    budget = llm_call_budget(needed)
     pieces = chunk_document(text, max_chars=limit)
+    if len(pieces) > budget:
+        pieces = pieces[:budget]
     if len(pieces) > 1:
         header = text[:CHUNK_HEADER_CHARS]
         decorated: list[str] = []
@@ -189,6 +215,7 @@ def extract_entities(
                     + piece
                 )
         pieces = decorated
+    meter = _RowCallBudget(budget)
     logger.info(
         "specialist_openrouter_call",
         agent=specialist,
@@ -196,12 +223,24 @@ def extract_entities(
         doc_class=doc_class,
         chars=len(text),
         chunks=len(pieces),
+        needed_chunks=needed,
+        llm_call_budget=budget,
         chunk_limit=limit,
         model=model,
         max_tokens=max_tokens,
     )
     parsed_chunks: list[dict[str, Any]] = []
     for i, piece in enumerate(pieces):
+        if meter.remaining <= 0:
+            logger.warning(
+                "specialist_llm_call_budget_exhausted",
+                agent=specialist,
+                used=meter.used,
+                budget=budget,
+                chunk=i,
+                chunks=len(pieces),
+            )
+            break
         user = user_extract_message(
             doc_class=doc_class,
             text=piece,
@@ -219,6 +258,7 @@ def extract_entities(
                 max_tokens=max_tokens,
                 temperature=temperature,
                 agent=specialist,
+                meter=meter,
             )
         )
     extracted = merge_extracted(parsed_chunks)
@@ -231,6 +271,9 @@ def extract_entities(
         "model": model,
         "prompt_key": prompt_key_for(specialist),
         "chunks": len(pieces),
+        "needed_chunks": needed,
+        "llm_call_budget": budget,
+        "llm_calls": meter.used,
     }
 
 
@@ -338,6 +381,24 @@ def _windows(text: str, *, max_chars: int, overlap: int) -> list[str]:
     return chunks
 
 
+class _RowCallBudget:
+    """Hard stop on OpenRouter create() calls for one scored document row."""
+
+    def __init__(self, limit: int) -> None:
+        self.limit = max(int(limit), 1)
+        self.used = 0
+
+    @property
+    def remaining(self) -> int:
+        return max(self.limit - self.used, 0)
+
+    def consume(self) -> bool:
+        if self.used >= self.limit:
+            return False
+        self.used += 1
+        return True
+
+
 def _complete_json(
     client: Any,
     *,
@@ -347,7 +408,10 @@ def _complete_json(
     max_tokens: int,
     temperature: float,
     agent: str,
+    meter: _RowCallBudget,
 ) -> dict[str, Any]:
+    if not meter.consume():
+        return {"_parse_error": True, "confidence": 0.0, "_budget_exhausted": True}
     try:
         response = client.chat.completions.create(
             model=model,
@@ -360,15 +424,27 @@ def _complete_json(
             max_tokens=max_tokens,
         )
     except Exception:
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": system + "\nReply with ONLY a JSON object."},
-                {"role": "user", "content": user},
-            ],
-            temperature=temperature,
-            max_tokens=max_tokens,
-        )
+        if not meter.consume():
+            logger.warning(
+                "specialist_llm_retry_blocked_by_budget",
+                agent=agent,
+                used=meter.used,
+                budget=meter.limit,
+            )
+            return {"_parse_error": True, "confidence": 0.0, "_budget_exhausted": True}
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": system + "\nReply with ONLY a JSON object."},
+                    {"role": "user", "content": user},
+                ],
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+        except Exception:
+            logger.warning("specialist_llm_retry_failed", agent=agent, exc_info=True)
+            return {"_parse_error": True, "confidence": 0.0}
     _record(response, model=model, agent=agent)
     return _parse_json(_message_content(response))
 

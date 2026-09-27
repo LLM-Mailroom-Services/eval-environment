@@ -12,7 +12,9 @@ from evals.specialist_llm import (
     CLASS_SPECIALIST,
     chunk_document,
     extract_entities,
+    llm_call_budget,
     merge_extracted,
+    needed_chunks,
     prompt_key_for,
     set_mock_client,
     specialist_system_prompt,
@@ -119,6 +121,8 @@ def test_extract_entities_openrouter_shape_not_langchain():
         assert "AGREEMENT AND PLAN OF MERGER" in user
         assert captured["model"] == "mock-model"
         assert out["chunks"] == 1
+        assert out["llm_calls"] == 1
+        assert out["llm_call_budget"] == 2
     finally:
         set_mock_client(None)
         deactivate()
@@ -139,9 +143,8 @@ def test_chunk_document_splits_long_merger_on_articles():
 def test_chunk_document_windows_when_no_articles():
     text = "x" * 10_000
     chunks = chunk_document(text, max_chars=3_000, overlap=500)
-    assert len(chunks) > 2
-    assert chunks[0].startswith("x")
-    assert chunks[-1].endswith("x")
+    assert len(chunks) == needed_chunks(10_000, 3_000)
+    assert "".join(chunks) == text or sum(len(c) for c in chunks) >= len(text)
 
 
 def test_merge_extracted_unions_chunk_fields():
@@ -186,8 +189,10 @@ def test_long_merger_issues_one_call_per_chunk_same_system_prompt(monkeypatch):
             "merger_agreement_specialist",
             {"text": text, "expected_doc_class": "merger_agreement"},
         )
-        assert 1 < len(captured) <= sl.MAX_CHUNKS
-        assert out["chunks"] == len(captured)
+        assert 1 < len(captured) <= out["llm_call_budget"]
+        assert out["chunks"] == needed_chunks(len(text), 1_200)
+        assert out["llm_calls"] == len(captured)
+        assert out["llm_calls"] <= out["llm_call_budget"]
         assert out["prompt_key"] == "merger_agreement_specialist_v1"
         assert out["extracted_data"]["parties"][0] == "P1"
         for call in captured:
@@ -197,6 +202,45 @@ def test_long_merger_issues_one_call_per_chunk_same_system_prompt(monkeypatch):
             assert "You are the contracts specialist" not in system
             assert "chunk" in user.lower()
             assert "Extract the registered entities" in user
+    finally:
+        set_mock_client(None)
+        deactivate()
+
+
+def test_needed_chunks_and_call_budget_include_15_percent_headroom():
+    assert needed_chunks(48_000, 48_000) == 1
+    assert llm_call_budget(1) == 2
+    assert needed_chunks(387_592, 48_000) == 9
+    assert llm_call_budget(9) == 11
+    assert llm_call_budget(8) == 10
+    text = "y" * 387_592
+    pieces = chunk_document(text, max_chars=48_000)
+    assert len(pieces) == 9
+    assert all(len(p) <= 48_000 for p in pieces[:-1])
+
+
+def test_row_llm_call_budget_blocks_retry_runaway():
+    activate("frozen")
+    try:
+        captured = {"n": 0}
+
+        def _create(**kwargs):
+            captured["n"] += 1
+            raise RuntimeError("simulated openrouter failure")
+
+        client = MagicMock()
+        client.chat.completions.create.side_effect = lambda **kw: _create(**kw)
+        set_mock_client(client)
+        text = "short merger"
+        out = extract_entities(
+            "merger_agreement_specialist",
+            {"text": text, "expected_doc_class": "merger_agreement"},
+        )
+        assert out["needed_chunks"] == 1
+        assert out["llm_call_budget"] == 2
+        assert captured["n"] == 2
+        assert out["llm_calls"] == 2
+        assert out["extracted_data"].get("_parse_error") is True
     finally:
         set_mock_client(None)
         deactivate()

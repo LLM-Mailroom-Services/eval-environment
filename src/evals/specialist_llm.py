@@ -129,6 +129,15 @@ def extract_entities(
     system = system + _JSON_NOTE
     user = user_extract_message(doc_class=doc_class, text=text, subclass=subclass)
     client, model, max_tokens, temperature = _client_for(specialist)
+    logger.info(
+        "specialist_openrouter_call",
+        agent=specialist,
+        prompt_key=prompt_key_for(specialist),
+        doc_class=doc_class,
+        chars=len(text),
+        model=model,
+        max_tokens=max_tokens,
+    )
     try:
         response = client.chat.completions.create(
             model=model,

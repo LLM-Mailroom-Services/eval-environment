@@ -25,7 +25,7 @@ CLASS_BUDGETS: dict[str, int] = {
     "correspondence_specialist": 4096,
     "insurance_claims_specialist": 6144,
     "contracts_specialist": 8192,
-    "merger_agreement_specialist": 8192,
+    "merger_agreement_specialist": 16384,
     "corporate_records_specialist": 8192,
 }
 

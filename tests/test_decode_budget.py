@@ -49,6 +49,7 @@ def test_profiles_match_issue_18_budgets():
     assert CLASS_BUDGETS["correspondence_specialist"] == 4096
     assert CLASS_BUDGETS["insurance_claims_specialist"] == 6144
     assert CLASS_BUDGETS["contracts_specialist"] == 8192
+    assert CLASS_BUDGETS["merger_agreement_specialist"] == 16384
     assert COMPARISON_PROFILES["granite-4.2-8b"]["sampling"] == {
         "temperature": 1.0, "top_p": 0.95, "seed": 42,
     }

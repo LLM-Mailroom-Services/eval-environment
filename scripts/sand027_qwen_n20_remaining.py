@@ -79,8 +79,11 @@ def _wait_pid(pid: int) -> None:
 
 
 def _run_wave(task: str, subset: str, resume_id: str | None) -> int:
+    env = os.environ.copy()
+    env["PYTHONUNBUFFERED"] = "1"
+    env.setdefault("BRAINTRUST_PROJECT", "Mailroom-Evals")
     cmd = [
-        "uv", "run", "python", "scripts/run_evals.py",
+        "uv", "run", "python", "-u", "scripts/run_evals.py",
         "--task", task,
         "--real",
         "--subset", subset,
@@ -99,7 +102,7 @@ def _run_wave(task: str, subset: str, resume_id: str | None) -> int:
     with LOG.open("a", encoding="utf-8") as fh:
         fh.write("\n=== QWEN-N20 " + time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()) + " ===\n")
         fh.flush()
-        proc = subprocess.run(cmd, cwd=REPO, stdout=fh, stderr=subprocess.STDOUT)
+        proc = subprocess.run(cmd, cwd=REPO, stdout=fh, stderr=subprocess.STDOUT, env=env)
     _log(f"exit {task} code={proc.returncode}")
     return proc.returncode
 

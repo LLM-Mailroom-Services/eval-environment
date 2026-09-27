@@ -9,7 +9,7 @@
 | git | commit: 1d9f8d2 · dirty: True |
 | started / finished | 2026-09-27T05:42:11+00:00 → 2026-09-27T05:45:37+00:00 |
 | duration_s | 208.1 |
-| comparison report | reports/api-comparisons/granite-4.2-8b/insurance_claims/RUN… |
+| comparison report | reports/api-comparisons/granite-4.2-8b/insurance_claims/run… |
 | error | — |
 
 ### Run configuration

@@ -9,7 +9,7 @@
 | git | commit: 2a70e8c · dirty: True |
 | started / finished | 2026-09-27T05:26:37+00:00 → 2026-09-27T05:31:27+00:00 |
 | duration_s | 292 |
-| comparison report | reports/api-comparisons/granite-4.2-8b/correspondence/RUN-2… |
+| comparison report | reports/api-comparisons/granite-4.2-8b/correspondence/runs/… |
 | error | — |
 
 ### Run configuration

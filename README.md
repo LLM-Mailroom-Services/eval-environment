@@ -248,6 +248,11 @@ uv run python scripts/run_evals.py --task eval:classification --real --trace-bac
 - Langfuse is intentionally **not** a sink here — issue #7 names Phoenix
   and/or Braintrust.
 
+Full step-by-step replication for the OpenRouter-provider + Braintrust-sink
+path — specialists and the sorter, decode profiles, the concurrency=8
+reliability findings, and the full-corpus Dataset sync — lives in
+[`docs/openrouter-braintrust-runbook.md`](docs/openrouter-braintrust-runbook.md).
+
 ## Vercel viewer & dashboard
 
 `web/` is a zero-dependency static site — a **dedicated viewer of eval run

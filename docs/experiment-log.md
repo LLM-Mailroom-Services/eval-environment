@@ -10,9 +10,15 @@ task family (`eval`, `pilot`, `calibration`).
 | path | contents | env override |
 |---|---|---|
 | `reports/experiment_log.jsonl` | THE index — one line per RUN (summary + pointers) | `EXPERIMENT_LOG_PATH` |
-| `reports/experiment_log.md` | rendered human-readable tables, rebuildable | `EXPERIMENT_LOG_MD_PATH` |
+| `reports/experiment_log.md` | SHORT grouped index (real waves ≥10 cases / debug real runs / mock runs), rebuildable | `EXPERIMENT_LOG_MD_PATH` |
+| `reports/experiment_log/<run_id>.md` | ONE file per run — full detail (dataset, metrics, per-agent, cases); never appended into the index | `EXPERIMENT_LOG_RUNS_DIR` |
 | `data/experiments/<run_id>/cases.jsonl` | one line per CASE (full fidelity) | `EVALS_EXPERIMENTS_DIR` |
 | `data/experiments/<run_id>/summary.json` | the same run-summary record, self-contained | `EVALS_EXPERIMENTS_DIR` |
+
+The main index deliberately never grows a per-run detail section inline —
+that used to make it thousands of lines long and dominated by mock/CI-smoke
+noise. Grouping is by `mode`/case-count only (a markdown-layout concern);
+the JSONL still carries every run, mock or real, without exception.
 
 ## Run-summary record
 

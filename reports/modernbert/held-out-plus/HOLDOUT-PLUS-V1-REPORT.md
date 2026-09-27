@@ -62,6 +62,21 @@ Builder: `training/build_heldout_plus.py` (deterministic, seed 42).
 Full audit: `data/heldout_plus_v1/audit.json` (local build artifact, gitignored;
 `data/` never commits — re-run the builder to reproduce byte-identically).
 
+## Plus-set quality mix (2026-09-27, local CPU)
+
+| property | value |
+| --- | --- |
+| body chars min / median / max | 4 / 699 / 211,263 |
+| token estimate min / median / max | 1 / 174 / 52,816 |
+| nonempty subjects | 964 / 1,000 (932 unique) |
+| folded-duplicate subject groups | 11 groups / 46 rows (top: bare `RE:`/`Re:` subjects as published — source trait, not a cleaning defect) |
+| subclass mix | email 981 · notice 7 · memo 6 · letter 5 · press_release 1 |
+
+Median 174 tokens keeps the extension firmly in the single-window regime
+(pre-flight: 1,269/1,323 single-window overall); the long tail exercises the
+plurality-merge path. The builder now also emits `token_estimate`, so plus
+rows match the `build_documents` column contract exactly.
+
 ## Eval wiring
 
 - `training/eval_modernbert.py --subset heldout-plus` loads canonical test +
@@ -85,6 +100,25 @@ label through the full `id2label`; regression test
 `test_runner_up_unknown_with_trainable_map` fails on the old code with the
 exact production traceback line and passes on the new (36/36 inference tests,
 51/51 with the eval-CLI suite).
+
+## Pre-flight validation (2026-09-27, local CPU)
+
+Full-pool contract check over all **1,323** docs (labels, emptiness, title
+leak, `window_document` at 8,192/512):
+
+| check | result |
+| --- | --- |
+| windowed without error | **1,323 / 1,323** |
+| label mismatches (`normalize_subclass`) | 0 |
+| empty bodies | 0 |
+| `title == filename` | 0 |
+| single-window / multi-window docs | 1,269 / 54 (max 13 windows) |
+| total windows | **1,554** |
+
+Runtime projection from the 323-doc Modal run (541 windows in ~200 s remote
+wall incl. stage pull + weight load): eval time scales ~linearly in windows,
+so the full 1,323-doc run should land **under ~12 min wall ≈ $0.16** at
+$0.80/hr L4. The pool will not crash or fail-open on windowing.
 
 ## Cost / runtime note (no new GPU billing this turn)
 

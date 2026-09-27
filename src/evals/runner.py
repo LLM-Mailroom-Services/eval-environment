@@ -126,6 +126,10 @@ def run_task(
     """Execute one task. Returns the run summary + per-case rows."""
     spec = get_task(task_id)
     subset = subset or spec.default_subset
+    if spec.name in invoke_mod.TASK_SPECIALIST:
+        # Merger (and the other class specialists) are agent calls. extract_node
+        # is not the eval path — it emits extra pipeline nodes and can CUAD-enrich.
+        invoke_mode = "agent"
 
     # Preflight BEFORE any corpus load / prompt injection / LLM spend.
     # Real mode hard-fails on missing credentials, bad model/prompt/subset,
@@ -699,7 +703,7 @@ def _execute_cases(
         except Exception:
             pass
         # Name the parent Experiment row after the specialist *before* invoke so
-        # nested extract-fields / LLM spans attach under one document row.
+        # nested LLM spans attach under that specialist call (not a document row).
         specialist = _specialist_name(spec, None)
         with tracing.case_span(
             backend,
@@ -731,9 +735,14 @@ def _execute_cases(
             )
             if case_model:
                 span.update_metadata({"model": case_model})
+            if isinstance(prediction, dict) and prediction.get("prompt_key"):
+                span.update_metadata({
+                    "prompt_key": prediction["prompt_key"],
+                    "specialist": prediction.get("specialist") or specialist,
+                })
             perf = scoring.performance_row(latency, usage, case_model)
             span.set_output({"scores": scores, "error": error})
-            # Span metrics: essentials; Braintrust experiment: one fully scored document row.
+            # Span metrics: essentials; Braintrust experiment: one specialist row.
             span.set_metrics(scoring.essential_metrics(spec.scorer, scores))
             agent_usage = _agent_usage()
             specialist = _specialist_name(spec, agent_usage) or specialist

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-"""Finish Qwen3-8B N=20 specialist waves (contracts resume + merger + corporate).
+"""Finish Qwen3-8B N=20 specialist waves not yet completed.
 
-Correspondence and insurance already completed n=20. Does not schedule Granite
-or N=50. Waits for an in-flight contracts PID when provided.
+Skips correspondence, insurance, and contracts (already n=20). Runs merger
+then corporate_records as fresh OpenRouter specialist calls. No Granite / N=50.
 """
 from __future__ import annotations
 
@@ -26,7 +26,6 @@ SEED = 42
 CONTRACTS_RID = "20260926T235347Z-eval-contracts"
 
 WAVES = [
-    ("eval:contracts", "class:contract"),
     ("eval:merger_agreement", "class:merger_agreement"),
     ("eval:corporate_records", "class:corporate_record"),
 ]
@@ -91,7 +90,7 @@ def _run_wave(task: str, subset: str, resume_id: str | None) -> int:
         "--decode-profile", PROFILE,
         "--require-trace-sink",
         "--prompt-source", "frozen",
-        "--trace-backend", "auto",
+        "--trace-backend", "braintrust",
     ]
     if resume_id:
         cmd.extend(["--resume", resume_id])
@@ -120,11 +119,6 @@ def main() -> int:
             )
             continue
         resume = None
-        if task == "eval:contracts":
-            n = _cases_on_disk(CONTRACTS_RID)
-            if 0 < n < SAMPLE:
-                resume = CONTRACTS_RID
-                _log(f"resume {CONTRACTS_RID} from {n}/{SAMPLE}")
         code = _run_wave(task, subset, resume)
         if code != 0:
             return code

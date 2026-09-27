@@ -78,9 +78,10 @@ def test_case_span_names_specialist_parent_not_extract_fields():
     assert kw["name"] == "contracts_specialist"
     assert kw["name"] != "extract-fields"
     assert kw["type"] == "eval"
-    assert kw["id"] == tracing.doc_text_sha256(case)
-    assert kw["metadata"]["pipeline_node"] == "extract-fields"
+    assert "id" not in kw
+    assert "dataset_record_id" not in kw
     assert kw["metadata"]["specialist"] == "contracts_specialist"
+    assert kw["metadata"]["eval_target"] == "contracts_specialist"
 
 
 def test_run_span_is_noop_when_experiment_is_open():

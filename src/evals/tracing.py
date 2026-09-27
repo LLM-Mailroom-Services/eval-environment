@@ -11,10 +11,10 @@ first agent instantiation so llm-mailroom's ``llm/client.get_llm`` wraps the
 OpenAI client with the matching instrumentation — every LLM call inside a
 node/agent invocation auto-traces.
 
-One Experiment row per case: the parent span is named after the specialist
-(or node when there is no specialist), and nested node/LLM spans attach
-under it. Do not also ``Experiment.log`` the same document — that duplicates
-rows. Input/output are CURATED:
+One Experiment row per specialist (or node) invocation — never a document
+inventory row, and never a sibling extract-fields / pipeline-node row.
+Nested LLM spans attach under the specialist parent. Do not
+``Experiment.log`` a second row. Input/output are CURATED:
 no raw document text, no ground-truth labels, and no filename-bearing
 ``case_id`` strings (use ``public_case_ref`` + ``doc_text_sha256`` to
 join back to the experiment log). Scorer metrics attach to the span
@@ -372,11 +372,11 @@ def case_span(
     span_name: str | None = None,
     specialist: str | None = None,
 ) -> Iterator[Any]:
-    """One parent Experiment row per document.
+    """One parent Experiment row per specialist (or node) call.
 
-    ``span_name`` / ``specialist`` name the row (one specialist invocation).
-    Nested extract-fields / LLM spans belong under this parent — they must
-    not be logged as sibling Experiment rows.
+    ``span_name`` / ``specialist`` name the row. Nested LLM spans belong
+    under this parent. Documents are not logged as their own rows; extract-fields
+    and other pipeline nodes must not appear as sibling Experiment rows.
     """
     if backend == "none":
         yield _noop
@@ -386,33 +386,28 @@ def case_span(
     meta = dict(run_meta or {})
     meta.setdefault("case_ref", public_case_ref(case))
     meta.setdefault("doc_text_sha256", doc_text_sha256(case))
-    meta.setdefault("pipeline_node", node_name)
     if specialist:
         meta.setdefault("specialist", specialist)
-    row_id = doc_text_sha256(case)
+        meta["eval_target"] = specialist
+    else:
+        meta.setdefault("eval_target", node_name)
     try:
         if backend == "braintrust":
             import braintrust
 
-            from evals.braintrust_experiment import current_experiment, dataset_record_id
+            from evals.braintrust_experiment import current_experiment
 
             exp = current_experiment()
-            record_id = dataset_record_id(case)
-            # Experiment rows are type=eval so scores land on the document
-            # parent; nested extract-fields / LLM spans stay children.
+            # Specialist (or node) parent only. Do not key the row by document
+            # sha / dataset_record_id — that surfaces the corpus document as
+            # its own Braintrust row beside the specialist call.
             span_kwargs: dict[str, Any] = {
                 "name": parent_name,
                 "type": "eval",
                 "input": _curate_case_input(case),
-                "metadata": {
-                    **(meta or {}),
-                    **({"dataset_record_id": record_id} if record_id else {}),
-                },
+                "metadata": meta or {},
                 "tags": list(meta.get("tags") or []) or None,
-                "id": row_id,
             }
-            if record_id:
-                span_kwargs["dataset_record_id"] = record_id
             span_cm = (
                 exp.start_span(**span_kwargs)
                 if exp is not None
@@ -589,8 +584,8 @@ def run_span(
         if backend == "braintrust":
             from evals.braintrust_experiment import current_experiment
 
-            # An open Experiment already has one row per document. A sibling
-            # evals-run span shows up as a 21st root and duplicates the UI.
+            # An open Experiment already has one row per specialist call. A
+            # sibling evals-run span shows up as an extra root in the UI.
             if current_experiment() is not None:
                 yield _noop
                 return

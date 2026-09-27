@@ -318,3 +318,106 @@ hub tip ed7576b676343e0b402ec5412cded301e629bdee differs from the requested pinn
 2026-09-27 00:03:35 [info     ] extracted                      attempts=1 confidence=0.85 conflict_detected=False doc_type=contract
 2026-09-27 00:03:35 [info     ] audit_entry_written            entry_id=582de303-d52d-4d65-ad87-a053190a9158 event_name=extracted
 2026-09-27 00:03:35 [info     ] llm_structured_call            agent=contracts_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:04:52 [info     ] llm_structured_response        agent=contracts_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'term_length', 'governing_law', 'contract_value', 'renewal_terms', 'cuad_family', 'merger_consideration', 'cuad_clauses', 'maud_clauses', 'confidence']
+2026-09-27 00:04:52 [info     ] extracted                      attempts=1 confidence=0.9 conflict_detected=False doc_type=contract
+2026-09-27 00:04:52 [info     ] audit_entry_written            entry_id=3919b4a8-61de-4da2-a83e-4b967c3028e7 event_name=extracted
+2026-09-27 00:05:01 [info     ] llm_structured_call            agent=contracts_specialist model=qwen/qwen3-8b pages=None
+2026-09-27T00:12:28Z wait pid=12056
+2026-09-27T00:12:28Z still running pid=12056 contracts_cases=18
+2026-09-27T00:12:48Z still running pid=12056 contracts_cases=18
+2026-09-27T00:13:08Z still running pid=12056 contracts_cases=18
+2026-09-27T00:13:28Z still running pid=12056 contracts_cases=18
+2026-09-27T00:13:48Z still running pid=12056 contracts_cases=18
+2026-09-27T00:14:08Z still running pid=12056 contracts_cases=19
+2026-09-27T00:14:28Z still running pid=12056 contracts_cases=19
+2026-09-27T00:14:48Z still running pid=12056 contracts_cases=19
+2026-09-27T00:15:08Z still running pid=12056 contracts_cases=19
+2026-09-27T00:15:28Z pid 12056 exited; contracts_cases=40
+2026-09-27T00:15:30Z SKIP eval:contracts class:contract run=20260926T235347Z-eval-contracts n=20 cost=0.058368
+2026-09-27T00:15:30Z RUN scripts/run_evals.py --task eval:merger_agreement --real --subset class:merger_agreement --sample 20 --seed 42 --model qwen/qwen3-8b --decode-profile qwen3-8b --require-trace-sink --prompt-source frozen --trace-backend auto
+
+=== QWEN-N20 2026-09-27T00:15:30Z ===
+2026-09-27 00:15:31 [info     ] evals_dojo_taxonomy_wired      doc_classes=['contract', 'corporate_record', 'correspondence', 'insurance_claim', 'merger_agreement'] source=_taxonomy_from_config
+2026-09-27 00:15:31 [info     ] evals_preflight_ok             mode=real task=eval:merger_agreement warnings=0
+hub tip ed7576b676343e0b402ec5412cded301e629bdee differs from the requested pinned revision 46a4d3c240a36671cde0182fff4960f6b8b73aca — the dataset moved upstream; this load stays on the pin, but the next publish roll will re-pin (provenance records both)
+2026-09-27 00:15:33 [info     ] evals_prompts_activated        roles=['arbiter', 'boss', 'contracts_specialist', 'corporate_records_specialist', 'correspondence_specialist', 'insurance_claims_specialist', 'intake', 'judge', 'judge-classification', 'judge-correctness', 'merger_agreement_specialist', 'pipeline_quality', 'pipeline_verdict', 'sorter', 'sorter_reviewer'] source=frozen
+2026-09-27 00:15:33 [info     ] evals_openrouter_model_override model=qwen/qwen3-8b
+2026-09-27 00:15:33 [info     ] braintrust_initialized         project=Mailroom-Evals
+2026-09-27 00:15:33 [info     ] evals_langchain_llm_tracing_enabled
+2026-09-27 00:15:33 [info     ] braintrust_experiment_opened   dataset=mailroom-hf-46a4d3c2 experiment=20260927T001533Z-eval-merger_agreement n_cases=20 project=Mailroom-Evals
+2026-09-27 00:15:34 [debug    ] score_configs_validated        count=59 registry=llm-dojo-scoring
+2026-09-27 00:15:34 [info     ] schema_ready                   url=sqlite+aiosqlite:////tmp/mailroom-evals-mmbncmqg/mailroom.db
+2026-09-27 00:15:34 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:16:11 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords', 'confidence']
+2026-09-27 00:16:11 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:16:49 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords']
+2026-09-27 00:16:49 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27T00:17:16Z SKIP eval:contracts class:contract run=20260926T235347Z-eval-contracts n=20 cost=0.058368
+2026-09-27T00:17:16Z RUN scripts/run_evals.py --task eval:merger_agreement --real --subset class:merger_agreement --sample 20 --seed 42 --model qwen/qwen3-8b --decode-profile qwen3-8b --require-trace-sink --prompt-source frozen --trace-backend auto
+
+=== QWEN-N20 2026-09-27T00:17:16Z ===
+2026-09-27 00:17:17 [info     ] evals_dojo_taxonomy_wired      doc_classes=['contract', 'corporate_record', 'correspondence', 'insurance_claim', 'merger_agreement'] source=_taxonomy_from_config
+2026-09-27 00:17:17 [info     ] evals_preflight_ok             mode=real task=eval:merger_agreement warnings=0
+hub tip ed7576b676343e0b402ec5412cded301e629bdee differs from the requested pinned revision 46a4d3c240a36671cde0182fff4960f6b8b73aca — the dataset moved upstream; this load stays on the pin, but the next publish roll will re-pin (provenance records both)
+2026-09-27 00:17:19 [info     ] evals_prompts_activated        roles=['arbiter', 'boss', 'contracts_specialist', 'corporate_records_specialist', 'correspondence_specialist', 'insurance_claims_specialist', 'intake', 'judge', 'judge-classification', 'judge-correctness', 'merger_agreement_specialist', 'pipeline_quality', 'pipeline_verdict', 'sorter', 'sorter_reviewer'] source=frozen
+2026-09-27 00:17:19 [info     ] evals_openrouter_model_override model=qwen/qwen3-8b
+2026-09-27 00:17:19 [info     ] braintrust_initialized         project=Mailroom-Evals
+2026-09-27 00:17:19 [info     ] evals_langchain_llm_tracing_enabled
+2026-09-27 00:17:20 [info     ] braintrust_experiment_opened   dataset=mailroom-hf-46a4d3c2 experiment=20260927T001719Z-eval-merger_agreement n_cases=20 project=Mailroom-Evals
+2026-09-27 00:17:20 [debug    ] score_configs_validated        count=59 registry=llm-dojo-scoring
+2026-09-27 00:17:20 [info     ] schema_ready                   url=sqlite+aiosqlite:////tmp/mailroom-evals-ft0kh8t4/mailroom.db
+2026-09-27 00:17:20 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:18:00 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords', 'confidence']
+2026-09-27 00:18:00 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:18:27 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords']
+2026-09-27 00:18:27 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:18:45 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords', 'confidence']
+2026-09-27 00:18:45 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:19:08 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords', 'confidence']
+2026-09-27 00:19:08 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:19:39 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords']
+2026-09-27 00:19:39 [info     ] extracted                      attempts=1 confidence=0.85 conflict_detected=False doc_type=merger_agreement
+2026-09-27 00:19:39 [info     ] audit_entry_written            entry_id=84f5891d-42a0-4550-9e88-af01057ff46c event_name=extracted
+2026-09-27 00:19:44 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:20:21 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords']
+2026-09-27 00:20:21 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:20:46 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords', 'confidence']
+2026-09-27 00:20:46 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:21:14 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords', 'confidence']
+2026-09-27 00:21:14 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:21:39 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords', 'confidence']
+2026-09-27 00:21:39 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:21:54 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords', 'confidence']
+2026-09-27 00:21:54 [info     ] extracted                      attempts=1 confidence=1.0 conflict_detected=False doc_type=merger_agreement
+2026-09-27 00:21:54 [info     ] audit_entry_written            entry_id=601b4a14-1b1c-498e-9e80-6ea2df515239 event_name=extracted
+2026-09-27 00:21:59 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:22:30 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords']
+2026-09-27 00:22:30 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:22:59 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords', 'confidence']
+2026-09-27 00:22:59 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:23:25 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords']
+2026-09-27 00:23:25 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:23:46 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords', 'confidence']
+2026-09-27 00:23:46 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:24:02 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords']
+2026-09-27 00:24:02 [info     ] extracted                      attempts=1 confidence=1.0 conflict_detected=False doc_type=merger_agreement
+2026-09-27 00:24:02 [info     ] audit_entry_written            entry_id=17327c91-10e3-4ff6-8b2e-04582e3874cb event_name=extracted
+2026-09-27 00:24:04 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:24:38 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords']
+2026-09-27 00:24:38 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:25:03 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords', 'confidence']
+2026-09-27 00:25:03 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:25:25 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords']
+2026-09-27 00:25:25 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:25:42 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords', 'confidence']
+2026-09-27 00:25:42 [info     ] extracted                      attempts=1 confidence=1.0 conflict_detected=False doc_type=merger_agreement
+2026-09-27 00:25:42 [info     ] audit_entry_written            entry_id=801f7c7c-abfc-48dc-84f0-ec1f5775370d event_name=extracted
+2026-09-27 00:25:43 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:26:13 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords', 'confidence']
+2026-09-27 00:26:13 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:26:40 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords']
+2026-09-27 00:26:40 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:27:01 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords', 'confidence']
+2026-09-27 00:27:01 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None
+2026-09-27 00:27:28 [info     ] llm_structured_response        agent=merger_agreement_specialist keys=['reasoning', 'document_name', 'parties', 'effective_date', 'effective_time', 'governing_law', 'merger_consideration', 'maud_clauses', 'intent', 'subject_matter', 'keywords']
+2026-09-27 00:27:28 [info     ] llm_structured_call            agent=merger_agreement_specialist model=qwen/qwen3-8b pages=None

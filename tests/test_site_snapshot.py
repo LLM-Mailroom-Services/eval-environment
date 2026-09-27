@@ -42,6 +42,8 @@ def test_build_snapshot_shape(logged_run):
     assert len(env["tasks"]) == 31
     assert env["corpus"]["revision"] == "46a4d3c240a36671cde0182fff4960f6b8b73aca"
     assert len(env["prompts"]["versions"]) == 15
+    assert isinstance(env["prompts"]["mutations"], list)
+    assert len(env["prompts"]["mutations"]) == 2
     assert "prompt-lineage" in env["inventory"]["skills"]
     assert "prompt-engineer" in env["inventory"]["subagents"]
     assert env["inventory"]["test_count"] > 60

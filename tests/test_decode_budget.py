@@ -24,6 +24,11 @@ def test_strip_thinking_spans_unwraps_granite_envelope():
     assert strip_thinking_spans(raw) == '{"confidence": 0.9}'
 
 
+def test_strip_thinking_spans_unwraps_qwen_think():
+    raw = '<think>step by step {not json}</think>\n{"confidence": 0.9}'
+    assert strip_thinking_spans(raw) == '{"confidence": 0.9}'
+
+
 def test_strip_thinking_spans_is_noop_on_clean_text():
     assert strip_thinking_spans('{"confidence": 0.9}') == '{"confidence": 0.9}'
 
@@ -49,6 +54,7 @@ def test_profiles_match_issue_18_budgets():
     assert CLASS_BUDGETS["correspondence_specialist"] == 4096
     assert CLASS_BUDGETS["insurance_claims_specialist"] == 6144
     assert CLASS_BUDGETS["contracts_specialist"] == 8192
+    assert CLASS_BUDGETS["merger_agreement_specialist"] == 16384
     assert COMPARISON_PROFILES["granite-4.2-8b"]["sampling"] == {
         "temperature": 1.0, "top_p": 0.95, "seed": 42,
     }

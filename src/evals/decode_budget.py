@@ -25,7 +25,7 @@ CLASS_BUDGETS: dict[str, int] = {
     "correspondence_specialist": 4096,
     "insurance_claims_specialist": 6144,
     "contracts_specialist": 8192,
-    "merger_agreement_specialist": 8192,
+    "merger_agreement_specialist": 16384,
     "corporate_records_specialist": 8192,
 }
 
@@ -33,7 +33,7 @@ CLASS_BUDGETS: dict[str, int] = {
 # sandbox pins 600 s for exactly this reason — DMR-072 overlay comment).
 COMPARISON_CALL_TIMEOUT_S = 600
 
-THINKING_RE = re.compile(r"<thinking>.*?</thinking>", re.DOTALL | re.IGNORECASE)
+THINKING_RE = re.compile(r"<think(?:ing)?>.*?</think(?:ing)?>", re.DOTALL | re.IGNORECASE)
 RESPONSE_OPEN_RE = re.compile(r"<response>\s*", re.IGNORECASE)
 RESPONSE_CLOSE_RE = re.compile(r"\s*</response>", re.IGNORECASE)
 
@@ -102,7 +102,7 @@ def recover_prediction(prediction: dict[str, Any] | None) -> tuple[dict[str, Any
     cleaned = strip_thinking_spans(raw)
     try:
         parsed = json.loads(cleaned)
-    except (json.JSONDecodeError, TypeError):
+    except (json.JSONDecodeError, TypeError, ValueError, RecursionError):
         return prediction, False
     if not isinstance(parsed, dict):
         return prediction, False

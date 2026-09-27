@@ -193,6 +193,20 @@ def _read_cases_file(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def _dedupe_cases(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Keep the first row per case_id (checkpoint + write_run must not double-count)."""
+    seen: set[str] = set()
+    out: list[dict[str, Any]] = []
+    for row in rows:
+        cid = row.get("case_id")
+        if cid:
+            if cid in seen:
+                continue
+            seen.add(cid)
+        out.append(row)
+    return out
+
+
 def append_case_row(run_dir: Path, run_id: str, row: dict[str, Any]) -> None:
     """Checkpoint one case row (resume-safe; survives interrupted runs)."""
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -226,12 +240,22 @@ def write_run(
     run_dir.mkdir(parents=True, exist_ok=True)
 
     cases_file = run_dir / "cases.jsonl"
+    existing_ids = {
+        row.get("case_id")
+        for row in _read_cases_file(cases_file)
+        if row.get("case_id")
+    }
     with cases_file.open("a", encoding="utf-8") as fh:
         for row in case_rows:
+            cid = row.get("case_id")
+            if cid and cid in existing_ids:
+                continue
             row.setdefault("run_id", run_id)
             row.setdefault("record_kind", "case")
             row.setdefault("schema_version", SCHEMA_VERSION)
             fh.write(json.dumps(row, default=str) + "\n")
+            if cid:
+                existing_ids.add(cid)
 
     summary = dict(summary)
     summary["cases_ref"] = str(cases_file)
@@ -274,7 +298,7 @@ def load_cases(run_id: str) -> list[dict[str, Any]]:
     Falls back to ``data/experiments/<run_id>/cases.jsonl`` when no run-summary
     exists yet (interrupted real runs checkpoint per case).
     """
-    on_disk = _read_cases_file(cases_file_path(run_id))
+    on_disk = _dedupe_cases(_read_cases_file(cases_file_path(run_id)))
     for run in load_runs():
         if run.get("run_id") != run_id:
             continue
@@ -283,7 +307,7 @@ def load_cases(run_id: str) -> list[dict[str, Any]]:
             return list(embedded)
         ref = run.get("cases_ref")
         if ref and Path(ref).exists():
-            from_ref = _read_cases_file(Path(ref))
+            from_ref = _dedupe_cases(_read_cases_file(Path(ref)))
             return from_ref if from_ref else on_disk
         return on_disk
     return on_disk

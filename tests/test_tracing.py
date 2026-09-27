@@ -77,9 +77,20 @@ def test_case_span_names_specialist_parent_not_extract_fields():
     kw = exp.start_span.call_args.kwargs
     assert kw["name"] == "contracts_specialist"
     assert kw["name"] != "extract-fields"
-    assert kw["id"] == tracing.doc_text_sha256(case)
-    assert kw["metadata"]["pipeline_node"] == "extract-fields"
+    assert kw["type"] == "eval"
+    assert "id" not in kw
+    assert "dataset_record_id" not in kw
     assert kw["metadata"]["specialist"] == "contracts_specialist"
+    assert kw["metadata"]["eval_target"] == "contracts_specialist"
+
+
+def test_run_span_is_noop_when_experiment_is_open():
+    exp = MagicMock()
+    with patch("evals.braintrust_experiment.current_experiment", return_value=exp):
+        with patch("braintrust.start_span") as start:
+            with tracing.run_span("braintrust", run_meta={"run_id": "r1"}) as span:
+                span.set_metrics({"overall_score": 0.5})
+            start.assert_not_called()
 
 
 def test_node_observation_names():

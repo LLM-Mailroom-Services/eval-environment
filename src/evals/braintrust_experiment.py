@@ -1,9 +1,8 @@
 """Braintrust Experiments + HF corpus dataset linkage for eval runs.
 
 Keeps the existing Logger (``init_logger``) for nested LLM spans while opening
-a per-run Experiment attached to a project Dataset that mirrors the pinned
-Hugging Face mailroom corpus. Dataset rows upsert on ``doc_text_sha256`` so
-re-runs do not multiply rows.
+a per-run Experiment. Dataset-document upserts are intentionally off: Braintrust
+rows are specialist (or node) invocations, not corpus documents.
 
 Scoring on Braintrust stays minimal — see ``scoring.sink_score_metrics``.
 """
@@ -92,7 +91,7 @@ def begin_eval_run(
     dataset_prov: dict[str, Any],
     run_metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
-    """Open a Braintrust Experiment linked to the HF corpus dataset."""
+    """Open a Braintrust Experiment. Do not insert corpus documents as dataset rows."""
     global _active_experiment, _dataset_handle, _record_id_by_sha
     _active_experiment = None
     _dataset_handle = None
@@ -109,48 +108,16 @@ def begin_eval_run(
     ds_name = _dataset_name(revision)
 
     try:
-        _dataset_handle = braintrust.init_dataset(
-            project=project,
-            name=ds_name,
-            description="Pinned Lucius-Morningstar/mailroom-dataset eval rows",
-            metadata={
-                "hf_repo": dataset_prov.get("repo") or "Lucius-Morningstar/mailroom-dataset",
-                "hf_revision": revision,
-                "hf_config": dataset_prov.get("config"),
-            },
-        )
-        for case in cases:
-            sha = doc_text_sha256(case)
-            try:
-                rid = _dataset_handle.insert(
-                    id=sha,
-                    input=_dataset_input(case),
-                    expected=_dataset_expected(case),
-                    metadata=_dataset_metadata(case, dataset_prov),
-                    tags=[
-                        t
-                        for t in (
-                            case.get("split"),
-                            case.get("expected_doc_class"),
-                            task_id,
-                        )
-                        if t
-                    ],
-                )
-                _record_id_by_sha[sha] = rid
-            except Exception:
-                logger.warning("braintrust_dataset_insert_failed", case_ref=public_case_ref(case), exc_info=True)
-
         meta = dict(run_metadata or {})
         meta.setdefault("hf_repo", dataset_prov.get("repo"))
         meta.setdefault("hf_revision", revision)
         meta.setdefault("hf_dataset_name", ds_name)
+        meta["dataset_rows"] = "off"
 
         _active_experiment = braintrust.init(
             project=project,
             experiment=run_id,
             description=f"mailroom-evals {task_id}",
-            dataset=_dataset_handle,
             metadata=meta,
             tags=[task_id, "mailroom-evals"],
         )
@@ -158,14 +125,14 @@ def begin_eval_run(
             "braintrust_experiment_opened",
             project=project,
             experiment=run_id,
-            dataset=ds_name,
+            dataset="off",
             n_cases=len(cases),
         )
         return {
             "project": project,
             "experiment": run_id,
-            "dataset": ds_name,
-            "dataset_records": len(_record_id_by_sha),
+            "dataset": None,
+            "dataset_records": 0,
         }
     except Exception:
         logger.warning("braintrust_experiment_begin_failed", exc_info=True)
@@ -232,11 +199,11 @@ def log_case_scores(
     tokens: dict[str, Any] | None = None,
     span: Any | None = None,
 ) -> None:
-    """Score the existing parent span for this document.
+    """Score the existing parent span for this specialist call.
 
     Must not call ``Experiment.log``: that opens a second row beside
-    ``case_span`` and duplicates the specialist invocation in the UI.
-    Nested node/LLM calls stay children of ``span``.
+    ``case_span``. Must not tag the row as a document.
+    Nested LLM calls stay children of ``span``.
     """
     if span is None or not hasattr(span, "log_document_row"):
         logger.warning(
@@ -259,7 +226,6 @@ def log_case_scores(
             expected=_dataset_expected(case),
             scores=row_scores or None,
             error=error,
-            dataset_record_id=dataset_record_id(case),
             metrics={
                 k: float(v)
                 for k, v in {
@@ -278,7 +244,7 @@ def log_case_scores(
                 "n_expected_fields": (scores or {}).get("n_expected_fields"),
                 "filename": case.get("filename"),
             },
-            tags=[t for t in (specialist, scorer, "document") if t],
+            tags=[t for t in (specialist, scorer) if t],
         )
     except Exception:
         logger.warning("braintrust_experiment_case_log_failed", exc_info=True)

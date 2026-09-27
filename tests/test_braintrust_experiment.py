@@ -30,7 +30,7 @@ def test_sink_score_metrics_caps_headline_count():
 
 @patch("braintrust.init")
 @patch("braintrust.init_dataset")
-def test_begin_eval_run_upserts_dataset_rows(mock_init_dataset, mock_init, monkeypatch):
+def test_begin_eval_run_does_not_insert_document_rows(mock_init_dataset, mock_init, monkeypatch):
     monkeypatch.setenv("BRAINTRUST_API_KEY", "test-key")
     monkeypatch.setenv("BRAINTRUST_PROJECT", "Mailroom-Evals")
 
@@ -54,12 +54,12 @@ def test_begin_eval_run_upserts_dataset_rows(mock_init_dataset, mock_init, monke
         dataset_prov={"repo": "Lucius-Morningstar/mailroom-dataset", "revision": "46a4d3c240a"},
     )
     assert info is not None
-    assert info["dataset"] == "mailroom-hf-46a4d3c2"
-    dataset.insert.assert_called_once()
-    call_kw = dataset.insert.call_args.kwargs
-    assert "Co" not in str(call_kw["input"])
-    assert call_kw["expected"]["expected_doc_class"] == "contract"
+    assert info["dataset"] is None
+    assert info["dataset_records"] == 0
+    mock_init_dataset.assert_not_called()
+    dataset.insert.assert_not_called()
     mock_init.assert_called_once()
+    assert mock_init.call_args.kwargs.get("dataset") is None
     end_eval_run()
 
 
@@ -94,7 +94,7 @@ def test_log_case_scores_one_fully_scored_document_row():
     assert kw["output"]["specialist"] == "contracts_specialist"
     assert kw["output"]["extracted_data"] == {"parties": ["Acme"]}
     assert kw["metadata"]["specialist"] == "contracts_specialist"
-    assert "document" in kw["tags"]
+    assert "document" not in kw["tags"]
 
 
 def test_log_case_scores_skips_without_parent_span():

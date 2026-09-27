@@ -57,7 +57,10 @@ def _wave_done(task: str, subset: str) -> dict | None:
         if run.get("error"):
             continue
         n = (run.get("metrics") or {}).get("n") or 0
-        if n >= SAMPLE:
+        # Unchunked merger waves truncated JSON and scored 0 — do not treat
+        # those as complete even if n reached SAMPLE.
+        overall = (run.get("metrics") or {}).get("overall_score")
+        if n >= SAMPLE and (overall is None or overall > 0 or task != "eval:merger_agreement"):
             return run
     return None
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from unittest.mock import MagicMock
 
 from evals.prompts import frozen_v1
@@ -9,7 +10,9 @@ from evals.prompts.registry import activate, deactivate
 from evals.specialist_llm import (
     CLASS_PROMPT_STEM,
     CLASS_SPECIALIST,
+    chunk_document,
     extract_entities,
+    merge_extracted,
     prompt_key_for,
     set_mock_client,
     specialist_system_prompt,
@@ -115,6 +118,85 @@ def test_extract_entities_openrouter_shape_not_langchain():
         assert "Extract the registered entities" in user
         assert "AGREEMENT AND PLAN OF MERGER" in user
         assert captured["model"] == "mock-model"
+        assert out["chunks"] == 1
+    finally:
+        set_mock_client(None)
+        deactivate()
+
+
+def test_chunk_document_splits_long_merger_on_articles():
+    body = "\n".join(
+        f"\nARTICLE {i}\n" + ("merger consideration cash.\n" * 40)
+        for i in range(1, 12)
+    )
+    preamble = "AGREEMENT AND PLAN OF MERGER\n" + body
+    chunks = chunk_document(preamble, max_chars=800)
+    assert len(chunks) > 1
+    assert sum(len(c) for c in chunks) >= len(preamble)
+    assert any("ARTICLE 1" in c or "ARTICLE 2" in c for c in chunks)
+
+
+def test_chunk_document_windows_when_no_articles():
+    text = "x" * 10_000
+    chunks = chunk_document(text, max_chars=3_000, overlap=500)
+    assert len(chunks) > 2
+    assert chunks[0].startswith("x")
+    assert chunks[-1].endswith("x")
+
+
+def test_merge_extracted_unions_chunk_fields():
+    merged = merge_extracted(
+        [
+            {"document_name": "Plan", "parties": ["Parent"], "maud_clauses": {"mae": "yes"}, "confidence": 0.4},
+            {"document_name": None, "parties": ["Target"], "maud_clauses": {"fiduciary_out": "yes"}, "confidence": 0.8},
+            {"_parse_error": True, "confidence": 0.0},
+        ]
+    )
+    assert merged["document_name"] == "Plan"
+    assert merged["parties"] == ["Parent", "Target"]
+    assert merged["maud_clauses"]["mae"] == "yes"
+    assert merged["maud_clauses"]["fiduciary_out"] == "yes"
+    assert merged["confidence"] == 0.6
+
+
+def test_long_merger_issues_one_call_per_chunk_same_system_prompt(monkeypatch):
+    activate("frozen")
+    try:
+        from evals import specialist_llm as sl
+
+        monkeypatch.setitem(sl.CHUNK_CHARS, "merger_agreement", 1_200)
+        captured: list[dict] = []
+
+        def _create(**kwargs):
+            captured.append(kwargs)
+            n = len(captured)
+            mock = MagicMock()
+            mock.choices[0].message.content = json.dumps(
+                {"document_name": "Plan", "parties": [f"P{n}"], "confidence": 0.5}
+            )
+            mock.usage.prompt_tokens = 3
+            mock.usage.completion_tokens = 2
+            return mock
+
+        client = MagicMock()
+        client.chat.completions.create.side_effect = lambda **kw: _create(**kw)
+        set_mock_client(client)
+        text = ("\nARTICLE 1\n" + ("cash merger of Parent and Target.\n" * 40)) * 8
+        out = extract_entities(
+            "merger_agreement_specialist",
+            {"text": text, "expected_doc_class": "merger_agreement"},
+        )
+        assert 1 < len(captured) <= sl.MAX_CHUNKS
+        assert out["chunks"] == len(captured)
+        assert out["prompt_key"] == "merger_agreement_specialist_v1"
+        assert out["extracted_data"]["parties"][0] == "P1"
+        for call in captured:
+            system = call["messages"][0]["content"]
+            user = call["messages"][1]["content"]
+            assert system.startswith("You are the merger-agreement specialist")
+            assert "You are the contracts specialist" not in system
+            assert "chunk" in user.lower()
+            assert "Extract the registered entities" in user
     finally:
         set_mock_client(None)
         deactivate()

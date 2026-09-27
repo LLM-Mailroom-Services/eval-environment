@@ -434,3 +434,23 @@ hub tip ed7576b676343e0b402ec5412cded301e629bdee differs from the requested pinn
 2026-09-27 00:42:31 [info     ] braintrust_experiment_opened   dataset=off experiment=20260927T004231Z-eval-merger_agreement n_cases=20 project=Mailroom-Evals
 2026-09-27 00:42:32 [info     ] braintrust_openai_client_wrapped
 2026-09-27 00:47:00 [info     ] braintrust_openai_client_wrapped
+2026-09-27T00:52:31Z RUN -u scripts/run_evals.py --task eval:merger_agreement --real --subset class:merger_agreement --sample 20 --seed 42 --model qwen/qwen3-8b --decode-profile qwen3-8b --require-trace-sink --prompt-source frozen --trace-backend braintrust
+
+=== QWEN-N20 2026-09-27T00:52:31Z ===
+2026-09-27 00:52:31 [info     ] evals_dojo_taxonomy_wired      doc_classes=['contract', 'corporate_record', 'correspondence', 'insurance_claim', 'merger_agreement'] source=_taxonomy_from_config
+2026-09-27 00:52:31 [info     ] evals_preflight_ok             mode=real task=eval:merger_agreement warnings=0
+hub tip ed7576b676343e0b402ec5412cded301e629bdee differs from the requested pinned revision 46a4d3c240a36671cde0182fff4960f6b8b73aca — the dataset moved upstream; this load stays on the pin, but the next publish roll will re-pin (provenance records both)
+2026-09-27 00:52:33 [info     ] evals_prompts_activated        roles=['arbiter', 'boss', 'contracts_specialist', 'corporate_records_specialist', 'correspondence_specialist', 'insurance_claims_specialist', 'intake', 'judge', 'judge-classification', 'judge-correctness', 'merger_agreement_specialist', 'pipeline_quality', 'pipeline_verdict', 'sorter', 'sorter_reviewer'] source=frozen
+2026-09-27 00:52:33 [info     ] evals_openrouter_model_override model=qwen/qwen3-8b
+2026-09-27 00:52:34 [info     ] braintrust_initialized         project=Mailroom-Evals
+2026-09-27 00:52:34 [info     ] evals_langchain_llm_tracing_enabled
+2026-09-27 00:52:34 [info     ] braintrust_experiment_opened   dataset=off experiment=20260927T005233Z-eval-merger_agreement n_cases=20 project=Mailroom-Evals
+2026-09-27 00:52:34 [info     ] braintrust_openai_client_wrapped
+2026-09-27 00:52:34 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=387592 doc_class=merger_agreement max_tokens=16384 model=qwen/qwen3-8b prompt_key=merger_agreement_specialist_v1
+2026-09-27 00:56:29 [info     ] braintrust_openai_client_wrapped
+2026-09-27 00:56:29 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=362558 doc_class=merger_agreement max_tokens=16384 model=qwen/qwen3-8b prompt_key=merger_agreement_specialist_v1
+2026-09-27 01:00:09 [warning  ] evals_case_failed              case=corpus:ground_truth:train:contract_31_merger_agreement.txt error='ValueError: Exceeds the limit (4300 digits) for integer string conversion: value has 8191 digits; use sys.set_int_max_str_digits() to increase the limit'
+2026-09-27 01:00:09 [info     ] braintrust_openai_client_wrapped
+2026-09-27 01:00:09 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=390026 doc_class=merger_agreement max_tokens=16384 model=qwen/qwen3-8b prompt_key=merger_agreement_specialist_v1
+2026-09-27 01:04:59 [info     ] braintrust_openai_client_wrapped
+2026-09-27 01:04:59 [info     ] specialist_openrouter_call     agent=merger_agreement_specialist chars=346640 doc_class=merger_agreement max_tokens=16384 model=qwen/qwen3-8b prompt_key=merger_agreement_specialist_v1

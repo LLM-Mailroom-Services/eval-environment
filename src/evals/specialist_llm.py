@@ -2,14 +2,16 @@
 
 System message = the designated lineage prompt for that specialist.
 User message = extract the registered entities from the included document.
-The OpenAI-compatible client is the pipeline's OpenRouter wrapper so Braintrust
-``wrap_openai`` still records the LLM call under the specialist parent span,
-and ``pipeline.limits.record_usage`` still captures tokens/cost.
+Long merger agreements are split into overlapping chunks so one Qwen
+completion can finish valid JSON (qwen/qwen3-8b silently caps near 8192
+completion tokens). Chunk LLM calls stay nested under the one specialist
+parent span; scoring still sees one merged prediction per document.
 """
 
 from __future__ import annotations
 
 import json
+import re
 from typing import Any
 
 import structlog
@@ -39,9 +41,27 @@ CLASS_PROMPT_STEM: dict[str, str] = {
     "insurance_claim": "You are the insurance-claims specialist.",
 }
 
+# Soft cap on source chars sent in one completion. Merger agreements in the
+# pinned corpus run 300k–400k chars; a single call truncates JSON and can
+# trip Python's int-digit limit on the broken number. Other classes stay
+# whole unless they blow past the fallback cap.
+CHUNK_CHARS: dict[str, int] = {
+    "merger_agreement": 48_000,
+}
+DEFAULT_CHUNK_CHARS = 120_000
+CHUNK_OVERLAP = 1_500
+CHUNK_HEADER_CHARS = 3_500
+MAX_CHUNKS = 8
+
+_ARTICLE_SPLIT = re.compile(
+    r"(?=\n[ \t]*(?:ARTICLE|Article|SECTION|Section)\s+(?:[IVXLCDM]+|\d+))",
+)
+
 _JSON_NOTE = (
     "\n\nOutput must be a single json object conforming to the provided "
-    "json schema (response_format is json_object)."
+    "json schema (response_format is json_object). Keep values compact: "
+    "clause answers are short labels or quotes of at most 80 characters; "
+    "never transcribe an article; never emit a number longer than 20 digits."
 )
 
 # Set by invoke.install_mocks — never hits the network in mock mode.
@@ -101,43 +121,233 @@ def user_extract_message(
     doc_class: str,
     text: str,
     subclass: str | None = None,
+    chunk_index: int | None = None,
+    chunk_count: int | None = None,
+    chunk_span: str | None = None,
 ) -> str:
     fields = ", ".join(sorted(LIVE_SCHEMA_FIELDS.get(doc_class) or ())) or "(schema fields)"
     handoff = f"`{doc_class}`"
     if subclass:
         handoff += f" (subclass `{subclass}`)"
+    chunk_line = ""
+    if chunk_count and chunk_count > 1 and chunk_index is not None:
+        chunk_line = (
+            f"This is chunk {chunk_index + 1} of {chunk_count} of a longer "
+            f"{doc_class.replace('_', ' ')}"
+            + (f" ({chunk_span})." if chunk_span else ".")
+            + " Extract only facts visible in this chunk. "
+        )
     return (
         f"Extract the registered entities from this document. "
         f"The document class is {handoff}. "
+        f"{chunk_line}"
         f"Return one complete JSON object with every live schema field "
         f"({fields}). Unstated values must be null or []. Never invent "
-        f"facts from letterhead, filename, or general knowledge.\n\n"
+        f"facts from letterhead, filename, or general knowledge. "
+        f"Keep JSON compact — short quotes, no full-article transcription.\n\n"
         f"Document:\n{text}"
     )
+
+
+def chunk_document(text: str, *, max_chars: int, overlap: int = CHUNK_OVERLAP) -> list[str]:
+    """Split a long source into overlapping windows, preferring ARTICLE breaks."""
+    if max_chars <= 0 or len(text) <= max_chars:
+        return [text] if text else [""]
+    overlap = _clamp_overlap(max_chars, overlap)
+    packed = _pack_articles(text, max_chars=max_chars, overlap=overlap)
+    pieces = packed if packed else _windows(text, max_chars=max_chars, overlap=overlap)
+    if len(pieces) > MAX_CHUNKS:
+        size = max(max_chars, (len(text) + MAX_CHUNKS - 1) // MAX_CHUNKS)
+        pieces = [text[i : i + size] for i in range(0, len(text), size)]
+    return pieces
 
 
 def extract_entities(
     specialist: str,
     case: dict[str, Any],
 ) -> dict[str, Any]:
-    """One OpenRouter chat completion: specialist system prompt + document user msg."""
+    """OpenRouter chat completion(s): designated system prompt + document user msg."""
     doc_class = str(case.get("expected_doc_class") or "")
     text = str(case.get("text") or "")
     subclass = case.get("expected_subclass")
     system = specialist_system_prompt(specialist)
     assert_prompt_matches_class(specialist, doc_class, system)
     system = system + _JSON_NOTE
-    user = user_extract_message(doc_class=doc_class, text=text, subclass=subclass)
     client, model, max_tokens, temperature = _client_for(specialist)
+    limit = CHUNK_CHARS.get(doc_class, DEFAULT_CHUNK_CHARS)
+    pieces = chunk_document(text, max_chars=limit)
+    if len(pieces) > 1:
+        header = text[:CHUNK_HEADER_CHARS]
+        decorated: list[str] = []
+        for i, piece in enumerate(pieces):
+            if i == 0 or piece.startswith(header[: min(len(header), 80)]):
+                decorated.append(piece)
+            else:
+                decorated.append(
+                    header
+                    + "\n\n[...document continues; extract from this span...]\n\n"
+                    + piece
+                )
+        pieces = decorated
     logger.info(
         "specialist_openrouter_call",
         agent=specialist,
         prompt_key=prompt_key_for(specialist),
         doc_class=doc_class,
         chars=len(text),
+        chunks=len(pieces),
+        chunk_limit=limit,
         model=model,
         max_tokens=max_tokens,
     )
+    parsed_chunks: list[dict[str, Any]] = []
+    for i, piece in enumerate(pieces):
+        user = user_extract_message(
+            doc_class=doc_class,
+            text=piece,
+            subclass=subclass,
+            chunk_index=i,
+            chunk_count=len(pieces),
+            chunk_span=f"part {i + 1}/{len(pieces)}",
+        )
+        parsed_chunks.append(
+            _complete_json(
+                client,
+                system=system,
+                user=user,
+                model=model,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                agent=specialist,
+            )
+        )
+    extracted = merge_extracted(parsed_chunks)
+    confidence = extracted.get("confidence") if isinstance(extracted, dict) else None
+    return {
+        "extracted_data": extracted,
+        "extraction_confidence": confidence,
+        "doc_type": doc_class,
+        "specialist": specialist,
+        "model": model,
+        "prompt_key": prompt_key_for(specialist),
+        "chunks": len(pieces),
+    }
+
+
+def merge_extracted(parts: list[dict[str, Any]]) -> dict[str, Any]:
+    """Union non-empty fields across chunk extractions. One document, one payload."""
+    good = [
+        p for p in parts
+        if isinstance(p, dict) and not p.get("_parse_error")
+    ]
+    if not good:
+        return {"_parse_error": True, "confidence": 0.0}
+    out: dict[str, Any] = {}
+    for payload in good:
+        for key, value in payload.items():
+            if key.startswith("_") or key == "reasoning":
+                continue
+            out[key] = _merge_value(out.get(key), value)
+    confs = [
+        float(p["confidence"])
+        for p in good
+        if isinstance(p.get("confidence"), (int, float))
+    ]
+    if confs:
+        out["confidence"] = round(sum(confs) / len(confs), 4)
+    return out
+
+
+def _merge_value(current: Any, incoming: Any) -> Any:
+    if _is_empty(incoming):
+        return current
+    if _is_empty(current):
+        return incoming
+    if isinstance(current, dict) and isinstance(incoming, dict):
+        keys = set(current) | set(incoming)
+        return {k: _merge_value(current.get(k), incoming.get(k)) for k in keys}
+    if isinstance(current, list) and isinstance(incoming, list):
+        return _merge_lists(current, incoming)
+    if isinstance(current, str) and isinstance(incoming, str):
+        return current if len(current) >= len(incoming) else incoming
+    return current
+
+
+def _merge_lists(left: list[Any], right: list[Any]) -> list[Any]:
+    out: list[Any] = []
+    seen: set[str] = set()
+    for item in [*left, *right]:
+        try:
+            sig = json.dumps(item, sort_keys=True, default=str)
+        except TypeError:
+            sig = str(item)
+        if sig in seen:
+            continue
+        seen.add(sig)
+        out.append(item)
+    return out
+
+
+def _is_empty(value: Any) -> bool:
+    return value is None or value == "" or value == [] or value == {}
+
+
+def _clamp_overlap(max_chars: int, overlap: int) -> int:
+    if max_chars <= 2:
+        return 0
+    return min(max(overlap, 0), max_chars // 5)
+
+
+def _pack_articles(text: str, *, max_chars: int, overlap: int) -> list[str] | None:
+    parts = _ARTICLE_SPLIT.split(text)
+    if len(parts) < 3:
+        return None
+    bins: list[str] = []
+    buf = parts[0]
+    for part in parts[1:]:
+        if buf and len(buf) + len(part) > max_chars:
+            bins.append(buf)
+            tail = buf[-overlap:] if overlap and overlap < len(buf) else ""
+            buf = tail + part
+        else:
+            buf += part
+    if buf:
+        bins.append(buf)
+    if len(bins) <= 1:
+        return None
+    expanded: list[str] = []
+    for block in bins:
+        if len(block) <= max_chars:
+            expanded.append(block)
+        else:
+            expanded.extend(_windows(block, max_chars=max_chars, overlap=overlap))
+    return expanded or None
+
+
+def _windows(text: str, *, max_chars: int, overlap: int) -> list[str]:
+    overlap = _clamp_overlap(max_chars, overlap)
+    step = max(max_chars - overlap, 1)
+    chunks = []
+    start = 0
+    while start < len(text):
+        end = min(start + max_chars, len(text))
+        chunks.append(text[start:end])
+        if end >= len(text):
+            break
+        start += step
+    return chunks
+
+
+def _complete_json(
+    client: Any,
+    *,
+    system: str,
+    user: str,
+    model: str,
+    max_tokens: int,
+    temperature: float,
+    agent: str,
+) -> dict[str, Any]:
     try:
         response = client.chat.completions.create(
             model=model,
@@ -159,17 +369,8 @@ def extract_entities(
             temperature=temperature,
             max_tokens=max_tokens,
         )
-    _record(response, model=model, agent=specialist)
-    extracted = _parse_json(_message_content(response))
-    confidence = extracted.get("confidence") if isinstance(extracted, dict) else None
-    return {
-        "extracted_data": extracted,
-        "extraction_confidence": confidence,
-        "doc_type": doc_class,
-        "specialist": specialist,
-        "model": model,
-        "prompt_key": prompt_key_for(specialist),
-    }
+    _record(response, model=model, agent=agent)
+    return _parse_json(_message_content(response))
 
 
 def _client_for(specialist: str) -> tuple[Any, str, int, float]:
@@ -208,12 +409,12 @@ def _parse_json(raw: str) -> dict[str, Any]:
         content = content.removeprefix("json").strip()
     try:
         parsed = json.loads(content)
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, ValueError):
         start, end = content.find("{"), content.rfind("}")
         if start >= 0 and end > start:
             try:
                 parsed = json.loads(content[start : end + 1])
-            except json.JSONDecodeError:
+            except (json.JSONDecodeError, ValueError):
                 return {"_parse_error": True, "confidence": 0.0}
         else:
             return {"_parse_error": True, "confidence": 0.0}

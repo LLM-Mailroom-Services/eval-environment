@@ -1,0 +1,197 @@
+{
+  "reliability_table": [
+    {
+      "bin": "0.95-1.00",
+      "n": 1,
+      "accuracy": 1.0
+    }
+  ],
+  "ece": 0.025,
+  "cell_confusion": {
+    "correct_high": {
+      "n": 1,
+      "agreed": 1,
+      "agreement": 1.0
+    }
+  },
+  "threshold_curve": [
+    {
+      "threshold": 0.05,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f2": null
+    },
+    {
+      "threshold": 0.1,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f2": null
+    },
+    {
+      "threshold": 0.15,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f2": null
+    },
+    {
+      "threshold": 0.2,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f2": null
+    },
+    {
+      "threshold": 0.25,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f2": null
+    },
+    {
+      "threshold": 0.3,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f2": null
+    },
+    {
+      "threshold": 0.35,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f2": null
+    },
+    {
+      "threshold": 0.4,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f2": null
+    },
+    {
+      "threshold": 0.45,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f2": null
+    },
+    {
+      "threshold": 0.5,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f2": null
+    },
+    {
+      "threshold": 0.55,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f2": null
+    },
+    {
+      "threshold": 0.6,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f2": null
+    },
+    {
+      "threshold": 0.65,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f2": null
+    },
+    {
+      "threshold": 0.7,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f2": null
+    },
+    {
+      "threshold": 0.75,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f2": null
+    },
+    {
+      "threshold": 0.8,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f2": null
+    },
+    {
+      "threshold": 0.85,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f2": null
+    },
+    {
+      "threshold": 0.9,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f2": null
+    },
+    {
+      "threshold": 0.95,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f2": null
+    }
+  ],
+  "recommended_thresholds": {},
+  "caveats": [
+    "small fixture sample (n=1) \u2014 CIs are wide; extend fixtures before trusting thresholds"
+  ],
+  "generated_at": "2026-09-26T23:27:24+00:00",
+  "n_cases": 1,
+  "errors": 0
+}

@@ -49,12 +49,29 @@ def test_write_load_roundtrip():
 
 def test_large_run_uses_cases_ref():
     summary = _summary()
-    rows = _case_rows(summary["run_id"]) * 30  # 60 rows > EMBED_LIMIT
+    rows = [
+        {"run_id": summary["run_id"], "case_id": f"c{i}", "scores": {"class_correct": i % 2},
+         "latency_ms": 10.0, "error": None}
+        for i in range(60)
+    ]
     written = experiment_log.write_run(summary, rows)
     assert not written["cases_embedded"]
     assert written["cases_ref"]
     loaded = experiment_log.load_cases(summary["run_id"])
     assert len(loaded) == 60
+
+
+def test_write_run_does_not_duplicate_checkpointed_cases():
+    summary = _summary()
+    rows = _case_rows(summary["run_id"])
+    run_dir = experiment_log.experiments_dir() / summary["run_id"]
+    for row in rows:
+        experiment_log.append_case_row(run_dir, summary["run_id"], row)
+    experiment_log.write_run(summary, rows, run_dir=run_dir)
+    on_disk = (run_dir / "cases.jsonl").read_text().strip().splitlines()
+    assert len(on_disk) == 2
+    loaded = experiment_log.load_cases(summary["run_id"])
+    assert len(loaded) == 2
 
 
 def test_validate_record():

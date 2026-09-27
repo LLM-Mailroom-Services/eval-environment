@@ -62,6 +62,27 @@ def essential_scorer(scorer: str) -> str:
     return CALIBRATION_ESSENTIAL_ALIAS.get(scorer, scorer)
 
 
+# Numeric 0–1 score keys forwarded as Braintrust experiment ``scores`` on
+# *each document row*. Count/flags stay in metadata (quota + 0–1 contract).
+_BT_SCORE_SKIP = frozenset({"n_expected_fields", "scorer_error"})
+
+
+def row_score_metrics(scores: dict[str, Any] | None) -> dict[str, float]:
+    """One document's full 0–1 score surface for a Braintrust experiment row."""
+    out: dict[str, float] = {}
+    for key, value in (scores or {}).items():
+        if key in _BT_SCORE_SKIP:
+            continue
+        if isinstance(value, bool):
+            out[key] = 1.0 if value else 0.0
+            continue
+        if isinstance(value, (int, float)):
+            f = float(value)
+            if 0.0 <= f <= 1.0:
+                out[key] = f
+    return out
+
+
 def sink_score_metrics(scorer: str, scores: dict[str, Any], *, max_scores: int | None = None) -> dict[str, float]:
     """Minimal headline scores for Braintrust experiment scoring (quota-safe)."""
     limit = max_scores if max_scores is not None else SINK_SCORE_METRICS_MAX

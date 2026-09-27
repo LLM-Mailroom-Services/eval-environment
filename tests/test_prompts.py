@@ -242,6 +242,18 @@ def test_archived_production_specialists():
     assert len(resolve("contracts_specialist_v0").text) > len(frozen_v1.VERSIONS["contracts_specialist_v1"])
 
 
+def test_contracts_specialist_v33_modal_parity():
+    v33 = resolve("contracts_specialist_v33")
+    frozen = resolve("contracts_specialist_v1")
+    assert v33.lineage == "archived"
+    assert v33.source == "sandbox:contracts_specialist_v33@303e7f0bb05d"
+    assert v33.text != frozen.text
+    assert len(v33.text) > len(frozen.text)
+    from evals.prompts.registry import default_keys
+
+    assert default_keys("archived")["contracts_specialist"] == "contracts_specialist_v0"
+
+
 def test_mutation_gates_pass():
     parent = resolve("boss_v1")
     anchor = "PRODUCTION DOCTRINE (mailroom pipeline):"

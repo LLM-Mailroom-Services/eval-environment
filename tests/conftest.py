@@ -21,6 +21,7 @@ def _hermetic_env(monkeypatch):
     monkeypatch.setenv("EXPERIMENT_LOG_PATH", str(Path(tmp) / "experiment_log.jsonl"))
     monkeypatch.setenv("EXPERIMENT_LOG_MD_PATH", str(Path(tmp) / "experiment_log.md"))
     monkeypatch.setenv("EVALS_EXPERIMENTS_DIR", str(Path(tmp) / "experiments"))
+    monkeypatch.setenv("EVALS_COMPARISON_REPORTS_DIR", str(Path(tmp) / "comparison-reports"))
     yield
 
 

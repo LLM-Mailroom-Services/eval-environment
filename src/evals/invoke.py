@@ -2,12 +2,12 @@
 
 Two modes (``--invoke node|agent``):
 
-- **node** (default): build a faithful ``DocumentState`` from the corpus row
-  and call the raw graph node function (``classify_node``, ``extract_node``,
-  ``judge_verify_node``, …) — true node-level measurement inside the same
-  code path the pipeline runs.
-- **agent**: call the underlying agent class directly (``SorterAgent``,
-  specialists, ``CompletenessJudge``, …) — the ``agent_eval.py`` style.
+- **node** (default for non-specialists): build a faithful ``DocumentState``
+  from the corpus row and call the raw graph node function.
+- **agent**: call the underlying agent class directly.
+- **extraction specialists** always call OpenRouter directly: designated
+  lineage system prompt + a user message asking to extract entities from the
+  included document. No LangChain specialist classes, no ``extract_node``.
 
 Mock mode installs the deterministic fake-LLM shims (FakeLangChainLLM +
 mocked OpenAI client) so nothing touches the network. Isolation: every
@@ -161,6 +161,9 @@ def install_mocks() -> None:
 
     base_mod.BaseAgent.__init__ = _init  # type: ignore[method-assign]
     client_mod.OpenAI = lambda *a, **k: mock_client  # type: ignore[misc]
+    from evals.specialist_llm import set_mock_client
+
+    set_mock_client(mock_client)
 
 
 def _write_case_text(case: dict[str, Any], base_dir: Path) -> Path:
@@ -254,13 +257,7 @@ def _invoke_node(task: str, case: dict[str, Any]) -> dict[str, Any]:
             "confidence": update.get("classification_confidence"),
         }
     if task in TASK_SPECIALIST:
-        state = build_state(case, doc_type=case.get("expected_doc_class"))
-        update = bg.extract_node(state)
-        return {
-            "extracted_data": update.get("extracted_data"),
-            "extraction_confidence": update.get("extraction_confidence"),
-            "doc_type": update.get("doc_type", state.get("doc_type")),
-        }
+        return _invoke_specialist(task, case)
     if task == "judge_arbiter":
         # Judge calibration probes the verdict boundary against review_expected.
         # The extraction input must be REAL (the judge rubric treats
@@ -281,19 +278,10 @@ def _invoke_node(task: str, case: dict[str, Any]) -> dict[str, Any]:
         specialist = _specialist_for_class(str(case.get("expected_doc_class") or ""))
         if specialist:
             try:
-                mod_name, cls_name = _SPECIALIST_CLASSES[specialist]
-                import importlib as _il
-
-                cls = getattr(_il.import_module(mod_name), cls_name)
-                raw = cls().extract(str(case.get("text") or ""))
-                if isinstance(raw, dict):
-                    import json as _json
-
-                    payload = raw.get("content") if "content" in raw else raw
-                    try:
-                        state["extracted_data"] = _json.loads(payload) if isinstance(payload, str) else payload
-                    except _json.JSONDecodeError:
-                        state["extracted_data"] = None
+                raw = _specialist_prediction(specialist, str(case.get("text") or ""), str(case.get("expected_doc_class") or ""))
+                payload = raw.get("extracted_data") if isinstance(raw, dict) else raw
+                if isinstance(payload, dict):
+                    state["extracted_data"] = payload
             except Exception:
                 logger.warning("judge_probe_extraction_failed", case=case.get("id"))
         update = bg.judge_verify_node(state)
@@ -392,13 +380,9 @@ def _intake_result(case: dict[str, Any], update: dict[str, Any]) -> dict[str, An
 
 
 def _specialist_for_class(doc_class: str) -> str | None:
-    return {
-        "contract": "contracts_specialist",
-        "merger_agreement": "merger_agreement_specialist",
-        "corporate_record": "corporate_records_specialist",
-        "correspondence": "correspondence_specialist",
-        "insurance_claim": "insurance_claims_specialist",
-    }.get(doc_class)
+    from evals.specialist_llm import CLASS_SPECIALIST
+
+    return CLASS_SPECIALIST.get(doc_class)
 
 
 def _fixture_probe_extraction(case: dict[str, Any], *, partial: bool) -> dict[str, Any]:
@@ -460,17 +444,10 @@ def _invoke_agent(task: str, case: dict[str, Any]) -> dict[str, Any]:
     task = _canonical_task(task)
     if task == "retry":
         # Retry calibration probes the specialist on failure-shaped fixtures.
-        specialist = TASK_SPECIALIST.get(_specialist_for_class(doc_class), "contracts_specialist")
-        import importlib
-
-        mod_name, cls_name = _SPECIALIST_CLASSES[specialist]
-        cls = getattr(importlib.import_module(mod_name), cls_name)
-        result = cls().extract(text)
-        return {
-            "extracted_data": result,
-            "extraction_confidence": result.get("confidence") if isinstance(result, dict) else None,
-            "doc_type": doc_class,
-        }
+        specialist = _specialist_for_class(doc_class)
+        if not specialist:
+            raise KeyError(f"no designated specialist for class {doc_class!r}")
+        return _specialist_prediction(specialist, text, doc_class)
     if task == "intake":
         from agents.intake import IntakeAgent
 
@@ -487,11 +464,7 @@ def _invoke_agent(task: str, case: dict[str, Any]) -> dict[str, Any]:
             "reasoning": reasoning,
         }
     if task in TASK_SPECIALIST:
-        import importlib
-
-        mod_name, cls_name = _SPECIALIST_CLASSES[TASK_SPECIALIST[task]]
-        cls = getattr(importlib.import_module(mod_name), cls_name)
-        return cls().extract(text)
+        return _invoke_specialist(task, case)
     if task == "judge_arbiter":
         from agents.judge import CompletenessJudge
 
@@ -523,8 +496,45 @@ def _invoke_agent(task: str, case: dict[str, Any]) -> dict[str, Any]:
     raise ValueError(f"task {task!r} has no agent-mode invocation")
 
 
+def _invoke_specialist(task: str, case: dict[str, Any]) -> dict[str, Any]:
+    """OpenRouter chat completion with the designated specialist prompt.
+
+    Does not call LangChain specialist classes or ``extract_node``.
+    """
+    from evals.specialist_llm import specialist_for_class
+
+    specialist = TASK_SPECIALIST[task]
+    doc_class = str(case.get("expected_doc_class") or "")
+    required = specialist_for_class(doc_class)
+    if specialist != required:
+        raise RuntimeError(
+            f"task {task!r} is wired to {specialist!r} but class {doc_class!r} "
+            f"is designated to {required!r}"
+        )
+    return _specialist_prediction(specialist, str(case.get("text") or ""), doc_class, case=case)
+
+
+def _specialist_prediction(
+    specialist: str,
+    text: str,
+    doc_class: str,
+    case: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    from evals.specialist_llm import extract_entities
+
+    row = dict(case or {})
+    row.setdefault("text", text)
+    row.setdefault("expected_doc_class", doc_class)
+    return extract_entities(specialist, row)
+
+
 def invoke(task: str, case: dict[str, Any], *, mode: str = "node") -> dict[str, Any]:
     """Run one case through the task's node or agent. Returns the prediction."""
+    canonical = _canonical_task(task)
+    # Extraction specialists are agent-only. The merger prompt is not the
+    # extract_node path; node mode would emit extract-fields / CUAD enrich.
+    if canonical in TASK_SPECIALIST:
+        return _invoke_specialist(canonical, case)
     if mode == "node":
         return _invoke_node(task, case)
     if mode == "agent":

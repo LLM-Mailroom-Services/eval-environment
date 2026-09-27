@@ -1,9 +1,8 @@
 """Braintrust Experiments + HF corpus dataset linkage for eval runs.
 
 Keeps the existing Logger (``init_logger``) for nested LLM spans while opening
-a per-run Experiment attached to a project Dataset that mirrors the pinned
-Hugging Face mailroom corpus. Dataset rows upsert on ``doc_text_sha256`` so
-re-runs do not multiply rows.
+a per-run Experiment. Dataset-document upserts are intentionally off: Braintrust
+rows are specialist (or node) invocations, not corpus documents.
 
 Scoring on Braintrust stays minimal — see ``scoring.sink_score_metrics``.
 """
@@ -92,7 +91,7 @@ def begin_eval_run(
     dataset_prov: dict[str, Any],
     run_metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
-    """Open a Braintrust Experiment linked to the HF corpus dataset."""
+    """Open a Braintrust Experiment. Do not insert corpus documents as dataset rows."""
     global _active_experiment, _dataset_handle, _record_id_by_sha
     _active_experiment = None
     _dataset_handle = None
@@ -109,48 +108,16 @@ def begin_eval_run(
     ds_name = _dataset_name(revision)
 
     try:
-        _dataset_handle = braintrust.init_dataset(
-            project=project,
-            name=ds_name,
-            description="Pinned Lucius-Morningstar/mailroom-dataset eval rows",
-            metadata={
-                "hf_repo": dataset_prov.get("repo") or "Lucius-Morningstar/mailroom-dataset",
-                "hf_revision": revision,
-                "hf_config": dataset_prov.get("config"),
-            },
-        )
-        for case in cases:
-            sha = doc_text_sha256(case)
-            try:
-                rid = _dataset_handle.insert(
-                    id=sha,
-                    input=_dataset_input(case),
-                    expected=_dataset_expected(case),
-                    metadata=_dataset_metadata(case, dataset_prov),
-                    tags=[
-                        t
-                        for t in (
-                            case.get("split"),
-                            case.get("expected_doc_class"),
-                            task_id,
-                        )
-                        if t
-                    ],
-                )
-                _record_id_by_sha[sha] = rid
-            except Exception:
-                logger.warning("braintrust_dataset_insert_failed", case_ref=public_case_ref(case), exc_info=True)
-
         meta = dict(run_metadata or {})
         meta.setdefault("hf_repo", dataset_prov.get("repo"))
         meta.setdefault("hf_revision", revision)
         meta.setdefault("hf_dataset_name", ds_name)
+        meta["dataset_rows"] = "off"
 
         _active_experiment = braintrust.init(
             project=project,
             experiment=run_id,
             description=f"mailroom-evals {task_id}",
-            dataset=_dataset_handle,
             metadata=meta,
             tags=[task_id, "mailroom-evals"],
         )
@@ -158,19 +125,52 @@ def begin_eval_run(
             "braintrust_experiment_opened",
             project=project,
             experiment=run_id,
-            dataset=ds_name,
+            dataset="off",
             n_cases=len(cases),
         )
         return {
             "project": project,
             "experiment": run_id,
-            "dataset": ds_name,
-            "dataset_records": len(_record_id_by_sha),
+            "dataset": None,
+            "dataset_records": 0,
         }
     except Exception:
         logger.warning("braintrust_experiment_begin_failed", exc_info=True)
         _active_experiment = None
         return None
+
+
+def finalize_eval_run(summary: dict[str, Any]) -> None:
+    """Record wall time + cost on the Experiment without adding a non-document row."""
+    exp = _active_experiment
+    if exp is None:
+        return
+    perf = summary.get("performance") or {}
+    duration = summary.get("duration_s")
+    cost_total = perf.get("cost_usd_est_total")
+    cap = summary.get("cost_cap") or {}
+    try:
+        extra = {
+            "duration_s": duration,
+            "cost_usd_est_total": cost_total,
+            "cost_cap": cap,
+            "n": (summary.get("metrics") or {}).get("n"),
+            "errors": (summary.get("metrics") or {}).get("errors"),
+            "decode_profile": (summary.get("params") or {}).get("decode_profile"),
+        }
+        # Prefer metadata merge when the SDK exposes it; never log a fake case.
+        if hasattr(exp, "update_metadata"):
+            exp.update_metadata(extra)
+        logger.info(
+            "braintrust_experiment_finalized",
+            run_id=summary.get("run_id"),
+            duration_s=duration,
+            cost_usd_est_total=cost_total,
+            cost_cap_status=cap.get("status"),
+            document_rows=(summary.get("metrics") or {}).get("n"),
+        )
+    except Exception:
+        logger.warning("braintrust_experiment_finalize_failed", exc_info=True)
 
 
 def end_eval_run() -> None:
@@ -192,24 +192,59 @@ def log_case_scores(
     scorer: str,
     scores: dict[str, Any],
     error: str | None = None,
+    prediction: dict[str, Any] | None = None,
+    specialist: str | None = None,
+    latency_ms: float | None = None,
+    cost_usd: float | None = None,
+    tokens: dict[str, Any] | None = None,
+    span: Any | None = None,
 ) -> None:
-    """Attach minimal headline scores to the Experiment (quota-safe)."""
-    exp = _active_experiment
-    if exp is None:
+    """Score the existing parent span for this specialist call.
+
+    Must not call ``Experiment.log``: that opens a second row beside
+    ``case_span``. Must not tag the row as a document.
+    Nested LLM calls stay children of ``span``.
+    """
+    if span is None or not hasattr(span, "log_document_row"):
+        logger.warning(
+            "braintrust_experiment_case_log_skipped_no_span",
+            case_ref=public_case_ref(case),
+        )
         return
-    headline = scoring.sink_score_metrics(scorer, scores)
-    if not headline and not error:
-        return
+    row_scores = scoring.row_score_metrics(scores)
+    extracted = None
+    if isinstance(prediction, dict):
+        extracted = prediction.get("extracted_data") or prediction
     try:
-        exp.log(
-            input=_dataset_input(case),
-            output={"error": error} if error else {"ok": True},
+        span.log_document_row(
+            output={
+                "specialist": specialist,
+                "extracted_data": extracted,
+                "error": error,
+                "scores": scores or {},
+            },
             expected=_dataset_expected(case),
-            scores=headline or None,
+            scores=row_scores or None,
             error=error,
-            dataset_record_id=dataset_record_id(case),
-            metadata={"case_ref": public_case_ref(case)},
-            allow_concurrent_with_spans=True,
+            metrics={
+                k: float(v)
+                for k, v in {
+                    "latency_ms": latency_ms,
+                    "cost_usd": cost_usd,
+                    "prompt_tokens": (tokens or {}).get("prompt"),
+                    "completion_tokens": (tokens or {}).get("completion"),
+                }.items()
+                if isinstance(v, (int, float))
+            }
+            or None,
+            metadata={
+                "case_ref": public_case_ref(case),
+                "specialist": specialist,
+                "scorer": scorer,
+                "n_expected_fields": (scores or {}).get("n_expected_fields"),
+                "filename": case.get("filename"),
+            },
+            tags=[t for t in (specialist, scorer) if t],
         )
     except Exception:
         logger.warning("braintrust_experiment_case_log_failed", exc_info=True)

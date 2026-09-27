@@ -77,6 +77,10 @@ HEADLINE_MEAN_KEYS = (
     "exact_match_mean",
 )
 
+# Registry task ids that must never source-chunk on pinned seed-42 draws
+# (see ``specialist_llm.SINGLE_COVERAGE_CHUNK_CLASSES``).
+SINGLE_COVERAGE_TASKS = frozenset({"correspondence", "insurance_claims"})
+
 _SLUG_RE = re.compile(r"[^a-z0-9.]+")
 
 # Slugified OpenRouter ids → the same filing keys used by decode profiles.
@@ -84,6 +88,72 @@ MODEL_FILE_ALIASES: dict[str, str] = {
     "qwen-qwen3-8b": "qwen3-8b",
     "ibm-granite-granite-4.2-8b": "granite-4.2-8b",
 }
+
+
+def _prediction_meta(row: dict[str, Any]) -> dict[str, Any]:
+    pred = row.get("prediction")
+    return pred if isinstance(pred, dict) else {}
+
+
+def _specialist_call_sanity_caveats(
+    summary: dict[str, Any],
+    case_rows: list[dict[str, Any]],
+) -> list[str]:
+    """Warn when call counts look like accidental chunking or runaway retries."""
+    task = str(summary.get("task") or "")
+    n_docs = len(case_rows) or int((summary.get("metrics") or {}).get("n") or 0)
+    if n_docs <= 0:
+        return []
+
+    perf = summary.get("performance") or {}
+    by_agent = perf.get("by_agent") if isinstance(perf.get("by_agent"), dict) else {}
+    specialist_calls = sum(
+        int(slot.get("calls") or 0)
+        for slot in by_agent.values()
+        if isinstance(slot, dict)
+    )
+    if specialist_calls <= 0:
+        specialist_calls = sum(
+            int(_prediction_meta(row).get("llm_calls") or 0) for row in case_rows
+        )
+
+    max_needed = max(
+        (int(_prediction_meta(row).get("needed_chunks") or 1) for row in case_rows),
+        default=1,
+    )
+    max_chunks = max(
+        (int(_prediction_meta(row).get("chunks") or 1) for row in case_rows),
+        default=1,
+    )
+
+    lines: list[str] = []
+    if task in SINGLE_COVERAGE_TASKS and max_needed > 1:
+        lines.append(
+            f"- **Source-chunking bug:** up to `{max_needed}` coverage chunks on "
+            f"`{task}` — pinned draws fit in one span; fix `_chunk_limit_for` "
+            "before treating scores as comparable."
+        )
+    elif task == "merger_agreement" and max_chunks >= 8:
+        lines.append(
+            f"- **Merger chunking:** up to `{max_chunks}` source chunks per row — "
+            "confirm the run model inherits merger-specific limits from "
+            "`LARGE_COMPLETION_MODELS` / `CHUNK_CHARS`, not an accidental qwen3-8b default on Granite."
+        )
+
+    if task in SINGLE_COVERAGE_TASKS and specialist_calls > n_docs:
+        lines.append(
+            f"- **Call count:** `{specialist_calls}` specialist LLM calls for "
+            f"`{n_docs}` documents — this is **not** source chunking when "
+            f"`needed_chunks=1` (here max `{max_needed}`). Extra calls are "
+            "JSON parse / network **retries** (`llm_call_budget=2`). "
+            "Do not apply merger 48K chunk settings to correspondence or insurance."
+        )
+        if specialist_calls > n_docs * 15 // 10:
+            lines.append(
+                "- **High retry rate:** calls exceed ~1.5× document count — "
+                "see runbook §4 (concurrency reliability) before accepting the wave as canonical."
+            )
+    return lines
 
 
 def classify(subset: str | None) -> str:
@@ -430,6 +500,8 @@ def render_report(summary: dict[str, Any], case_rows: list[dict[str, Any]]) -> s
         )
     if params.get("resumed_from"):
         lines.append(f"- resumed run: `{_fmt(params.get('resumed_from'))}` (subset manifest preserved)")
+    for note in _specialist_call_sanity_caveats(summary, case_rows):
+        lines.append(note)
     lines.append(
         "- Pair with the Modal leg: same `RUN-<wave>-<CLASS>` stem in "
         "`local-mailroom-sandbox/reports/` (e.g. `RUN-20-CORRESPONDENCE-AWQ-REPORT.md`)."

@@ -186,6 +186,22 @@ def test_cap_status_flags_over_cap():
     assert comparison_report.cap_status(summary, {}) is None
 
 
+def test_render_report_warns_when_correspondence_calls_exceed_doc_count():
+    summary = _summary(mode="real")
+    summary["performance"]["by_agent"]["correspondence_specialist"]["calls"] = 39
+    rows = [
+        {
+            **_ROWS[0],
+            "prediction": {"needed_chunks": 1, "chunks": 1, "llm_calls": 2},
+        }
+        for _ in range(20)
+    ]
+    text = comparison_report.render_report(summary, rows)
+    assert "not** source chunking" in text
+    assert "39" in text
+    assert "High retry rate" in text
+
+
 # ── runner hook ───────────────────────────────────────────────────────────────
 
 

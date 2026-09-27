@@ -63,6 +63,14 @@ CHUNK_CHARS: dict[str, int] = {
 }
 DEFAULT_CHUNK_CHARS = 120_000
 
+# Pinned seed-42 N=20 maxima: correspondence 34,310 chars; insurance_claim 14,607.
+# These classes must never be source-split across completions — one coverage call
+# per document unless the harness retry budget fires on parse/network failure.
+SINGLE_COVERAGE_CHUNK_CLASSES: frozenset[str] = frozenset(
+    {"correspondence", "insurance_claim"}
+)
+SINGLE_COVERAGE_CHUNK_LIMIT = 100_000
+
 # Some models have a much larger real completion ceiling than qwen3-8b's
 # ~8,192 tokens, so the whole document fits in one call safely. Per
 # OpenRouter's model pages: qwen/qwen3.7-flash has a 1,000,000-token context
@@ -82,9 +90,13 @@ LARGE_COMPLETION_MODELS: dict[str, int] = {
 
 
 def _chunk_limit_for(doc_class: str, model: str | None) -> int:
-    override = LARGE_COMPLETION_MODELS.get((model or "").strip().lower())
-    if override is not None:
-        return override
+    if doc_class in SINGLE_COVERAGE_CHUNK_CLASSES:
+        return SINGLE_COVERAGE_CHUNK_LIMIT
+    if doc_class == "merger_agreement":
+        override = LARGE_COMPLETION_MODELS.get((model or "").strip().lower())
+        if override is not None:
+            return override
+        return CHUNK_CHARS["merger_agreement"]
     return CHUNK_CHARS.get(doc_class, DEFAULT_CHUNK_CHARS)
 CHUNK_OVERLAP = 1_500
 CHUNK_HEADER_CHARS = 3_500

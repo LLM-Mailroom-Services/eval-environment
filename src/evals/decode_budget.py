@@ -29,6 +29,20 @@ CLASS_BUDGETS: dict[str, int] = {
     "corporate_records_specialist": 8192,
 }
 
+# Granite 4.2's OpenRouter chat template runs thinking ON. Those reasoning
+# tokens count against ``max_tokens`` even though the JSON answer is compact.
+# The first real Granite correspondence wave at the Qwen budget (4096) had
+# 14/20 rows consume their retry slot and 13/20 still exhaust 8192 aggregate
+# completion tokens. A controlled canonical-draw probe with the mandated
+# T=1.0/top_p=0.95/seed=42 posture showed 4096 fail on 2/3 docs, while 8192
+# completed all 3 in one call (6291/7103/6875 tokens). Give every Granite
+# specialist 2x its Qwen completion allowance to preserve the same extraction
+# prompt/schema while accommodating model-specific hidden reasoning. This is
+# decode-cap parity, not prompt/output-semantic drift.
+GRANITE_CLASS_BUDGETS: dict[str, int] = {
+    agent: budget * 2 for agent, budget in CLASS_BUDGETS.items()
+}
+
 # Thinking-ON decodes blow past the vendored 120 s per-call default (the
 # sandbox pins 600 s for exactly this reason — DMR-072 overlay comment).
 COMPARISON_CALL_TIMEOUT_S = 600
@@ -43,7 +57,7 @@ COMPARISON_PROFILES: dict[str, dict[str, Any]] = {
     # best-effort. Applied on BOTH legs so the comparison stays paired.
     "granite-4.2-8b": {
         "model": "ibm-granite/granite-4.2-8b",
-        "max_tokens_by_agent": dict(CLASS_BUDGETS),
+        "max_tokens_by_agent": dict(GRANITE_CLASS_BUDGETS),
         "sampling": {"temperature": 1.0, "top_p": 0.95, "seed": 42},
         "call_timeout_s": COMPARISON_CALL_TIMEOUT_S,
         # N=20 probe wave hard cap (SAND-027 doctrine; 50-doc waves are
@@ -241,12 +255,17 @@ def _install_sampling_injection(sampling: dict[str, Any], applied: dict[str, Any
 
         class _SamplingChatOpenAI(original_cls):  # type: ignore[misc, valid-type]
             def __init__(self, *args: Any, **kwargs: Any) -> None:
-                kwargs.setdefault("temperature", sampling.get("temperature"))
+                # Mandated profile values override taxonomy/call-site values.
+                # ``setdefault`` here was incorrect: BaseAgent always passes
+                # its taxonomy temperature (0.1), so Granite's required 1.0
+                # silently never reached sorter/native LangChain calls.
+                if sampling.get("temperature") is not None:
+                    kwargs["temperature"] = sampling["temperature"]
                 if sampling.get("top_p") is not None:
-                    kwargs.setdefault("top_p", sampling["top_p"])
+                    kwargs["top_p"] = sampling["top_p"]
                 model_kwargs = dict(kwargs.get("model_kwargs") or {})
                 if sampling.get("seed") is not None:
-                    model_kwargs.setdefault("seed", sampling["seed"])
+                    model_kwargs["seed"] = sampling["seed"]
                 if model_kwargs:
                     kwargs["model_kwargs"] = model_kwargs
                 applied["sampling_injected"] = True

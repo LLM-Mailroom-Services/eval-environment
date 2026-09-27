@@ -56,14 +56,20 @@ Agents that always keep taxonomy defaults regardless of `--model`:
 — see `_SKIP_MODEL_OVERRIDE` in `openrouter_roster.py`). The sorter (`sorter`,
 `sorter_reviewer`) and all five specialists ARE overridden by `--model`.
 
-### Decode profiles (specialists only)
+### Decode profiles (sampling applies to every LLM; budgets are specialist-only)
 
 `--decode-profile {qwen3-8b,granite-4.2-8b}` lifts each specialist's
 completion budget for thinking-ON decodes and raises the per-call timeout to
 600s (`src/evals/decode_budget.py`, `CLASS_BUDGETS` keyed by specialist agent
-name). **This profile map has no entry for `sorter`** — passing
-`--decode-profile` on `eval:classification` is harmless but does nothing
-useful; omit it for sorter runs. Passing `--decode-profile` is also what
+name). Granite uses model-specific budgets at 2x the Qwen specialist budgets
+because its thinking-ON chat template consumes reasoning tokens inside
+`max_tokens`; this changes only the decode ceiling, not the prompt/schema.
+
+The sampling part applies to **all LLM call families**, including sorter:
+Granite requires `temperature=1.0`, `top_p=0.95`, `seed=42`; Qwen keeps its
+pipeline posture. Therefore, **always pass `--decode-profile
+granite-4.2-8b` on Granite sorter runs too**, even though the profile has no
+sorter-specific max-token entry. Passing `--decode-profile` is also what
 triggers the auto-written Modal-comparable report
 (`reports/api-comparisons/<model>/<task>/RUN-<wave>-<CLASS>-<MODEL>-REPORT.md`
 — always separated by specialist/task, never flat across a model dir) —
@@ -138,6 +144,29 @@ vs. the contaminated concurrency=8 baseline), insurance_claims 0/20 parse
 errors (score 0.202 → 0.7488, close to the concurrency=1 reference of
 0.8056).
 
+### Granite-specific validation (do not reuse the Qwen budget blindly)
+
+The first Granite correspondence wave
+(`20260927T044805Z-eval-correspondence`) exposed two setup defects and is a
+debug baseline, **not a valid paired result**:
+
+1. specialist evals call `client.chat.completions.create` directly, bypassing
+   the two original sampling wrappers; the report correctly showed
+   `sampling injected on wire: False`, so IBM's mandated sampling did not
+   reach those calls;
+2. the Qwen correspondence cap (4096) was too small for Granite thinking-ON:
+   14/20 rows needed their retry and 13/20 exhausted 8192 aggregate
+   completion tokens across two attempts.
+
+The direct-client path now consumes the active decode profile and sends
+`temperature=1.0`, `top_p=0.95`, `seed=42` on the wire. A controlled
+three-document canonical-draw probe under that exact posture found 4096
+failed on 2/3 docs, while 8192 completed all 3 in one call
+(6291/7103/6875 completion tokens). Granite specialist budgets are therefore
+2x the Qwen class budgets. The invalid wave remains in the append-only log;
+its deterministic N=20 report filename is replaced only when the corrected
+rerun finishes.
+
 If you see `specialist_llm_retry_blocked_by_budget` warnings in logs at any
 non-trivial rate, that is a signal the model/load combination needs a larger
 budget multiplier than `needed * 2` — do not silently raise it without
@@ -176,13 +205,14 @@ top_p=0.95, seed=42` is applied automatically by the profile).
 ## 6. The sorter runbook (`eval:classification`)
 
 Sorter has no decode-profile budget map (§2) and no per-class subset — its
-default subset is `full`. Same OpenRouter + Braintrust wiring, no
-`--decode-profile`:
+default subset is `full`. For Qwen, omit `--decode-profile`; for Granite it
+is mandatory because it carries IBM's sampling posture:
 
 ```bash
 uv run python -u scripts/run_evals.py \
   --task eval:classification --real --subset full --sample 20 --seed 42 \
-  --model qwen/qwen3-8b \
+  --model ibm-granite/granite-4.2-8b \
+  --decode-profile granite-4.2-8b \
   --require-trace-sink --prompt-source frozen \
   --trace-backend braintrust --concurrency 8 \
   2>&1 | tee -a /tmp/run.log

@@ -698,7 +698,17 @@ def _execute_cases(
             reset_run_usage()  # per-case token accounting
         except Exception:
             pass
-        with tracing.case_span(backend, node_name=spec.node_name, case=case, run_meta=run_meta) as span:
+        # Name the parent Experiment row after the specialist *before* invoke so
+        # nested extract-fields / LLM spans attach under one document row.
+        specialist = _specialist_name(spec, None)
+        with tracing.case_span(
+            backend,
+            node_name=spec.node_name,
+            case=case,
+            run_meta=run_meta,
+            span_name=specialist or spec.node_name,
+            specialist=specialist,
+        ) as span:
             try:
                 prediction = invoke_mod.invoke(spec.name, case, mode=invoke_mode) or {}
             except Exception as exc:
@@ -726,7 +736,7 @@ def _execute_cases(
             # Span metrics: essentials; Braintrust experiment: one fully scored document row.
             span.set_metrics(scoring.essential_metrics(spec.scorer, scores))
             agent_usage = _agent_usage()
-            specialist = _specialist_name(spec, agent_usage)
+            specialist = _specialist_name(spec, agent_usage) or specialist
             tokens = {
                 "prompt": perf["prompt_tokens"],
                 "completion": perf["completion_tokens"],
@@ -745,6 +755,7 @@ def _execute_cases(
                     latency_ms=perf["latency_ms"],
                     cost_usd=perf["cost_usd_est"],
                     tokens=tokens,
+                    span=span,
                 )
             case_trace = getattr(span, "trace_ref", None)
         rows.append(

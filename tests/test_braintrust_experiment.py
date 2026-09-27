@@ -65,6 +65,7 @@ def test_begin_eval_run_upserts_dataset_rows(mock_init_dataset, mock_init, monke
 
 def test_log_case_scores_one_fully_scored_document_row():
     exp = MagicMock()
+    span = MagicMock()
     with patch("evals.braintrust_experiment._active_experiment", exp):
         case = {"id": "x", "text": "doc", "expected_doc_class": "contract", "filename": "a.pdf"}
         log_case_scores(
@@ -81,9 +82,11 @@ def test_log_case_scores_one_fully_scored_document_row():
             latency_ms=12.0,
             cost_usd=0.001,
             tokens={"prompt": 10, "completion": 4},
+            span=span,
         )
-    exp.log.assert_called_once()
-    kw = exp.log.call_args.kwargs
+    exp.log.assert_not_called()
+    span.log_document_row.assert_called_once()
+    kw = span.log_document_row.call_args.kwargs
     assert kw["scores"]["overall_score"] == 0.7
     assert kw["scores"]["extraction_f1"] == 0.2
     assert kw["scores"]["needs_judge_review"] == 1.0
@@ -92,3 +95,15 @@ def test_log_case_scores_one_fully_scored_document_row():
     assert kw["output"]["extracted_data"] == {"parties": ["Acme"]}
     assert kw["metadata"]["specialist"] == "contracts_specialist"
     assert "document" in kw["tags"]
+
+
+def test_log_case_scores_skips_without_parent_span():
+    exp = MagicMock()
+    with patch("evals.braintrust_experiment._active_experiment", exp):
+        log_case_scores(
+            {"id": "x", "text": "doc"},
+            scorer="extraction",
+            scores={"overall_score": 1.0},
+            specialist="contracts_specialist",
+        )
+    exp.log.assert_not_called()

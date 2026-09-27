@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock, patch
+
 import pytest
 
 from evals import tracing
@@ -51,6 +53,33 @@ def test_apply_provider_env(monkeypatch):
 def test_noop_span_when_disabled():
     with tracing.case_span("none", node_name="classify-document", case={}, run_meta={}) as span:
         span.set_output({"ok": True}).set_metrics({"a": 1.0})
+        span.log_document_row(scores={"overall_score": 1.0})
+
+
+def test_case_span_names_specialist_parent_not_extract_fields():
+    exp = MagicMock()
+    span_cm = MagicMock()
+    span_cm.__enter__.return_value = MagicMock()
+    span_cm.__exit__.return_value = None
+    exp.start_span.return_value = span_cm
+    case = {"id": "c", "text": "hello"}
+    with patch("evals.braintrust_experiment.current_experiment", return_value=exp):
+        with patch("evals.braintrust_experiment.dataset_record_id", return_value="rec-1"):
+            with tracing.case_span(
+                "braintrust",
+                node_name="extract-fields",
+                case=case,
+                run_meta={"run_id": "r1"},
+                span_name="contracts_specialist",
+                specialist="contracts_specialist",
+            ) as handle:
+                handle.log_document_row(scores={"overall_score": 0.5})
+    kw = exp.start_span.call_args.kwargs
+    assert kw["name"] == "contracts_specialist"
+    assert kw["name"] != "extract-fields"
+    assert kw["id"] == tracing.doc_text_sha256(case)
+    assert kw["metadata"]["pipeline_node"] == "extract-fields"
+    assert kw["metadata"]["specialist"] == "contracts_specialist"
 
 
 def test_node_observation_names():

@@ -230,19 +230,26 @@ def log_case_scores(
     latency_ms: float | None = None,
     cost_usd: float | None = None,
     tokens: dict[str, Any] | None = None,
+    span: Any | None = None,
 ) -> None:
-    """One Braintrust experiment row per document, with the full 0–1 score set."""
-    exp = _active_experiment
-    if exp is None:
+    """Score the existing parent span for this document.
+
+    Must not call ``Experiment.log``: that opens a second row beside
+    ``case_span`` and duplicates the specialist invocation in the UI.
+    Nested node/LLM calls stay children of ``span``.
+    """
+    if span is None or not hasattr(span, "log_document_row"):
+        logger.warning(
+            "braintrust_experiment_case_log_skipped_no_span",
+            case_ref=public_case_ref(case),
+        )
         return
     row_scores = scoring.row_score_metrics(scores)
     extracted = None
     if isinstance(prediction, dict):
         extracted = prediction.get("extracted_data") or prediction
     try:
-        exp.log(
-            id=doc_text_sha256(case),
-            input=_dataset_input(case),
+        span.log_document_row(
             output={
                 "specialist": specialist,
                 "extracted_data": extracted,
@@ -272,7 +279,6 @@ def log_case_scores(
                 "filename": case.get("filename"),
             },
             tags=[t for t in (specialist, scorer, "document") if t],
-            allow_concurrent_with_spans=True,
         )
     except Exception:
         logger.warning("braintrust_experiment_case_log_failed", exc_info=True)

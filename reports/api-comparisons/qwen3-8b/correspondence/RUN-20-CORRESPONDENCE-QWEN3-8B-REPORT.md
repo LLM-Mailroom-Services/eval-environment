@@ -120,4 +120,6 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 
 - mode: **real**; trace backend: `braintrust`
 - decode profile: `qwen3-8b`; budgets/timeout per issue #18 §3
+- **Call count:** `39` specialist LLM calls for `20` documents — this is **not** source chunking when `needed_chunks=1` (here max `1`). Extra calls are JSON parse / network **retries** (`llm_call_budget=2`). Do not apply merger 48K chunk settings to correspondence or insurance.
+- **High retry rate:** calls exceed ~1.5× document count — see runbook §4 (concurrency reliability) before accepting the wave as canonical.
 - Pair with the Modal leg: same `RUN-<wave>-<CLASS>` stem in `local-mailroom-sandbox/reports/` (e.g. `RUN-20-CORRESPONDENCE-AWQ-REPORT.md`).

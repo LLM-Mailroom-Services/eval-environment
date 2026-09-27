@@ -5,29 +5,96 @@ All notable changes to mailroom-evals are documented here. Format based on
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-09-27
+
+SAND-027 Leg B (OpenRouter API) vs Modal parity, Braintrust experiment rows,
+comparison-report tree, and experiment-log schema v3.
+
 ### Added
 
 - **OpenRouter model roster** — `config/openrouter_models.yaml` (incl.
-  `ibm-granite/granite-4.2-8b` @ $0.06/$0.25 per 1M, 131K context).
-  `--list-models` prints registered slugs; `--model` validates, applies a
-  uniform OpenRouter override to pipeline agents for the run, and prices token
-  usage from the roster (dojo fallback when absent).
-- **Archived production specialists (`*_v0`)** — the pre-concise production
-  freeze is kept as a resolvable archive (`src/evals/prompts/archived_production.py`,
-  `prompts/archive/`). Opt in with `--prompt-source archived` or
-  `--prompt-version contracts_specialist_v0` (and the other specialist `_v0`
-  keys). New GEPA / token-budget / modal+vLLM work targets frozen concise v1.
+  `qwen/qwen3-8b`, `qwen/qwen3.7-flash`, `ibm-granite/granite-4.2-8b` with
+  live-verified pricing). `--list-models` / `--model` validate slugs, apply a
+  uniform OpenRouter override for the run, and price tokens from the roster.
+- **Direct specialist OpenRouter path** — `src/evals/specialist_llm.py` runs
+  extraction specialists via designated frozen prompts + OpenRouter chat
+  completions (no LangChain specialist classes); merger agreements support
+  model-specific source-chunk limits and per-chunk JSON retries.
+- **Decode comparison profiles** — `qwen3-8b` and `granite-4.2-8b` profiles
+  (`src/evals/decode_budget.py`): per-agent completion budgets, IBM Granite
+  sampling (`T=1.0`, `top_p=0.95`, `seed=42`), 600 s call timeout, wave cost
+  caps; profile sampling reaches the specialist direct-client path.
+- **Modal-comparable API reports** — `reports/api-comparisons/<model>/<task>/`
+  with immutable `runs/<run_id>.md`, canonical `RUN-<wave>-<CLASS>-<MODEL>-REPORT.md`
+  stems, [INDEX.md](reports/api-comparisons/INDEX.md), per-model suite READMEs,
+  and **[API-LEG-MASTER-REPORT.md](reports/api-comparisons/API-LEG-MASTER-REPORT.md)**
+  (Qwen vs Granite paired deltas + superseded-run index). Regenerate via
+  `scripts/render_comparison_reports.py`.
+- **OpenRouter + Braintrust runbook** — `docs/openrouter-braintrust-runbook.md`
+  (N=20 waves, concurrency reliability, one-coverage-call vs chunking policy,
+  Granite validation gates).
+- **Braintrust experiment integration** — one scored row per document in
+  Braintrust experiments; optional full-corpus Dataset sync
+  (`scripts/sync_braintrust_dataset.py`); HF corpus linked to experiments with
+  minimal essential span metrics.
+- **SAND-027 orchestration** — `scripts/sand027_n20_orchestrate.py`,
+  `sand027_n20_waves.sh`, Qwen concurrency-8 rerun helpers; resume-safe wave
+  locks; canonical subset draws under `data/manifests/subset-draws/` (#20).
+- **Archived production specialists (`*_v0`)** — verbose pre-concise freeze in
+  `prompts/archive/` + `archived_production.py`; opt in with
+  `--prompt-source archived` or `--prompt-version <role>_v0`.
+- **Contracts Modal v33 twin** — `contracts_specialist_v33` archive prompt for
+  sandbox parity experiments.
+- **Cloud agent environment** — `.cursor/environment.json`,
+  `scripts/cloud-agent-install.sh`; CI installs via uv with comparison-report
+  snapshot checks.
+- **Experiment-log detail files** — short `reports/experiment_log.md` index plus
+  per-run `reports/experiment_log/<run_id>.md` write-ups.
 
 ### Changed
 
-- **Frozen extraction specialists (concise baseline)** — `contracts_specialist_v1`,
-  `corporate_records_specialist_v1`, `correspondence_specialist_v1`, and
-  `insurance_claims_specialist_v1` now materialize the sandbox simplified
-  prompts from `Exios66/local-mailroom-sandbox` @ `97c0f940194f` (PR #33
-  lineage). Promote with
-  `python scripts/promote_sandbox_specialist.py upgrade-frozen-specialists`.
-  Removed the redundant `contracts_specialist_v2` mutation catalog entry.
-  Drift checks skip manifest keys with `source_kind: sandbox`.
+- **Frozen extraction specialists (concise baseline)** — four specialist v1
+  prompts align with sandbox simplified lineage (`97c0f940194f`); promote via
+  `scripts/promote_sandbox_specialist.py upgrade-frozen-specialists`.
+- **Experiment log schema v3** — `schema_version: 3` (v1/v2 records remain
+  valid); richer run summaries (`performance.cost_usd_total` /
+  `cost_usd_est_total`, `expected_cost_usd`, comparison-report paths).
+- **Specialist concurrency** — real eval waves can run documents concurrently
+  (`--concurrency`); runner aggregates per-agent usage and re-prices runs from
+  aggregate tokens (not summed rounded per-case costs).
+- **Git tracking policy** — `reports/` (experiment log, api-comparisons,
+  calibration) tracked; `data/experiments/` and raw tee logs gitignored again.
+- **Viewer snapshot** — `export_site_snapshot.py` unwraps prompt mutation JSON;
+  snapshot refreshed for 60+ logged runs.
+
+### Fixed
+
+- **Qwen concurrency garble** — retry once on successful but non-JSON
+  completions; **one retry slot per coverage chunk** (not one shared slot per
+  document).
+- **Merger chunk policy** — `CHUNK_CHARS` / `LARGE_COMPLETION_MODELS` scoped by
+  doc class (48K multi-chunk for `qwen/qwen3-8b` merger only; Granite ~280K
+  context-safe spans; correspondence/insurance never source-chunked on pinned
+  draws). Comparison reports flag high call counts vs chunking misconfiguration.
+- **Granite compliance** — mandated sampling on specialist wire calls;
+  correspondence 16K completion budget after N=20 evidence; merger rerun
+  supersedes accidental 48K-chunk Granite wave (~170 calls).
+- **Truncated merger JSON** — treat 8k-digit integer overflow / truncated JSON
+  as parse misses; disable Qwen thinking on chunked merger path where required.
+- **Braintrust rows** — one document row per specialist case (no duplicate
+  experiment rows); resume matches model/prompt wave lock.
+- **Trace hygiene** — sanitize case refs in trace metadata (#30); checkpointed
+  case rows not rewritten at run close.
+- **Comparison report costs** — expected vs actual vs roster-estimated cost
+  columns; run configuration and serial-vs-batched wall proof in API reports.
+
+### Validation
+
+- **275** hermetic tests (`uv run pytest tests/ -q`).
+- SAND-027 Leg B N=20 suites logged for **qwen/qwen3-8b** and
+  **ibm-granite/granite-4.2-8b** (six specialist/classification tasks, seed 42,
+  Braintrust `Mailroom-Evals`); master report and suite READMEs committed under
+  `reports/api-comparisons/`.
 
 ## [0.4.0] — 2026-09-13
 

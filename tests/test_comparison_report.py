@@ -186,6 +186,59 @@ def test_cap_status_flags_over_cap():
     assert comparison_report.cap_status(summary, {}) is None
 
 
+def test_render_master_report_lists_canonical_suites():
+    qwen = _summary(
+        run_id="20260927T033031Z-eval-correspondence",
+        task="correspondence",
+        mode="real",
+    )
+    qwen["params"] = {"sample": 20, "seed": 42, "decode_profile": "qwen3-8b"}
+    qwen["metrics"] = {"n": 20, "overall_score": 0.513, "errors": 0, "scorer_errors": 0}
+    granite = _summary(
+        run_id="20260927T053647Z-eval-correspondence",
+        task="correspondence",
+        mode="real",
+        model="ibm-granite/granite-4.2-8b",
+    )
+    granite["params"] = {"sample": 20, "seed": 42, "decode_profile": "granite-4.2-8b"}
+    granite["metrics"] = {"n": 20, "overall_score": 0.4065, "errors": 0, "scorer_errors": 0}
+    text = comparison_report.render_master_report(
+        [qwen, granite],
+        [
+            {"run_id": qwen["run_id"], "canonical_report": "qwen3-8b/correspondence/x.md"},
+            {"run_id": granite["run_id"], "canonical_report": "granite-4.2-8b/correspondence/y.md"},
+        ],
+    )
+    assert "API leg — master comparison" in text
+    assert "Paired comparison" in text
+    assert "20260927T033031Z-eval-correspondence" in text
+
+
+def test_render_model_suite_readme_links_canonical_stems():
+    summary = _summary(mode="real")
+    summary["params"] = {"sample": 20, "decode_profile": "qwen3-8b"}
+    summary["metrics"] = {"n": 20, "overall_score": 0.5, "errors": 0, "scorer_errors": 0}
+    text = comparison_report.render_model_suite_readme("qwen3-8b", [summary])
+    assert "Final runs" in text
+    assert "correspondence/RUN-" in text
+
+
+def test_render_report_warns_when_correspondence_calls_exceed_doc_count():
+    summary = _summary(mode="real")
+    summary["performance"]["by_agent"]["correspondence_specialist"]["calls"] = 39
+    rows = [
+        {
+            **_ROWS[0],
+            "prediction": {"needed_chunks": 1, "chunks": 1, "llm_calls": 2},
+        }
+        for _ in range(20)
+    ]
+    text = comparison_report.render_report(summary, rows)
+    assert "not** source chunking" in text
+    assert "39" in text
+    assert "High retry rate" in text
+
+
 # ── runner hook ───────────────────────────────────────────────────────────────
 
 

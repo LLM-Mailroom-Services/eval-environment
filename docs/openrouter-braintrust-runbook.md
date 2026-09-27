@@ -61,9 +61,11 @@ Agents that always keep taxonomy defaults regardless of `--model`:
 `--decode-profile {qwen3-8b,granite-4.2-8b}` lifts each specialist's
 completion budget for thinking-ON decodes and raises the per-call timeout to
 600s (`src/evals/decode_budget.py`, `CLASS_BUDGETS` keyed by specialist agent
-name). Granite uses model-specific budgets at 2x the Qwen specialist budgets
-because its thinking-ON chat template consumes reasoning tokens inside
-`max_tokens`; this changes only the decode ceiling, not the prompt/schema.
+name). Granite starts at 2x the Qwen specialist budgets because its
+thinking-ON chat template consumes reasoning tokens inside `max_tokens`;
+correspondence uses 16K after its full N=20 validation proved 8K still
+truncated two documents. This changes only the decode ceiling, not the
+prompt/schema.
 
 The sampling part applies to **all LLM call families**, including sorter:
 Granite requires `temperature=1.0`, `top_p=0.95`, `seed=42`; Qwen keeps its
@@ -162,10 +164,13 @@ The direct-client path now consumes the active decode profile and sends
 `temperature=1.0`, `top_p=0.95`, `seed=42` on the wire. A controlled
 three-document canonical-draw probe under that exact posture found 4096
 failed on 2/3 docs, while 8192 completed all 3 in one call
-(6291/7103/6875 completion tokens). Granite specialist budgets are therefore
-2x the Qwen class budgets. The invalid wave remains in the append-only log;
-its deterministic N=20 report filename is replaced only when the corrected
-rerun finishes.
+(6291/7103/6875 completion tokens). A subsequent full N=20 run at 8192
+(`20260927T052637Z`) still found two harder documents whose first and retry
+attempts both stopped at exactly 8192 without valid JSON. Correspondence is
+therefore 16K per attempt; the other Granite classes remain at 2x pending
+their own full-wave evidence. Both superseded waves remain in the append-only
+log; the deterministic N=20 report filename is replaced only when the next
+corrected rerun finishes.
 
 If you see `specialist_llm_retry_blocked_by_budget` warnings in logs at any
 non-trivial rate, that is a signal the model/load combination needs a larger
@@ -173,6 +178,42 @@ budget multiplier than `needed * 2` — do not silently raise it without
 re-verifying the retry-rescue rate first (see §6, in-process diagnostic).
 
 ## 5. The specialist runbook (N=20, concurrency=8, single job at a time)
+
+### One coverage call per document (default — not merger-only)
+
+**Source chunking** splits one document's text across multiple completions.
+**JSON retries** re-call the *same* coverage span after garbled output or a
+network error. Do not confuse them when reading `performance.by_agent.calls`.
+
+| task | pinned N=20 max source size | source chunks | expected specialist calls (N=20) |
+|---|---:|---|---|
+| `eval:correspondence` | 34,310 chars | **always 1** | **~20** (one coverage call per doc) |
+| `eval:insurance_claims` | 14,607 chars | **always 1** | **~20** |
+| `eval:contracts` | 173,240 chars | usually 1 (120K default span) | ~20–24 |
+| `eval:corporate_records` | 312,280 chars | 1–3 on qwen3-8b (120K spans) | ~20–40 when chunked |
+| `eval:merger_agreement` | 464,926 chars | model-specific (below) | model-specific |
+
+**Never** point a non-merger task at merger-only chunk policy (48K qwen3-8b
+merger spans, Granite 280K merger spans, etc.). Code enforces this via
+`SINGLE_COVERAGE_CHUNK_CLASSES` for correspondence and insurance.
+
+**Sanity-check every API report before you treat it as canonical:**
+
+1. Run log / case rows: `needed_chunks=1` and `chunks=1` for correspondence
+   and insurance (always on pinned draws).
+2. **~39 calls on correspondence for 20 docs is not chunking** — it is almost
+   always **retries** under `--concurrency 8` (see §4). The contaminated
+   baseline `20260926T234358Z` had **20 calls** at concurrency=1; the
+   post-retry-fix wave `20260927T033031Z` has **39 calls** with **0 parse
+   errors** but ~2× API spend. Prefer the run with **~20 calls and 0 parse
+   errors** when both exist; do not “fix” correspondence by shrinking chunk
+   sizes.
+3. Merger is the only class where multi-chunk coverage is **normal** for
+   `qwen/qwen3-8b` (48K spans). Granite / qwen3.7-flash use merger-specific
+   large spans (§5 below).
+
+Comparison reports auto-append caveats when call counts or `needed_chunks`
+look wrong (`evals.comparison_report`).
 
 Task ids, model, and profile are the only per-class variables:
 
@@ -196,6 +237,24 @@ run_specialist eval:contracts          contract           qwen/qwen3-8b qwen3-8b
 run_specialist eval:corporate_records  corporate_record   qwen/qwen3-8b qwen3-8b
 run_specialist eval:merger_agreement   merger_agreement   qwen/qwen3-8b qwen3-8b
 ```
+
+### Merger agreement: minimize coverage chunks (model-specific)
+
+The pinned corpus includes merger agreements up to **464,926 characters**.
+**Default posture is one specialist completion per document** — not 48K
+source chunking — whenever the run model can safely hold the full text in one
+call (see `LARGE_COMPLETION_MODELS` in `src/evals/specialist_llm.py`).
+
+| model | merger chunking | why |
+|---|---|---|
+| `qwen/qwen3-8b` | **48K multi-chunk** (8–10 calls/doc) | live evidence: ~8,192 completion-token hard cap truncates unchunked ~390K-char docs → parse_error |
+| `qwen/qwen3.7-flash` | **one call/doc** (budget 2 with retry) | 1M context / 65K completion on OpenRouter; 465K-char docs fit in one pass |
+| `ibm-granite/granite-4.2-8b` | **~280K source span** (1 call for most N=20 rows; ≤2 for the 465K outlier) | 131K context minus 32K merger `max_tokens`; do not inherit the 48K qwen3-8b path |
+
+Do **not** run Granite (or qwen3.7-flash) merger evals with the qwen3-8b
+48K default — that wastes spend (e.g. Granite N=20 at ~170 calls / ~$0.44
+instead of ~20 calls). After changing chunk policy, rerun merger only; other
+specialist rows stay valid.
 
 Run each of the five sequentially (one at a time — §4), never in parallel.
 For Granite comparisons, swap `qwen/qwen3-8b qwen3-8b` for

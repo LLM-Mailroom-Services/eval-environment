@@ -55,6 +55,7 @@ from __future__ import annotations
 import json
 import os
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -77,6 +78,10 @@ HEADLINE_MEAN_KEYS = (
     "exact_match_mean",
 )
 
+# Registry task ids that must never source-chunk on pinned seed-42 draws
+# (see ``specialist_llm.SINGLE_COVERAGE_CHUNK_CLASSES``).
+SINGLE_COVERAGE_TASKS = frozenset({"correspondence", "insurance_claims"})
+
 _SLUG_RE = re.compile(r"[^a-z0-9.]+")
 
 # Slugified OpenRouter ids → the same filing keys used by decode profiles.
@@ -84,6 +89,72 @@ MODEL_FILE_ALIASES: dict[str, str] = {
     "qwen-qwen3-8b": "qwen3-8b",
     "ibm-granite-granite-4.2-8b": "granite-4.2-8b",
 }
+
+
+def _prediction_meta(row: dict[str, Any]) -> dict[str, Any]:
+    pred = row.get("prediction")
+    return pred if isinstance(pred, dict) else {}
+
+
+def _specialist_call_sanity_caveats(
+    summary: dict[str, Any],
+    case_rows: list[dict[str, Any]],
+) -> list[str]:
+    """Warn when call counts look like accidental chunking or runaway retries."""
+    task = str(summary.get("task") or "")
+    n_docs = len(case_rows) or int((summary.get("metrics") or {}).get("n") or 0)
+    if n_docs <= 0:
+        return []
+
+    perf = summary.get("performance") or {}
+    by_agent = perf.get("by_agent") if isinstance(perf.get("by_agent"), dict) else {}
+    specialist_calls = sum(
+        int(slot.get("calls") or 0)
+        for slot in by_agent.values()
+        if isinstance(slot, dict)
+    )
+    if specialist_calls <= 0:
+        specialist_calls = sum(
+            int(_prediction_meta(row).get("llm_calls") or 0) for row in case_rows
+        )
+
+    max_needed = max(
+        (int(_prediction_meta(row).get("needed_chunks") or 1) for row in case_rows),
+        default=1,
+    )
+    max_chunks = max(
+        (int(_prediction_meta(row).get("chunks") or 1) for row in case_rows),
+        default=1,
+    )
+
+    lines: list[str] = []
+    if task in SINGLE_COVERAGE_TASKS and max_needed > 1:
+        lines.append(
+            f"- **Source-chunking bug:** up to `{max_needed}` coverage chunks on "
+            f"`{task}` — pinned draws fit in one span; fix `_chunk_limit_for` "
+            "before treating scores as comparable."
+        )
+    elif task == "merger_agreement" and max_chunks >= 8:
+        lines.append(
+            f"- **Merger chunking:** up to `{max_chunks}` source chunks per row — "
+            "confirm the run model inherits merger-specific limits from "
+            "`LARGE_COMPLETION_MODELS` / `CHUNK_CHARS`, not an accidental qwen3-8b default on Granite."
+        )
+
+    if task in SINGLE_COVERAGE_TASKS and specialist_calls > n_docs:
+        lines.append(
+            f"- **Call count:** `{specialist_calls}` specialist LLM calls for "
+            f"`{n_docs}` documents — this is **not** source chunking when "
+            f"`needed_chunks=1` (here max `{max_needed}`). Extra calls are "
+            "JSON parse / network **retries** (`llm_call_budget=2`). "
+            "Do not apply merger 48K chunk settings to correspondence or insurance."
+        )
+        if specialist_calls > n_docs * 15 // 10:
+            lines.append(
+                "- **High retry rate:** calls exceed ~1.5× document count — "
+                "see runbook §4 (concurrency reliability) before accepting the wave as canonical."
+            )
+    return lines
 
 
 def classify(subset: str | None) -> str:
@@ -430,6 +501,8 @@ def render_report(summary: dict[str, Any], case_rows: list[dict[str, Any]]) -> s
         )
     if params.get("resumed_from"):
         lines.append(f"- resumed run: `{_fmt(params.get('resumed_from'))}` (subset manifest preserved)")
+    for note in _specialist_call_sanity_caveats(summary, case_rows):
+        lines.append(note)
     lines.append(
         "- Pair with the Modal leg: same `RUN-<wave>-<CLASS>` stem in "
         "`local-mailroom-sandbox/reports/` (e.g. `RUN-20-CORRESPONDENCE-AWQ-REPORT.md`)."
@@ -471,7 +544,335 @@ def render_index(entries: list[dict[str, Any]], base_dir: Path | None = None) ->
             f"{entry.get('n')} | [{Path(run_rel).name}]({run_rel}) | "
             f"{f'[{Path(canon).name}]({canon})' if canon != '—' else '—'} |"
         )
+    lines.append("")
+    lines.append(
+        "Master rollup (canonical N=20 suites, paired deltas): "
+        "[API-LEG-MASTER-REPORT.md](API-LEG-MASTER-REPORT.md)."
+    )
     return "\n".join(lines) + "\n"
+
+
+SUITE_TASK_ORDER = (
+    "correspondence",
+    "insurance_claims",
+    "contracts",
+    "merger_agreement",
+    "corporate_records",
+    "classification",
+)
+
+TASK_LABELS = {
+    "correspondence": "correspondence",
+    "insurance_claims": "insurance claims",
+    "contracts": "contracts",
+    "merger_agreement": "merger agreements",
+    "corporate_records": "corporate records",
+    "classification": "sorter / classification",
+}
+
+
+def headline_result(summary: dict[str, Any]) -> str:
+    """Human-readable headline metric for suite tables."""
+    metrics = summary.get("metrics") or {}
+    task = summary.get("task")
+    if task == "classification":
+        parts: list[str] = []
+        if isinstance(metrics.get("class_accuracy"), (int, float)):
+            parts.append(f"class {float(metrics['class_accuracy']):.4f}")
+        if isinstance(metrics.get("subclass_accuracy"), (int, float)):
+            parts.append(f"subclass {float(metrics['subclass_accuracy']):.4f}")
+        return "; ".join(parts) if parts else "—"
+    for key in ("overall_score", *HEADLINE_MEAN_KEYS):
+        value = metrics.get(key)
+        if isinstance(value, (int, float)):
+            return f"overall {float(value):.4f}"
+    return "—"
+
+
+def specialist_llm_calls(summary: dict[str, Any]) -> int:
+    perf = summary.get("performance") or {}
+    by_agent = perf.get("by_agent") if isinstance(perf.get("by_agent"), dict) else {}
+    total = sum(
+        int(slot.get("calls") or 0)
+        for slot in by_agent.values()
+        if isinstance(slot, dict)
+    )
+    return total
+
+
+def run_cost_est(summary: dict[str, Any]) -> float | None:
+    return run_cost_usd(summary)
+
+
+def _canonical_rel(summary: dict[str, Any], base_dir: Path) -> str:
+    return repo_relative_path(report_path(summary, base_dir), base_dir)
+
+
+def _model_relative_report(summary: dict[str, Any], base_dir: Path, model_key: str) -> str:
+    rel = _canonical_rel(summary, base_dir)
+    prefix = f"{model_key}/"
+    if rel.startswith(prefix):
+        return rel[len(prefix) :]
+    return rel
+
+
+def _suite_canonical_rows(
+    canonical_summaries: list[dict[str, Any]],
+    *,
+    model_key: str,
+    min_wave: int = 20,
+) -> list[dict[str, Any]]:
+    rows = [
+        s
+        for s in canonical_summaries
+        if model_short(s) == model_key and wave_size(s) >= min_wave
+    ]
+    order = {t: i for i, t in enumerate(SUITE_TASK_ORDER)}
+
+    def sort_key(s: dict[str, Any]) -> tuple[int, str]:
+        task = str(s.get("task") or "")
+        return (order.get(task, 99), task)
+
+    return sorted(rows, key=sort_key)
+
+
+MODEL_SUITE_INTRO = {
+    "qwen3-8b": (
+        "OpenRouter API results for `qwen/qwen3-8b` (decode profile `qwen3-8b`), "
+        "SAND-027 Leg B N=20 waves, seed 42, frozen prompts, concurrency 8."
+    ),
+    "granite-4.2-8b": (
+        "OpenRouter API results for `ibm-granite/granite-4.2-8b` "
+        "(decode profile `granite-4.2-8b`), traced to Braintrust project "
+        "`Mailroom-Evals`. Same canonical seed-42 draws as the Qwen suite."
+    ),
+}
+
+MODEL_SUITE_FOOTNOTES: dict[str, str] = {
+    "qwen3-8b": """## Qwen 3 8B notes
+
+- Merger N=20 on `qwen/qwen3-8b` may be reserved for a separate agent wave;
+  treat any stand-in merger run as non-canonical unless this table lists it.
+- Correspondence with **~39 calls / 20 docs** is JSON **retries**, not source
+  chunking — see runbook §5 and per-run report caveats.
+- Merger uses validated **48K** source spans (multi-chunk) due to the ~8K
+  completion-token cap on this model.
+""",
+    "granite-4.2-8b": """## Granite-specific posture
+
+- IBM sampling on every call: temperature 1.0, top-p 0.95, seed 42.
+- Thinking-ON specialist budgets: correspondence 16384, insurance 12288,
+  contracts 16384, merger 32768, corporate records 16384.
+- Merger uses **280K source spans** (not qwen3-8b 48K chunking).
+
+Superseded diagnostics remain in the append-only experiment log only —
+use the final run ids in the table above for comparisons.
+""",
+}
+
+
+def render_model_suite_readme(
+    model_key: str,
+    canonical_summaries: list[dict[str, Any]],
+    base_dir: Path | None = None,
+) -> str:
+    """Per-model suite README under ``<model>/README.md`` (N≥20 canonical rows)."""
+    base = base_dir or reports_dir()
+    suite = _suite_canonical_rows(canonical_summaries, model_key=model_key)
+    title = model_key.replace("-", " ").title()
+    if model_key == "qwen3-8b":
+        title = "Qwen 3 8B"
+    elif model_key == "granite-4.2-8b":
+        title = "Granite 4.2 8B"
+
+    lines = [
+        f"# {title} — SAND-027 Leg B N=20 suite",
+        "",
+        MODEL_SUITE_INTRO.get(model_key, f"API-leg results for `{model_key}`."),
+        "",
+        "Regenerated from the experiment log by "
+        "`scripts/render_comparison_reports.py`.",
+        "",
+        "## Final runs (canonical wave stems)",
+        "",
+        "| task | final run | result | parse / scorer errors | LLM calls | cost est | report |",
+        "|---|---|---:|---:|---:|---:|---|",
+    ]
+    total_cases = 0
+    total_calls = 0
+    total_cost = 0.0
+    for summary in suite:
+        metrics = summary.get("metrics") or {}
+        n = int(metrics.get("n") or wave_size(summary) or 0)
+        total_cases += n
+        calls = specialist_llm_calls(summary)
+        total_calls += calls
+        cost = run_cost_est(summary)
+        if isinstance(cost, (int, float)):
+            total_cost += float(cost)
+        task = str(summary.get("task") or "")
+        label = TASK_LABELS.get(task, task)
+        err = int(metrics.get("errors") or 0)
+        scorer_err = int(metrics.get("scorer_errors") or 0)
+        rel = _model_relative_report(summary, base, model_key)
+        cost_s = f"${cost:.6f}" if isinstance(cost, (int, float)) else "—"
+        lines.append(
+            f"| {label} | `{summary.get('run_id')}` | {headline_result(summary)} | "
+            f"{err} / {scorer_err} | {calls} | {cost_s} | [report]({rel}) |"
+        )
+    lines.extend(
+        [
+            "",
+            f"Suite total: **{total_cases} evaluated case rows**, "
+            f"**{total_calls} recorded LLM calls**, and "
+            f"**${total_cost:.6f} estimated API cost** (aggregate per-agent pricing).",
+            "",
+        ]
+    )
+    foot = MODEL_SUITE_FOOTNOTES.get(model_key)
+    if foot:
+        lines.append(foot.strip())
+        lines.append("")
+    return "\n".join(lines)
+
+
+def _metric_numeric(summary: dict[str, Any], *, paired: str) -> float | None:
+    """Single float for cross-model delta (overall or class accuracy)."""
+    metrics = summary.get("metrics") or {}
+    if paired == "classification":
+        value = metrics.get("class_accuracy")
+        return float(value) if isinstance(value, (int, float)) else None
+    for key in ("overall_score", *HEADLINE_MEAN_KEYS):
+        value = metrics.get(key)
+        if isinstance(value, (int, float)):
+            return float(value)
+    return None
+
+
+def render_master_report(
+    canonical_summaries: list[dict[str, Any]],
+    index_entries: list[dict[str, Any]],
+    base_dir: Path | None = None,
+) -> str:
+    """Cross-model API-leg master rollup at ``API-LEG-MASTER-REPORT.md``."""
+    base = base_dir or reports_dir()
+    generated = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    qwen_suite = _suite_canonical_rows(canonical_summaries, model_key="qwen3-8b")
+    granite_suite = _suite_canonical_rows(canonical_summaries, model_key="granite-4.2-8b")
+
+    lines = [
+        "# SAND-027 API leg — master comparison report",
+        "",
+        f"Generated: `{generated}` from `reports/experiment_log.jsonl` via "
+        "`scripts/render_comparison_reports.py`.",
+        "",
+        "Use this file for cross-model Leg B summaries; drill into per-run "
+        "detail via the linked canonical stems or "
+        "[INDEX.md](INDEX.md) (every report-worthy run).",
+        "",
+        "## Model suite rollups",
+        "",
+        "| model | README | master table |",
+        "|---|---|---|",
+        "| Qwen 3 8B | [qwen3-8b/README.md](qwen3-8b/README.md) | below |",
+        "| Granite 4.2 8B | [granite-4.2-8b/README.md](granite-4.2-8b/README.md) | below |",
+        "",
+    ]
+
+    for model_key, suite in (("qwen3-8b", qwen_suite), ("granite-4.2-8b", granite_suite)):
+        lines.append(f"## {model_key} — canonical N=20")
+        lines.append("")
+        lines.append(
+            "| task | run_id | result | calls | cost est | report |"
+        )
+        lines.append("|---|---|---:|---:|---:|---|")
+        for summary in suite:
+            task = str(summary.get("task") or "")
+            rel = _canonical_rel(summary, base)
+            cost = run_cost_est(summary)
+            cost_s = f"${cost:.6f}" if isinstance(cost, (int, float)) else "—"
+            lines.append(
+                f"| {TASK_LABELS.get(task, task)} | `{summary.get('run_id')}` | "
+                f"{headline_result(summary)} | {specialist_llm_calls(summary)} | "
+                f"{cost_s} | [{Path(rel).name}]({rel}) |"
+            )
+        lines.append("")
+
+    lines.append("## Paired comparison (Granite − Qwen, same seed-42 draws)")
+    lines.append("")
+    lines.append("| task | Qwen 3 8B | Granite 4.2 8B | delta |")
+    lines.append("|---|---:|---:|---:|")
+    qwen_by_task = {str(s.get("task")): s for s in qwen_suite}
+    granite_by_task = {str(s.get("task")): s for s in granite_suite}
+    for task in SUITE_TASK_ORDER:
+        qw = qwen_by_task.get(task)
+        gr = granite_by_task.get(task)
+        if not qw and not gr:
+            continue
+        label = TASK_LABELS.get(task, task)
+        if task == "classification":
+            qw_m = _metric_numeric(qw, paired=task) if qw else None
+            gr_m = _metric_numeric(gr, paired=task) if gr else None
+            qw_s = f"class {qw_m:.4f}" if qw_m is not None else "—"
+            gr_s = f"class {gr_m:.4f}" if gr_m is not None else "—"
+            delta = f"{gr_m - qw_m:+.4f}" if qw_m is not None and gr_m is not None else "—"
+            lines.append(f"| {label} (class accuracy) | {qw_s} | {gr_s} | {delta} |")
+            qw_sub = (qw.get("metrics") or {}).get("subclass_accuracy") if qw else None
+            gr_sub = (gr.get("metrics") or {}).get("subclass_accuracy") if gr else None
+            if isinstance(qw_sub, (int, float)) or isinstance(gr_sub, (int, float)):
+                qw_ss = f"{float(qw_sub):.4f}" if isinstance(qw_sub, (int, float)) else "—"
+                gr_ss = f"{float(gr_sub):.4f}" if isinstance(gr_sub, (int, float)) else "—"
+                dsub = (
+                    f"{float(gr_sub) - float(qw_sub):+.4f}"
+                    if isinstance(qw_sub, (int, float)) and isinstance(gr_sub, (int, float))
+                    else "—"
+                )
+                lines.append(f"| {label} (subclass accuracy) | {qw_ss} | {gr_ss} | {dsub} |")
+            continue
+        qw_m = _metric_numeric(qw, paired=task) if qw else None
+        gr_m = _metric_numeric(gr, paired=task) if gr else None
+        qw_s = f"{qw_m:.4f}" if qw_m is not None else "—"
+        gr_s = f"{gr_m:.4f}" if gr_m is not None else "—"
+        delta = f"{gr_m - qw_m:+.4f}" if qw_m is not None and gr_m is not None else "—"
+        lines.append(f"| {label} | {qw_s} | {gr_s} | {delta} |")
+    lines.append("")
+
+    # Superseded runs: same canonical stem, older run ids in the log.
+    by_canon: dict[str, list[str]] = {}
+    for entry in index_entries:
+        canon = entry.get("canonical_report")
+        run_id = entry.get("run_id")
+        if canon and run_id:
+            by_canon.setdefault(canon, []).append(str(run_id))
+    superseded_lines: list[str] = []
+    for canon, run_ids in sorted(by_canon.items()):
+        ordered = sorted(set(run_ids), reverse=True)
+        if len(ordered) < 2:
+            continue
+        final, older = ordered[0], ordered[1:]
+        superseded_lines.append(
+            f"- `{Path(canon).name}`: **final** `{final}`; superseded "
+            + ", ".join(f"`{r}`" for r in older)
+        )
+    lines.append("## Superseded runs (append-only log; do not use for pairing)")
+    lines.append("")
+    if superseded_lines:
+        lines.extend(superseded_lines)
+    else:
+        lines.append("- (none detected — each canonical stem has a single run id)")
+    lines.append("")
+    lines.append("## Runbook")
+    lines.append("")
+    lines.append(
+        "- OpenRouter + Braintrust: [docs/openrouter-braintrust-runbook.md]"
+        "(../../docs/openrouter-braintrust-runbook.md)"
+    )
+    lines.append(
+        "- One coverage call vs chunking: runbook §5; comparison reports include "
+        "call-count sanity caveats."
+    )
+    lines.append("")
+    return "\n".join(lines)
 
 
 def write_report(

@@ -63,6 +63,14 @@ CHUNK_CHARS: dict[str, int] = {
 }
 DEFAULT_CHUNK_CHARS = 120_000
 
+# Pinned seed-42 N=20 maxima: correspondence 34,310 chars; insurance_claim 14,607.
+# These classes must never be source-split across completions — one coverage call
+# per document unless the harness retry budget fires on parse/network failure.
+SINGLE_COVERAGE_CHUNK_CLASSES: frozenset[str] = frozenset(
+    {"correspondence", "insurance_claim"}
+)
+SINGLE_COVERAGE_CHUNK_LIMIT = 100_000
+
 # Some models have a much larger real completion ceiling than qwen3-8b's
 # ~8,192 tokens, so the whole document fits in one call safely. Per
 # OpenRouter's model pages: qwen/qwen3.7-flash has a 1,000,000-token context
@@ -72,13 +80,23 @@ DEFAULT_CHUNK_CHARS = 120_000
 # lower-budget "qwen3.7-*" variant does not inherit this by accident.
 LARGE_COMPLETION_MODELS: dict[str, int] = {
     "qwen/qwen3.7-flash": 480_000,
+    # 131,072-token context minus 32,768 Granite merger max_tokens leaves ~98K
+    # input tokens. Live 400s at 345K chars (~120K input tokens) bound the
+    # safe single-chunk source span; ~280K chars keeps one call for most N=20
+    # merger rows and at most two coverage chunks for the 464,926-char outlier
+    # (not the qwen3-8b 48K → 8–10 chunk path).
+    "ibm-granite/granite-4.2-8b": 280_000,
 }
 
 
 def _chunk_limit_for(doc_class: str, model: str | None) -> int:
-    override = LARGE_COMPLETION_MODELS.get((model or "").strip().lower())
-    if override is not None:
-        return override
+    if doc_class in SINGLE_COVERAGE_CHUNK_CLASSES:
+        return SINGLE_COVERAGE_CHUNK_LIMIT
+    if doc_class == "merger_agreement":
+        override = LARGE_COMPLETION_MODELS.get((model or "").strip().lower())
+        if override is not None:
+            return override
+        return CHUNK_CHARS["merger_agreement"]
     return CHUNK_CHARS.get(doc_class, DEFAULT_CHUNK_CHARS)
 CHUNK_OVERLAP = 1_500
 CHUNK_HEADER_CHARS = 3_500

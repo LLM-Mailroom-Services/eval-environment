@@ -271,9 +271,16 @@ def _install_sampling_injection(sampling: dict[str, Any], applied: dict[str, Any
                     kwargs["top_p"] = sampling["top_p"]
                 model_kwargs = dict(kwargs.get("model_kwargs") or {})
                 if sampling.get("seed") is not None:
-                    model_kwargs["seed"] = sampling["seed"]
+                    # Current langchain-openai exposes seed explicitly. Putting
+                    # it in model_kwargs still reaches OpenRouter, but emits a
+                    # warning on every sorter construction and obscures
+                    # whether the setting is first-class; pass it directly.
+                    kwargs["seed"] = sampling["seed"]
+                    model_kwargs.pop("seed", None)
                 if model_kwargs:
                     kwargs["model_kwargs"] = model_kwargs
+                else:
+                    kwargs.pop("model_kwargs", None)
                 applied["sampling_injected"] = True
                 super().__init__(*args, **kwargs)
 

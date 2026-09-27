@@ -1,11 +1,11 @@
 {
  "schema": "eval-site-snapshot",
  "version": 1,
- "generated_at": "2026-09-27T05:35:54+00:00",
+ "generated_at": "2026-09-27T07:14:43+00:00",
  "health": {
   "log_valid": true,
   "log_problems": [],
-  "log_records": 53,
+  "log_records": 59,
   "lineage_drift_free": true,
   "lineage_detail": {
    "ok": true,
@@ -512,6 +512,7 @@
      "pilot:merger_agreement"
     ],
     "models_seen": [
+     "ibm-granite/granite-4.2-8b",
      "qwen/qwen3-8b",
      "qwen/qwen3.7-flash"
     ]
@@ -535,6 +536,7 @@
      "pilot:merger_agreement"
     ],
     "models_seen": [
+     "ibm-granite/granite-4.2-8b",
      "qwen/qwen3-8b",
      "qwen/qwen3.7-flash"
     ]
@@ -558,6 +560,7 @@
      "pilot:merger_agreement"
     ],
     "models_seen": [
+     "ibm-granite/granite-4.2-8b",
      "mock-model",
      "qwen/qwen3-8b"
     ]
@@ -605,6 +608,7 @@
      "pilot:merger_agreement"
     ],
     "models_seen": [
+     "ibm-granite/granite-4.2-8b",
      "mock-model",
      "qwen/qwen3-8b"
     ]
@@ -736,6 +740,7 @@
      "pilot:pipeline_chain"
     ],
     "models_seen": [
+     "ibm-granite/granite-4.2-8b",
      "qwen/qwen3-8b",
      "qwen/qwen3.7-flash"
     ]
@@ -750,6 +755,7 @@
      "pilot:pipeline_chain"
     ],
     "models_seen": [
+     "ibm-granite/granite-4.2-8b",
      "qwen/qwen3-8b",
      "qwen/qwen3.7-flash"
     ]
@@ -764,6 +770,7 @@
      "pilot:pipeline_chain"
     ],
     "models_seen": [
+     "ibm-granite/granite-4.2-8b",
      "mock-model",
      "qwen/qwen3-8b"
     ]
@@ -793,6 +800,7 @@
      "pilot:pipeline_chain"
     ],
     "models_seen": [
+     "ibm-granite/granite-4.2-8b",
      "mock-model",
      "qwen/qwen3-8b"
     ]
@@ -1085,76 +1093,76 @@
   }
  },
  "totals": {
-  "total_runs": 53,
+  "total_runs": 59,
   "by_family": {
-   "eval": 53
+   "eval": 59
   },
   "by_mode": {
-   "real": 26,
+   "real": 32,
    "mock": 27
   },
   "by_day": {
    "2026-09-26": 32,
-   "2026-09-27": 21
+   "2026-09-27": 27
   },
   "by_task": {
-   "correspondence": {
-    "runs": 10,
-    "latest": {
-     "run_id": "20260927T052637Z-eval-correspondence",
-     "started_at": "2026-09-27T05:26:37+00:00",
-     "mode": "real",
-     "headline": 0.3793,
-     "n_cases": 20
-    }
-   },
    "classification": {
-    "runs": 4,
+    "runs": 5,
     "latest": {
-     "run_id": "20260927T051729Z-eval-classification",
-     "started_at": "2026-09-27T05:17:29+00:00",
-     "mode": "mock",
-     "headline": 0.0,
-     "n_cases": 1
+     "run_id": "20260927T070900Z-eval-classification",
+     "started_at": "2026-09-27T07:09:00+00:00",
+     "mode": "real",
+     "headline": 0.9,
+     "n_cases": 20
     }
    },
    "corporate_records": {
-    "runs": 4,
-    "latest": {
-     "run_id": "20260927T042239Z-eval-corporate_records",
-     "started_at": "2026-09-27T04:22:39+00:00",
-     "mode": "real",
-     "headline": 0.4004,
-     "n_cases": 20
-    }
-   },
-   "contracts": {
-    "runs": 10,
-    "latest": {
-     "run_id": "20260927T035621Z-eval-contracts",
-     "started_at": "2026-09-27T03:56:21+00:00",
-     "mode": "real",
-     "headline": 0.6169,
-     "n_cases": 20
-    }
-   },
-   "insurance_claims": {
     "runs": 5,
     "latest": {
-     "run_id": "20260927T035135Z-eval-insurance_claims",
-     "started_at": "2026-09-27T03:51:35+00:00",
+     "run_id": "20260927T065622Z-eval-corporate_records",
+     "started_at": "2026-09-27T06:56:22+00:00",
      "mode": "real",
-     "headline": 0.7488,
+     "headline": 0.4156,
      "n_cases": 20
     }
    },
    "merger_agreement": {
-    "runs": 8,
+    "runs": 9,
     "latest": {
-     "run_id": "20260927T022750Z-eval-merger_agreement",
-     "started_at": "2026-09-27T02:27:50+00:00",
+     "run_id": "20260927T060322Z-eval-merger_agreement",
+     "started_at": "2026-09-27T06:03:22+00:00",
      "mode": "real",
-     "headline": 0.3748,
+     "headline": 0.387,
+     "n_cases": 20
+    }
+   },
+   "contracts": {
+    "runs": 11,
+    "latest": {
+     "run_id": "20260927T054738Z-eval-contracts",
+     "started_at": "2026-09-27T05:47:38+00:00",
+     "mode": "real",
+     "headline": 0.4769,
+     "n_cases": 20
+    }
+   },
+   "insurance_claims": {
+    "runs": 6,
+    "latest": {
+     "run_id": "20260927T054211Z-eval-insurance_claims",
+     "started_at": "2026-09-27T05:42:11+00:00",
+     "mode": "real",
+     "headline": 0.7135,
+     "n_cases": 20
+    }
+   },
+   "correspondence": {
+    "runs": 11,
+    "latest": {
+     "run_id": "20260927T053647Z-eval-correspondence",
+     "started_at": "2026-09-27T05:36:47+00:00",
+     "mode": "real",
+     "headline": 0.4065,
      "n_cases": 20
     }
    },
@@ -1221,6 +1229,1273 @@
   }
  },
  "runs": [
+  {
+   "run_id": "20260927T070900Z-eval-classification",
+   "family": "eval",
+   "task": "classification",
+   "invoke": "node",
+   "mode": "real",
+   "model": "ibm-granite/granite-4.2-8b",
+   "prompt_version": null,
+   "prompt_lineage": "frozen",
+   "prompt_source": "frozen",
+   "trace_backend": "braintrust",
+   "started_at": "2026-09-27T07:09:00+00:00",
+   "finished_at": "2026-09-27T07:12:02+00:00",
+   "duration_s": 184.3,
+   "error": null,
+   "metrics": {
+    "n": 20,
+    "class_accuracy": 0.9,
+    "subclass_accuracy": 0.6,
+    "errors": 0,
+    "scorer_errors": 0
+   },
+   "performance": {
+    "latency_ms_mean": 26860.855,
+    "latency_ms_p95": 111121.3,
+    "tokens_prompt_total": 933912,
+    "tokens_completion_total": 33329,
+    "cost_usd_est_total": 0.064367,
+    "by_agent": {
+     "sorter": {
+      "calls": 118,
+      "prompt_tokens": 933912,
+      "completion_tokens": 33329,
+      "total_tokens": 967241,
+      "models": [
+       "ibm-granite/granite-4.2-8b"
+      ],
+      "cost_usd_est": 0.064367
+     }
+    }
+   },
+   "dataset": {
+    "subset_spec": {
+     "kind": "full",
+     "value": null
+    },
+    "repo": "Lucius-Morningstar/mailroom-dataset",
+    "revision": "46a4d3c240a36671cde0182fff4960f6b8b73aca",
+    "config": "ground_truth",
+    "split": "train",
+    "n_total": 2979,
+    "n_selected": 20,
+    "sample": 20,
+    "seed": 42,
+    "subset": "full",
+    "case_ids": [
+     "corpus:ground_truth:train:property:261501663.txt",
+     "corpus:ground_truth:train:inpatient:196841176990879:1.txt",
+     "corpus:ground_truth:train:insurbias-425.txt",
+     "corpus:ground_truth:train:brawner-s/all_documents/59.",
+     "corpus:ground_truth:train:0000912057-01-507164_a2041839zex-4_38.txt",
+     "corpus:ground_truth:train:dasovich-j/all_documents/9309.",
+     "corpus:ground_truth:train:dasovich-j/all_documents/9178.",
+     "corpus:ground_truth:train:0000950130-01-502904_dex211.txt",
+     "corpus:ground_truth:train:inpatient:196091177001318:1.txt",
+     "corpus:ground_truth:train:inpatient:196831176969260:1.txt",
+     "corpus:ground_truth:train:0001193125-14-273392_d715499dex415.htm",
+     "corpus:ground_truth:train:contract_117_merger_agreement.txt",
+     "corpus:ground_truth:train:property:262952775.txt",
+     "corpus:ground_truth:train:0000950123-03-010752_y88696a1exv4w7.txt",
+     "corpus:ground_truth:train:contract_4_merger_agreement.txt",
+     "corpus:ground_truth:train:carrier:887493388020303.txt",
+     "corpus:ground_truth:train:contract_94_merger_agreement.txt",
+     "corpus:ground_truth:train:inpatient:196641176967981:1.txt",
+     "corpus:ground_truth:train:0001047469-06-011763_a2173128zex-3_1.htm",
+     "corpus:ground_truth:train:outpatient:542502281397875:1.txt"
+    ],
+    "filenames": [
+     "property:261501663.txt",
+     "inpatient:196841176990879:1.txt",
+     "insurbias-425.txt",
+     "brawner-s/all_documents/59.",
+     "0000912057-01-507164_a2041839zex-4_38.txt",
+     "dasovich-j/all_documents/9309.",
+     "dasovich-j/all_documents/9178.",
+     "0000950130-01-502904_dex211.txt",
+     "inpatient:196091177001318:1.txt",
+     "inpatient:196831176969260:1.txt",
+     "0001193125-14-273392_d715499dex415.htm",
+     "contract_117_merger_agreement.txt",
+     "property:262952775.txt",
+     "0000950123-03-010752_y88696a1exv4w7.txt",
+     "contract_4_merger_agreement.txt",
+     "carrier:887493388020303.txt",
+     "contract_94_merger_agreement.txt",
+     "inpatient:196641176967981:1.txt",
+     "0001047469-06-011763_a2173128zex-3_1.htm",
+     "outpatient:542502281397875:1.txt"
+    ],
+    "subset_manifest_path": "data/experiments/20260927T070900Z-eval-classification/subset_manifest.json",
+    "subset_manifest_jsonl": "data/experiments/20260927T070900Z-eval-classification/subset_manifest.jsonl"
+   },
+   "git": {
+    "commit": "1d9f8d2",
+    "dirty": true
+   },
+   "schema_version": 3,
+   "calibration": null,
+   "trace_ids": {
+    "backend": "braintrust",
+    "project": "Mailroom-Evals",
+    "experiment": "20260927T070900Z-eval-classification",
+    "dataset": null,
+    "dataset_records": 0
+   },
+   "judging": null,
+   "pipeline_git": "28cb4be816fbb60e56cd3bb2ab72f8d9be1ab636",
+   "prompt_versions": {
+    "arbiter": {
+     "key": "arbiter_v1",
+     "lineage": "frozen",
+     "source": "production:arbiter",
+     "sha256": "d674eb5afc1efe57342b597740e850376a68d16b7041588d09fa03e62ff9cd5e"
+    },
+    "boss": {
+     "key": "boss_v1",
+     "lineage": "frozen",
+     "source": "production:boss",
+     "sha256": "c760107a6e4abeb3a8ef078c344fd1dc2e3f4fd06b2065a4c21e7228ca39a5af"
+    },
+    "contracts_specialist": {
+     "key": "contracts_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:contracts_specialist_v33_simplified@303e7f0bb05d",
+     "sha256": "d91de3967cc3b12cbd222cc5a4ae167b39578125abc83be7422498dc5024fd24"
+    },
+    "corporate_records_specialist": {
+     "key": "corporate_records_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:corporate_records_specialist_simplified@303e7f0bb05d",
+     "sha256": "484e64dd847b7bb35afebca74edc1fb6c381f0f7d5e9367ad8673bec0b8af45c"
+    },
+    "correspondence_specialist": {
+     "key": "correspondence_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:correspondence_specialist_simplified@303e7f0bb05d",
+     "sha256": "eab63b5afd29906b1ad3aca2d7698bf5c15d4b7f4ce9ade3b744be535d18d4f3"
+    },
+    "insurance_claims_specialist": {
+     "key": "insurance_claims_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:insurance_claims_specialist_simplified@303e7f0bb05d",
+     "sha256": "6c2776bcbe00091200aecbcfd21c99f197398d929143dd0c7c722811fa100034"
+    },
+    "intake": {
+     "key": "intake_v1",
+     "lineage": "frozen",
+     "source": "production:INTAKE_SYSTEM_PROMPT",
+     "sha256": "e57c5d1a0e7f66ca25e369c6377ac855b6e5932a7126bc5bd9f963ec0bd8e139"
+    },
+    "judge": {
+     "key": "judge_v1",
+     "lineage": "frozen",
+     "source": "production:judge",
+     "sha256": "d5fcdbf544605927c4fb1ee0bf8cef571043458d55588268c3fbbc5a355fc729"
+    },
+    "judge-classification": {
+     "key": "judge-classification_v1",
+     "lineage": "frozen",
+     "source": "production:judge-classification",
+     "sha256": "a577874ec28eff0bb742491b434dd9a5cdef027f86354a8c632cf1a492eced92"
+    },
+    "judge-correctness": {
+     "key": "judge-correctness_v1",
+     "lineage": "frozen",
+     "source": "production:judge-correctness",
+     "sha256": "5f355f1f12ee6ce8b9486915299d508ff055ce489bbd7e195d21f3f30d71686b"
+    },
+    "merger_agreement_specialist": {
+     "key": "merger_agreement_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:merger_agreement_specialist_simplified@303e7f0bb05d",
+     "sha256": "003232584d6890054d956398135f439b86692a1123683f58914c0393b5e1a00b"
+    },
+    "pipeline_quality": {
+     "key": "pipeline_quality_v1",
+     "lineage": "frozen",
+     "source": "evaluator:QUALITY_PROMPT",
+     "sha256": "e8eab7af550f59141db00e76475dea65f7fdcdcad0dda7bcd79a6bd294e86752"
+    },
+    "pipeline_verdict": {
+     "key": "pipeline_verdict_v1",
+     "lineage": "frozen",
+     "source": "evaluator:PIPELINE_PROMPT",
+     "sha256": "375a7853f3685f4b890b62210a5d08b361e176154c8ed2f656e800fda5447487"
+    },
+    "sorter": {
+     "key": "sorter_v1",
+     "lineage": "frozen",
+     "source": "production:sorter",
+     "sha256": "2b1e69b2c0530bd967bac6f0d3097818b65858f65687a826005cd495f04be788"
+    },
+    "sorter_reviewer": {
+     "key": "sorter_reviewer_v1",
+     "lineage": "frozen",
+     "source": "production:sorter_reviewer",
+     "sha256": "db02beff97dd13f13be7965f8d389f6b2768a526a8f6c7a7688f1a86717fd7c3"
+    }
+   },
+   "headline": 0.9,
+   "n_cases": 20
+  },
+  {
+   "run_id": "20260927T065622Z-eval-corporate_records",
+   "family": "eval",
+   "task": "corporate_records",
+   "invoke": "agent",
+   "mode": "real",
+   "model": "ibm-granite/granite-4.2-8b",
+   "prompt_version": null,
+   "prompt_lineage": "frozen",
+   "prompt_source": "frozen",
+   "trace_backend": "braintrust",
+   "started_at": "2026-09-27T06:56:22+00:00",
+   "finished_at": "2026-09-27T07:04:48+00:00",
+   "duration_s": 508.6,
+   "error": null,
+   "metrics": {
+    "n": 20,
+    "overall_score": 0.4156,
+    "errors": 0,
+    "scorer_errors": 0
+   },
+   "performance": {
+    "latency_ms_mean": 95147.26,
+    "latency_ms_p95": 205019.6,
+    "tokens_prompt_total": 196299,
+    "tokens_completion_total": 127441,
+    "cost_usd_est_total": 0.043638,
+    "by_agent": {
+     "corporate_records_specialist": {
+      "calls": 22,
+      "prompt_tokens": 196299,
+      "completion_tokens": 127441,
+      "total_tokens": 323740,
+      "models": [
+       "ibm-granite/granite-4.2-8b"
+      ],
+      "cost_usd_est": 0.043638
+     }
+    }
+   },
+   "dataset": {
+    "subset_spec": {
+     "kind": "class",
+     "value": "corporate_record"
+    },
+    "repo": "Lucius-Morningstar/mailroom-dataset",
+    "revision": "46a4d3c240a36671cde0182fff4960f6b8b73aca",
+    "config": "ground_truth",
+    "split": "train",
+    "n_total": 403,
+    "n_selected": 20,
+    "sample": 20,
+    "seed": 42,
+    "subset": "class:corporate_record",
+    "case_ids": [
+     "corpus:ground_truth:train:0001047469-12-006895_a2210011zex-4_10.htm",
+     "corpus:ground_truth:train:0001047469-03-032251_a2118977zex-3_2.htm",
+     "corpus:ground_truth:train:0000950123-11-055070_h75396a4exv21w1.htm",
+     "corpus:ground_truth:train:0000898430-01-503595_dex32.txt",
+     "corpus:ground_truth:train:0001193125-11-240442_dex43.htm",
+     "corpus:ground_truth:train:0000950123-10-001751_c54716a1exv4w2.htm",
+     "corpus:ground_truth:train:0001571049-14-000599_t1400242_ex3-1.htm",
+     "corpus:ground_truth:train:0001193125-13-256819_d428632dex211.htm",
+     "corpus:ground_truth:train:0001104659-22-110926_tm2225873d4_ex3-5.htm",
+     "corpus:ground_truth:train:0001193125-08-109289_dex241.htm",
+     "corpus:ground_truth:train:0001079974-08-000839_artdimensionss1x31_9252008.htm",
+     "corpus:ground_truth:train:0001193125-05-179145_dex32.htm",
+     "corpus:ground_truth:train:0001021432-06-000035_certamendriv090106.txt",
+     "corpus:ground_truth:train:0001021432-06-000037_certamendcal092706.txt",
+     "corpus:ground_truth:train:0000950137-05-002026_c91812a1exv4w1.txt",
+     "corpus:ground_truth:train:0001104659-18-050217_a18-2297_8ex3d3.htm",
+     "corpus:ground_truth:train:0001144204-16-109616_v442647_ex3-1.htm",
+     "corpus:ground_truth:train:0001193125-10-221497_dex32.htm",
+     "corpus:ground_truth:train:0001493152-23-024269_ex4-5.htm",
+     "corpus:ground_truth:train:0001683168-23-005255_cardiff_ex0302.htm"
+    ],
+    "filenames": [
+     "0001047469-12-006895_a2210011zex-4_10.htm",
+     "0001047469-03-032251_a2118977zex-3_2.htm",
+     "0000950123-11-055070_h75396a4exv21w1.htm",
+     "0000898430-01-503595_dex32.txt",
+     "0001193125-11-240442_dex43.htm",
+     "0000950123-10-001751_c54716a1exv4w2.htm",
+     "0001571049-14-000599_t1400242_ex3-1.htm",
+     "0001193125-13-256819_d428632dex211.htm",
+     "0001104659-22-110926_tm2225873d4_ex3-5.htm",
+     "0001193125-08-109289_dex241.htm",
+     "0001079974-08-000839_artdimensionss1x31_9252008.htm",
+     "0001193125-05-179145_dex32.htm",
+     "0001021432-06-000035_certamendriv090106.txt",
+     "0001021432-06-000037_certamendcal092706.txt",
+     "0000950137-05-002026_c91812a1exv4w1.txt",
+     "0001104659-18-050217_a18-2297_8ex3d3.htm",
+     "0001144204-16-109616_v442647_ex3-1.htm",
+     "0001193125-10-221497_dex32.htm",
+     "0001493152-23-024269_ex4-5.htm",
+     "0001683168-23-005255_cardiff_ex0302.htm"
+    ],
+    "subset_manifest_path": "data/experiments/20260927T065622Z-eval-corporate_records/subset_manifest.json",
+    "subset_manifest_jsonl": "data/experiments/20260927T065622Z-eval-corporate_records/subset_manifest.jsonl"
+   },
+   "git": {
+    "commit": "1d9f8d2",
+    "dirty": true
+   },
+   "schema_version": 3,
+   "calibration": null,
+   "trace_ids": {
+    "backend": "braintrust",
+    "project": "Mailroom-Evals",
+    "experiment": "20260927T065622Z-eval-corporate_records",
+    "dataset": null,
+    "dataset_records": 0
+   },
+   "judging": null,
+   "pipeline_git": "28cb4be816fbb60e56cd3bb2ab72f8d9be1ab636",
+   "prompt_versions": {
+    "arbiter": {
+     "key": "arbiter_v1",
+     "lineage": "frozen",
+     "source": "production:arbiter",
+     "sha256": "d674eb5afc1efe57342b597740e850376a68d16b7041588d09fa03e62ff9cd5e"
+    },
+    "boss": {
+     "key": "boss_v1",
+     "lineage": "frozen",
+     "source": "production:boss",
+     "sha256": "c760107a6e4abeb3a8ef078c344fd1dc2e3f4fd06b2065a4c21e7228ca39a5af"
+    },
+    "contracts_specialist": {
+     "key": "contracts_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:contracts_specialist_v33_simplified@303e7f0bb05d",
+     "sha256": "d91de3967cc3b12cbd222cc5a4ae167b39578125abc83be7422498dc5024fd24"
+    },
+    "corporate_records_specialist": {
+     "key": "corporate_records_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:corporate_records_specialist_simplified@303e7f0bb05d",
+     "sha256": "484e64dd847b7bb35afebca74edc1fb6c381f0f7d5e9367ad8673bec0b8af45c"
+    },
+    "correspondence_specialist": {
+     "key": "correspondence_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:correspondence_specialist_simplified@303e7f0bb05d",
+     "sha256": "eab63b5afd29906b1ad3aca2d7698bf5c15d4b7f4ce9ade3b744be535d18d4f3"
+    },
+    "insurance_claims_specialist": {
+     "key": "insurance_claims_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:insurance_claims_specialist_simplified@303e7f0bb05d",
+     "sha256": "6c2776bcbe00091200aecbcfd21c99f197398d929143dd0c7c722811fa100034"
+    },
+    "intake": {
+     "key": "intake_v1",
+     "lineage": "frozen",
+     "source": "production:INTAKE_SYSTEM_PROMPT",
+     "sha256": "e57c5d1a0e7f66ca25e369c6377ac855b6e5932a7126bc5bd9f963ec0bd8e139"
+    },
+    "judge": {
+     "key": "judge_v1",
+     "lineage": "frozen",
+     "source": "production:judge",
+     "sha256": "d5fcdbf544605927c4fb1ee0bf8cef571043458d55588268c3fbbc5a355fc729"
+    },
+    "judge-classification": {
+     "key": "judge-classification_v1",
+     "lineage": "frozen",
+     "source": "production:judge-classification",
+     "sha256": "a577874ec28eff0bb742491b434dd9a5cdef027f86354a8c632cf1a492eced92"
+    },
+    "judge-correctness": {
+     "key": "judge-correctness_v1",
+     "lineage": "frozen",
+     "source": "production:judge-correctness",
+     "sha256": "5f355f1f12ee6ce8b9486915299d508ff055ce489bbd7e195d21f3f30d71686b"
+    },
+    "merger_agreement_specialist": {
+     "key": "merger_agreement_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:merger_agreement_specialist_simplified@303e7f0bb05d",
+     "sha256": "003232584d6890054d956398135f439b86692a1123683f58914c0393b5e1a00b"
+    },
+    "pipeline_quality": {
+     "key": "pipeline_quality_v1",
+     "lineage": "frozen",
+     "source": "evaluator:QUALITY_PROMPT",
+     "sha256": "e8eab7af550f59141db00e76475dea65f7fdcdcad0dda7bcd79a6bd294e86752"
+    },
+    "pipeline_verdict": {
+     "key": "pipeline_verdict_v1",
+     "lineage": "frozen",
+     "source": "evaluator:PIPELINE_PROMPT",
+     "sha256": "375a7853f3685f4b890b62210a5d08b361e176154c8ed2f656e800fda5447487"
+    },
+    "sorter": {
+     "key": "sorter_v1",
+     "lineage": "frozen",
+     "source": "production:sorter",
+     "sha256": "2b1e69b2c0530bd967bac6f0d3097818b65858f65687a826005cd495f04be788"
+    },
+    "sorter_reviewer": {
+     "key": "sorter_reviewer_v1",
+     "lineage": "frozen",
+     "source": "production:sorter_reviewer",
+     "sha256": "db02beff97dd13f13be7965f8d389f6b2768a526a8f6c7a7688f1a86717fd7c3"
+    }
+   },
+   "headline": 0.4156,
+   "n_cases": 20
+  },
+  {
+   "run_id": "20260927T060322Z-eval-merger_agreement",
+   "family": "eval",
+   "task": "merger_agreement",
+   "invoke": "agent",
+   "mode": "real",
+   "model": "ibm-granite/granite-4.2-8b",
+   "prompt_version": null,
+   "prompt_lineage": "frozen",
+   "prompt_source": "frozen",
+   "trace_backend": "braintrust",
+   "started_at": "2026-09-27T06:03:22+00:00",
+   "finished_at": "2026-09-27T06:54:02+00:00",
+   "duration_s": 3041.9,
+   "error": null,
+   "metrics": {
+    "n": 20,
+    "overall_score": 0.387,
+    "errors": 0,
+    "scorer_errors": 0
+   },
+   "performance": {
+    "latency_ms_mean": 1065583.98,
+    "latency_ms_p95": 1748404.3,
+    "tokens_prompt_total": 2044275,
+    "tokens_completion_total": 1259169,
+    "cost_usd_est_total": 0.437449,
+    "by_agent": {
+     "merger_agreement_specialist": {
+      "calls": 170,
+      "prompt_tokens": 2044275,
+      "completion_tokens": 1259169,
+      "total_tokens": 3303444,
+      "models": [
+       "ibm-granite/granite-4.2-8b"
+      ],
+      "cost_usd_est": 0.437449
+     }
+    }
+   },
+   "dataset": {
+    "subset_spec": {
+     "kind": "class",
+     "value": "merger_agreement"
+    },
+    "repo": "Lucius-Morningstar/mailroom-dataset",
+    "revision": "46a4d3c240a36671cde0182fff4960f6b8b73aca",
+    "config": "ground_truth",
+    "split": "train",
+    "n_total": 135,
+    "n_selected": 20,
+    "sample": 20,
+    "seed": 42,
+    "subset": "class:merger_agreement",
+    "case_ids": [
+     "corpus:ground_truth:train:contract_128_merger_agreement.txt",
+     "corpus:ground_truth:train:contract_31_merger_agreement.txt",
+     "corpus:ground_truth:train:contract_99_merger_agreement.txt",
+     "corpus:ground_truth:train:contract_114_merger_agreement.txt",
+     "corpus:ground_truth:train:contract_94_merger_agreement.txt",
+     "corpus:ground_truth:train:contract_120_merger_agreement.txt",
+     "corpus:ground_truth:train:contract_41_merger_agreement.txt",
+     "corpus:ground_truth:train:contract_62_merger_agreement.txt",
+     "corpus:ground_truth:train:contract_51_merger_agreement.txt",
+     "corpus:ground_truth:train:contract_70_merger_agreement.txt",
+     "corpus:ground_truth:train:contract_100_merger_agreement.txt",
+     "corpus:ground_truth:train:contract_97_merger_agreement.txt",
+     "corpus:ground_truth:train:contract_71_merger_agreement.txt",
+     "corpus:ground_truth:train:contract_66_merger_agreement.txt",
+     "corpus:ground_truth:train:contract_34_merger_agreement.txt",
+     "corpus:ground_truth:train:contract_5_merger_agreement.txt",
+     "corpus:ground_truth:train:contract_76_merger_agreement.txt",
+     "corpus:ground_truth:train:contract_136_merger_agreement.txt",
+     "corpus:ground_truth:train:contract_122_merger_agreement.txt",
+     "corpus:ground_truth:train:contract_19_merger_agreement.txt"
+    ],
+    "filenames": [
+     "contract_128_merger_agreement.txt",
+     "contract_31_merger_agreement.txt",
+     "contract_99_merger_agreement.txt",
+     "contract_114_merger_agreement.txt",
+     "contract_94_merger_agreement.txt",
+     "contract_120_merger_agreement.txt",
+     "contract_41_merger_agreement.txt",
+     "contract_62_merger_agreement.txt",
+     "contract_51_merger_agreement.txt",
+     "contract_70_merger_agreement.txt",
+     "contract_100_merger_agreement.txt",
+     "contract_97_merger_agreement.txt",
+     "contract_71_merger_agreement.txt",
+     "contract_66_merger_agreement.txt",
+     "contract_34_merger_agreement.txt",
+     "contract_5_merger_agreement.txt",
+     "contract_76_merger_agreement.txt",
+     "contract_136_merger_agreement.txt",
+     "contract_122_merger_agreement.txt",
+     "contract_19_merger_agreement.txt"
+    ],
+    "subset_manifest_path": "data/experiments/20260927T060322Z-eval-merger_agreement/subset_manifest.json",
+    "subset_manifest_jsonl": "data/experiments/20260927T060322Z-eval-merger_agreement/subset_manifest.jsonl"
+   },
+   "git": {
+    "commit": "1d9f8d2",
+    "dirty": true
+   },
+   "schema_version": 3,
+   "calibration": null,
+   "trace_ids": {
+    "backend": "braintrust",
+    "project": "Mailroom-Evals",
+    "experiment": "20260927T060322Z-eval-merger_agreement",
+    "dataset": null,
+    "dataset_records": 0
+   },
+   "judging": null,
+   "pipeline_git": "28cb4be816fbb60e56cd3bb2ab72f8d9be1ab636",
+   "prompt_versions": {
+    "arbiter": {
+     "key": "arbiter_v1",
+     "lineage": "frozen",
+     "source": "production:arbiter",
+     "sha256": "d674eb5afc1efe57342b597740e850376a68d16b7041588d09fa03e62ff9cd5e"
+    },
+    "boss": {
+     "key": "boss_v1",
+     "lineage": "frozen",
+     "source": "production:boss",
+     "sha256": "c760107a6e4abeb3a8ef078c344fd1dc2e3f4fd06b2065a4c21e7228ca39a5af"
+    },
+    "contracts_specialist": {
+     "key": "contracts_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:contracts_specialist_v33_simplified@303e7f0bb05d",
+     "sha256": "d91de3967cc3b12cbd222cc5a4ae167b39578125abc83be7422498dc5024fd24"
+    },
+    "corporate_records_specialist": {
+     "key": "corporate_records_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:corporate_records_specialist_simplified@303e7f0bb05d",
+     "sha256": "484e64dd847b7bb35afebca74edc1fb6c381f0f7d5e9367ad8673bec0b8af45c"
+    },
+    "correspondence_specialist": {
+     "key": "correspondence_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:correspondence_specialist_simplified@303e7f0bb05d",
+     "sha256": "eab63b5afd29906b1ad3aca2d7698bf5c15d4b7f4ce9ade3b744be535d18d4f3"
+    },
+    "insurance_claims_specialist": {
+     "key": "insurance_claims_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:insurance_claims_specialist_simplified@303e7f0bb05d",
+     "sha256": "6c2776bcbe00091200aecbcfd21c99f197398d929143dd0c7c722811fa100034"
+    },
+    "intake": {
+     "key": "intake_v1",
+     "lineage": "frozen",
+     "source": "production:INTAKE_SYSTEM_PROMPT",
+     "sha256": "e57c5d1a0e7f66ca25e369c6377ac855b6e5932a7126bc5bd9f963ec0bd8e139"
+    },
+    "judge": {
+     "key": "judge_v1",
+     "lineage": "frozen",
+     "source": "production:judge",
+     "sha256": "d5fcdbf544605927c4fb1ee0bf8cef571043458d55588268c3fbbc5a355fc729"
+    },
+    "judge-classification": {
+     "key": "judge-classification_v1",
+     "lineage": "frozen",
+     "source": "production:judge-classification",
+     "sha256": "a577874ec28eff0bb742491b434dd9a5cdef027f86354a8c632cf1a492eced92"
+    },
+    "judge-correctness": {
+     "key": "judge-correctness_v1",
+     "lineage": "frozen",
+     "source": "production:judge-correctness",
+     "sha256": "5f355f1f12ee6ce8b9486915299d508ff055ce489bbd7e195d21f3f30d71686b"
+    },
+    "merger_agreement_specialist": {
+     "key": "merger_agreement_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:merger_agreement_specialist_simplified@303e7f0bb05d",
+     "sha256": "003232584d6890054d956398135f439b86692a1123683f58914c0393b5e1a00b"
+    },
+    "pipeline_quality": {
+     "key": "pipeline_quality_v1",
+     "lineage": "frozen",
+     "source": "evaluator:QUALITY_PROMPT",
+     "sha256": "e8eab7af550f59141db00e76475dea65f7fdcdcad0dda7bcd79a6bd294e86752"
+    },
+    "pipeline_verdict": {
+     "key": "pipeline_verdict_v1",
+     "lineage": "frozen",
+     "source": "evaluator:PIPELINE_PROMPT",
+     "sha256": "375a7853f3685f4b890b62210a5d08b361e176154c8ed2f656e800fda5447487"
+    },
+    "sorter": {
+     "key": "sorter_v1",
+     "lineage": "frozen",
+     "source": "production:sorter",
+     "sha256": "2b1e69b2c0530bd967bac6f0d3097818b65858f65687a826005cd495f04be788"
+    },
+    "sorter_reviewer": {
+     "key": "sorter_reviewer_v1",
+     "lineage": "frozen",
+     "source": "production:sorter_reviewer",
+     "sha256": "db02beff97dd13f13be7965f8d389f6b2768a526a8f6c7a7688f1a86717fd7c3"
+    }
+   },
+   "headline": 0.387,
+   "n_cases": 20
+  },
+  {
+   "run_id": "20260927T054738Z-eval-contracts",
+   "family": "eval",
+   "task": "contracts",
+   "invoke": "agent",
+   "mode": "real",
+   "model": "ibm-granite/granite-4.2-8b",
+   "prompt_version": null,
+   "prompt_lineage": "frozen",
+   "prompt_source": "frozen",
+   "trace_backend": "braintrust",
+   "started_at": "2026-09-27T05:47:38+00:00",
+   "finished_at": "2026-09-27T05:58:41+00:00",
+   "duration_s": 665.5,
+   "error": null,
+   "metrics": {
+    "n": 20,
+    "overall_score": 0.4769,
+    "errors": 0,
+    "scorer_errors": 0
+   },
+   "performance": {
+    "latency_ms_mean": 183884.02,
+    "latency_ms_p95": 264084.4,
+    "tokens_prompt_total": 303184,
+    "tokens_completion_total": 223089,
+    "cost_usd_est_total": 0.073963,
+    "by_agent": {
+     "contracts_specialist": {
+      "calls": 24,
+      "prompt_tokens": 303184,
+      "completion_tokens": 223089,
+      "total_tokens": 526273,
+      "models": [
+       "ibm-granite/granite-4.2-8b"
+      ],
+      "cost_usd_est": 0.073963
+     }
+    }
+   },
+   "dataset": {
+    "subset_spec": {
+     "kind": "class",
+     "value": "contract"
+    },
+    "repo": "Lucius-Morningstar/mailroom-dataset",
+    "revision": "46a4d3c240a36671cde0182fff4960f6b8b73aca",
+    "config": "ground_truth",
+    "split": "train",
+    "n_total": 540,
+    "n_selected": 20,
+    "sample": 20,
+    "seed": 42,
+    "subset": "class:contract",
+    "case_ids": [
+     "corpus:ground_truth:train:MOVADOGROUPINC_04_30_2003-EX-10.28-ENDORSEMENT AGREEMENT.PDF",
+     "corpus:ground_truth:train:GOLDRESOURCECORP_12_11_2008-EX-10.1-STRATEGIC ALLIANCE AGREEMENT.PDF",
+     "corpus:ground_truth:train:MorganStanleyDirectLendingFund_20191119_10-12GA_EX-10.5_11898508_EX-10.5_Trademark License Agreement.pdf",
+     "corpus:ground_truth:train:SUCAMPOPHARMACEUTICALS,INC_11_04_2015-EX-10.2-STRATEGIC ALLIANCE AGREEMENT.PDF",
+     "corpus:ground_truth:train:FOUNDATIONMEDICINE,INC_02_02_2015-EX-10.2-Collaboration Agreement.PDF",
+     "corpus:ground_truth:train:EcoScienceSolutionsInc_20180406_8-K_EX-10.1_11135398_EX-10.1_Sponsorship Agreement.pdf",
+     "corpus:ground_truth:train:NETGEAR,INC_04_21_2003-EX-10.16-DISTRIBUTOR AGREEMENT.pdf",
+     "corpus:ground_truth:train:KINGPHARMACEUTICALSINC_08_09_2006-EX-10.1-PROMOTION AGREEMENT.PDF",
+     "corpus:ground_truth:train:0001047469-05-021628_a2161868zex-10_9.htm",
+     "corpus:ground_truth:train:0000721748-15-000083_ncmf02121510_20.htm",
+     "corpus:ground_truth:train:ConformisInc_20191101_10-Q_EX-10.6_11861402_EX-10.6_Development Agreement.pdf",
+     "corpus:ground_truth:train:NEONSYSTEMSINC_03_01_1999-EX-10.5-DISTRIBUTOR AGREEMENT_Amendment.pdf",
+     "corpus:ground_truth:train:VERTEXENERGYINC_08_14_2014-EX-10.24-OPERATION AND MAINTENANCE AGREEMENT.PDF",
+     "corpus:ground_truth:train:LEGACYTECHNOLOGYHOLDINGS,INC_12_09_2005-EX-10.2-DISTRIBUTOR AGREEMENT.PDF",
+     "corpus:ground_truth:train:0001582718-14-000092_ex-10_1.htm",
+     "corpus:ground_truth:train:PfHospitalityGroupInc_20150923_10-12G_EX-10.1_9266710_EX-10.1_Franchise Agreement1.pdf",
+     "corpus:ground_truth:train:TodosMedicalLtd_20190328_20-F_EX-4.10_11587157_EX-4.10_Marketing Agreement_ Reseller Agreement.pdf",
+     "corpus:ground_truth:train:TURNKEYCAPITAL,INC_07_20_2017-EX-1.1-Strategic Alliance Agreement.PDF",
+     "corpus:ground_truth:train:ROCKYMOUNTAINCHOCOLATEFACTORY,INC_12_23_2019-EX-10.2-STRATEGIC ALLIANCE AGREEMENT.PDF",
+     "corpus:ground_truth:train:IGENEBIOTECHNOLOGYINC_05_13_2003-EX-1-JOINT VENTURE AGREEMENT.PDF"
+    ],
+    "filenames": [
+     "MOVADOGROUPINC_04_30_2003-EX-10.28-ENDORSEMENT AGREEMENT.PDF",
+     "GOLDRESOURCECORP_12_11_2008-EX-10.1-STRATEGIC ALLIANCE AGREEMENT.PDF",
+     "MorganStanleyDirectLendingFund_20191119_10-12GA_EX-10.5_11898508_EX-10.5_Trademark License Agreement.pdf",
+     "SUCAMPOPHARMACEUTICALS,INC_11_04_2015-EX-10.2-STRATEGIC ALLIANCE AGREEMENT.PDF",
+     "FOUNDATIONMEDICINE,INC_02_02_2015-EX-10.2-Collaboration Agreement.PDF",
+     "EcoScienceSolutionsInc_20180406_8-K_EX-10.1_11135398_EX-10.1_Sponsorship Agreement.pdf",
+     "NETGEAR,INC_04_21_2003-EX-10.16-DISTRIBUTOR AGREEMENT.pdf",
+     "KINGPHARMACEUTICALSINC_08_09_2006-EX-10.1-PROMOTION AGREEMENT.PDF",
+     "0001047469-05-021628_a2161868zex-10_9.htm",
+     "0000721748-15-000083_ncmf02121510_20.htm",
+     "ConformisInc_20191101_10-Q_EX-10.6_11861402_EX-10.6_Development Agreement.pdf",
+     "NEONSYSTEMSINC_03_01_1999-EX-10.5-DISTRIBUTOR AGREEMENT_Amendment.pdf",
+     "VERTEXENERGYINC_08_14_2014-EX-10.24-OPERATION AND MAINTENANCE AGREEMENT.PDF",
+     "LEGACYTECHNOLOGYHOLDINGS,INC_12_09_2005-EX-10.2-DISTRIBUTOR AGREEMENT.PDF",
+     "0001582718-14-000092_ex-10_1.htm",
+     "PfHospitalityGroupInc_20150923_10-12G_EX-10.1_9266710_EX-10.1_Franchise Agreement1.pdf",
+     "TodosMedicalLtd_20190328_20-F_EX-4.10_11587157_EX-4.10_Marketing Agreement_ Reseller Agreement.pdf",
+     "TURNKEYCAPITAL,INC_07_20_2017-EX-1.1-Strategic Alliance Agreement.PDF",
+     "ROCKYMOUNTAINCHOCOLATEFACTORY,INC_12_23_2019-EX-10.2-STRATEGIC ALLIANCE AGREEMENT.PDF",
+     "IGENEBIOTECHNOLOGYINC_05_13_2003-EX-1-JOINT VENTURE AGREEMENT.PDF"
+    ],
+    "subset_manifest_path": "data/experiments/20260927T054738Z-eval-contracts/subset_manifest.json",
+    "subset_manifest_jsonl": "data/experiments/20260927T054738Z-eval-contracts/subset_manifest.jsonl"
+   },
+   "git": {
+    "commit": "1d9f8d2",
+    "dirty": true
+   },
+   "schema_version": 3,
+   "calibration": null,
+   "trace_ids": {
+    "backend": "braintrust",
+    "project": "Mailroom-Evals",
+    "experiment": "20260927T054738Z-eval-contracts",
+    "dataset": null,
+    "dataset_records": 0
+   },
+   "judging": null,
+   "pipeline_git": "28cb4be816fbb60e56cd3bb2ab72f8d9be1ab636",
+   "prompt_versions": {
+    "arbiter": {
+     "key": "arbiter_v1",
+     "lineage": "frozen",
+     "source": "production:arbiter",
+     "sha256": "d674eb5afc1efe57342b597740e850376a68d16b7041588d09fa03e62ff9cd5e"
+    },
+    "boss": {
+     "key": "boss_v1",
+     "lineage": "frozen",
+     "source": "production:boss",
+     "sha256": "c760107a6e4abeb3a8ef078c344fd1dc2e3f4fd06b2065a4c21e7228ca39a5af"
+    },
+    "contracts_specialist": {
+     "key": "contracts_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:contracts_specialist_v33_simplified@303e7f0bb05d",
+     "sha256": "d91de3967cc3b12cbd222cc5a4ae167b39578125abc83be7422498dc5024fd24"
+    },
+    "corporate_records_specialist": {
+     "key": "corporate_records_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:corporate_records_specialist_simplified@303e7f0bb05d",
+     "sha256": "484e64dd847b7bb35afebca74edc1fb6c381f0f7d5e9367ad8673bec0b8af45c"
+    },
+    "correspondence_specialist": {
+     "key": "correspondence_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:correspondence_specialist_simplified@303e7f0bb05d",
+     "sha256": "eab63b5afd29906b1ad3aca2d7698bf5c15d4b7f4ce9ade3b744be535d18d4f3"
+    },
+    "insurance_claims_specialist": {
+     "key": "insurance_claims_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:insurance_claims_specialist_simplified@303e7f0bb05d",
+     "sha256": "6c2776bcbe00091200aecbcfd21c99f197398d929143dd0c7c722811fa100034"
+    },
+    "intake": {
+     "key": "intake_v1",
+     "lineage": "frozen",
+     "source": "production:INTAKE_SYSTEM_PROMPT",
+     "sha256": "e57c5d1a0e7f66ca25e369c6377ac855b6e5932a7126bc5bd9f963ec0bd8e139"
+    },
+    "judge": {
+     "key": "judge_v1",
+     "lineage": "frozen",
+     "source": "production:judge",
+     "sha256": "d5fcdbf544605927c4fb1ee0bf8cef571043458d55588268c3fbbc5a355fc729"
+    },
+    "judge-classification": {
+     "key": "judge-classification_v1",
+     "lineage": "frozen",
+     "source": "production:judge-classification",
+     "sha256": "a577874ec28eff0bb742491b434dd9a5cdef027f86354a8c632cf1a492eced92"
+    },
+    "judge-correctness": {
+     "key": "judge-correctness_v1",
+     "lineage": "frozen",
+     "source": "production:judge-correctness",
+     "sha256": "5f355f1f12ee6ce8b9486915299d508ff055ce489bbd7e195d21f3f30d71686b"
+    },
+    "merger_agreement_specialist": {
+     "key": "merger_agreement_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:merger_agreement_specialist_simplified@303e7f0bb05d",
+     "sha256": "003232584d6890054d956398135f439b86692a1123683f58914c0393b5e1a00b"
+    },
+    "pipeline_quality": {
+     "key": "pipeline_quality_v1",
+     "lineage": "frozen",
+     "source": "evaluator:QUALITY_PROMPT",
+     "sha256": "e8eab7af550f59141db00e76475dea65f7fdcdcad0dda7bcd79a6bd294e86752"
+    },
+    "pipeline_verdict": {
+     "key": "pipeline_verdict_v1",
+     "lineage": "frozen",
+     "source": "evaluator:PIPELINE_PROMPT",
+     "sha256": "375a7853f3685f4b890b62210a5d08b361e176154c8ed2f656e800fda5447487"
+    },
+    "sorter": {
+     "key": "sorter_v1",
+     "lineage": "frozen",
+     "source": "production:sorter",
+     "sha256": "2b1e69b2c0530bd967bac6f0d3097818b65858f65687a826005cd495f04be788"
+    },
+    "sorter_reviewer": {
+     "key": "sorter_reviewer_v1",
+     "lineage": "frozen",
+     "source": "production:sorter_reviewer",
+     "sha256": "db02beff97dd13f13be7965f8d389f6b2768a526a8f6c7a7688f1a86717fd7c3"
+    }
+   },
+   "headline": 0.4769,
+   "n_cases": 20
+  },
+  {
+   "run_id": "20260927T054211Z-eval-insurance_claims",
+   "family": "eval",
+   "task": "insurance_claims",
+   "invoke": "agent",
+   "mode": "real",
+   "model": "ibm-granite/granite-4.2-8b",
+   "prompt_version": null,
+   "prompt_lineage": "frozen",
+   "prompt_source": "frozen",
+   "trace_backend": "braintrust",
+   "started_at": "2026-09-27T05:42:11+00:00",
+   "finished_at": "2026-09-27T05:45:37+00:00",
+   "duration_s": 208.1,
+   "error": null,
+   "metrics": {
+    "n": 20,
+    "overall_score": 0.7135,
+    "errors": 0,
+    "scorer_errors": 0
+   },
+   "performance": {
+    "latency_ms_mean": 58454.34,
+    "latency_ms_p95": 121582.6,
+    "tokens_prompt_total": 43656,
+    "tokens_completion_total": 88363,
+    "cost_usd_est_total": 0.02471,
+    "by_agent": {
+     "insurance_claims_specialist": {
+      "calls": 20,
+      "prompt_tokens": 43656,
+      "completion_tokens": 88363,
+      "total_tokens": 132019,
+      "models": [
+       "ibm-granite/granite-4.2-8b"
+      ],
+      "cost_usd_est": 0.02471
+     }
+    }
+   },
+   "dataset": {
+    "subset_spec": {
+     "kind": "class",
+     "value": "insurance_claim"
+    },
+    "repo": "Lucius-Morningstar/mailroom-dataset",
+    "revision": "46a4d3c240a36671cde0182fff4960f6b8b73aca",
+    "config": "ground_truth",
+    "split": "train",
+    "n_total": 986,
+    "n_selected": 20,
+    "sample": 20,
+    "seed": 42,
+    "subset": "class:insurance_claim",
+    "case_ids": [
+     "corpus:ground_truth:train:pde:233384494245864.txt",
+     "corpus:ground_truth:train:insurbias-624.txt",
+     "corpus:ground_truth:train:carrier:887473385855273.txt",
+     "corpus:ground_truth:train:carrier:887453386193813.txt",
+     "corpus:ground_truth:train:outpatient:542872281350908:1.txt",
+     "corpus:ground_truth:train:pde:233724491332182.txt",
+     "corpus:ground_truth:train:auto:CLM-000145.txt",
+     "corpus:ground_truth:train:insurbias-163.txt",
+     "corpus:ground_truth:train:insurbias-1111.txt",
+     "corpus:ground_truth:train:pde:233184493359051.txt",
+     "corpus:ground_truth:train:outpatient:542152281286913:1.txt",
+     "corpus:ground_truth:train:insurbias-385.txt",
+     "corpus:ground_truth:train:insurbias-310.txt",
+     "corpus:ground_truth:train:auto:CLM-000322.txt",
+     "corpus:ground_truth:train:pde:233614493105212.txt",
+     "corpus:ground_truth:train:carrier:887623388590174.txt",
+     "corpus:ground_truth:train:inpatient:196411177017295:1.txt",
+     "corpus:ground_truth:train:auto:CLM-000611.txt",
+     "corpus:ground_truth:train:pde:233364488871784.txt",
+     "corpus:ground_truth:train:property:266855223.txt"
+    ],
+    "filenames": [
+     "pde:233384494245864.txt",
+     "insurbias-624.txt",
+     "carrier:887473385855273.txt",
+     "carrier:887453386193813.txt",
+     "outpatient:542872281350908:1.txt",
+     "pde:233724491332182.txt",
+     "auto:CLM-000145.txt",
+     "insurbias-163.txt",
+     "insurbias-1111.txt",
+     "pde:233184493359051.txt",
+     "outpatient:542152281286913:1.txt",
+     "insurbias-385.txt",
+     "insurbias-310.txt",
+     "auto:CLM-000322.txt",
+     "pde:233614493105212.txt",
+     "carrier:887623388590174.txt",
+     "inpatient:196411177017295:1.txt",
+     "auto:CLM-000611.txt",
+     "pde:233364488871784.txt",
+     "property:266855223.txt"
+    ],
+    "subset_manifest_path": "data/experiments/20260927T054211Z-eval-insurance_claims/subset_manifest.json",
+    "subset_manifest_jsonl": "data/experiments/20260927T054211Z-eval-insurance_claims/subset_manifest.jsonl"
+   },
+   "git": {
+    "commit": "1d9f8d2",
+    "dirty": true
+   },
+   "schema_version": 3,
+   "calibration": null,
+   "trace_ids": {
+    "backend": "braintrust",
+    "project": "Mailroom-Evals",
+    "experiment": "20260927T054211Z-eval-insurance_claims",
+    "dataset": null,
+    "dataset_records": 0
+   },
+   "judging": null,
+   "pipeline_git": "28cb4be816fbb60e56cd3bb2ab72f8d9be1ab636",
+   "prompt_versions": {
+    "arbiter": {
+     "key": "arbiter_v1",
+     "lineage": "frozen",
+     "source": "production:arbiter",
+     "sha256": "d674eb5afc1efe57342b597740e850376a68d16b7041588d09fa03e62ff9cd5e"
+    },
+    "boss": {
+     "key": "boss_v1",
+     "lineage": "frozen",
+     "source": "production:boss",
+     "sha256": "c760107a6e4abeb3a8ef078c344fd1dc2e3f4fd06b2065a4c21e7228ca39a5af"
+    },
+    "contracts_specialist": {
+     "key": "contracts_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:contracts_specialist_v33_simplified@303e7f0bb05d",
+     "sha256": "d91de3967cc3b12cbd222cc5a4ae167b39578125abc83be7422498dc5024fd24"
+    },
+    "corporate_records_specialist": {
+     "key": "corporate_records_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:corporate_records_specialist_simplified@303e7f0bb05d",
+     "sha256": "484e64dd847b7bb35afebca74edc1fb6c381f0f7d5e9367ad8673bec0b8af45c"
+    },
+    "correspondence_specialist": {
+     "key": "correspondence_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:correspondence_specialist_simplified@303e7f0bb05d",
+     "sha256": "eab63b5afd29906b1ad3aca2d7698bf5c15d4b7f4ce9ade3b744be535d18d4f3"
+    },
+    "insurance_claims_specialist": {
+     "key": "insurance_claims_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:insurance_claims_specialist_simplified@303e7f0bb05d",
+     "sha256": "6c2776bcbe00091200aecbcfd21c99f197398d929143dd0c7c722811fa100034"
+    },
+    "intake": {
+     "key": "intake_v1",
+     "lineage": "frozen",
+     "source": "production:INTAKE_SYSTEM_PROMPT",
+     "sha256": "e57c5d1a0e7f66ca25e369c6377ac855b6e5932a7126bc5bd9f963ec0bd8e139"
+    },
+    "judge": {
+     "key": "judge_v1",
+     "lineage": "frozen",
+     "source": "production:judge",
+     "sha256": "d5fcdbf544605927c4fb1ee0bf8cef571043458d55588268c3fbbc5a355fc729"
+    },
+    "judge-classification": {
+     "key": "judge-classification_v1",
+     "lineage": "frozen",
+     "source": "production:judge-classification",
+     "sha256": "a577874ec28eff0bb742491b434dd9a5cdef027f86354a8c632cf1a492eced92"
+    },
+    "judge-correctness": {
+     "key": "judge-correctness_v1",
+     "lineage": "frozen",
+     "source": "production:judge-correctness",
+     "sha256": "5f355f1f12ee6ce8b9486915299d508ff055ce489bbd7e195d21f3f30d71686b"
+    },
+    "merger_agreement_specialist": {
+     "key": "merger_agreement_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:merger_agreement_specialist_simplified@303e7f0bb05d",
+     "sha256": "003232584d6890054d956398135f439b86692a1123683f58914c0393b5e1a00b"
+    },
+    "pipeline_quality": {
+     "key": "pipeline_quality_v1",
+     "lineage": "frozen",
+     "source": "evaluator:QUALITY_PROMPT",
+     "sha256": "e8eab7af550f59141db00e76475dea65f7fdcdcad0dda7bcd79a6bd294e86752"
+    },
+    "pipeline_verdict": {
+     "key": "pipeline_verdict_v1",
+     "lineage": "frozen",
+     "source": "evaluator:PIPELINE_PROMPT",
+     "sha256": "375a7853f3685f4b890b62210a5d08b361e176154c8ed2f656e800fda5447487"
+    },
+    "sorter": {
+     "key": "sorter_v1",
+     "lineage": "frozen",
+     "source": "production:sorter",
+     "sha256": "2b1e69b2c0530bd967bac6f0d3097818b65858f65687a826005cd495f04be788"
+    },
+    "sorter_reviewer": {
+     "key": "sorter_reviewer_v1",
+     "lineage": "frozen",
+     "source": "production:sorter_reviewer",
+     "sha256": "db02beff97dd13f13be7965f8d389f6b2768a526a8f6c7a7688f1a86717fd7c3"
+    }
+   },
+   "headline": 0.7135,
+   "n_cases": 20
+  },
+  {
+   "run_id": "20260927T053647Z-eval-correspondence",
+   "family": "eval",
+   "task": "correspondence",
+   "invoke": "agent",
+   "mode": "real",
+   "model": "ibm-granite/granite-4.2-8b",
+   "prompt_version": null,
+   "prompt_lineage": "frozen",
+   "prompt_source": "frozen",
+   "trace_backend": "braintrust",
+   "started_at": "2026-09-27T05:36:47+00:00",
+   "finished_at": "2026-09-27T05:41:17+00:00",
+   "duration_s": 272.3,
+   "error": null,
+   "metrics": {
+    "n": 20,
+    "overall_score": 0.4065,
+    "errors": 0,
+    "scorer_errors": 0
+   },
+   "performance": {
+    "latency_ms_mean": 76726.235,
+    "latency_ms_p95": 146506.5,
+    "tokens_prompt_total": 51943,
+    "tokens_completion_total": 104315,
+    "cost_usd_est_total": 0.029195,
+    "by_agent": {
+     "correspondence_specialist": {
+      "calls": 20,
+      "prompt_tokens": 51943,
+      "completion_tokens": 104315,
+      "total_tokens": 156258,
+      "models": [
+       "ibm-granite/granite-4.2-8b"
+      ],
+      "cost_usd_est": 0.029195
+     }
+    }
+   },
+   "dataset": {
+    "subset_spec": {
+     "kind": "class",
+     "value": "correspondence"
+    },
+    "repo": "Lucius-Morningstar/mailroom-dataset",
+    "revision": "46a4d3c240a36671cde0182fff4960f6b8b73aca",
+    "config": "ground_truth",
+    "split": "train",
+    "n_total": 915,
+    "n_selected": 20,
+    "sample": 20,
+    "seed": 42,
+    "subset": "class:correspondence",
+    "case_ids": [
+     "corpus:ground_truth:train:blair-l/meetings/608.",
+     "corpus:ground_truth:train:lokey-t/inbox/250.",
+     "corpus:ground_truth:train:kean-s/all_documents/849.",
+     "corpus:ground_truth:train:may-l/all_documents/41.",
+     "corpus:ground_truth:train:skilling-j/inbox/1555.",
+     "corpus:ground_truth:train:sanders-r/sent_items/261.",
+     "corpus:ground_truth:train:mcconnell-m/all_documents/227.",
+     "corpus:ground_truth:train:thomas-p/deleted_items/292.",
+     "corpus:ground_truth:train:nemec-g/all_documents/906.",
+     "corpus:ground_truth:train:dasovich-j/all_documents/13056.",
+     "corpus:ground_truth:train:kaminski-v/all_documents/5470.",
+     "corpus:ground_truth:train:parks-j/sent_items/425.",
+     "corpus:ground_truth:train:campbell-l/inbox/81.",
+     "corpus:ground_truth:train:donoho-l/inbox/35.",
+     "corpus:ground_truth:train:kitchen-l/sent_items/613.",
+     "corpus:ground_truth:train:derrick-j/deleted_items/79.",
+     "corpus:ground_truth:train:rogers-b/_sent_mail/358.",
+     "corpus:ground_truth:train:dasovich-j/all_documents/10751.",
+     "corpus:ground_truth:train:motley-m/deleted_items/63.",
+     "corpus:ground_truth:train:dorland-c/_sent_mail/78."
+    ],
+    "filenames": [
+     "blair-l/meetings/608.",
+     "lokey-t/inbox/250.",
+     "kean-s/all_documents/849.",
+     "may-l/all_documents/41.",
+     "skilling-j/inbox/1555.",
+     "sanders-r/sent_items/261.",
+     "mcconnell-m/all_documents/227.",
+     "thomas-p/deleted_items/292.",
+     "nemec-g/all_documents/906.",
+     "dasovich-j/all_documents/13056.",
+     "kaminski-v/all_documents/5470.",
+     "parks-j/sent_items/425.",
+     "campbell-l/inbox/81.",
+     "donoho-l/inbox/35.",
+     "kitchen-l/sent_items/613.",
+     "derrick-j/deleted_items/79.",
+     "rogers-b/_sent_mail/358.",
+     "dasovich-j/all_documents/10751.",
+     "motley-m/deleted_items/63.",
+     "dorland-c/_sent_mail/78."
+    ],
+    "subset_manifest_path": "data/experiments/20260927T053647Z-eval-correspondence/subset_manifest.json",
+    "subset_manifest_jsonl": "data/experiments/20260927T053647Z-eval-correspondence/subset_manifest.jsonl"
+   },
+   "git": {
+    "commit": "1d9f8d2",
+    "dirty": true
+   },
+   "schema_version": 3,
+   "calibration": null,
+   "trace_ids": {
+    "backend": "braintrust",
+    "project": "Mailroom-Evals",
+    "experiment": "20260927T053647Z-eval-correspondence",
+    "dataset": null,
+    "dataset_records": 0
+   },
+   "judging": null,
+   "pipeline_git": "28cb4be816fbb60e56cd3bb2ab72f8d9be1ab636",
+   "prompt_versions": {
+    "arbiter": {
+     "key": "arbiter_v1",
+     "lineage": "frozen",
+     "source": "production:arbiter",
+     "sha256": "d674eb5afc1efe57342b597740e850376a68d16b7041588d09fa03e62ff9cd5e"
+    },
+    "boss": {
+     "key": "boss_v1",
+     "lineage": "frozen",
+     "source": "production:boss",
+     "sha256": "c760107a6e4abeb3a8ef078c344fd1dc2e3f4fd06b2065a4c21e7228ca39a5af"
+    },
+    "contracts_specialist": {
+     "key": "contracts_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:contracts_specialist_v33_simplified@303e7f0bb05d",
+     "sha256": "d91de3967cc3b12cbd222cc5a4ae167b39578125abc83be7422498dc5024fd24"
+    },
+    "corporate_records_specialist": {
+     "key": "corporate_records_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:corporate_records_specialist_simplified@303e7f0bb05d",
+     "sha256": "484e64dd847b7bb35afebca74edc1fb6c381f0f7d5e9367ad8673bec0b8af45c"
+    },
+    "correspondence_specialist": {
+     "key": "correspondence_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:correspondence_specialist_simplified@303e7f0bb05d",
+     "sha256": "eab63b5afd29906b1ad3aca2d7698bf5c15d4b7f4ce9ade3b744be535d18d4f3"
+    },
+    "insurance_claims_specialist": {
+     "key": "insurance_claims_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:insurance_claims_specialist_simplified@303e7f0bb05d",
+     "sha256": "6c2776bcbe00091200aecbcfd21c99f197398d929143dd0c7c722811fa100034"
+    },
+    "intake": {
+     "key": "intake_v1",
+     "lineage": "frozen",
+     "source": "production:INTAKE_SYSTEM_PROMPT",
+     "sha256": "e57c5d1a0e7f66ca25e369c6377ac855b6e5932a7126bc5bd9f963ec0bd8e139"
+    },
+    "judge": {
+     "key": "judge_v1",
+     "lineage": "frozen",
+     "source": "production:judge",
+     "sha256": "d5fcdbf544605927c4fb1ee0bf8cef571043458d55588268c3fbbc5a355fc729"
+    },
+    "judge-classification": {
+     "key": "judge-classification_v1",
+     "lineage": "frozen",
+     "source": "production:judge-classification",
+     "sha256": "a577874ec28eff0bb742491b434dd9a5cdef027f86354a8c632cf1a492eced92"
+    },
+    "judge-correctness": {
+     "key": "judge-correctness_v1",
+     "lineage": "frozen",
+     "source": "production:judge-correctness",
+     "sha256": "5f355f1f12ee6ce8b9486915299d508ff055ce489bbd7e195d21f3f30d71686b"
+    },
+    "merger_agreement_specialist": {
+     "key": "merger_agreement_specialist_v1",
+     "lineage": "frozen",
+     "source": "sandbox:merger_agreement_specialist_simplified@303e7f0bb05d",
+     "sha256": "003232584d6890054d956398135f439b86692a1123683f58914c0393b5e1a00b"
+    },
+    "pipeline_quality": {
+     "key": "pipeline_quality_v1",
+     "lineage": "frozen",
+     "source": "evaluator:QUALITY_PROMPT",
+     "sha256": "e8eab7af550f59141db00e76475dea65f7fdcdcad0dda7bcd79a6bd294e86752"
+    },
+    "pipeline_verdict": {
+     "key": "pipeline_verdict_v1",
+     "lineage": "frozen",
+     "source": "evaluator:PIPELINE_PROMPT",
+     "sha256": "375a7853f3685f4b890b62210a5d08b361e176154c8ed2f656e800fda5447487"
+    },
+    "sorter": {
+     "key": "sorter_v1",
+     "lineage": "frozen",
+     "source": "production:sorter",
+     "sha256": "2b1e69b2c0530bd967bac6f0d3097818b65858f65687a826005cd495f04be788"
+    },
+    "sorter_reviewer": {
+     "key": "sorter_reviewer_v1",
+     "lineage": "frozen",
+     "source": "production:sorter_reviewer",
+     "sha256": "db02beff97dd13f13be7965f8d389f6b2768a526a8f6c7a7688f1a86717fd7c3"
+    }
+   },
+   "headline": 0.4065,
+   "n_cases": 20
+  },
   {
    "run_id": "20260927T052637Z-eval-correspondence",
    "family": "eval",
@@ -10513,6 +11788,3682 @@
   }
  ],
  "cases": {
+  "20260927T070900Z-eval-classification": [
+   {
+    "case_id": "corpus:ground_truth:train:property:261501663.txt",
+    "filename": "property:261501663.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "property",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "8f8760f5df7bd9d2f677e39f85ca23c6d728fa70243ac7ba303a93ed8cdedb20",
+    "scores": {
+     "predicted_doc_class": "insurance_claim",
+     "expected_doc_class": "insurance_claim",
+     "class_correct": 1,
+     "predicted_subclass": "property",
+     "expected_subclass": "property",
+     "subclass_correct": 1
+    },
+    "latency_ms": 3669.6,
+    "prediction": {
+     "doc_type": "insurance_claim",
+     "contract_subtype": null,
+     "doc_subclass": "property",
+     "confidence": 0.98
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:inpatient:196841176990879:1.txt",
+    "filename": "inpatient:196841176990879:1.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "inpatient",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "71ff2f5c8755d1b89065921997387bf819f0905eddca0a489d878de103fb9072",
+    "scores": {
+     "predicted_doc_class": "insurance_claim",
+     "expected_doc_class": "insurance_claim",
+     "class_correct": 1,
+     "predicted_subclass": "inpatient",
+     "expected_subclass": "inpatient",
+     "subclass_correct": 1
+    },
+    "latency_ms": 9747.9,
+    "prediction": {
+     "doc_type": "insurance_claim",
+     "contract_subtype": null,
+     "doc_subclass": "inpatient",
+     "confidence": 0.98
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:insurbias-425.txt",
+    "filename": "insurbias-425.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "auto",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "35b5ed5a63e43598b004c7ea9d72922bebada3eb51d656a032eaf96fb92b696e",
+    "scores": {
+     "predicted_doc_class": "insurance_claim",
+     "expected_doc_class": "insurance_claim",
+     "class_correct": 1,
+     "predicted_subclass": "auto",
+     "expected_subclass": "auto",
+     "subclass_correct": 1
+    },
+    "latency_ms": 2856.4,
+    "prediction": {
+     "doc_type": "insurance_claim",
+     "contract_subtype": null,
+     "doc_subclass": "auto",
+     "confidence": 0.99
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:brawner-s/all_documents/59.",
+    "filename": "brawner-s/all_documents/59.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "email",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "01a77c6dae92ea1c70480628a8814013857ab38800af403d4f0b21c8c338755b",
+    "scores": {
+     "predicted_doc_class": "correspondence",
+     "expected_doc_class": "correspondence",
+     "class_correct": 1,
+     "predicted_subclass": "other",
+     "expected_subclass": "email",
+     "subclass_correct": 0
+    },
+    "latency_ms": 3899.3,
+    "prediction": {
+     "doc_type": "correspondence",
+     "contract_subtype": null,
+     "doc_subclass": "other",
+     "confidence": 0.99
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0000912057-01-507164_a2041839zex-4_38.txt",
+    "filename": "0000912057-01-507164_a2041839zex-4_38.txt",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "rights_instrument",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "92a19af2947897ad0f9f3cac87fee35ee080bb6baf638f43ecbfbb3c89ba7195",
+    "scores": {
+     "predicted_doc_class": "corporate_record",
+     "expected_doc_class": "corporate_record",
+     "class_correct": 1,
+     "predicted_subclass": "rights_instrument",
+     "expected_subclass": "rights_instrument",
+     "subclass_correct": 1
+    },
+    "latency_ms": 6304.6,
+    "prediction": {
+     "doc_type": "corporate_record",
+     "contract_subtype": null,
+     "doc_subclass": "rights_instrument",
+     "confidence": 0.95
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:dasovich-j/all_documents/9309.",
+    "filename": "dasovich-j/all_documents/9309.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "press_release",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "f7f52533effa7c18cc5f1a69a89959e6addc23a12d844c941cfb39a3a0e8bb6f",
+    "scores": {
+     "predicted_doc_class": "correspondence",
+     "expected_doc_class": "correspondence",
+     "class_correct": 1,
+     "predicted_subclass": "other",
+     "expected_subclass": "press_release",
+     "subclass_correct": 0
+    },
+    "latency_ms": 3205.4,
+    "prediction": {
+     "doc_type": "correspondence",
+     "contract_subtype": null,
+     "doc_subclass": "other",
+     "confidence": 0.98
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:dasovich-j/all_documents/9178.",
+    "filename": "dasovich-j/all_documents/9178.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "press_release",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "118c314cb2fa26790dd20c3901d0eedf7a3585bb5b680e40c290cefb52ed54aa",
+    "scores": {
+     "predicted_doc_class": "correspondence",
+     "expected_doc_class": "correspondence",
+     "class_correct": 1,
+     "predicted_subclass": "other",
+     "expected_subclass": "press_release",
+     "subclass_correct": 0
+    },
+    "latency_ms": 2842.6,
+    "prediction": {
+     "doc_type": "correspondence",
+     "contract_subtype": null,
+     "doc_subclass": "other",
+     "confidence": 0.99
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0000950130-01-502904_dex211.txt",
+    "filename": "0000950130-01-502904_dex211.txt",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "subsidiary_list",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "acf460d132dcf5b20d7579d63d076efeeb55674cec6ef4540dc3f30a931e6a23",
+    "scores": {
+     "predicted_doc_class": "corporate_record",
+     "expected_doc_class": "corporate_record",
+     "class_correct": 1,
+     "predicted_subclass": "subsidiary_list",
+     "expected_subclass": "subsidiary_list",
+     "subclass_correct": 1
+    },
+    "latency_ms": 2702.0,
+    "prediction": {
+     "doc_type": "corporate_record",
+     "contract_subtype": null,
+     "doc_subclass": "subsidiary_list",
+     "confidence": 0.98
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:inpatient:196091177001318:1.txt",
+    "filename": "inpatient:196091177001318:1.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "inpatient",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "f9f4d741290d9d194e53c95eda8bd80b49f75aaed0869c8c0973871144478835",
+    "scores": {
+     "predicted_doc_class": "insurance_claim",
+     "expected_doc_class": "insurance_claim",
+     "class_correct": 1,
+     "predicted_subclass": "inpatient",
+     "expected_subclass": "inpatient",
+     "subclass_correct": 1
+    },
+    "latency_ms": 2758.7,
+    "prediction": {
+     "doc_type": "insurance_claim",
+     "contract_subtype": null,
+     "doc_subclass": "inpatient",
+     "confidence": 0.99
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:inpatient:196831176969260:1.txt",
+    "filename": "inpatient:196831176969260:1.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "inpatient",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "aa6e81442c2281be70e240653d93969262b89f0d5de3f970dfe9b09f1334cbea",
+    "scores": {
+     "predicted_doc_class": "insurance_claim",
+     "expected_doc_class": "insurance_claim",
+     "class_correct": 1,
+     "predicted_subclass": "carrier",
+     "expected_subclass": "inpatient",
+     "subclass_correct": 0
+    },
+    "latency_ms": 3111.0,
+    "prediction": {
+     "doc_type": "insurance_claim",
+     "contract_subtype": null,
+     "doc_subclass": "carrier",
+     "confidence": 0.98
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001193125-14-273392_d715499dex415.htm",
+    "filename": "0001193125-14-273392_d715499dex415.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "indenture",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "7833fd0f405f15c227531c6687d560e1f1b0ea00a50315676a9517726ef64f26",
+    "scores": {
+     "predicted_doc_class": "corporate_record",
+     "expected_doc_class": "corporate_record",
+     "class_correct": 1,
+     "predicted_subclass": "indenture",
+     "expected_subclass": "indenture",
+     "subclass_correct": 1
+    },
+    "latency_ms": 3100.9,
+    "prediction": {
+     "doc_type": "corporate_record",
+     "contract_subtype": null,
+     "doc_subclass": "indenture",
+     "confidence": 0.98
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_117_merger_agreement.txt",
+    "filename": "contract_117_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "all_stock",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "6313c759f1254c935346999fc825e6dc30265b200e3291c66426ce40ea30a869",
+    "scores": {
+     "predicted_doc_class": "unknown",
+     "expected_doc_class": "merger_agreement",
+     "class_correct": 0,
+     "predicted_subclass": null,
+     "expected_subclass": "all_stock",
+     "subclass_correct": 0
+    },
+    "latency_ms": 111121.3,
+    "prediction": {
+     "doc_type": "unknown",
+     "contract_subtype": null,
+     "doc_subclass": null,
+     "confidence": 0.1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:property:262952775.txt",
+    "filename": "property:262952775.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "property",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "d476033ad51411d06ed3a786c807a618523dfc092c99a0371b18a5aedb406e8f",
+    "scores": {
+     "predicted_doc_class": "insurance_claim",
+     "expected_doc_class": "insurance_claim",
+     "class_correct": 1,
+     "predicted_subclass": "property",
+     "expected_subclass": "property",
+     "subclass_correct": 1
+    },
+    "latency_ms": 5167.6,
+    "prediction": {
+     "doc_type": "insurance_claim",
+     "contract_subtype": null,
+     "doc_subclass": "property",
+     "confidence": 0.98
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0000950123-03-010752_y88696a1exv4w7.txt",
+    "filename": "0000950123-03-010752_y88696a1exv4w7.txt",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "indenture",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "0dc59c153b86b38558cea48bd6acfd3053fd24fc9417fb1cb1845b783d2c7777",
+    "scores": {
+     "predicted_doc_class": "corporate_record",
+     "expected_doc_class": "corporate_record",
+     "class_correct": 1,
+     "predicted_subclass": "indenture",
+     "expected_subclass": "indenture",
+     "subclass_correct": 1
+    },
+    "latency_ms": 97546.6,
+    "prediction": {
+     "doc_type": "corporate_record",
+     "contract_subtype": null,
+     "doc_subclass": "indenture",
+     "confidence": 0.974
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_4_merger_agreement.txt",
+    "filename": "contract_4_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "all_cash",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "245a0967275b86869d69bcd9439586ade0527e229e17fa633fbd6a62d18b63ae",
+    "scores": {
+     "predicted_doc_class": "unknown",
+     "expected_doc_class": "merger_agreement",
+     "class_correct": 0,
+     "predicted_subclass": null,
+     "expected_subclass": "all_cash",
+     "subclass_correct": 0
+    },
+    "latency_ms": 92120.1,
+    "prediction": {
+     "doc_type": "unknown",
+     "contract_subtype": null,
+     "doc_subclass": null,
+     "confidence": 0.1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:carrier:887493388020303.txt",
+    "filename": "carrier:887493388020303.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "carrier",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "185e8f488c5e7049cfcbf178bfd864f30fdb0bab20592dfafa5c45d5097a965a",
+    "scores": {
+     "predicted_doc_class": "insurance_claim",
+     "expected_doc_class": "insurance_claim",
+     "class_correct": 1,
+     "predicted_subclass": "carrier",
+     "expected_subclass": "carrier",
+     "subclass_correct": 1
+    },
+    "latency_ms": 2421.2,
+    "prediction": {
+     "doc_type": "insurance_claim",
+     "contract_subtype": null,
+     "doc_subclass": "carrier",
+     "confidence": 0.98
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_94_merger_agreement.txt",
+    "filename": "contract_94_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "mixed_cash_stock_election",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "4cde1c08196ab3c80ee4de6acc6677259d1c5bab69ffddb7c67240f0755b9872",
+    "scores": {
+     "predicted_doc_class": "merger_agreement",
+     "expected_doc_class": "merger_agreement",
+     "class_correct": 1,
+     "predicted_subclass": "all_cash",
+     "expected_subclass": "mixed_cash_stock_election",
+     "subclass_correct": 0
+    },
+    "latency_ms": 174013.2,
+    "prediction": {
+     "doc_type": "merger_agreement",
+     "contract_subtype": null,
+     "doc_subclass": "all_cash",
+     "confidence": 0.956
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:inpatient:196641176967981:1.txt",
+    "filename": "inpatient:196641176967981:1.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "inpatient",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "5512560239d654923ef13f0dad223093dc2ef66a435aeadb2503ee9f2608be74",
+    "scores": {
+     "predicted_doc_class": "insurance_claim",
+     "expected_doc_class": "insurance_claim",
+     "class_correct": 1,
+     "predicted_subclass": "inpatient",
+     "expected_subclass": "inpatient",
+     "subclass_correct": 1
+    },
+    "latency_ms": 2624.8,
+    "prediction": {
+     "doc_type": "insurance_claim",
+     "contract_subtype": null,
+     "doc_subclass": "inpatient",
+     "confidence": 0.99
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001047469-06-011763_a2173128zex-3_1.htm",
+    "filename": "0001047469-06-011763_a2173128zex-3_1.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "charter_amendment",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "b24fde7ae1f1aad6a01c7187e40143521031a81b1e42c5285fc1e031865fee05",
+    "scores": {
+     "predicted_doc_class": "corporate_record",
+     "expected_doc_class": "corporate_record",
+     "class_correct": 1,
+     "predicted_subclass": "articles_of_incorporation",
+     "expected_subclass": "charter_amendment",
+     "subclass_correct": 0
+    },
+    "latency_ms": 4998.6,
+    "prediction": {
+     "doc_type": "corporate_record",
+     "contract_subtype": null,
+     "doc_subclass": "articles_of_incorporation",
+     "confidence": 0.99
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:outpatient:542502281397875:1.txt",
+    "filename": "outpatient:542502281397875:1.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "outpatient",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "5e08629df6b42145a196a4b728d0f72cb873dbbb49f6b4b37fa24cc4dc233789",
+    "scores": {
+     "predicted_doc_class": "insurance_claim",
+     "expected_doc_class": "insurance_claim",
+     "class_correct": 1,
+     "predicted_subclass": "outpatient",
+     "expected_subclass": "outpatient",
+     "subclass_correct": 1
+    },
+    "latency_ms": 3005.3,
+    "prediction": {
+     "doc_type": "insurance_claim",
+     "contract_subtype": null,
+     "doc_subclass": "outpatient",
+     "confidence": 0.97
+    }
+   }
+  ],
+  "20260927T065622Z-eval-corporate_records": [
+   {
+    "case_id": "corpus:ground_truth:train:0001047469-12-006895_a2210011zex-4_10.htm",
+    "filename": "0001047469-12-006895_a2210011zex-4_10.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "indenture",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "460b1d7966297ca1bf4106c2409cab5509b88a25d16dbaf3eff6c61e6ff35aee",
+    "scores": {
+     "overall_score": 0.2545,
+     "needs_judge_review": false,
+     "n_expected_fields": 4,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0,
+     "entity_list_f1": 0.1538
+    },
+    "latency_ms": 86230.7,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "corporate_record",
+     "specialist": "corporate_records_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "corporate_records_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001047469-03-032251_a2118977zex-3_2.htm",
+    "filename": "0001047469-03-032251_a2118977zex-3_2.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "bylaws",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "d9273770ae814076505ed9522392f8e63a6011db599b0eb05740ca266231945f",
+    "scores": {
+     "overall_score": 0.55,
+     "needs_judge_review": false,
+     "n_expected_fields": 4,
+     "extraction_precision": 0.1333,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.2105,
+     "extraction_f2": 0.3225,
+     "entity_list_f1": 0.0
+    },
+    "latency_ms": 3602.8,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "corporate_record",
+     "specialist": "corporate_records_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "corporate_records_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0000950123-11-055070_h75396a4exv21w1.htm",
+    "filename": "0000950123-11-055070_h75396a4exv21w1.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "subsidiary_list",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "0fe14e019a6bf3d526fb60734ddd43c045c894be1c72889c0e73f549a6080de8",
+    "scores": {
+     "overall_score": 0.0,
+     "needs_judge_review": false,
+     "n_expected_fields": 4,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0
+    },
+    "latency_ms": 10050.1,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "corporate_record",
+     "specialist": "corporate_records_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "corporate_records_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0000898430-01-503595_dex32.txt",
+    "filename": "0000898430-01-503595_dex32.txt",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "charter_amendment",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "b460a96a1253bff52bc389dd73fad33208d1e7572d6457ac9c3e37bd295f6460",
+    "scores": {
+     "overall_score": 0.2762,
+     "needs_judge_review": false,
+     "n_expected_fields": 4,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0,
+     "entity_list_f1": 0.1538
+    },
+    "latency_ms": 117122.5,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "corporate_record",
+     "specialist": "corporate_records_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "corporate_records_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001193125-11-240442_dex43.htm",
+    "filename": "0001193125-11-240442_dex43.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "rights_instrument",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "48831bd7900a9b71a80382ab79ece247ea21094a79a2d5e09eb7379ee23905c0",
+    "scores": {
+     "overall_score": 0.6691,
+     "needs_judge_review": false,
+     "n_expected_fields": 4,
+     "extraction_precision": 0.1538,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.2352,
+     "extraction_f2": 0.3448,
+     "entity_list_f1": 0.1538
+    },
+    "latency_ms": 49059.7,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "corporate_record",
+     "specialist": "corporate_records_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "corporate_records_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0000950123-10-001751_c54716a1exv4w2.htm",
+    "filename": "0000950123-10-001751_c54716a1exv4w2.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "rights_instrument",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "4537aa453dcafa29491ca6072e1544a2581eb9469ec33901e2aa5ff633cea424",
+    "scores": {
+     "overall_score": 0.6214,
+     "needs_judge_review": false,
+     "n_expected_fields": 4,
+     "extraction_precision": 0.1538,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.2352,
+     "extraction_f2": 0.3448,
+     "entity_list_f1": 0.1538
+    },
+    "latency_ms": 205019.6,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "corporate_record",
+     "specialist": "corporate_records_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "corporate_records_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001571049-14-000599_t1400242_ex3-1.htm",
+    "filename": "0001571049-14-000599_t1400242_ex3-1.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "articles_of_incorporation",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "50e8766a108db5afb209a27ffb7a2002716bb047f37bff0b18f1a56c88c75b95",
+    "scores": {
+     "overall_score": 0.675,
+     "needs_judge_review": true,
+     "n_expected_fields": 4,
+     "extraction_precision": 0.1429,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.2223,
+     "extraction_f2": 0.3334,
+     "entity_list_f1": 0.1429
+    },
+    "latency_ms": 3895.4,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "corporate_record",
+     "specialist": "corporate_records_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "corporate_records_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001193125-13-256819_d428632dex211.htm",
+    "filename": "0001193125-13-256819_d428632dex211.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "subsidiary_list",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "74bca4e97c748666baee25e3db1cd80f885598ec9e86b2a10ddb57b3266b2416",
+    "scores": {
+     "overall_score": 0.4636,
+     "needs_judge_review": false,
+     "n_expected_fields": 4,
+     "extraction_precision": 0.1667,
+     "extraction_recall": 0.25,
+     "extraction_f1": 0.2,
+     "extraction_f2": 0.2273,
+     "entity_list_f1": 0.2222
+    },
+    "latency_ms": 113266.2,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "corporate_record",
+     "specialist": "corporate_records_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "corporate_records_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001104659-22-110926_tm2225873d4_ex3-5.htm",
+    "filename": "0001104659-22-110926_tm2225873d4_ex3-5.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "officer_certificate",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "8139a6f16d1dc613232f7c3d472e7bbd57e465386f37a89452317559cbd1cde3",
+    "scores": {
+     "overall_score": 0.3372,
+     "needs_judge_review": false,
+     "n_expected_fields": 4,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0,
+     "entity_list_f1": 0.2667
+    },
+    "latency_ms": 2433.1,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "corporate_record",
+     "specialist": "corporate_records_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "corporate_records_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001193125-08-109289_dex241.htm",
+    "filename": "0001193125-08-109289_dex241.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "powers_of_attorney",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "5b7b8a4c28c63a51d54cf2fc2d2e177a8661e79821c250af4d40dd4fbd491c99",
+    "scores": {
+     "overall_score": 0.5708,
+     "needs_judge_review": false,
+     "n_expected_fields": 4,
+     "extraction_precision": 0.1818,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.2666,
+     "extraction_f2": 0.3704,
+     "entity_list_f1": 0.1667
+    },
+    "latency_ms": 197213.4,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "corporate_record",
+     "specialist": "corporate_records_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "corporate_records_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001079974-08-000839_artdimensionss1x31_9252008.htm",
+    "filename": "0001079974-08-000839_artdimensionss1x31_9252008.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "articles_of_incorporation",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "04c0314e82da6b844f250c7ec35134947e77577077040a7b0c507c38bc5121d3",
+    "scores": {
+     "overall_score": 0.7063,
+     "needs_judge_review": true,
+     "n_expected_fields": 4,
+     "extraction_precision": 0.3333,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.4,
+     "extraction_f2": 0.4545,
+     "entity_list_f1": 0.625
+    },
+    "latency_ms": 75910.5,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "corporate_record",
+     "specialist": "corporate_records_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "corporate_records_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001193125-05-179145_dex32.htm",
+    "filename": "0001193125-05-179145_dex32.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "charter_amendment",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "b389c94f70fc098289f36c3a7ffce6dee33956f2051a6233e3ed3cc9a0e32247",
+    "scores": {
+     "overall_score": 0.3098,
+     "needs_judge_review": false,
+     "n_expected_fields": 4,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0,
+     "entity_list_f1": 0.1538
+    },
+    "latency_ms": 89875.7,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "corporate_record",
+     "specialist": "corporate_records_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "corporate_records_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001021432-06-000035_certamendriv090106.txt",
+    "filename": "0001021432-06-000035_certamendriv090106.txt",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "board_resolution",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "153007c6b7fcbc0f0da9510214d3beb9e5501e3e4715038d3ed4d0e54f16c9da",
+    "scores": {
+     "overall_score": 0.4234,
+     "needs_judge_review": false,
+     "n_expected_fields": 4,
+     "extraction_precision": 0.0909,
+     "extraction_recall": 0.25,
+     "extraction_f1": 0.1333,
+     "extraction_f2": 0.1852,
+     "entity_list_f1": 0.3077
+    },
+    "latency_ms": 64867.1,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "corporate_record",
+     "specialist": "corporate_records_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "corporate_records_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001021432-06-000037_certamendcal092706.txt",
+    "filename": "0001021432-06-000037_certamendcal092706.txt",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "board_resolution",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "5937c7662d440d1f99c1cdfeb529a5fb7c5907c100ef2f342a78e365cf49bead",
+    "scores": {
+     "overall_score": 0.4098,
+     "needs_judge_review": false,
+     "n_expected_fields": 4,
+     "extraction_precision": 0.0833,
+     "extraction_recall": 0.25,
+     "extraction_f1": 0.125,
+     "extraction_f2": 0.1785,
+     "entity_list_f1": 0.1538
+    },
+    "latency_ms": 76268.4,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "corporate_record",
+     "specialist": "corporate_records_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "corporate_records_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0000950137-05-002026_c91812a1exv4w1.txt",
+    "filename": "0000950137-05-002026_c91812a1exv4w1.txt",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "indenture",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "6b92681f96caf807fc4ce1c8bebfcbfabe7b49d484850d9cded0a8d73b48cf0a",
+    "scores": {
+     "overall_score": 0.3589,
+     "needs_judge_review": true,
+     "n_expected_fields": 4,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0,
+     "entity_list_f1": 0.3529
+    },
+    "latency_ms": 412907.5,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "corporate_record",
+     "specialist": "corporate_records_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "corporate_records_specialist_v1",
+     "chunks": 3,
+     "needed_chunks": 3,
+     "llm_call_budget": 6,
+     "llm_calls": 3
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001104659-18-050217_a18-2297_8ex3d3.htm",
+    "filename": "0001104659-18-050217_a18-2297_8ex3d3.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "officer_certificate",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "2a745d9d335bd3429af98742b4e4b2b481351c7f6684017873a8d311c8f8afbc",
+    "scores": {
+     "overall_score": 0.2294,
+     "needs_judge_review": false,
+     "n_expected_fields": 4,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0,
+     "entity_list_f1": 0.1538
+    },
+    "latency_ms": 99594.2,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "corporate_record",
+     "specialist": "corporate_records_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "corporate_records_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001144204-16-109616_v442647_ex3-1.htm",
+    "filename": "0001144204-16-109616_v442647_ex3-1.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "charter_amendment",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "155c3450e66206d4ff8b114a1443c2c3f38f45d0045218c166378f0b3940ae03",
+    "scores": {
+     "overall_score": 0.2521,
+     "needs_judge_review": false,
+     "n_expected_fields": 4,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0,
+     "entity_list_f1": 0.1538
+    },
+    "latency_ms": 163842.1,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "corporate_record",
+     "specialist": "corporate_records_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "corporate_records_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001193125-10-221497_dex32.htm",
+    "filename": "0001193125-10-221497_dex32.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "charter_amendment",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "9c1f4a9c39a5cab54fef627e6feaa461888f84e226550a201f0346e1b726b347",
+    "scores": {
+     "overall_score": 0.591,
+     "needs_judge_review": true,
+     "n_expected_fields": 4,
+     "extraction_precision": 0.1111,
+     "extraction_recall": 0.25,
+     "extraction_f1": 0.1538,
+     "extraction_f2": 0.2,
+     "entity_list_f1": 0.3077
+    },
+    "latency_ms": 2411.1,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "corporate_record",
+     "specialist": "corporate_records_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "corporate_records_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001493152-23-024269_ex4-5.htm",
+    "filename": "0001493152-23-024269_ex4-5.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "indenture",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "ac92013d1381c36ac90c8c3a668c147d4eb0c6143bdb79a45426a2a526e7f198",
+    "scores": {
+     "overall_score": 0.3115,
+     "needs_judge_review": false,
+     "n_expected_fields": 4,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0,
+     "entity_list_f1": 0.3077
+    },
+    "latency_ms": 126870.7,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "corporate_record",
+     "specialist": "corporate_records_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "corporate_records_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001683168-23-005255_cardiff_ex0302.htm",
+    "filename": "0001683168-23-005255_cardiff_ex0302.htm",
+    "expected_doc_class": "corporate_record",
+    "expected_subclass": "officer_certificate",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "d864df108857955c2ff1261fbd367409fbce959b5d1d9184d95a020107ad7aa6",
+    "scores": {
+     "overall_score": 0.3025,
+     "needs_judge_review": false,
+     "n_expected_fields": 4,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0,
+     "entity_list_f1": 0.1429
+    },
+    "latency_ms": 2504.4,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "corporate_record",
+     "specialist": "corporate_records_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "corporate_records_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   }
+  ],
+  "20260927T060322Z-eval-merger_agreement": [
+   {
+    "case_id": "corpus:ground_truth:train:contract_128_merger_agreement.txt",
+    "filename": "contract_128_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "other",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "e3a39e4c3d5a2b7645f89adb3f85627158999c6981b93861e508918a53da2eb0",
+    "scores": {
+     "overall_score": 0.099,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0
+    },
+    "latency_ms": 1247604.1,
+    "prediction": {
+     "extraction_confidence": 0.7767,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 9,
+     "needed_chunks": 9,
+     "llm_call_budget": 18,
+     "llm_calls": 9
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_31_merger_agreement.txt",
+    "filename": "contract_31_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "other",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "263cad3e71c33d035ffe1a78f7a5ba73c78c76835ca069b683d3dd845eb25e79",
+    "scores": {
+     "overall_score": 0.099,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0
+    },
+    "latency_ms": 1112379.2,
+    "prediction": {
+     "extraction_confidence": 0.765,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 8,
+     "needed_chunks": 8,
+     "llm_call_budget": 16,
+     "llm_calls": 8
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_99_merger_agreement.txt",
+    "filename": "contract_99_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "all_cash",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "79d9818a22941835253713cc81fc981c2f271d31bb708036257bb6112549d2f8",
+    "scores": {
+     "overall_score": 0.5333,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.1111,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.1818,
+     "extraction_f2": 0.2941,
+     "entity_list_f1": 0.125
+    },
+    "latency_ms": 1424451.1,
+    "prediction": {
+     "extraction_confidence": 0.8,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 9,
+     "needed_chunks": 9,
+     "llm_call_budget": 18,
+     "llm_calls": 9
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_114_merger_agreement.txt",
+    "filename": "contract_114_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "other",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "9d33eeb170874333824372fed66a90773e945d5be6b8b6814eb8fdc7342305eb",
+    "scores": {
+     "overall_score": 0.1163,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0,
+     "entity_list_f1": 0.0
+    },
+    "latency_ms": 909993.6,
+    "prediction": {
+     "extraction_confidence": 0.7786,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 8,
+     "needed_chunks": 8,
+     "llm_call_budget": 16,
+     "llm_calls": 8
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_94_merger_agreement.txt",
+    "filename": "contract_94_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "mixed_cash_stock_election",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "4cde1c08196ab3c80ee4de6acc6677259d1c5bab69ffddb7c67240f0755b9872",
+    "scores": {
+     "overall_score": 0.5588,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.1111,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.1818,
+     "extraction_f2": 0.2941,
+     "entity_list_f1": 0.2
+    },
+    "latency_ms": 1748404.3,
+    "prediction": {
+     "extraction_confidence": 0.7312,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 10,
+     "needed_chunks": 10,
+     "llm_call_budget": 20,
+     "llm_calls": 10
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_120_merger_agreement.txt",
+    "filename": "contract_120_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "other",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "7091add935a2712eaa69232632eb07178b63fb90978ed4a1d9d8da9e29f660df",
+    "scores": {
+     "overall_score": 0.099,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0
+    },
+    "latency_ms": 1004991.2,
+    "prediction": {
+     "extraction_confidence": 0.7775,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 8,
+     "needed_chunks": 8,
+     "llm_call_budget": 16,
+     "llm_calls": 8
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_41_merger_agreement.txt",
+    "filename": "contract_41_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "all_cash",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "2b8e5a24c30e16936e79d6b830fada6cd07d37e3cb5e26f23ef014549d91d5b2",
+    "scores": {
+     "overall_score": 0.5588,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.1,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.1667,
+     "extraction_f2": 0.2778,
+     "entity_list_f1": 0.2
+    },
+    "latency_ms": 1234822.0,
+    "prediction": {
+     "extraction_confidence": 0.8037,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 9,
+     "needed_chunks": 9,
+     "llm_call_budget": 18,
+     "llm_calls": 9
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_62_merger_agreement.txt",
+    "filename": "contract_62_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "all_cash",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "89141158c1ed54687304893676993702b7df56182f83caea8f932e79b56dbe1b",
+    "scores": {
+     "overall_score": 0.7222,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.1111,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.1818,
+     "extraction_f2": 0.2941,
+     "entity_list_f1": 0.6154
+    },
+    "latency_ms": 953902.7,
+    "prediction": {
+     "extraction_confidence": 0.75,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 7,
+     "needed_chunks": 7,
+     "llm_call_budget": 14,
+     "llm_calls": 7
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_51_merger_agreement.txt",
+    "filename": "contract_51_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "other",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "427291bb399de869538b5c53fb726ad8b7073c3f7bb63815845d3f60ff6c117c",
+    "scores": {
+     "overall_score": 0.5,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.125,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.2,
+     "extraction_f2": 0.3125
+    },
+    "latency_ms": 1361030.7,
+    "prediction": {
+     "extraction_confidence": 0.75,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 10,
+     "needed_chunks": 10,
+     "llm_call_budget": 20,
+     "llm_calls": 10
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_70_merger_agreement.txt",
+    "filename": "contract_70_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "other",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "0c80307ee300169347e8896f7408242361a4d161e435a68e86b4da1028a67379",
+    "scores": {
+     "overall_score": 0.1441,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0,
+     "entity_list_f1": 0.0952
+    },
+    "latency_ms": 893219.4,
+    "prediction": {
+     "extraction_confidence": 0.7937,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 9,
+     "needed_chunks": 9,
+     "llm_call_budget": 18,
+     "llm_calls": 9
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_100_merger_agreement.txt",
+    "filename": "contract_100_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "all_stock",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "2b9a1070b12c3a9a27583be50bbfc0fe390beffbf0da2cb76756b735cc6c78ba",
+    "scores": {
+     "overall_score": 0.5,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.1111,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.1818,
+     "extraction_f2": 0.2941
+    },
+    "latency_ms": 1950586.8,
+    "prediction": {
+     "extraction_confidence": 0.796,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 8,
+     "needed_chunks": 8,
+     "llm_call_budget": 16,
+     "llm_calls": 8
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_97_merger_agreement.txt",
+    "filename": "contract_97_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "mixed_cash_stock",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "c9557d58341c2a358382d7d15cccd67943935c4f9af793f41296db6f3a21475d",
+    "scores": {
+     "overall_score": 0.5278,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.125,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.2,
+     "extraction_f2": 0.3125,
+     "entity_list_f1": 0.1053
+    },
+    "latency_ms": 556902.3,
+    "prediction": {
+     "extraction_confidence": 0.7675,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 6,
+     "needed_chunks": 6,
+     "llm_call_budget": 12,
+     "llm_calls": 6
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_71_merger_agreement.txt",
+    "filename": "contract_71_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "all_cash",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "797d2c3e7ced2c78e56e58cd471de98e4923e69bc61730e58cf98e194f768b7d",
+    "scores": {
+     "overall_score": 0.6111,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.125,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.2,
+     "extraction_f2": 0.3125,
+     "entity_list_f1": 0.3636
+    },
+    "latency_ms": 1186225.0,
+    "prediction": {
+     "extraction_confidence": 0.7937,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 8,
+     "needed_chunks": 8,
+     "llm_call_budget": 16,
+     "llm_calls": 8
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_66_merger_agreement.txt",
+    "filename": "contract_66_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "all_stock",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "3f42e7b1ddf23f5a850a198b81956eb8b1b6554cf9356465646e36f03164b3f1",
+    "scores": {
+     "overall_score": 0.3905,
+     "needs_judge_review": true,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0,
+     "entity_list_f1": 0.3
+    },
+    "latency_ms": 1256131.8,
+    "prediction": {
+     "extraction_confidence": 0.7875,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 10,
+     "needed_chunks": 10,
+     "llm_call_budget": 20,
+     "llm_calls": 10
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_34_merger_agreement.txt",
+    "filename": "contract_34_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "other",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "04b126ab6ddeb40f40ed143c5b86b30e5355d298f68d1397b50a69c6c7718032",
+    "scores": {
+     "overall_score": 0.099,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0,
+     "entity_list_f1": 0.0
+    },
+    "latency_ms": 1017198.3,
+    "prediction": {
+     "extraction_confidence": 0.8067,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 9,
+     "needed_chunks": 9,
+     "llm_call_budget": 18,
+     "llm_calls": 9
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_5_merger_agreement.txt",
+    "filename": "contract_5_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "mixed_cash_stock",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "87bd8a9b35ea3ececa76b9cea7c1eeb2879aa862c1883a338a5570a3ae99a078",
+    "scores": {
+     "overall_score": 0.5,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.1429,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.2223,
+     "extraction_f2": 0.3334
+    },
+    "latency_ms": 796078.7,
+    "prediction": {
+     "extraction_confidence": 0.7188,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 10,
+     "needed_chunks": 10,
+     "llm_call_budget": 20,
+     "llm_calls": 10
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_76_merger_agreement.txt",
+    "filename": "contract_76_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "other",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "6d66ff78c311c0c3480f9e222529af181569869780fde70c9c70d66d6885a506",
+    "scores": {
+     "overall_score": 0.099,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0
+    },
+    "latency_ms": 870445.3,
+    "prediction": {
+     "extraction_confidence": 0.758,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 10,
+     "needed_chunks": 10,
+     "llm_call_budget": 20,
+     "llm_calls": 10
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_136_merger_agreement.txt",
+    "filename": "contract_136_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "all_cash",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "fb7ee24e71d730b5ef929f83666c409383b94fa300b80d0c0a43c4d504d22557",
+    "scores": {
+     "overall_score": 0.5312,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.1111,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.1818,
+     "extraction_f2": 0.2941,
+     "entity_list_f1": 0.1111
+    },
+    "latency_ms": 430016.1,
+    "prediction": {
+     "extraction_confidence": 0.7625,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 6,
+     "needed_chunks": 6,
+     "llm_call_budget": 12,
+     "llm_calls": 6
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_122_merger_agreement.txt",
+    "filename": "contract_122_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "other",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "a1018319501af2cb64a47c11e5b0097914b6a155eb324457d65150374c59aa79",
+    "scores": {
+     "overall_score": 0.5,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.1111,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.1818,
+     "extraction_f2": 0.2941
+    },
+    "latency_ms": 606595.9,
+    "prediction": {
+     "extraction_confidence": 0.8,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 8,
+     "needed_chunks": 8,
+     "llm_call_budget": 16,
+     "llm_calls": 8
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:contract_19_merger_agreement.txt",
+    "filename": "contract_19_merger_agreement.txt",
+    "expected_doc_class": "merger_agreement",
+    "expected_subclass": "mixed_cash_stock",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "4fe3c2f1aa4f545c29a075f4cb70108ecae4fd02810a63cbd247f1f369161a91",
+    "scores": {
+     "overall_score": 0.55,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.1,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.1667,
+     "extraction_f2": 0.2778,
+     "entity_list_f1": 0.1667
+    },
+    "latency_ms": 750701.1,
+    "prediction": {
+     "extraction_confidence": 0.8029,
+     "doc_type": "merger_agreement",
+     "specialist": "merger_agreement_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "merger_agreement_specialist_v1",
+     "chunks": 8,
+     "needed_chunks": 8,
+     "llm_call_budget": 16,
+     "llm_calls": 8
+    }
+   }
+  ],
+  "20260927T054738Z-eval-contracts": [
+   {
+    "case_id": "corpus:ground_truth:train:MOVADOGROUPINC_04_30_2003-EX-10.28-ENDORSEMENT AGREEMENT.PDF",
+    "filename": "MOVADOGROUPINC_04_30_2003-EX-10.28-ENDORSEMENT AGREEMENT.PDF",
+    "expected_doc_class": "contract",
+    "expected_subclass": "Endorsement",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "ba1c107875c61d0b4913f6aaaaf00d5ca64d75d9a594447d02c40880d8f44fea",
+    "scores": {
+     "overall_score": 0.0,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0
+    },
+    "latency_ms": 11322.7,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "contract",
+     "specialist": "contracts_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "contracts_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:GOLDRESOURCECORP_12_11_2008-EX-10.1-STRATEGIC ALLIANCE AGREEMENT.PDF",
+    "filename": "GOLDRESOURCECORP_12_11_2008-EX-10.1-STRATEGIC ALLIANCE AGREEMENT.PDF",
+    "expected_doc_class": "contract",
+    "expected_subclass": "Strategic Alliance",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "ffb9302f4c40faf86181d040267edb30c7266aa0f381f3efa6a4c95d9e351a9f",
+    "scores": {
+     "overall_score": 0.5416,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.1667,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.25,
+     "extraction_f2": 0.3572,
+     "entity_list_f1": 0.15
+    },
+    "latency_ms": 164121.0,
+    "prediction": {
+     "extraction_confidence": 0.82,
+     "doc_type": "contract",
+     "specialist": "contracts_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "contracts_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:MorganStanleyDirectLendingFund_20191119_10-12GA_EX-10.5_11898508_EX-10.5_Trademark License Agreement.pdf",
+    "filename": "MorganStanleyDirectLendingFund_20191119_10-12GA_EX-10.5_11898508_EX-10.5_Trademark License Agreement.pdf",
+    "expected_doc_class": "contract",
+    "expected_subclass": "License_Agreements",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "2968497b74ed1946495a91d7baa6d62f400ff981f462d6d945f601d8806694ca",
+    "scores": {
+     "overall_score": 0.5926,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.2,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.2857,
+     "extraction_f2": 0.3846,
+     "entity_list_f1": 0.3125
+    },
+    "latency_ms": 154669.2,
+    "prediction": {
+     "extraction_confidence": 0.85,
+     "doc_type": "contract",
+     "specialist": "contracts_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "contracts_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:SUCAMPOPHARMACEUTICALS,INC_11_04_2015-EX-10.2-STRATEGIC ALLIANCE AGREEMENT.PDF",
+    "filename": "SUCAMPOPHARMACEUTICALS,INC_11_04_2015-EX-10.2-STRATEGIC ALLIANCE AGREEMENT.PDF",
+    "expected_doc_class": "contract",
+    "expected_subclass": "Strategic Alliance",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "83c8a5b6a0ee219c184a90eaffec0cf930e7ed80e4f12ce342714bc745115934",
+    "scores": {
+     "overall_score": 0.6071,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.2,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.2857,
+     "extraction_f2": 0.3846,
+     "entity_list_f1": 0.3529
+    },
+    "latency_ms": 180480.7,
+    "prediction": {
+     "extraction_confidence": 0.87,
+     "doc_type": "contract",
+     "specialist": "contracts_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "contracts_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:FOUNDATIONMEDICINE,INC_02_02_2015-EX-10.2-Collaboration Agreement.PDF",
+    "filename": "FOUNDATIONMEDICINE,INC_02_02_2015-EX-10.2-Collaboration Agreement.PDF",
+    "expected_doc_class": "contract",
+    "expected_subclass": "Collaboration",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "75ee54e34508350f537d8c765a2567c3ab99bbd7533fac6880739d5b850f53ce",
+    "scores": {
+     "overall_score": 0.54,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.25,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.3333,
+     "extraction_f2": 0.4167,
+     "entity_list_f1": 0.1481
+    },
+    "latency_ms": 264084.4,
+    "prediction": {
+     "extraction_confidence": 0.75,
+     "doc_type": "contract",
+     "specialist": "contracts_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "contracts_specialist_v1",
+     "chunks": 2,
+     "needed_chunks": 2,
+     "llm_call_budget": 4,
+     "llm_calls": 2
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:EcoScienceSolutionsInc_20180406_8-K_EX-10.1_11135398_EX-10.1_Sponsorship Agreement.pdf",
+    "filename": "EcoScienceSolutionsInc_20180406_8-K_EX-10.1_11135398_EX-10.1_Sponsorship Agreement.pdf",
+    "expected_doc_class": "contract",
+    "expected_subclass": "Sponsorship",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "a2bbc78780c5eee0b15768c43c3dd8b15181d714d98273f4a6c4f2478e76a02d",
+    "scores": {
+     "overall_score": 0.8182,
+     "needs_judge_review": true,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.1429,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.2223,
+     "extraction_f2": 0.3334,
+     "entity_list_f1": 0.7778
+    },
+    "latency_ms": 215848.2,
+    "prediction": {
+     "extraction_confidence": 0.93,
+     "doc_type": "contract",
+     "specialist": "contracts_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "contracts_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:NETGEAR,INC_04_21_2003-EX-10.16-DISTRIBUTOR AGREEMENT.pdf",
+    "filename": "NETGEAR,INC_04_21_2003-EX-10.16-DISTRIBUTOR AGREEMENT.pdf",
+    "expected_doc_class": "contract",
+    "expected_subclass": "Distributor",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "1b4a0744754138176a7a3081a9c89a859248df2013a56f6ef13eeccbc264c9a1",
+    "scores": {
+     "overall_score": 0.5889,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.1429,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.2223,
+     "extraction_f2": 0.3334,
+     "entity_list_f1": 0.3019
+    },
+    "latency_ms": 216091.7,
+    "prediction": {
+     "extraction_confidence": 0.87,
+     "doc_type": "contract",
+     "specialist": "contracts_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "contracts_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:KINGPHARMACEUTICALSINC_08_09_2006-EX-10.1-PROMOTION AGREEMENT.PDF",
+    "filename": "KINGPHARMACEUTICALSINC_08_09_2006-EX-10.1-PROMOTION AGREEMENT.PDF",
+    "expected_doc_class": "contract",
+    "expected_subclass": "Promotion",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "92a552b93eee815071993af2c822aa2133f5588b3bf6dcec3de7e07bfa542d6a",
+    "scores": {
+     "overall_score": 0.5703,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.1667,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.25,
+     "extraction_f2": 0.3572,
+     "entity_list_f1": 0.2466
+    },
+    "latency_ms": 230970.7,
+    "prediction": {
+     "extraction_confidence": 0.85,
+     "doc_type": "contract",
+     "specialist": "contracts_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "contracts_specialist_v1",
+     "chunks": 2,
+     "needed_chunks": 2,
+     "llm_call_budget": 4,
+     "llm_calls": 2
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001047469-05-021628_a2161868zex-10_9.htm",
+    "filename": "0001047469-05-021628_a2161868zex-10_9.htm",
+    "expected_doc_class": "contract",
+    "expected_subclass": "IP",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "76ef49975d5c6ac8fbf098bcbb29d3afda3fdacfa9650006857931034d6e3c33",
+    "scores": {
+     "overall_score": 0.3514,
+     "needs_judge_review": false,
+     "n_expected_fields": 1,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0
+    },
+    "latency_ms": 32249.4,
+    "prediction": {
+     "extraction_confidence": 0.85,
+     "doc_type": "contract",
+     "specialist": "contracts_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "contracts_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0000721748-15-000083_ncmf02121510_20.htm",
+    "filename": "0000721748-15-000083_ncmf02121510_20.htm",
+    "expected_doc_class": "contract",
+    "expected_subclass": "Consulting Agreements",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "d0b1f03ecf5cbf7d822ff93ff70e78b7285bb353b5de3cd8573b083f685dd55b",
+    "scores": {
+     "overall_score": 1.0,
+     "needs_judge_review": false,
+     "n_expected_fields": 1,
+     "extraction_precision": 0.1667,
+     "extraction_recall": 1.0,
+     "extraction_f1": 0.2858,
+     "extraction_f2": 0.5001
+    },
+    "latency_ms": 172263.3,
+    "prediction": {
+     "extraction_confidence": 0.75,
+     "doc_type": "contract",
+     "specialist": "contracts_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "contracts_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:ConformisInc_20191101_10-Q_EX-10.6_11861402_EX-10.6_Development Agreement.pdf",
+    "filename": "ConformisInc_20191101_10-Q_EX-10.6_11861402_EX-10.6_Development Agreement.pdf",
+    "expected_doc_class": "contract",
+    "expected_subclass": "Development",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "e5e4c32e2b01ec4d236572293a310d2cb96743d3e13f652cfe8c2d42df251844",
+    "scores": {
+     "overall_score": 0.606,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.1667,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.25,
+     "extraction_f2": 0.3572,
+     "entity_list_f1": 0.35
+    },
+    "latency_ms": 230208.0,
+    "prediction": {
+     "extraction_confidence": 0.94,
+     "doc_type": "contract",
+     "specialist": "contracts_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "contracts_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:NEONSYSTEMSINC_03_01_1999-EX-10.5-DISTRIBUTOR AGREEMENT_Amendment.pdf",
+    "filename": "NEONSYSTEMSINC_03_01_1999-EX-10.5-DISTRIBUTOR AGREEMENT_Amendment.pdf",
+    "expected_doc_class": "contract",
+    "expected_subclass": "Distributor",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "9efa34e33b135d9bdc6e0fa949b22953b5a1675efa39c7222cf7d2ddc2251ebf",
+    "scores": {
+     "overall_score": 0.5469,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.1667,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.25,
+     "extraction_f2": 0.3572,
+     "entity_list_f1": 0.1714
+    },
+    "latency_ms": 159181.2,
+    "prediction": {
+     "extraction_confidence": 0.85,
+     "doc_type": "contract",
+     "specialist": "contracts_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "contracts_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:VERTEXENERGYINC_08_14_2014-EX-10.24-OPERATION AND MAINTENANCE AGREEMENT.PDF",
+    "filename": "VERTEXENERGYINC_08_14_2014-EX-10.24-OPERATION AND MAINTENANCE AGREEMENT.PDF",
+    "expected_doc_class": "contract",
+    "expected_subclass": "Maintenance",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "4b2cb71fad30b513054df0fcbe35d333dfb5b0b2267ff0733589427ad5e7327c",
+    "scores": {
+     "overall_score": 0.0,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0
+    },
+    "latency_ms": 16006.1,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "contract",
+     "specialist": "contracts_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "contracts_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:LEGACYTECHNOLOGYHOLDINGS,INC_12_09_2005-EX-10.2-DISTRIBUTOR AGREEMENT.PDF",
+    "filename": "LEGACYTECHNOLOGYHOLDINGS,INC_12_09_2005-EX-10.2-DISTRIBUTOR AGREEMENT.PDF",
+    "expected_doc_class": "contract",
+    "expected_subclass": "Distributor",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "b4322d0d017a7c697dee87ca9b3d5aa963c4b5ca6f8b136c583fcc87e5f0e5c4",
+    "scores": {
+     "overall_score": 0.6304,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.1429,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.2223,
+     "extraction_f2": 0.3334,
+     "entity_list_f1": 0.4138
+    },
+    "latency_ms": 182100.6,
+    "prediction": {
+     "extraction_confidence": 0.93,
+     "doc_type": "contract",
+     "specialist": "contracts_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "contracts_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:0001582718-14-000092_ex-10_1.htm",
+    "filename": "0001582718-14-000092_ex-10_1.htm",
+    "expected_doc_class": "contract",
+    "expected_subclass": "IP",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "6cc6a1c8ad03ca89907d0decc07c2ea867e2c83e56ef94dca83b9d5274095f6c",
+    "scores": {
+     "overall_score": 0.0,
+     "needs_judge_review": false,
+     "n_expected_fields": 1,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0
+    },
+    "latency_ms": 187802.2,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "contract",
+     "specialist": "contracts_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "contracts_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:PfHospitalityGroupInc_20150923_10-12G_EX-10.1_9266710_EX-10.1_Franchise Agreement1.pdf",
+    "filename": "PfHospitalityGroupInc_20150923_10-12G_EX-10.1_9266710_EX-10.1_Franchise Agreement1.pdf",
+    "expected_doc_class": "contract",
+    "expected_subclass": "Franchise",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "3d9aa8e816a1271c5169e51a03dd88439b1278c21ce57cb28b786e22335108e4",
+    "scores": {
+     "overall_score": 0.5655,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.0909,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.1538,
+     "extraction_f2": 0.2631,
+     "entity_list_f1": 0.2245
+    },
+    "latency_ms": 424463.1,
+    "prediction": {
+     "extraction_confidence": 0.85,
+     "doc_type": "contract",
+     "specialist": "contracts_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "contracts_specialist_v1",
+     "chunks": 2,
+     "needed_chunks": 2,
+     "llm_call_budget": 4,
+     "llm_calls": 2
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:TodosMedicalLtd_20190328_20-F_EX-4.10_11587157_EX-4.10_Marketing Agreement_ Reseller Agreement.pdf",
+    "filename": "TodosMedicalLtd_20190328_20-F_EX-4.10_11587157_EX-4.10_Marketing Agreement_ Reseller Agreement.pdf",
+    "expected_doc_class": "contract",
+    "expected_subclass": "Marketing",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "3bcd68919d852aef771a652fb959f6774a84cef37a1438c685b8e3cd96b486b9",
+    "scores": {
+     "overall_score": 0.3365,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0,
+     "entity_list_f1": 0.4878
+    },
+    "latency_ms": 249270.1,
+    "prediction": {
+     "extraction_confidence": 0.85,
+     "doc_type": "contract",
+     "specialist": "contracts_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "contracts_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:TURNKEYCAPITAL,INC_07_20_2017-EX-1.1-Strategic Alliance Agreement.PDF",
+    "filename": "TURNKEYCAPITAL,INC_07_20_2017-EX-1.1-Strategic Alliance Agreement.PDF",
+    "expected_doc_class": "contract",
+    "expected_subclass": "Strategic Alliance",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "c6d3bd7a840671da319819fad0b8c1cc1545ab83ddcf9016c7ce3aaf2b52c4de",
+    "scores": {
+     "overall_score": 0.625,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.1111,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.1818,
+     "extraction_f2": 0.2941,
+     "entity_list_f1": 0.3529
+    },
+    "latency_ms": 194506.1,
+    "prediction": {
+     "extraction_confidence": 0.92,
+     "doc_type": "contract",
+     "specialist": "contracts_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "contracts_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:ROCKYMOUNTAINCHOCOLATEFACTORY,INC_12_23_2019-EX-10.2-STRATEGIC ALLIANCE AGREEMENT.PDF",
+    "filename": "ROCKYMOUNTAINCHOCOLATEFACTORY,INC_12_23_2019-EX-10.2-STRATEGIC ALLIANCE AGREEMENT.PDF",
+    "expected_doc_class": "contract",
+    "expected_subclass": "Strategic Alliance",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "0cf2b9b2c6137425894a54226b39ce8f050eaebde0f9b95bbe1e25af0b119a75",
+    "scores": {
+     "overall_score": 0.6177,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.1667,
+     "extraction_recall": 0.5,
+     "extraction_f1": 0.25,
+     "extraction_f2": 0.3572,
+     "entity_list_f1": 0.381
+    },
+    "latency_ms": 243582.8,
+    "prediction": {
+     "extraction_confidence": 0.8,
+     "doc_type": "contract",
+     "specialist": "contracts_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "contracts_specialist_v1",
+     "chunks": 2,
+     "needed_chunks": 2,
+     "llm_call_budget": 4,
+     "llm_calls": 2
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:IGENEBIOTECHNOLOGYINC_05_13_2003-EX-1-JOINT VENTURE AGREEMENT.PDF",
+    "filename": "IGENEBIOTECHNOLOGYINC_05_13_2003-EX-1-JOINT VENTURE AGREEMENT.PDF",
+    "expected_doc_class": "contract",
+    "expected_subclass": "Joint Venture _ Filing",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "3413f2b63169639f157ba60f663245197e24310c269c443267db6af0e4707708",
+    "scores": {
+     "overall_score": 0.0,
+     "needs_judge_review": false,
+     "n_expected_fields": 2,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0
+    },
+    "latency_ms": 148458.9,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "contract",
+     "specialist": "contracts_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "contracts_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   }
+  ],
+  "20260927T054211Z-eval-insurance_claims": [
+   {
+    "case_id": "corpus:ground_truth:train:pde:233384494245864.txt",
+    "filename": "pde:233384494245864.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "pde",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "2b263e418eee6c789e0951b0b6703185bf7c6568d19a61d46c50b7b263c8afb9",
+    "scores": {
+     "overall_score": 0.7286,
+     "needs_judge_review": true,
+     "n_expected_fields": 11,
+     "extraction_precision": 0.6364,
+     "extraction_recall": 0.6364,
+     "extraction_f1": 0.6364,
+     "extraction_f2": 0.6364,
+     "determination_consistency": 1.0,
+     "amount_exactness": 1.0
+    },
+    "latency_ms": 101588.2,
+    "prediction": {
+     "extraction_confidence": 0.93,
+     "doc_type": "insurance_claim",
+     "specialist": "insurance_claims_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "insurance_claims_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:insurbias-624.txt",
+    "filename": "insurbias-624.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "auto",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "c33751602be2e09dfee1325939a4918f28d3fa50167d8fe86d37b8d18e97fbef",
+    "scores": {
+     "overall_score": 0.8537,
+     "needs_judge_review": false,
+     "n_expected_fields": 11,
+     "extraction_precision": 0.6923,
+     "extraction_recall": 0.8182,
+     "extraction_f1": 0.75,
+     "extraction_f2": 0.7895,
+     "determination_consistency": 1.0,
+     "amount_exactness": 1.0
+    },
+    "latency_ms": 98830.4,
+    "prediction": {
+     "extraction_confidence": 0.96,
+     "doc_type": "insurance_claim",
+     "specialist": "insurance_claims_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "insurance_claims_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:carrier:887473385855273.txt",
+    "filename": "carrier:887473385855273.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "carrier",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "154655b59065c946860f26681318b67cc1dcc4fdd3e078eb699ced0ee1bc0488",
+    "scores": {
+     "overall_score": 0.63,
+     "needs_judge_review": true,
+     "n_expected_fields": 11,
+     "extraction_precision": 0.6,
+     "extraction_recall": 0.5455,
+     "extraction_f1": 0.5715,
+     "extraction_f2": 0.5556,
+     "entity_list_f1": 0.6667,
+     "determination_consistency": 1.0,
+     "amount_exactness": 1.0
+    },
+    "latency_ms": 3966.0,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "insurance_claim",
+     "specialist": "insurance_claims_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "insurance_claims_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:carrier:887453386193813.txt",
+    "filename": "carrier:887453386193813.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "carrier",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "e8f98d2c9e631c6eacc8d14e9f53040d82ab96c081002d2c7bc5e0b8dcce2bef",
+    "scores": {
+     "overall_score": 0.0,
+     "needs_judge_review": false,
+     "n_expected_fields": 11,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0,
+     "determination_consistency": 0.0
+    },
+    "latency_ms": 879.9,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "insurance_claim",
+     "specialist": "insurance_claims_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "insurance_claims_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:outpatient:542872281350908:1.txt",
+    "filename": "outpatient:542872281350908:1.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "outpatient",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "99e94b6e021c665a9e1aa3b0a4df4e48458bbb2d97ec953fa02b33ebc54bcba2",
+    "scores": {
+     "overall_score": 0.662,
+     "needs_judge_review": false,
+     "n_expected_fields": 11,
+     "extraction_precision": 0.6364,
+     "extraction_recall": 0.6364,
+     "extraction_f1": 0.6364,
+     "extraction_f2": 0.6364,
+     "determination_consistency": 1.0,
+     "amount_exactness": 1.0
+    },
+    "latency_ms": 3896.6,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "insurance_claim",
+     "specialist": "insurance_claims_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "insurance_claims_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:pde:233724491332182.txt",
+    "filename": "pde:233724491332182.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "pde",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "aa744f4e31404ef7ee8c95f4a528194435c45dd29013571559ba5449cc40aae4",
+    "scores": {
+     "overall_score": 0.567,
+     "needs_judge_review": false,
+     "n_expected_fields": 11,
+     "extraction_precision": 0.6,
+     "extraction_recall": 0.5455,
+     "extraction_f1": 0.5715,
+     "extraction_f2": 0.5556,
+     "determination_consistency": 1.0,
+     "amount_exactness": 1.0
+    },
+    "latency_ms": 4406.7,
+    "prediction": {
+     "extraction_confidence": 0.95,
+     "doc_type": "insurance_claim",
+     "specialist": "insurance_claims_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "insurance_claims_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:auto:CLM-000145.txt",
+    "filename": "auto:CLM-000145.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "auto",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "5cb525d38469b349c4fec1d2b988f0250f71a5a3701f4e8331c5831469d1bb96",
+    "scores": {
+     "overall_score": 0.8833,
+     "needs_judge_review": true,
+     "n_expected_fields": 12,
+     "extraction_precision": 0.7143,
+     "extraction_recall": 0.8333,
+     "extraction_f1": 0.7692,
+     "extraction_f2": 0.8064,
+     "determination_consistency": 1.0,
+     "amount_exactness": 1.0
+    },
+    "latency_ms": 78205.9,
+    "prediction": {
+     "extraction_confidence": 0.98,
+     "doc_type": "insurance_claim",
+     "specialist": "insurance_claims_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "insurance_claims_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:insurbias-163.txt",
+    "filename": "insurbias-163.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "auto",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "72ce97435382d57a08adbd6fcb8f776868ec57db0bf96ab7bc6271bb2d3251a2",
+    "scores": {
+     "overall_score": 0.7911,
+     "needs_judge_review": true,
+     "n_expected_fields": 11,
+     "extraction_precision": 0.7273,
+     "extraction_recall": 0.7273,
+     "extraction_f1": 0.7273,
+     "extraction_f2": 0.7273,
+     "determination_consistency": 1.0,
+     "amount_exactness": 1.0
+    },
+    "latency_ms": 3930.7,
+    "prediction": {
+     "extraction_confidence": 1.0,
+     "doc_type": "insurance_claim",
+     "specialist": "insurance_claims_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "insurance_claims_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:insurbias-1111.txt",
+    "filename": "insurbias-1111.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "auto",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "d6d5fc880c762ebfe9098d493823f82fa07514ac05d8f1141c22925bebbfd497",
+    "scores": {
+     "overall_score": 0.9664,
+     "needs_judge_review": true,
+     "n_expected_fields": 10,
+     "extraction_precision": 0.6923,
+     "extraction_recall": 0.9,
+     "extraction_f1": 0.7826,
+     "extraction_f2": 0.8491,
+     "determination_consistency": 1.0,
+     "amount_exactness": 1.0
+    },
+    "latency_ms": 116300.2,
+    "prediction": {
+     "extraction_confidence": 0.95,
+     "doc_type": "insurance_claim",
+     "specialist": "insurance_claims_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "insurance_claims_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:pde:233184493359051.txt",
+    "filename": "pde:233184493359051.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "pde",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "4a7cfaf40ec3bc39390a9b85b1cf7a53908e91856f23eea60c8f7cf2deaae7e7",
+    "scores": {
+     "overall_score": 0.6902,
+     "needs_judge_review": false,
+     "n_expected_fields": 11,
+     "extraction_precision": 0.6364,
+     "extraction_recall": 0.6364,
+     "extraction_f1": 0.6364,
+     "extraction_f2": 0.6364,
+     "determination_consistency": 1.0,
+     "amount_exactness": 1.0
+    },
+    "latency_ms": 107096.1,
+    "prediction": {
+     "extraction_confidence": 0.94,
+     "doc_type": "insurance_claim",
+     "specialist": "insurance_claims_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "insurance_claims_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:outpatient:542152281286913:1.txt",
+    "filename": "outpatient:542152281286913:1.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "outpatient",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "30e6af571fd7de8c139ba9c236f4e9b4d732d3d99986de61743719f1204e8273",
+    "scores": {
+     "overall_score": 0.649,
+     "needs_judge_review": false,
+     "n_expected_fields": 11,
+     "extraction_precision": 0.6,
+     "extraction_recall": 0.5455,
+     "extraction_f1": 0.5715,
+     "extraction_f2": 0.5556,
+     "entity_list_f1": 0.8571,
+     "determination_consistency": 1.0,
+     "amount_exactness": 1.0
+    },
+    "latency_ms": 3504.8,
+    "prediction": {
+     "extraction_confidence": 0.95,
+     "doc_type": "insurance_claim",
+     "specialist": "insurance_claims_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "insurance_claims_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:insurbias-385.txt",
+    "filename": "insurbias-385.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "auto",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "2d2565555074578f8668a1164eff9918f23fb3b8c1425c00c5c7115419b46d62",
+    "scores": {
+     "overall_score": 0.862,
+     "needs_judge_review": false,
+     "n_expected_fields": 11,
+     "extraction_precision": 0.6923,
+     "extraction_recall": 0.8182,
+     "extraction_f1": 0.75,
+     "extraction_f2": 0.7895,
+     "determination_consistency": 1.0,
+     "amount_exactness": 1.0
+    },
+    "latency_ms": 110557.3,
+    "prediction": {
+     "extraction_confidence": 0.95,
+     "doc_type": "insurance_claim",
+     "specialist": "insurance_claims_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "insurance_claims_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:insurbias-310.txt",
+    "filename": "insurbias-310.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "auto",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "bf8814b718fc9bda1a770e1fdb11df80f13b237e312ed86298827eec2323e56a",
+    "scores": {
+     "overall_score": 0.848,
+     "needs_judge_review": false,
+     "n_expected_fields": 11,
+     "extraction_precision": 0.6923,
+     "extraction_recall": 0.8182,
+     "extraction_f1": 0.75,
+     "extraction_f2": 0.7895,
+     "determination_consistency": 1.0,
+     "amount_exactness": 1.0
+    },
+    "latency_ms": 132341.3,
+    "prediction": {
+     "extraction_confidence": 1.0,
+     "doc_type": "insurance_claim",
+     "specialist": "insurance_claims_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "insurance_claims_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:auto:CLM-000322.txt",
+    "filename": "auto:CLM-000322.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "auto",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "505170f0e8fc23d92a5c68355a43ab92be1a2c4be5620b84e6058b71282c37cd",
+    "scores": {
+     "overall_score": 0.8826,
+     "needs_judge_review": true,
+     "n_expected_fields": 12,
+     "extraction_precision": 0.7143,
+     "extraction_recall": 0.8333,
+     "extraction_f1": 0.7692,
+     "extraction_f2": 0.8064,
+     "determination_consistency": 1.0,
+     "amount_exactness": 1.0
+    },
+    "latency_ms": 75576.9,
+    "prediction": {
+     "extraction_confidence": 1.0,
+     "doc_type": "insurance_claim",
+     "specialist": "insurance_claims_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "insurance_claims_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:pde:233614493105212.txt",
+    "filename": "pde:233614493105212.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "pde",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "c9816bbd85918f4e935be92ee22eff64f4c3d44d211081a1abefcbf74e808abc",
+    "scores": {
+     "overall_score": 0.567,
+     "needs_judge_review": false,
+     "n_expected_fields": 11,
+     "extraction_precision": 0.6,
+     "extraction_recall": 0.5455,
+     "extraction_f1": 0.5715,
+     "extraction_f2": 0.5556,
+     "determination_consistency": 1.0,
+     "amount_exactness": 0.0
+    },
+    "latency_ms": 3623.1,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "insurance_claim",
+     "specialist": "insurance_claims_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "insurance_claims_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:carrier:887623388590174.txt",
+    "filename": "carrier:887623388590174.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "carrier",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "4a9dbd7accfc65d9fe8d7ca6d1a24a17f9af34881378ad63cb14831b34977a94",
+    "scores": {
+     "overall_score": 0.7013,
+     "needs_judge_review": true,
+     "n_expected_fields": 11,
+     "extraction_precision": 0.6,
+     "extraction_recall": 0.5455,
+     "extraction_f1": 0.5715,
+     "extraction_f2": 0.5556,
+     "entity_list_f1": 0.6667,
+     "determination_consistency": 1.0
+    },
+    "latency_ms": 121582.6,
+    "prediction": {
+     "extraction_confidence": 0.75,
+     "doc_type": "insurance_claim",
+     "specialist": "insurance_claims_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "insurance_claims_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:inpatient:196411177017295:1.txt",
+    "filename": "inpatient:196411177017295:1.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "inpatient",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "539b080a076071b927ce36a8e9530e8005e284fc33f2b96a656e67f9c0c37188",
+    "scores": {
+     "overall_score": 0.6626,
+     "needs_judge_review": false,
+     "n_expected_fields": 11,
+     "extraction_precision": 0.6364,
+     "extraction_recall": 0.6364,
+     "extraction_f1": 0.6364,
+     "extraction_f2": 0.6364,
+     "entity_list_f1": 1.0,
+     "determination_consistency": 1.0,
+     "amount_exactness": 1.0
+    },
+    "latency_ms": 4390.9,
+    "prediction": {
+     "extraction_confidence": 0.95,
+     "doc_type": "insurance_claim",
+     "specialist": "insurance_claims_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "insurance_claims_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:auto:CLM-000611.txt",
+    "filename": "auto:CLM-000611.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "auto",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "e52187601528127a4bda39af4bc5389b584b1cb9b3c2993b3caa1538610d2b9b",
+    "scores": {
+     "overall_score": 0.8844,
+     "needs_judge_review": true,
+     "n_expected_fields": 12,
+     "extraction_precision": 0.7143,
+     "extraction_recall": 0.8333,
+     "extraction_f1": 0.7692,
+     "extraction_f2": 0.8064,
+     "determination_consistency": 1.0,
+     "amount_exactness": 1.0
+    },
+    "latency_ms": 55740.9,
+    "prediction": {
+     "extraction_confidence": 0.98,
+     "doc_type": "insurance_claim",
+     "specialist": "insurance_claims_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "insurance_claims_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:pde:233364488871784.txt",
+    "filename": "pde:233364488871784.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "pde",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "c05668ae4aea84bed7cae3a757448d9693f315c78fe1999420aa0055e31580e1",
+    "scores": {
+     "overall_score": 0.6981,
+     "needs_judge_review": false,
+     "n_expected_fields": 11,
+     "extraction_precision": 0.6364,
+     "extraction_recall": 0.6364,
+     "extraction_f1": 0.6364,
+     "extraction_f2": 0.6364,
+     "determination_consistency": 1.0,
+     "amount_exactness": 1.0
+    },
+    "latency_ms": 62954.6,
+    "prediction": {
+     "extraction_confidence": 0.97,
+     "doc_type": "insurance_claim",
+     "specialist": "insurance_claims_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "insurance_claims_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:property:266855223.txt",
+    "filename": "property:266855223.txt",
+    "expected_doc_class": "insurance_claim",
+    "expected_subclass": "property",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "6d194ffe40e9a5a316c598754701571dd27da8e878b8023418b1c82ea7afdc9c",
+    "scores": {
+     "overall_score": 0.7422,
+     "needs_judge_review": false,
+     "n_expected_fields": 11,
+     "extraction_precision": 0.5,
+     "extraction_recall": 0.6364,
+     "extraction_f1": 0.56,
+     "extraction_f2": 0.6035,
+     "entity_list_f1": 0.2857,
+     "determination_consistency": 0.0,
+     "amount_exactness": 1.0
+    },
+    "latency_ms": 79713.7,
+    "prediction": {
+     "extraction_confidence": 0.93,
+     "doc_type": "insurance_claim",
+     "specialist": "insurance_claims_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "insurance_claims_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   }
+  ],
+  "20260927T053647Z-eval-correspondence": [
+   {
+    "case_id": "corpus:ground_truth:train:blair-l/meetings/608.",
+    "filename": "blair-l/meetings/608.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "email",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "7120047634a844acd1a8f49e82b0f9539b02305ac81a3cc36815009c11120958",
+    "scores": {
+     "overall_score": 0.3513,
+     "needs_judge_review": false,
+     "n_expected_fields": 6,
+     "extraction_precision": 0.1429,
+     "extraction_recall": 0.1667,
+     "extraction_f1": 0.1539,
+     "extraction_f2": 0.1613,
+     "entity_list_f1": 0.0,
+     "content_topic_accuracy": 0.0,
+     "content_topic_f1_macro": 0.0,
+     "sentiment_accuracy": 0.0,
+     "sentiment_f1_macro": 0.0
+    },
+    "latency_ms": 60276.6,
+    "prediction": {
+     "extraction_confidence": 0.75,
+     "doc_type": "correspondence",
+     "specialist": "correspondence_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "correspondence_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:lokey-t/inbox/250.",
+    "filename": "lokey-t/inbox/250.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "press_release",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "f4dd38afaa27332544d1ee5dbf9b39e40ddd6a5309fde0b153c6b43aeea3aad6",
+    "scores": {
+     "overall_score": 0.5,
+     "needs_judge_review": false,
+     "n_expected_fields": 6,
+     "extraction_precision": 0.2222,
+     "extraction_recall": 0.3333,
+     "extraction_f1": 0.2666,
+     "extraction_f2": 0.303,
+     "entity_list_f1": 0.0,
+     "content_topic_accuracy": 0.0,
+     "content_topic_f1_macro": 0.0,
+     "sentiment_accuracy": 0.0,
+     "sentiment_f1_macro": 0.0
+    },
+    "latency_ms": 104109.3,
+    "prediction": {
+     "extraction_confidence": 0.9,
+     "doc_type": "correspondence",
+     "specialist": "correspondence_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "correspondence_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:kean-s/all_documents/849.",
+    "filename": "kean-s/all_documents/849.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "email",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "d8f11fb5425be7ae7552d99bd1d94c5e4580a2693775793dff22793ff4b04b21",
+    "scores": {
+     "overall_score": 0.5769,
+     "needs_judge_review": false,
+     "n_expected_fields": 6,
+     "extraction_precision": 0.1429,
+     "extraction_recall": 0.3333,
+     "extraction_f1": 0.2,
+     "extraction_f2": 0.2632,
+     "entity_list_f1": 0.0,
+     "content_topic_accuracy": 0.0,
+     "content_topic_f1_macro": 0.0,
+     "sentiment_accuracy": 0.0,
+     "sentiment_f1_macro": 0.0
+    },
+    "latency_ms": 59383.5,
+    "prediction": {
+     "extraction_confidence": 0.94,
+     "doc_type": "correspondence",
+     "specialist": "correspondence_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "correspondence_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:may-l/all_documents/41.",
+    "filename": "may-l/all_documents/41.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "email",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "10864c3af4b5abed0e68bcf7fec292105c2f45718f06001cddd4bc4de02face8",
+    "scores": {
+     "overall_score": 0.419,
+     "needs_judge_review": false,
+     "n_expected_fields": 6,
+     "extraction_precision": 0.0909,
+     "extraction_recall": 0.1667,
+     "extraction_f1": 0.1176,
+     "extraction_f2": 0.1429,
+     "entity_list_f1": 0.0,
+     "content_topic_accuracy": 0.0,
+     "content_topic_f1_macro": 0.0,
+     "sentiment_accuracy": 0.0,
+     "sentiment_f1_macro": 0.0
+    },
+    "latency_ms": 87643.7,
+    "prediction": {
+     "extraction_confidence": 0.88,
+     "doc_type": "correspondence",
+     "specialist": "correspondence_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "correspondence_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:skilling-j/inbox/1555.",
+    "filename": "skilling-j/inbox/1555.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "letter",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "256fc4b2ae4ba5d257a90cffcd232f7724bba3b5f52d41353b493699b9255ff0",
+    "scores": {
+     "overall_score": 0.0,
+     "needs_judge_review": false,
+     "n_expected_fields": 6,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0,
+     "content_topic_accuracy": 0.0,
+     "content_topic_f1_macro": 0.0,
+     "sentiment_accuracy": 0.0,
+     "sentiment_f1_macro": 0.0
+    },
+    "latency_ms": 840.7,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "correspondence",
+     "specialist": "correspondence_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "correspondence_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:sanders-r/sent_items/261.",
+    "filename": "sanders-r/sent_items/261.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "notice",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "28efa9421f42938ce082bdab018698c8a73e25b41c33394b300925981daef394",
+    "scores": {
+     "overall_score": 0.0,
+     "needs_judge_review": false,
+     "n_expected_fields": 6,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0,
+     "content_topic_accuracy": 0.0,
+     "content_topic_f1_macro": 0.0,
+     "sentiment_accuracy": 0.0,
+     "sentiment_f1_macro": 0.0
+    },
+    "latency_ms": 2548.2,
+    "prediction": {
+     "extraction_confidence": 0.0,
+     "doc_type": "correspondence",
+     "specialist": "correspondence_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "correspondence_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:mcconnell-m/all_documents/227.",
+    "filename": "mcconnell-m/all_documents/227.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "email",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "b7815623ac794379599f026a5af1d21026c58c76ad2eaacd236feec9d9bd8975",
+    "scores": {
+     "overall_score": 0.5,
+     "needs_judge_review": false,
+     "n_expected_fields": 6,
+     "extraction_precision": 0.1333,
+     "extraction_recall": 0.3333,
+     "extraction_f1": 0.1904,
+     "extraction_f2": 0.2564,
+     "entity_list_f1": 0.0,
+     "content_topic_accuracy": 0.0,
+     "content_topic_f1_macro": 0.0,
+     "sentiment_accuracy": 0.0,
+     "sentiment_f1_macro": 0.0
+    },
+    "latency_ms": 98034.9,
+    "prediction": {
+     "extraction_confidence": 0.96,
+     "doc_type": "correspondence",
+     "specialist": "correspondence_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "correspondence_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:thomas-p/deleted_items/292.",
+    "filename": "thomas-p/deleted_items/292.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "press_release",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "be75216ca5ac4cbb56a17020faffa9da663d65e4efffbd617954f03637dfd18b",
+    "scores": {
+     "overall_score": 0.7,
+     "needs_judge_review": true,
+     "n_expected_fields": 6,
+     "extraction_precision": 0.1667,
+     "extraction_recall": 0.3333,
+     "extraction_f1": 0.2222,
+     "extraction_f2": 0.2778,
+     "entity_list_f1": 0.1538,
+     "content_topic_accuracy": 0.0,
+     "content_topic_f1_macro": 0.0,
+     "sentiment_accuracy": 0.0,
+     "sentiment_f1_macro": 0.0
+    },
+    "latency_ms": 89946.4,
+    "prediction": {
+     "extraction_confidence": 0.92,
+     "doc_type": "correspondence",
+     "specialist": "correspondence_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "correspondence_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:nemec-g/all_documents/906.",
+    "filename": "nemec-g/all_documents/906.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "email",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "481b63bb612c8b07ab964f6ecf306ba3cf632f23fd2d71deeab7648b799cade5",
+    "scores": {
+     "overall_score": 0.25,
+     "needs_judge_review": false,
+     "n_expected_fields": 6,
+     "extraction_precision": 0.5,
+     "extraction_recall": 0.1667,
+     "extraction_f1": 0.25,
+     "extraction_f2": 0.1923,
+     "content_topic_accuracy": 0.0,
+     "content_topic_f1_macro": 0.0,
+     "sentiment_accuracy": 0.0,
+     "sentiment_f1_macro": 0.0
+    },
+    "latency_ms": 38935.3,
+    "prediction": {
+     "extraction_confidence": 0.3,
+     "doc_type": "correspondence",
+     "specialist": "correspondence_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "correspondence_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:dasovich-j/all_documents/13056.",
+    "filename": "dasovich-j/all_documents/13056.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "press_release",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "d86c2bbcc008ce49d5f6a728b7e1a415725678c2e94bdd168ffb0b2142e36874",
+    "scores": {
+     "overall_score": 0.5555,
+     "needs_judge_review": false,
+     "n_expected_fields": 6,
+     "extraction_precision": 0.1538,
+     "extraction_recall": 0.3333,
+     "extraction_f1": 0.2105,
+     "extraction_f2": 0.2702,
+     "entity_list_f1": 0.0,
+     "content_topic_accuracy": 0.0,
+     "content_topic_f1_macro": 0.0,
+     "sentiment_accuracy": 0.0,
+     "sentiment_f1_macro": 0.0
+    },
+    "latency_ms": 135225.2,
+    "prediction": {
+     "extraction_confidence": 0.9,
+     "doc_type": "correspondence",
+     "specialist": "correspondence_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "correspondence_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:kaminski-v/all_documents/5470.",
+    "filename": "kaminski-v/all_documents/5470.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "letter",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "90995861708749cb60b38fa59b861863b516c5d2e8beb82ee6f5ebcd1562c0f9",
+    "scores": {
+     "overall_score": 0.5625,
+     "needs_judge_review": false,
+     "n_expected_fields": 6,
+     "extraction_precision": 0.1538,
+     "extraction_recall": 0.3333,
+     "extraction_f1": 0.2105,
+     "extraction_f2": 0.2702,
+     "entity_list_f1": 0.0,
+     "content_topic_accuracy": 0.0,
+     "content_topic_f1_macro": 0.0,
+     "sentiment_accuracy": 0.0,
+     "sentiment_f1_macro": 0.0
+    },
+    "latency_ms": 98063.8,
+    "prediction": {
+     "extraction_confidence": 0.85,
+     "doc_type": "correspondence",
+     "specialist": "correspondence_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "correspondence_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:parks-j/sent_items/425.",
+    "filename": "parks-j/sent_items/425.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "email",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "4fe035338cb0532779425a09962e9e0d025f00a4216c50d647e1a96d71fc4bcd",
+    "scores": {
+     "overall_score": 0.3409,
+     "needs_judge_review": false,
+     "n_expected_fields": 6,
+     "extraction_precision": 0.2,
+     "extraction_recall": 0.1667,
+     "extraction_f1": 0.1818,
+     "extraction_f2": 0.1724,
+     "entity_list_f1": 0.0,
+     "content_topic_accuracy": 0.0,
+     "content_topic_f1_macro": 0.0,
+     "sentiment_accuracy": 0.0,
+     "sentiment_f1_macro": 0.0
+    },
+    "latency_ms": 36895.5,
+    "prediction": {
+     "extraction_confidence": 0.7,
+     "doc_type": "correspondence",
+     "specialist": "correspondence_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "correspondence_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:campbell-l/inbox/81.",
+    "filename": "campbell-l/inbox/81.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "meeting_request",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "4bd5c0eefe71fa20f3f289469a2c3da182d5902d02fa3225f19849f2d4b8e89c",
+    "scores": {
+     "overall_score": 0.6333,
+     "needs_judge_review": false,
+     "n_expected_fields": 6,
+     "extraction_precision": 0.1538,
+     "extraction_recall": 0.3333,
+     "extraction_f1": 0.2105,
+     "extraction_f2": 0.2702,
+     "entity_list_f1": 0.1538,
+     "content_topic_accuracy": 0.0,
+     "content_topic_f1_macro": 0.0,
+     "sentiment_accuracy": 0.0,
+     "sentiment_f1_macro": 0.0
+    },
+    "latency_ms": 79899.5,
+    "prediction": {
+     "extraction_confidence": 0.87,
+     "doc_type": "correspondence",
+     "specialist": "correspondence_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "correspondence_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:donoho-l/inbox/35.",
+    "filename": "donoho-l/inbox/35.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "email",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "2fa205bd47acab4b4bbc8e77b7c1dc4b1372d4a4282077da518fbb38fdfa686a",
+    "scores": {
+     "overall_score": 0.3887,
+     "needs_judge_review": false,
+     "n_expected_fields": 6,
+     "extraction_precision": 0.0769,
+     "extraction_recall": 0.1667,
+     "extraction_f1": 0.1052,
+     "extraction_f2": 0.1351,
+     "entity_list_f1": 0.1538,
+     "content_topic_accuracy": 0.0,
+     "content_topic_f1_macro": 0.0,
+     "sentiment_accuracy": 0.0,
+     "sentiment_f1_macro": 0.0
+    },
+    "latency_ms": 124658.4,
+    "prediction": {
+     "extraction_confidence": 0.94,
+     "doc_type": "correspondence",
+     "specialist": "correspondence_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "correspondence_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:kitchen-l/sent_items/613.",
+    "filename": "kitchen-l/sent_items/613.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "press_release",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "a9c587ac1151042c49b61d570bb891c9dd681b321e26e659d9b39df4020e1975",
+    "scores": {
+     "overall_score": 0.3259,
+     "needs_judge_review": false,
+     "n_expected_fields": 6,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0,
+     "entity_list_f1": 0.1538,
+     "content_topic_accuracy": 0.0,
+     "content_topic_f1_macro": 0.0,
+     "sentiment_accuracy": 0.0,
+     "sentiment_f1_macro": 0.0
+    },
+    "latency_ms": 146506.5,
+    "prediction": {
+     "extraction_confidence": 0.92,
+     "doc_type": "correspondence",
+     "specialist": "correspondence_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "correspondence_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:derrick-j/deleted_items/79.",
+    "filename": "derrick-j/deleted_items/79.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "notice",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "800d6fc1ef40d5f86de5c9f44ad4395ba1b4e4082e0065e5d0a267109693a0a5",
+    "scores": {
+     "overall_score": 0.55,
+     "needs_judge_review": false,
+     "n_expected_fields": 6,
+     "extraction_precision": 0.1538,
+     "extraction_recall": 0.3333,
+     "extraction_f1": 0.2105,
+     "extraction_f2": 0.2702,
+     "entity_list_f1": 0.0,
+     "content_topic_accuracy": 0.0,
+     "content_topic_f1_macro": 0.0,
+     "sentiment_accuracy": 0.0,
+     "sentiment_f1_macro": 0.0
+    },
+    "latency_ms": 115562.4,
+    "prediction": {
+     "extraction_confidence": 0.9,
+     "doc_type": "correspondence",
+     "specialist": "correspondence_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "correspondence_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:rogers-b/_sent_mail/358.",
+    "filename": "rogers-b/_sent_mail/358.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "email",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "b3d2fc79367e59421f44d7ec0f21bfbce957007f9d3df2583c01fa5a2c14fd36",
+    "scores": {
+     "overall_score": 0.0,
+     "needs_judge_review": false,
+     "n_expected_fields": 6,
+     "extraction_precision": 0.0,
+     "extraction_recall": 0.0,
+     "extraction_f1": 0.0,
+     "extraction_f2": 0.0,
+     "content_topic_accuracy": 0.0,
+     "content_topic_f1_macro": 0.0,
+     "sentiment_accuracy": 0.0,
+     "sentiment_f1_macro": 0.0
+    },
+    "latency_ms": 577.3,
+    "prediction": {
+     "extraction_confidence": null,
+     "doc_type": "correspondence",
+     "specialist": "correspondence_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "correspondence_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:dasovich-j/all_documents/10751.",
+    "filename": "dasovich-j/all_documents/10751.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "notice",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "d29fa5d66a3d8cfff06cd34786da0c6dd65d482564295a4aabb0dca93b69343e",
+    "scores": {
+     "overall_score": 0.6833,
+     "needs_judge_review": false,
+     "n_expected_fields": 6,
+     "extraction_precision": 0.1667,
+     "extraction_recall": 0.3333,
+     "extraction_f1": 0.2222,
+     "extraction_f2": 0.2778,
+     "entity_list_f1": 0.3077,
+     "content_topic_accuracy": 0.0,
+     "content_topic_f1_macro": 0.0,
+     "sentiment_accuracy": 0.0,
+     "sentiment_f1_macro": 0.0
+    },
+    "latency_ms": 165931.6,
+    "prediction": {
+     "extraction_confidence": 0.8,
+     "doc_type": "correspondence",
+     "specialist": "correspondence_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "correspondence_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:motley-m/deleted_items/63.",
+    "filename": "motley-m/deleted_items/63.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "email",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "3914ee1d0dad4f751212bc957ed3f56cc40654a1032449607fb390540e79d640",
+    "scores": {
+     "overall_score": 0.452,
+     "needs_judge_review": false,
+     "n_expected_fields": 6,
+     "extraction_precision": 0.1429,
+     "extraction_recall": 0.1667,
+     "extraction_f1": 0.1539,
+     "extraction_f2": 0.1613,
+     "entity_list_f1": 0.0,
+     "content_topic_accuracy": 0.0,
+     "content_topic_f1_macro": 0.0,
+     "sentiment_accuracy": 0.0,
+     "sentiment_f1_macro": 0.0
+    },
+    "latency_ms": 2013.1,
+    "prediction": {
+     "extraction_confidence": 0.7,
+     "doc_type": "correspondence",
+     "specialist": "correspondence_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "correspondence_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   },
+   {
+    "case_id": "corpus:ground_truth:train:dorland-c/_sent_mail/78.",
+    "filename": "dorland-c/_sent_mail/78.",
+    "expected_doc_class": "correspondence",
+    "expected_subclass": "email",
+    "review_expected": false,
+    "retry_expected": false,
+    "doc_text_sha256": "ca64ce537c8bd98cdcfa4e68ea1434ff4a915b4f00a5ee84d3e01e13addd92f9",
+    "scores": {
+     "overall_score": 0.3409,
+     "needs_judge_review": false,
+     "n_expected_fields": 6,
+     "extraction_precision": 0.125,
+     "extraction_recall": 0.1667,
+     "extraction_f1": 0.1429,
+     "extraction_f2": 0.1563,
+     "entity_list_f1": 0.0,
+     "content_topic_accuracy": 0.0,
+     "content_topic_f1_macro": 0.0,
+     "sentiment_accuracy": 0.0,
+     "sentiment_f1_macro": 0.0
+    },
+    "latency_ms": 87472.8,
+    "prediction": {
+     "extraction_confidence": 0.8,
+     "doc_type": "correspondence",
+     "specialist": "correspondence_specialist",
+     "model": "ibm-granite/granite-4.2-8b",
+     "prompt_key": "correspondence_specialist_v1",
+     "chunks": 1,
+     "needed_chunks": 1,
+     "llm_call_budget": 2,
+     "llm_calls": 1
+    }
+   }
+  ],
   "20260927T052637Z-eval-correspondence": [
    {
     "case_id": "corpus:ground_truth:train:blair-l/meetings/608.",

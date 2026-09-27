@@ -154,7 +154,7 @@ def test_apply_decode_budget_overrides_langchain_constructor_sampling(monkeypatc
             "model": "ibm-granite/granite-4.2-8b",
             "temperature": 1.0,
             "top_p": 0.95,
-            "model_kwargs": {"seed": 42},
+            "seed": 42,
         }]
         assert applied["sampling_injected"] is True
     assert lc_base.ChatOpenAI is FakeChatOpenAI

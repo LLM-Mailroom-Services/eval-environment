@@ -59,3 +59,5 @@ Digital-Mailroom/
 .vscode/
 docs/.Rhistory
 /.cursor/agents
+/data/manifests
+/reports/calibration

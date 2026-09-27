@@ -1,0 +1,48 @@
+{
+  "run_a": {
+    "run_id": "20260916T040422Z-eval-classification",
+    "prompt_version": "sorter_v1",
+    "model": "qwen/qwen3.7-flash"
+  },
+  "run_b": {
+    "run_id": "20260916T040550Z-eval-classification",
+    "prompt_version": "sorter_v2",
+    "model": "qwen/qwen3.7-flash"
+  },
+  "metric_deltas": {
+    "class_accuracy": {
+      "a": 0.9,
+      "b": 0.9,
+      "delta": 0.0
+    },
+    "errors": {
+      "a": 0,
+      "b": 0,
+      "delta": 0
+    },
+    "n": {
+      "a": 10,
+      "b": 10,
+      "delta": 0
+    },
+    "scorer_errors": {
+      "a": 0,
+      "b": 0,
+      "delta": 0
+    },
+    "subclass_accuracy": {
+      "a": 0.4,
+      "b": 0.4,
+      "delta": 0.0
+    }
+  },
+  "paired_case_deltas": {
+    "class_correct": {
+      "delta": 0.0,
+      "ci_lo": 0.0,
+      "ci_hi": 0.0,
+      "n": 10
+    }
+  },
+  "n_shared_cases": 10
+}

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from evals import scoring
 
 
@@ -83,6 +85,56 @@ def test_performance_row_and_summary():
     summary = scoring.summarize_performance([row, row])
     assert summary["tokens_prompt_total"] == 20
     assert summary["latency_ms_p95"] >= summary["latency_ms_mean"]
+
+
+def test_granite_agent_usage_counts_every_call_and_uses_roster_price():
+    """Retries/chunks are calls, and every token is priced at Granite's rates."""
+    rows = [
+        {
+            "latency_ms": 100.0,
+            "tokens": {"prompt": 3_000, "completion": 8_000},
+            "cost_usd": scoring.cost_for(
+                3_000, 8_000, "ibm-granite/granite-4.2-8b"
+            ),
+            "agent_usage": {
+                "correspondence_specialist": {
+                    "calls": 2,
+                    "prompt_tokens": 3_000,
+                    "completion_tokens": 8_000,
+                    "total": 11_000,
+                    "models": ["ibm-granite/granite-4.2-8b"],
+                }
+            },
+        },
+        {
+            "latency_ms": 50.0,
+            "tokens": {"prompt": 1_000, "completion": 2_000},
+            "cost_usd": scoring.cost_for(
+                1_000, 2_000, "ibm-granite/granite-4.2-8b"
+            ),
+            "agent_usage": {
+                "correspondence_specialist": {
+                    "calls": 1,
+                    "prompt_tokens": 1_000,
+                    "completion_tokens": 2_000,
+                    "total": 3_000,
+                    "models": ["ibm-granite/granite-4.2-8b"],
+                }
+            },
+        },
+    ]
+    summary = scoring.summarize_performance(rows)
+    agent = summary["by_agent"]["correspondence_specialist"]
+
+    assert summary["tokens_prompt_total"] == 4_000
+    assert summary["tokens_completion_total"] == 10_000
+    assert summary["cost_usd_est_total"] == pytest.approx(0.00274)
+    assert agent["calls"] == 3
+    assert agent["prompt_tokens"] == 4_000
+    assert agent["completion_tokens"] == 10_000
+    assert agent["total_tokens"] == 14_000
+    assert agent["cost_usd_est"] == pytest.approx(0.00274)
+    assert agent["models"] == ["ibm-granite/granite-4.2-8b"]
 
 
 def test_summarize_scores_keys():

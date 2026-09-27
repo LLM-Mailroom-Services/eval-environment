@@ -21,10 +21,11 @@ One row per run (append-only source of truth: `reports/experiment_log.jsonl`). E
 | [20260926T234603Z-eval-insurance_claims](experiment_log/20260926T234603Z-eval-insurance_claims.md) | eval | insurance_claims | real | qwen/qwen3-8b | class:insurance_claim | 20 | — | 0 |
 | [20260926T234358Z-eval-correspondence](experiment_log/20260926T234358Z-eval-correspondence.md) | eval | correspondence | real | qwen/qwen3-8b | class:correspondence | 20 | — | 0 |
 
-## Exploratory / debug real runs (real mode, n<10 cases) — 10
+## Exploratory / debug real runs (real mode, n<10 cases) — 11
 
 | run_id | family | task | mode | model | subset | n | key metric | errors |
 |---|---|---|---|---|---|---|---|---|
+| [20260927T051851Z-eval-correspondence](experiment_log/20260927T051851Z-eval-correspondence.md) | eval | correspondence | real | ibm-granite/granite-4.2-8b | class:correspondence | 1 | — | 0 |
 | [20260927T020724Z-eval-merger_agreement](experiment_log/20260927T020724Z-eval-merger_agreement.md) | eval | merger_agreement | real | qwen/qwen3.7-flash | class:merger_agreement | 2 | — | 0 |
 | [20260927T014814Z-eval-merger_agreement](experiment_log/20260927T014814Z-eval-merger_agreement.md) | eval | merger_agreement | real | qwen/qwen3-8b | class:merger_agreement | 2 | — | 0 |
 | [20260927T011209Z-eval-merger_agreement](experiment_log/20260927T011209Z-eval-merger_agreement.md) | eval | merger_agreement | real | qwen/qwen3-8b | class:merger_agreement | 1 | — | 0 |
@@ -36,10 +37,12 @@ One row per run (append-only source of truth: `reports/experiment_log.jsonl`). E
 | [20260926T223222Z-eval-contracts](experiment_log/20260926T223222Z-eval-contracts.md) | eval | contracts | real | qwen/qwen3.7-flash | class:contract | 1 | — | 0 |
 | [20260926T223211Z-eval-contracts](experiment_log/20260926T223211Z-eval-contracts.md) | eval | contracts | real | — | class:contract | 0 | — | 0 |
 
-## Mock / CI-smoke runs — 25
+## Mock / CI-smoke runs — 27
 
 | run_id | family | task | mode | model | subset | n | key metric | errors |
 |---|---|---|---|---|---|---|---|---|
+| [20260927T051729Z-eval-classification](experiment_log/20260927T051729Z-eval-classification.md) | eval | classification | mock | ibm-granite/granite-4.2-8b | full | 1 | class_accuracy=0.0 | 0 |
+| [20260927T051725Z-eval-correspondence](experiment_log/20260927T051725Z-eval-correspondence.md) | eval | correspondence | mock | ibm-granite/granite-4.2-8b | class:correspondence | 1 | — | 0 |
 | [20260927T044725Z-eval-correspondence](experiment_log/20260927T044725Z-eval-correspondence.md) | eval | correspondence | mock | ibm-granite/granite-4.2-8b | class:correspondence | 2 | — | 0 |
 | [20260926T232547Z-eval-pipeline_chain](experiment_log/20260926T232547Z-eval-pipeline_chain.md) | eval | pipeline_chain | mock | qwen/qwen3.7-flash | pilot | 2 | class_accuracy=0.0 | 0 |
 | [20260926T232546Z-eval-merger_agreement](experiment_log/20260926T232546Z-eval-merger_agreement.md) | eval | merger_agreement | mock | qwen/qwen3.7-flash | class:merger_agreement | 2 | — | 0 |

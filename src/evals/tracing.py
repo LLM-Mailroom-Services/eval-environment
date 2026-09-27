@@ -398,9 +398,11 @@ def case_span(
 
             exp = current_experiment()
             record_id = dataset_record_id(case)
+            # Experiment rows are type=eval so scores land on the document
+            # parent; nested extract-fields / LLM spans stay children.
             span_kwargs: dict[str, Any] = {
                 "name": parent_name,
-                "type": as_type,
+                "type": "eval",
                 "input": _curate_case_input(case),
                 "metadata": {
                     **(meta or {}),
@@ -585,6 +587,13 @@ def run_span(
         return
     try:
         if backend == "braintrust":
+            from evals.braintrust_experiment import current_experiment
+
+            # An open Experiment already has one row per document. A sibling
+            # evals-run span shows up as a 21st root and duplicates the UI.
+            if current_experiment() is not None:
+                yield _noop
+                return
             import braintrust
 
             with braintrust.start_span(

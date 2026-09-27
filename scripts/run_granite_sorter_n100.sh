@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Granite sorter (eval:classification) N=100 — mirrors API-leg run
 # 20260927T070900Z-eval-classification (N=20, concurrency 8, frozen sorter_v1).
+# Draw: --subset full --sample 100 --seed 42 → stratified_sample on
+# expected_doc_class (even round-robin across the five doc classes, shuffled
+# within each class — same harness as specialist subset draws).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 export PYTHONUNBUFFERED=1

@@ -65,3 +65,17 @@ def test_stratified_sample_deterministic():
 
 def test_stratified_sample_handles_empty():
     assert stratified_sample([], 5, seed=1) == []
+
+
+def test_stratified_sample_by_expected_doc_class():
+    """Case rows from _case_from_row use expected_doc_class, not expected."""
+    rows = (
+        [{"expected_doc_class": "contract", "i": i} for i in range(50)]
+        + [{"expected_doc_class": "correspondence", "i": i} for i in range(50)]
+    )
+    picked = stratified_sample(rows, 10, seed=42, by="expected_doc_class")
+    assert len(picked) == 10
+    counts = {}
+    for row in picked:
+        counts[row["expected_doc_class"]] = counts.get(row["expected_doc_class"], 0) + 1
+    assert counts == {"contract": 5, "correspondence": 5}

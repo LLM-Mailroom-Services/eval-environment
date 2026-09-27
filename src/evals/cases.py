@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import json
 import random
+from collections import Counter
 from typing import Any
 
 from pipeline.hf_corpora import (
@@ -388,9 +389,24 @@ def load_cases(
     cases = [_case_from_row(r, config=config, split=split) for r in raw_rows]
     selected = cases
     if sample is not None:
-        selected = stratified_sample(cases, int(sample), seed=seed)
+        # Cases expose ``expected_doc_class``; corpus rows use ``expected``.
+        by = "expected_doc_class" if cases and "expected_doc_class" in cases[0] else "expected"
+        selected = stratified_sample(cases, int(sample), seed=seed, by=by)
+        if spec["kind"] in ("full", "train") and int(sample) >= len(HUB_CLASSES):
+            drawn = {str(c.get("expected_doc_class") or "") for c in selected} - {""}
+            missing = set(HUB_CLASSES) - drawn
+            if missing:
+                raise ValueError(
+                    f"stratified sample n={sample} seed={seed} subset={subset!r} "
+                    f"missing doc classes: {sorted(missing)} (drawn={sorted(drawn)})"
+                )
     if n is not None:
         selected = selected[: max(0, int(n))]
+    class_counts: dict[str, int] | None = None
+    if selected:
+        class_counts = dict(
+            sorted(Counter(str(c.get("expected_doc_class") or "?") for c in selected).items())
+        )
     provenance = {
         "subset_spec": spec,
         "repo": FULL_CORPUS_ID,
@@ -401,6 +417,7 @@ def load_cases(
         "n_selected": len(selected),
         "sample": sample,
         "seed": seed,
+        "class_counts": class_counts,
     }
     if spec["kind"] == "corpus":
         provenance["repo"] = resolve_corpus(_SUBSET_CORPUS[spec["value"]])["id"]

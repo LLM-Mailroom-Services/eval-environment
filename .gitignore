@@ -6,20 +6,17 @@ __pycache__/
 build/
 dist/
 
-# Eval artifacts (append-only logs are regenerable; run dirs are local)
-# (root-anchored so the tracked web/data/ viewer snapshot is not caught)
+# Eval case dirs are local; reports/ stays tracked (experiment log, calibration,
+# API-leg comparison writeups). Root-anchored so web/data/ is not caught.
 /data/*
-/reports/*
 hf_cache/
 *.db
 *.db-wal
 *.db-shm
 
-# Deliverables tracked despite the root ignores:
-# - reports/api-comparisons/ = Modal-comparable API-leg run reports (paired
-#   with the sandbox Modal reports, filed by model)
+# Deliverables tracked despite the data ignore:
+# - reports/ (entire tree — do not gitignore)
 # - data/manifests/subset-draws/ = canonical comparison subset draws (#20)
-!/reports/api-comparisons/
 !/data/manifests/
 !/data/manifests/subset-draws/
 

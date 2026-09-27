@@ -266,8 +266,8 @@ Environment (health checks, command surface, skills/subagents,
 non-negotiables). Project dashboard:
 [Vercel → eval-environment](https://vercel.com/lucius-projects-54efe0bb/eval-environment/A5xZpmnPeh8RB2H2Pjn3acTtn4RS).
 
-**Data flow**: the raw experiment log stays local (per `.gitignore`); the
-viewer reads one tracked, generated snapshot:
+**Data flow**: the experiment log is tracked under `reports/` (JSONL +
+markdown). The Vercel viewer additionally reads one generated snapshot:
 
 ```bash
 uv run python scripts/export_site_snapshot.py          # regenerate web/data/snapshot.json

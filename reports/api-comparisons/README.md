@@ -6,20 +6,23 @@ against the Modal/vLLM leg reports kept in the sandbox repo
 
 ## Naming schema
 
-    <this dir>/<model_short>/RUN-<wave>-<CLASS>-<MODEL_SHORT>-REPORT.md
+    <this dir>/<model_short>/<task>/RUN-<wave>-<CLASS>-<MODEL_SHORT>-REPORT.md
 
 | slot | meaning | example |
 |---|---|---|
 | `model_short/` | decode-profile key, else slugified model id | `qwen3-8b`, `granite-4.2-8b` |
+| `task/` | the eval task id — reports are always separated by specialist/task, never flat across a model dir | `contracts`, `insurance_claims`, `correspondence`, `corporate_records`, `merger_agreement`, `classification` |
 | `wave` | draw size: `--sample` when set, else `--n` | `20`, `50` |
 | `CLASS` | subset class uppercased | `CORRESPONDENCE`, `INSURANCE_CLAIM`, `CONTRACT`, `MERGER_AGREEMENT`, `CORPORATE_RECORD`; `ALL` for whole-corpus runs |
 | stem | `RUN-<wave>-<CLASS>` | pairs with the Modal report of the same stem |
 
+E.g. `qwen3-8b/insurance_claims/RUN-20-INSURANCE_CLAIM-QWEN3-8B-REPORT.md`.
+
 Pairing rule: **same `RUN-<wave>-<CLASS>` stem = same wave and class**; the
 model variant is always the final token. E.g.
 
-    Modal leg: RUN-20-CORRESPONDENCE-AWQ-REPORT.md        (sandbox repo)
-    API leg:   RUN-20-CORRESPONDENCE-QWEN3-8B-REPORT.md   (this repo)
+    Modal leg: RUN-20-CORRESPONDENCE-AWQ-REPORT.md                              (sandbox repo)
+    API leg:   qwen3-8b/correspondence/RUN-20-CORRESPONDENCE-QWEN3-8B-REPORT.md (this repo)
 
 ## Comparable metric surface
 

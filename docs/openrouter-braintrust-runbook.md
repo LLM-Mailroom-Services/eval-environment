@@ -65,7 +65,8 @@ name). **This profile map has no entry for `sorter`** — passing
 `--decode-profile` on `eval:classification` is harmless but does nothing
 useful; omit it for sorter runs. Passing `--decode-profile` is also what
 triggers the auto-written Modal-comparable report
-(`reports/api-comparisons/<model>/RUN-<wave>-<CLASS>-<MODEL>-REPORT.md`) —
+(`reports/api-comparisons/<model>/<task>/RUN-<wave>-<CLASS>-<MODEL>-REPORT.md`
+— always separated by specialist/task, never flat across a model dir) —
 without it, no comparison report is emitted for that run.
 
 ## 3. Braintrust as the trace sink

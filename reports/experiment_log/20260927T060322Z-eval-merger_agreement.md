@@ -9,7 +9,34 @@
 | git | commit: 1d9f8d2 · dirty: True |
 | started / finished | 2026-09-27T06:03:22+00:00 → 2026-09-27T06:54:02+00:00 |
 | duration_s | 3041.9 |
+| comparison report | reports/api-comparisons/granite-4.2-8b/merger_agreement/RUN… |
 | error | — |
+
+### Run configuration
+
+| Param | Value |
+|---|---|
+| concurrency | 8 |
+| decode_budget_applied | sampling_injected: True · max_tokens_by_agent: {'contracts_… |
+| decode_call_timeout_s | 600 |
+| decode_profile | granite-4.2-8b |
+| decode_sampling | temperature: 1.0 · top_p: 0.95 · seed: 42 |
+| dry_run | ✗ |
+| n | — |
+| resumed_from | — |
+| sample | 20 |
+| scorer | extraction |
+| seed | 42 |
+| skipped_already_run | 0 |
+| thinking_recovered | 0 |
+
+### Cost cap
+
+| Key | Value |
+|---|---|
+| cap_usd | 1.5 |
+| cost_usd_est | 0.4374 |
+| status | under_cap |
 
 ### Dataset
 
@@ -44,6 +71,8 @@
 | Metric | Value |
 |---|---|
 | cost_usd_est_total | 0.4374 |
+| cost_usd_total | 0.4374 |
+| expected_cost_usd | 0.8 |
 | latency_ms_mean | 1065583.98 |
 | latency_ms_p95 | 1748404.3 |
 | tokens_completion_total | 1259169 |

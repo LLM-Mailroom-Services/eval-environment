@@ -1,11 +1,12 @@
 # mailroom-evals — experiment log
 
-One row per run (append-only source of truth: `reports/experiment_log.jsonl`). Each run's full detail (dataset provenance, metrics, per-agent performance, case table) lives in its own file under `reports/experiment_log/<run_id>.md` — this index never grows a per-run section inline, so it stays readable regardless of history size. OpenRouter/Braintrust N-doc waves also get a standalone, Modal-comparable report under `reports/api-comparisons/<model>/`.
+One row per run (append-only source of truth: `reports/experiment_log.jsonl`). Each run's full detail (dataset provenance, metrics, per-agent performance, case table) lives in its own file under `reports/experiment_log/<run_id>.md` — this index never grows a per-run section inline, so it stays readable regardless of history size. OpenRouter/Braintrust N-doc waves also get a standalone, Modal-comparable write-ups under `reports/api-comparisons/` (see `INDEX.md`; per-run files under `<model>/<task>/runs/`).
 
-## Real evaluation waves (real mode, n≥10 cases) — 21
+## Real evaluation waves (real mode, n≥10 cases) — 22
 
 | run_id | family | task | mode | model | subset | n | key metric | errors |
 |---|---|---|---|---|---|---|---|---|
+| [20260927T082404Z-eval-merger_agreement](experiment_log/20260927T082404Z-eval-merger_agreement.md) | eval | merger_agreement | real | ibm-granite/granite-4.2-8b | class:merger_agreement | 20 | — | 0 |
 | [20260927T070900Z-eval-classification](experiment_log/20260927T070900Z-eval-classification.md) | eval | classification | real | ibm-granite/granite-4.2-8b | full | 20 | class_accuracy=0.9 | 0 |
 | [20260927T065622Z-eval-corporate_records](experiment_log/20260927T065622Z-eval-corporate_records.md) | eval | corporate_records | real | ibm-granite/granite-4.2-8b | class:corporate_record | 20 | — | 0 |
 | [20260927T060322Z-eval-merger_agreement](experiment_log/20260927T060322Z-eval-merger_agreement.md) | eval | merger_agreement | real | ibm-granite/granite-4.2-8b | class:merger_agreement | 20 | — | 0 |

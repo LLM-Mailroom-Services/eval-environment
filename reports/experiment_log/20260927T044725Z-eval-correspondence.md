@@ -9,7 +9,34 @@
 | git | commit: 74390d1 · dirty: True |
 | started / finished | 2026-09-27T04:47:25+00:00 → 2026-09-27T04:47:25+00:00 |
 | duration_s | 2.5 |
+| comparison report | reports/api-comparisons/granite-4.2-8b/correspondence/RUN-2… |
 | error | — |
+
+### Run configuration
+
+| Param | Value |
+|---|---|
+| concurrency | 1 |
+| decode_budget_applied | sampling_injected: False · max_tokens_by_agent: {'contracts… |
+| decode_call_timeout_s | 600 |
+| decode_profile | granite-4.2-8b |
+| decode_sampling | temperature: 1.0 · top_p: 0.95 · seed: 42 |
+| dry_run | ✗ |
+| n | 2 |
+| resumed_from | — |
+| sample | — |
+| scorer | extraction |
+| seed | 42 |
+| skipped_already_run | 0 |
+| thinking_recovered | 0 |
+
+### Cost cap
+
+| Key | Value |
+|---|---|
+| cap_usd | 1.5 |
+| cost_usd_est | 0 |
+| status | under_cap |
 
 ### Dataset
 
@@ -44,6 +71,8 @@
 | Metric | Value |
 |---|---|
 | cost_usd_est_total | 0 |
+| cost_usd_total | 0 |
+| expected_cost_usd | 0.08 |
 | latency_ms_mean | 0.7 |
 | latency_ms_p95 | 0.8 |
 | tokens_completion_total | 20 |

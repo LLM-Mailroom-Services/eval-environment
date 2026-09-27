@@ -648,6 +648,12 @@ MODEL_SUITE_INTRO = {
         "(decode profile `granite-4.2-8b`), traced to Braintrust project "
         "`Mailroom-Evals`. Same canonical seed-42 draws as the Qwen suite."
     ),
+    "deepseek-v4.1-flash": (
+        "OpenRouter API results for `deepseek/deepseek-v4.1-flash`, "
+        "SAND-027 Leg B N=20 specialist waves (seed 42, frozen v1 prompts, "
+        "concurrency 8). One coverage call per document (`needed_chunks=1`, "
+        "max two LLM calls per doc for retry)."
+    ),
 }
 
 MODEL_SUITE_FOOTNOTES: dict[str, str] = {

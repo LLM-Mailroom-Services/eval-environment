@@ -148,7 +148,7 @@ def main() -> int:
     )
     print(comparison_report.repo_relative_path(master_path))
 
-    for model_key in ("qwen3-8b", "granite-4.2-8b"):
+    for model_key in ("qwen3-8b", "granite-4.2-8b", "deepseek-v4.1-flash"):
         readme = reports_root / model_key / "README.md"
         readme.parent.mkdir(parents=True, exist_ok=True)
         readme.write_text(

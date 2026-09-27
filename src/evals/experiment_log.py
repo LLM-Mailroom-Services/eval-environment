@@ -314,17 +314,19 @@ def load_cases(run_id: str) -> list[dict[str, Any]]:
     exists yet (interrupted real runs checkpoint per case).
     """
     on_disk = _dedupe_cases(_read_cases_file(cases_file_path(run_id)))
-    for run in load_runs():
-        if run.get("run_id") != run_id:
-            continue
-        embedded = run.get("cases_embedded") or []
-        if embedded:
-            return list(embedded)
-        ref = run.get("cases_ref")
-        if ref and Path(ref).exists():
-            from_ref = _dedupe_cases(_read_cases_file(Path(ref)))
-            return from_ref if from_ref else on_disk
+    summaries = [r for r in load_runs() if r.get("run_id") == run_id]
+    if not summaries:
         return on_disk
+    # Append-only log may carry multiple lines per run_id (resume, judging);
+    # the latest summary is authoritative for embedded vs cases_ref routing.
+    run = summaries[-1]
+    embedded = run.get("cases_embedded") or []
+    if embedded:
+        return list(embedded)
+    ref = run.get("cases_ref")
+    if ref and Path(ref).exists():
+        from_ref = _dedupe_cases(_read_cases_file(Path(ref)))
+        return from_ref if from_ref else on_disk
     return on_disk
 
 

@@ -21,6 +21,13 @@ models:
     context_tokens: 128000
     input_per_million: 0.05
     output_per_million: 0.25
+  deepseek/deepseek-v4.1-flash:
+    label: DeepSeek V4.1 Flash
+    modality: text
+    # Verified 2026-09-27 via OpenRouter /api/v1/models (deepseek/deepseek-v4.1-flash).
+    context_tokens: 1048576
+    input_per_million: 0.035
+    output_per_million: 0.29
   deepseek/deepseek-v4-pro:
     label: DeepSeek V4 Pro
     modality: text

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Granite sorter (eval:classification) N=100 — seed-42 full draw (100 docs).
-# Pair with scripts/run_qwen37_sorter_n100.sh for the same document set.
+# Qwen 3.7-Flash sorter (eval:classification) N=100 — same seed-42 full draw as Granite
+# (manifest: 20260927T100340Z-eval-classification). Pair with run_deepseek41_sorter_n100.sh.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 export PYTHONUNBUFFERED=1
@@ -12,8 +12,7 @@ exec uv run python -u scripts/run_evals.py \
   --subset full \
   --sample 100 \
   --seed 42 \
-  --model ibm-granite/granite-4.2-8b \
-  --decode-profile granite-4.2-8b \
+  --model qwen/qwen3.7-flash \
   --require-trace-sink \
   --prompt-source frozen \
   --trace-backend braintrust \

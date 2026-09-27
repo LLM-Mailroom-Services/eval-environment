@@ -281,6 +281,18 @@ uv run python -u scripts/run_evals.py \
 single-class N=20 like the specialist waves); use `--subset class:<name>`
 instead of `full` if a single-class classification slice is wanted.
 
+N=100 sorter waves (same seed-42 `full` draw for cross-model comparison):
+
+```bash
+bash scripts/run_granite_sorter_n100.sh
+bash scripts/run_qwen37_sorter_n100.sh
+bash scripts/run_deepseek41_sorter_n100.sh
+```
+
+Then `uv run python scripts/render_comparison_reports.py`,
+`uv run python scripts/render_experiment_log.py --validate`, and
+`EVALS_TRACE_BACKEND=none uv run python scripts/export_site_snapshot.py`.
+
 Pipe raw `tee` output to a scratch path outside the repo (e.g. `/tmp/run.log`
 as above), not under `reports/`. `reports/` is git-tracked and reserved for
 polished, self-contained deliverables (the experiment-log index/detail files

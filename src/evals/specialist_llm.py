@@ -77,9 +77,6 @@ def _chunk_limit_for(doc_class: str, model: str | None) -> int:
     return CHUNK_CHARS.get(doc_class, DEFAULT_CHUNK_CHARS)
 CHUNK_OVERLAP = 1_500
 CHUNK_HEADER_CHARS = 3_500
-# Extra LLM calls allowed beyond the coverage count, for split-math
-# error — not a license to fan out. 8 needed → 10 max; 1 needed → 2 max.
-CALL_HEADROOM = 0.15
 
 _HUGE_INT_RE = re.compile(r"-?\d{4001,}")
 _ARTICLE_SPLIT = re.compile(
@@ -190,9 +187,20 @@ def needed_chunks(n_chars: int, max_chars: int) -> int:
 
 
 def llm_call_budget(needed: int) -> int:
-    """Hard per-row LLM call cap: coverage count + 15% calculation headroom."""
+    """Hard per-row LLM call cap: one retry slot per coverage chunk.
+
+    Used to be ``ceil(needed * 1.15)`` — one shared spare call for the
+    whole document, sized for occasional split-math error. A concurrency=8
+    qwen/qwen3-8b repro showed that was not enough: under concurrent
+    provider load, EACH chunk call can independently come back as a
+    coherent-looking but non-JSON 200 response (not just network
+    exceptions), and a 2+-chunk document needing two retries had only one
+    spare slot (``specialist_llm_retry_blocked_by_budget``), silently
+    losing the second chunk's contribution. Budget now guarantees every
+    coverage call its own single retry: ``needed * 2``.
+    """
     needed = max(int(needed), 1)
-    return max(needed, math.ceil(needed * (1 + CALL_HEADROOM)))
+    return needed * 2
 
 
 def chunk_document(text: str, *, max_chars: int, overlap: int = CHUNK_OVERLAP) -> list[str]:

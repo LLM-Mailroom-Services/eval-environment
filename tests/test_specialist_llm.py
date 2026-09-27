@@ -238,12 +238,12 @@ def test_merger_large_completion_model_covers_pinned_corpus_in_one_call():
     assert sl._chunk_limit_for("merger_agreement", None) == 48_000
 
 
-def test_needed_chunks_and_call_budget_include_15_percent_headroom():
+def test_needed_chunks_and_call_budget_grant_one_retry_per_chunk():
     assert needed_chunks(48_000, 48_000) == 1
     assert llm_call_budget(1) == 2
     assert needed_chunks(387_592, 48_000) == 9
-    assert llm_call_budget(9) == 11
-    assert llm_call_budget(8) == 10
+    assert llm_call_budget(9) == 18
+    assert llm_call_budget(8) == 16
     text = "y" * 387_592
     pieces = chunk_document(text, max_chars=48_000)
     assert len(pieces) == 9

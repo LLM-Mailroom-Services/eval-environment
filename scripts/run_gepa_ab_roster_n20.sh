@@ -48,11 +48,15 @@ else:
 "
 }
 
+_spent_total() {
+  awk '/^[0-9]+(\.[0-9]+)?$/ { s += $1 } END { printf "%.6f", s + 0 }' "$GEPA_AB_SPENT_FILE" 2>/dev/null || echo 0
+}
+
 budget_ok_or_stop() {
   local spent
-  spent="$(awk '{s+=$1} END {printf \"%.4f\", s+0}' "$GEPA_AB_SPENT_FILE" 2>/dev/null || echo 0)"
+  spent="$(_spent_total)"
   if awk -v s="$spent" -v cap="$GEPA_AB_BUDGET_USD" 'BEGIN { exit (s <= cap + 0.0001) ? 0 : 1 }'; then
-    echo "budget ok: spent=\$${spent} cap=\$${GEPA_AB_BUDGET_USD}" | tee -a "$LOG"
+    echo "budget ok: spent=\$${spent} cap=\$${GEPA_AB_BUDGET_USD}" >>"$LOG"
     return 0
   fi
   echo "BUDGET STOP: spent=\$${spent} exceeds cap=\$${GEPA_AB_BUDGET_USD}" | tee -a "$LOG"
@@ -92,11 +96,13 @@ runs = [r for r in experiment_log.load_runs() if r.get('task')==task and r.get('
 runs = [r for r in runs if (r.get('params') or {}).get('sample') == sample or (r.get('dataset') or {}).get('n_selected') == sample]
 runs = [r for r in runs if (r.get('prompt_version')==pv if pv else not r.get('prompt_version'))]
 print(runs[-1]['run_id'] if runs else '')
-")"
-  if [[ -n "$run_id" ]]; then
-    cost="$(run_arm_cost_usd "$run_id")"
-    echo "$cost" >>"$GEPA_AB_SPENT_FILE"
-    echo "arm cost run_id=$run_id usd=$cost" >>"$LOG"
+" 2>/dev/null | tail -1 | tr -d '\r')"
+  if [[ -n "$run_id" && "$run_id" == *eval-* ]]; then
+    cost="$(run_arm_cost_usd "$run_id" 2>/dev/null | tail -1 | tr -d '\r')"
+    if [[ "$cost" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+      echo "$cost" >>"$GEPA_AB_SPENT_FILE"
+      echo "arm cost run_id=$run_id usd=$cost" >>"$LOG"
+    fi
   fi
   echo "$run_id"
 }

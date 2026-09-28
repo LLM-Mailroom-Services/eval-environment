@@ -86,6 +86,31 @@ def _llm_credentials_present() -> tuple[bool, str]:
     return False, "none"
 
 
+def _env_truthy(name: str) -> bool:
+    return (os.environ.get(name) or "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _real_spend_allowed() -> tuple[bool, str]:
+    """Operator gates before any live LLM spend (see AGENTS.md)."""
+    if _env_truthy("EVALS_REAL_RUNS_DISABLED"):
+        return False, "EVALS_REAL_RUNS_DISABLED is set — unset it or use --mock"
+    if _env_truthy("EVALS_SPEND_APPROVAL_REQUIRED"):
+        if _env_truthy("EVALS_SPEND_APPROVED"):
+            return True, "EVALS_SPEND_APPROVED"
+        cap = (os.environ.get("EVALS_SPEND_APPROVED_USD") or "").strip()
+        try:
+            if cap and float(cap) > 0:
+                return True, f"EVALS_SPEND_APPROVED_USD={cap}"
+        except ValueError:
+            pass
+        return (
+            False,
+            "EVALS_SPEND_APPROVAL_REQUIRED is set — export EVALS_SPEND_APPROVED=1 "
+            "or EVALS_SPEND_APPROVED_USD=<cap> before --real",
+        )
+    return True, "open"
+
+
 def run_preflight(
     spec: TaskSpec,
     *,
@@ -236,6 +261,12 @@ def run_preflight(
 
     # ── Real-mode credentials (HARD gate) ──────────────────────────────
     if not mock:
+        ok_spend, spend_detail = _real_spend_allowed()
+        if ok_spend:
+            report.checks.append({"name": "real_spend_guard", "ok": True, "detail": spend_detail})
+        else:
+            report.issues.append(PreflightIssue("real_spend_guard", spend_detail))
+            report.checks.append({"name": "real_spend_guard", "ok": False})
         ok_creds, source = _llm_credentials_present()
         if not ok_creds:
             report.issues.append(

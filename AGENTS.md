@@ -21,9 +21,10 @@ specialty skill:
 
 1. **Every run logs.** One run-summary line to `reports/experiment_log.jsonl`
    per run — including failures and mock runs. No exceptions.
-2. **Pin the corpus.** Repo `Lucius-Morningstar/mailroom-dataset` (schema v9),
-   revision `46a4d3c240a36671cde0182fff4960f6b8b73aca` (the GT-closure
-   republish of 2026-09-13; the v8 parent
+2. **Pin the corpus.** Repo `Lucius-Morningstar/mailroom-dataset` (schema v9 /
+   v9.1 content pin), revision `ed7576b676343e0b402ec5412cded301e629bdee`
+   (Hub tag `v9.1` not published yet — pin SHA; supersedes GT-closure
+   `46a4d3c240a36671cde0182fff4960f6b8b73aca`; the v8 parent
    `mailroom-corpus` @ `eafe1ab4c0d330d8f9c7a5fb254155e75d290828` stays frozen
    for lineage reference). Join `ground_truth` ⇆ `default` on `filename`; never
    zip positionally; expand the nested `gt_fields` JSON payload before scoring.

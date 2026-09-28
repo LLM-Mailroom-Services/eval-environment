@@ -8,7 +8,7 @@ description: Schema, configs, and subset selection for Lucius-Morningstar/mailro
 The ONE loading path is `evals.cases` → `pipeline.hf_corpus_loader`
 (`Digital-Mailroom/packages/llm-mailroom/src/pipeline/hf_corpus_loader.py`).
 It joins the `ground_truth` config (labels) to `default` (blind text) on
-`filename`, pinned to revision `46a4d3c240a36671cde0182fff4960f6b8b73aca`,
+`filename`, pinned to revision `ed7576b676343e0b402ec5412cded301e629bdee`,
 with `content_sha256` verification. Never zip rows positionally — always join.
 
 **Lineage**: `mailroom-dataset` v1 (= schema v9 of the corpus family, 3,302
@@ -18,7 +18,7 @@ kept for lineage reference — never destroyed). The v8 base + 1,302 expansion
 draws: contract +91, corporate_record +411, correspondence +650,
 insurance_claim +150.
 
-## Configs (verified against the Dataset Viewer 2026-09-13, GT-closure revision `46a4d3c2`)
+## Configs (verified against the Dataset Viewer, v9.1 pin `ed7576b6` — supersedes GT-closure `46a4d3c2`)
 
 | config | train | test | contents |
 | --- | --- | --- | --- |

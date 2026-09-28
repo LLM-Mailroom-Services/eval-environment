@@ -1,14 +1,20 @@
 #!/usr/bin/env bash
-# GEPA EVALUATE — full specialist roster: v1 vs v2 on identical seed-42 N=20 draws.
+# GEPA EVALUATE — full specialist roster: v1 vs v2 on identical seed-42 draws.
 # Same OpenRouter model both arms (default qwen/qwen3.7-flash). Records accept/reject.
+# Override sample: GEPA_AB_SAMPLE (default 50 for CI surface). Hard cap: GEPA_AB_BUDGET_USD.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 export PYTHONUNBUFFERED=1
 export BRAINTRUST_PROJECT="${BRAINTRUST_PROJECT:-Mailroom-Evals}"
 export GEPA_AB_MODEL="${GEPA_AB_MODEL:-qwen/qwen3.7-flash}"
 export GEPA_AB_SEED="${GEPA_AB_SEED:-42}"
-export GEPA_AB_SAMPLE="${GEPA_AB_SAMPLE:-20}"
+export GEPA_AB_SAMPLE="${GEPA_AB_SAMPLE:-50}"
 export GEPA_AB_CONCURRENCY="${GEPA_AB_CONCURRENCY:-8}"
+# Hard cap (USD, all arms incl. prior spend). Raise only after explicit confirmation.
+export GEPA_AB_BUDGET_USD="${GEPA_AB_BUDGET_USD:-2.00}"
+export GEPA_AB_SPENT_PRIOR_USD="${GEPA_AB_SPENT_PRIOR_USD:-0.037}"
+GEPA_AB_SPENT_FILE="${GEPA_AB_SPENT_FILE:-/tmp/gepa-ab-roster-spent.txt}"
+echo "${GEPA_AB_SPENT_PRIOR_USD}" >"$GEPA_AB_SPENT_FILE"
 
 set -a
 # shellcheck disable=SC1091
@@ -27,43 +33,99 @@ declare -a SPECS=(
   "eval:corporate_records corporate_record corporate_records_specialist_v2"
 )
 
+run_arm_cost_usd() {
+  local run_id="$1"
+  uv run python -c "
+from evals import experiment_log
+rid = '''$run_id'''
+for r in experiment_log.load_runs():
+    if r.get('run_id') == rid:
+        perf = r.get('performance') or {}
+        print(perf.get('cost_usd_est_total') or r.get('cost_usd_est_total') or 0)
+        break
+else:
+    print(0)
+" 2>/dev/null | grep -E '^[0-9]+(\.[0-9]+)?$' | tail -1
+}
+
+_spent_total() {
+  awk '/^[0-9]+(\.[0-9]+)?$/ { s += $1 } END { printf "%.6f", s + 0 }' "$GEPA_AB_SPENT_FILE" 2>/dev/null || echo 0
+}
+
+budget_ok_or_stop() {
+  local spent
+  spent="$(_spent_total)"
+  if awk -v s="$spent" -v cap="$GEPA_AB_BUDGET_USD" 'BEGIN { exit (s <= cap + 0.0001) ? 0 : 1 }'; then
+    echo "budget ok: spent=\$${spent} cap=\$${GEPA_AB_BUDGET_USD}" >>"$LOG"
+    return 0
+  fi
+  echo "BUDGET STOP: spent=\$${spent} exceeds cap=\$${GEPA_AB_BUDGET_USD}" | tee -a "$LOG"
+  exit 2
+}
+
 run_arm() {
   local task="$1" class="$2" prompt_ver="${3:-}"
+  budget_ok_or_stop
   local extra=()
   if [[ -n "$prompt_ver" ]]; then
     extra=(--prompt-version "$prompt_ver")
   fi
-  echo "=== ARM task=${task} prompt=${prompt_ver:-v1_frozen} model=${GEPA_AB_MODEL} ===" | tee -a "$LOG"
-  uv run python -u scripts/run_evals.py \
-    --task "$task" \
-    --real \
-    --subset "class:${class}" \
-    --sample "$GEPA_AB_SAMPLE" \
-    --seed "$GEPA_AB_SEED" \
-    --model "$GEPA_AB_MODEL" \
-    "${extra[@]}" \
-    --require-trace-sink \
-    --prompt-source frozen \
-    --trace-backend braintrust \
-    --concurrency "$GEPA_AB_CONCURRENCY" \
-    2>&1 | tee -a "$LOG"
-  uv run python -c "
+  {
+    echo "=== ARM task=${task} prompt=${prompt_ver:-v1_frozen} model=${GEPA_AB_MODEL} ==="
+    uv run python -u scripts/run_evals.py \
+      --task "$task" \
+      --real \
+      --subset "class:${class}" \
+      --sample "$GEPA_AB_SAMPLE" \
+      --seed "$GEPA_AB_SEED" \
+      --model "$GEPA_AB_MODEL" \
+      "${extra[@]}" \
+      --require-trace-sink \
+      --prompt-source frozen \
+      --trace-backend braintrust \
+      --concurrency "$GEPA_AB_CONCURRENCY"
+  } >>"$LOG" 2>&1
+  local run_id
+  run_id="$(uv run python -c "
 from evals import experiment_log
 task = '${task#eval:}'
+model = '${GEPA_AB_MODEL}'
+sample = int('${GEPA_AB_SAMPLE}')
 pv = '${prompt_ver}' or None
-runs = [r for r in experiment_log.load_runs() if r.get('task')==task and r.get('mode')=='real']
-if pv:
-    runs = [r for r in runs if r.get('prompt_version')==pv]
-else:
-    runs = [r for r in runs if not r.get('prompt_version')]
+runs = [r for r in experiment_log.load_runs() if r.get('task')==task and r.get('mode')=='real' and r.get('model')==model]
+runs = [r for r in runs if (r.get('params') or {}).get('sample') == sample or (r.get('dataset') or {}).get('n_selected') == sample]
+runs = [r for r in runs if (r.get('prompt_version')==pv if pv else not r.get('prompt_version'))]
 print(runs[-1]['run_id'] if runs else '')
-"
+" 2>/dev/null | grep -E '^[0-9]{8}T[0-9]{6}Z-eval-' | tail -1 | tr -d '\r')"
+  if [[ -n "$run_id" && "$run_id" == *eval-* ]]; then
+    cost="$(run_arm_cost_usd "$run_id" 2>/dev/null | tail -1 | tr -d '\r')"
+    if [[ "$cost" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+      echo "$cost" >>"$GEPA_AB_SPENT_FILE"
+      echo "arm cost run_id=$run_id usd=$cost" >>"$LOG"
+    fi
+  fi
+  echo "$run_id"
 }
 
-: >"$LOG"
+if [[ -z "${GEPA_AB_APPEND_LOG:-}" ]]; then
+  : >"$LOG"
+fi
 RESULT_LINES=()
+if [[ -n "${GEPA_AB_SEED_RESULTS:-}" ]]; then
+  while IFS= read -r line; do
+    [[ -n "$line" ]] && RESULT_LINES+=("$line")
+  done <<< "$GEPA_AB_SEED_RESULTS"
+fi
+# Optional resume: skip first N roster entries (after fixing run_arm / manual compares).
+GEPA_AB_ROSTER_SKIP="${GEPA_AB_ROSTER_SKIP:-0}"
 
+idx=0
 for spec in "${SPECS[@]}"; do
+  if (( idx < GEPA_AB_ROSTER_SKIP )); then
+    idx=$((idx + 1))
+    continue
+  fi
+  idx=$((idx + 1))
   # shellcheck disable=SC2086
   set -- $spec
   TASK="$1"; CLASS="$2"; V2="$3"
@@ -75,8 +137,17 @@ for spec in "${SPECS[@]}"; do
     echo "SKIP compare — missing run_id" | tee -a "$LOG"
     continue
   fi
-  CMP_OUT="$(uv run python scripts/compare_runs.py --a "$BASE_RUN" --b "$CAND_RUN" --record --json 2>&1 | tee -a "$LOG")"
-  ACCEPTED="$(echo "$CMP_OUT" | uv run python -c "import sys,json; d=json.load(sys.stdin); p=(d.get('paired_case_deltas') or {}); v=next(iter(p.values()),{}); print('yes' if v.get('ci_lo',0)>0 else 'no')" 2>/dev/null || echo "unknown")"
+  CMP_JSON="$(mktemp)"
+  uv run python scripts/compare_runs.py --a "$BASE_RUN" --b "$CAND_RUN" --record --json >"$CMP_JSON" 2>>"$LOG"
+  cat "$CMP_JSON" >>"$LOG"
+  ACCEPTED="$(CMP_JSON="$CMP_JSON" uv run python -c "
+import json, os
+d = json.load(open(os.environ['CMP_JSON']))
+p = d.get('paired_case_deltas') or {}
+v = next(iter(p.values()), {})
+print('yes' if (v.get('ci_lo') or 0) > 0 else 'no')
+" 2>/dev/null || echo "unknown")"
+  rm -f "$CMP_JSON"
   RESULT_LINES+=("{\"task\":\"${TASK#eval:}\",\"baseline\":\"$BASE_RUN\",\"candidate\":\"$CAND_RUN\",\"v2\":\"$V2\",\"accepted\":\"$ACCEPTED\"}")
 done
 
@@ -85,7 +156,13 @@ import json
 from pathlib import Path
 lines = '''$(printf '%s\n' "${RESULT_LINES[@]}")'''.strip().splitlines()
 rows = [json.loads(l) for l in lines if l.strip()]
-Path('$SUMMARY').write_text(json.dumps({'model': '$GEPA_AB_MODEL', 'seed': $GEPA_AB_SEED, 'n': $GEPA_AB_SAMPLE, 'results': rows}, indent=2))
+spent = float('''$(awk '/^[0-9]+(\.[0-9]+)?$/ { s += $1 } END { printf "%.6f", s + 0 }' "$GEPA_AB_SPENT_FILE" 2>/dev/null || echo 0)''')
+Path('$SUMMARY').write_text(json.dumps({
+    'model': '$GEPA_AB_MODEL', 'seed': $GEPA_AB_SEED, 'n': $GEPA_AB_SAMPLE,
+    'budget_usd_cap': float('$GEPA_AB_BUDGET_USD'),
+    'spent_usd_est': spent,
+    'results': rows,
+}, indent=2))
 print('summary → $SUMMARY')
 "
 

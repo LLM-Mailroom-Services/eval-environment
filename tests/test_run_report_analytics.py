@@ -63,4 +63,6 @@ def test_reproduce_and_artifacts():
     assert "qwen3-8b" in repro
     art = "\n".join(rra.render_artifacts(summary))
     assert "cases.jsonl" in art
-    assert "comparison_report" in art or "api-comparisons" in art
+    # conftest redirects EVALS_COMPARISON_REPORTS_DIR → tmp/comparison-reports
+    assert "Modal-comparable API-leg write-up" in art
+    assert "RUN-20-CORRESPONDENCE-QWEN3-8B-REPORT.md" in art

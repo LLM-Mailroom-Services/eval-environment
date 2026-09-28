@@ -40,7 +40,10 @@ global.document = {
 const winListeners = {};
 global.window = { addEventListener: (ev, fn) => { winListeners[ev] = fn; }, scrollTo() {} };
 global.location = { hash: "#/dashboard" };
-global.fetch = async () => ({ ok: true, json: async () => snapshot });
+const chartsIndex = path.join(ROOT, "web/data/charts/index.json");
+global.fetch = async url => String(url).includes("charts/index.json")
+    ? (fs.existsSync(chartsIndex) ? { ok: true, json: async () => JSON.parse(fs.readFileSync(chartsIndex, "utf8")) } : { ok: false, status: 404 })
+    : { ok: true, json: async () => snapshot };
 
 eval(js); // defines the viewer and calls load()
 
@@ -66,6 +69,17 @@ eval(js); // defines the viewer and calls load()
         }
         console.log("OK", v, "(" + out.length + " chars)");
     }
+    // Charts view loads its manifest asynchronously; every listed SVG must exist.
+    global.location.hash = "#/charts";
+    winListeners.hashchange();
+    await new Promise(r => setTimeout(r, 50));
+    const charts = JSON.parse(fs.readFileSync(chartsIndex, "utf8"));
+    const imgs = (elements.main.innerHTML.match(/<img /g) || []).length;
+    if (!charts.length || imgs !== charts.length) throw new Error("charts view rendered " + imgs + " of " + charts.length + " charts");
+    for (const c of charts) {
+        if (!fs.existsSync(path.join(ROOT, "web/data/charts", c.file))) throw new Error("missing chart " + c.file);
+    }
+    console.log("OK #/charts (" + imgs + " charts)");
     if (pairTask && (!elements["cmp-out"] || !elements["cmp-out"].innerHTML.includes("Metric deltas"))) {
         throw new Error("compare output did not render");
     }

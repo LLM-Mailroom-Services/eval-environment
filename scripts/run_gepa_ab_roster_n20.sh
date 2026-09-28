@@ -33,34 +33,41 @@ run_arm() {
   if [[ -n "$prompt_ver" ]]; then
     extra=(--prompt-version "$prompt_ver")
   fi
-  echo "=== ARM task=${task} prompt=${prompt_ver:-v1_frozen} model=${GEPA_AB_MODEL} ===" | tee -a "$LOG"
-  uv run python -u scripts/run_evals.py \
-    --task "$task" \
-    --real \
-    --subset "class:${class}" \
-    --sample "$GEPA_AB_SAMPLE" \
-    --seed "$GEPA_AB_SEED" \
-    --model "$GEPA_AB_MODEL" \
-    "${extra[@]}" \
-    --require-trace-sink \
-    --prompt-source frozen \
-    --trace-backend braintrust \
-    --concurrency "$GEPA_AB_CONCURRENCY" \
-    2>&1 | tee -a "$LOG" >/dev/null
+  {
+    echo "=== ARM task=${task} prompt=${prompt_ver:-v1_frozen} model=${GEPA_AB_MODEL} ==="
+    uv run python -u scripts/run_evals.py \
+      --task "$task" \
+      --real \
+      --subset "class:${class}" \
+      --sample "$GEPA_AB_SAMPLE" \
+      --seed "$GEPA_AB_SEED" \
+      --model "$GEPA_AB_MODEL" \
+      "${extra[@]}" \
+      --require-trace-sink \
+      --prompt-source frozen \
+      --trace-backend braintrust \
+      --concurrency "$GEPA_AB_CONCURRENCY"
+  } >>"$LOG" 2>&1
   uv run python -c "
 from evals import experiment_log
 task = '${task#eval:}'
+model = '${GEPA_AB_MODEL}'
 pv = '${prompt_ver}' or None
-runs = [r for r in experiment_log.load_runs() if r.get('task')==task and r.get('mode')=='real']
+runs = [
+    r for r in experiment_log.load_runs()
+    if r.get('task') == task and r.get('mode') == 'real' and r.get('model') == model
+]
 if pv:
-    runs = [r for r in runs if r.get('prompt_version')==pv]
+    runs = [r for r in runs if r.get('prompt_version') == pv]
 else:
     runs = [r for r in runs if not r.get('prompt_version')]
 print(runs[-1]['run_id'] if runs else '')
 "
 }
 
-: >"$LOG"
+if [[ -z "${GEPA_AB_APPEND_LOG:-}" ]]; then
+  : >"$LOG"
+fi
 RESULT_LINES=()
 if [[ -n "${GEPA_AB_SEED_RESULTS:-}" ]]; then
   while IFS= read -r line; do

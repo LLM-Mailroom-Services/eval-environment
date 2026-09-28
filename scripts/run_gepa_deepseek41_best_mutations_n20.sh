@@ -3,6 +3,9 @@
 # Reuses 20260927 DeepSeek v1 runs (same draw as SAND-027 Leg B). Records compare_runs --record.
 set -euo pipefail
 cd "$(dirname "$0")/.."
+# shellcheck disable=SC1091
+source scripts/gepa_spend_guard.sh
+gepa_require_spend_approval
 export PYTHONUNBUFFERED=1
 export BRAINTRUST_PROJECT="${BRAINTRUST_PROJECT:-Mailroom-Evals}"
 export GEPA_AB_MODEL="${GEPA_AB_MODEL:-deepseek/deepseek-v4.1-flash}"

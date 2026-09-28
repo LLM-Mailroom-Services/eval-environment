@@ -2,6 +2,9 @@
 # Complete N=20 seed-42 v1 vs v2 for contracts/merger/corporate; v4 candidate compares (budget-conscious).
 set -euo pipefail
 cd "$(dirname "$0")/.."
+# shellcheck disable=SC1091
+source scripts/gepa_spend_guard.sh
+gepa_require_spend_approval
 export PYTHONUNBUFFERED=1
 set -a; [ -f .env ] && source .env; set +a
 LOG=/tmp/gepa-n20-v4.log

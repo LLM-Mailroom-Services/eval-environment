@@ -29,6 +29,8 @@
 <text x="107.36" y="265.01" font-size="10" fill="#3d3d3a" text-anchor="middle">$1.46</text>
 <rect x="122.2" y="233.79" width="25.68" height="68.21" fill="#2a78d6" rx="2"/>
 <text x="135.04" y="229.79" font-size="10" fill="#3d3d3a" text-anchor="middle">$3.02</text>
+<rect x="149.88" y="292.2" width="25.68" height="9.8" fill="#8a5cd6" rx="2"/>
+<text x="162.72" y="288.2" font-size="10" fill="#3d3d3a" text-anchor="middle">$0.43</text>
 <text x="121.2" y="318" font-size="11" fill="#3d3d3a" text-anchor="middle">Correspondence</text>
 <rect x="205.24" y="286.76" width="25.68" height="15.24" fill="#1baf7a" rx="2"/>
 <text x="218.08" y="282.76" font-size="10" fill="#3d3d3a" text-anchor="middle">$0.67</text>
@@ -36,6 +38,8 @@
 <text x="245.76" y="270.08" font-size="10" fill="#3d3d3a" text-anchor="middle">$1.24</text>
 <rect x="260.6" y="265.79" width="25.68" height="36.21" fill="#2a78d6" rx="2"/>
 <text x="273.44" y="261.79" font-size="10" fill="#3d3d3a" text-anchor="middle">$1.60</text>
+<rect x="288.28" y="290.08" width="25.68" height="11.92" fill="#8a5cd6" rx="2"/>
+<text x="301.12" y="286.08" font-size="10" fill="#3d3d3a" text-anchor="middle">$0.53</text>
 <text x="259.6" y="318" font-size="11" fill="#3d3d3a" text-anchor="middle">Insurance claims</text>
 <rect x="343.64" y="279.77" width="25.68" height="22.23" fill="#1baf7a" rx="2"/>
 <text x="356.48" y="275.77" font-size="10" fill="#3d3d3a" text-anchor="middle">$0.98</text>
@@ -43,6 +47,8 @@
 <text x="384.16" y="248.69" font-size="10" fill="#3d3d3a" text-anchor="middle">$2.18</text>
 <rect x="399" y="233.96" width="25.68" height="68.04" fill="#2a78d6" rx="2"/>
 <text x="411.84" y="229.96" font-size="10" fill="#3d3d3a" text-anchor="middle">$3.01</text>
+<rect x="426.68" y="286.04" width="25.68" height="15.96" fill="#8a5cd6" rx="2"/>
+<text x="439.52" y="282.04" font-size="10" fill="#3d3d3a" text-anchor="middle">$0.71</text>
 <text x="398" y="318" font-size="11" fill="#3d3d3a" text-anchor="middle">Corporate records</text>
 <rect x="482.04" y="245.24" width="25.68" height="56.76" fill="#1baf7a" rx="2"/>
 <text x="494.88" y="241.24" font-size="10" fill="#3d3d3a" text-anchor="middle">$2.51</text>
@@ -50,13 +56,15 @@
 <text x="522.56" y="214.42" font-size="10" fill="#3d3d3a" text-anchor="middle">$3.70</text>
 <rect x="537.4" y="173.08" width="25.68" height="128.92" fill="#2a78d6" rx="2"/>
 <text x="550.24" y="169.08" font-size="10" fill="#3d3d3a" text-anchor="middle">$5.70</text>
+<rect x="565.08" y="265.15" width="25.68" height="36.85" fill="#8a5cd6" rx="2"/>
+<text x="577.92" y="261.15" font-size="10" fill="#3d3d3a" text-anchor="middle">$1.63</text>
 <text x="536.4" y="318" font-size="11" fill="#3d3d3a" text-anchor="middle">Contracts</text>
-<rect x="620.44" y="216.97" width="25.68" height="85.03" fill="#1baf7a" rx="2"/>
-<text x="633.28" y="212.97" font-size="10" fill="#3d3d3a" text-anchor="middle">$3.76</text>
+<rect x="620.44" y="190.71" width="25.68" height="111.29" fill="#1baf7a" rx="2"/>
+<text x="633.28" y="186.71" font-size="10" fill="#3d3d3a" text-anchor="middle">$4.92</text>
 <rect x="648.12" y="101.5" width="25.68" height="200.5" fill="#eb6834" rx="2"/>
 <text x="660.96" y="97.5" font-size="10" fill="#3d3d3a" text-anchor="middle">$8.87</text>
-<rect x="703.48" y="237" width="25.68" height="65" fill="#8a5cd6" rx="2"/>
-<text x="716.32" y="233" font-size="10" fill="#3d3d3a" text-anchor="middle">$2.88</text>
+<rect x="703.48" y="229" width="25.68" height="73" fill="#8a5cd6" rx="2"/>
+<text x="716.32" y="225" font-size="10" fill="#3d3d3a" text-anchor="middle">$3.23</text>
 <text x="674.8" y="318" font-size="11" fill="#3d3d3a" text-anchor="middle">Merger agreements</text>
 <line x1="52" x2="744" y1="302" y2="302" stroke="#c3c2b7"/>
 </svg>

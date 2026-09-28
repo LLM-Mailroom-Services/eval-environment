@@ -14,7 +14,7 @@ SVG = "{http://www.w3.org/2000/svg}"
 
 
 def _run(run_id, task, model, n, started, error=None, **metrics):
-    return {"run_id": run_id, "task": task, "model": model, "mode": "real", "error": error,
+    return {"run_id": run_id, "task": task, "model": model, "mode": "real", "error": error, "prompt_lineage": "frozen",
             "started_at": started, "metrics": {"n": n, **metrics},
             "performance": {"cost_usd_total": 0.01 * n}}
 
@@ -43,12 +43,14 @@ def _snapshot():
         _run("r2", "contracts", "qwen/qwen3-8b", 20, "2026-09-27T01:00:00", overall_score=0.6),  # latest wins
         _run("r3", "contracts", "deepseek/deepseek-v4.1-flash", 5, "2026-09-27T02:00:00", overall_score=0.9),  # n < 20
         _run("r4", "contracts", "ibm-granite/granite-4.2-8b", 20, "2026-09-27T03:00:00", error="boom"),
+        {**_run("r5", "contracts", "qwen/qwen3-8b", 20, "2026-09-28T01:00:00", overall_score=0.9),
+         "prompt_lineage": "mutation"},  # GEPA candidate prompt: not the baseline
         _run("c1", "classification", "deepseek/deepseek-v4.1-flash", 1, "2026-09-27T04:00:00"),  # resume segment
         _run("c1", "classification", "deepseek/deepseek-v4.1-flash", 100, "2026-09-27T04:00:00"),
         _run("c2", "classification", "qwen/qwen3-8b", 20, "2026-09-27T05:00:00"),  # below the sorter floor
         _run("c3", "classification", "ibm-granite/granite-4.2-8b", 100, "2026-09-27T06:00:00"),
     ]
-    cases = {"r1": _ext_cases(20, 0.2), "r2": _ext_cases(20, 0.5), "r3": _ext_cases(5, 0.9), "r4": [],
+    cases = {"r1": _ext_cases(20, 0.2), "r2": _ext_cases(20, 0.5), "r3": _ext_cases(5, 0.9), "r4": [], "r5": _ext_cases(20, 0.9),
              "c1": _cls_cases(100), "c2": _cls_cases(20), "c3": _cls_cases(100, collapse=True)}
     return {"generated_at": "2026-09-28T00:00:00+00:00", "runs": runs, "cases": cases}
 

@@ -14,8 +14,9 @@ summaries and case rows the Vercel viewer reads):
 - LLM sorter: reliability diagram of stated confidence against accuracy, with ECE
 - surrogate ALE of latency on extraction score, per document type
 
-Each (task, model) is charted from its latest real run with at least
-``MIN_N`` scored cases and no run error. Everything is computed from the
+Each (task, model) is charted from its latest real run on the frozen prompt
+lineage with at least ``MIN_N`` scored cases and no run error, so GEPA
+mutation A/B runs never stand in for a model's baseline. Everything is computed from the
 snapshot; nothing is hand-entered.
 
     python scripts/render_report_charts.py            # write web/data/charts + reports/charts/README.md
@@ -58,14 +59,16 @@ def model_color(m: str) -> str:
 def latest_runs(snap: dict) -> dict[tuple[str, str], dict]:
     """{(task, model): run} for the latest usable real run of each pair.
 
-    A resumed run appears once per segment under one run_id; the record with
-    the most scored cases wins.
+    Only frozen-lineage runs count: GEPA mutation runs score candidate
+    prompts, not the model's baseline. A resumed run appears once per segment
+    under one run_id; the record with the most scored cases wins.
     """
     best: dict[tuple[str, str], dict] = {}
     for r in snap["runs"]:
         n = (r.get("metrics") or {}).get("n") or 0
         floor = CLS_MIN_N if r.get("task") == "classification" else MIN_N
-        if r.get("mode") != "real" or r.get("error") or not r.get("model") or n < floor:
+        if r.get("mode") != "real" or r.get("error") or not r.get("model") or n < floor \
+                or r.get("prompt_lineage") != "frozen":
             continue
         if r["run_id"] not in snap.get("cases", {}):
             continue
@@ -142,7 +145,7 @@ def render(snap: dict) -> dict[str, tuple[str, str]]:
         [(model_label(m), model_color(m), [ext(t, m, lambda r: r["metrics"].get("overall_score")) for t in tasks])
          for m in ext_models],
         ymax=1.0, fmt=lambda v: f"{v:.2f}", tick_fmt=lambda t: f"{t:.1f}",
-        subtitle=f"Mean overall_score of each model's latest real run (n ≥ {MIN_N}) per type"))
+        subtitle=f"Mean overall_score of each model's latest real frozen-prompt run (n ≥ {MIN_N}) per type"))
 
     cap = "Per-document extraction scores"
     out["extraction_per_document.svg"] = (cap, sc.strips(

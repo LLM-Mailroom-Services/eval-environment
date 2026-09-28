@@ -26,6 +26,10 @@ Earlier N=20 pairs for correspondence and insurance_claims are also recorded in 
 
 ## Budget
 
-**~$1.08 / $2.00** estimated OpenRouter spend on 2026-09-28 GEPA runs. Details: `reports/gepa/gepa_ab_budget_status.md`.
+**~$1.36 / $2.00** estimated OpenRouter spend on 2026-09-28 GEPA runs. Details: `reports/gepa/gepa_ab_budget_status.md` and `reports/gepa/gepa_ab_final_report.md`.
+
+## N=20 v2 (completed for all five)
+
+Contracts, merger, and corporate N=20 pairs were recorded on 2026-09-28 (`20260928T074850Z`–`20260928T080826Z` baselines). Correspondence and insurance N=20 pairs were recorded earlier the same day.
 
 Correspondence v2 at **N=100** (same seed): REJECT (Δ −0.0084, CI lo −0.0193) — `20260928T072519Z` vs `20260928T073402Z`.

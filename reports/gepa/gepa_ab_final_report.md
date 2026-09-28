@@ -9,7 +9,8 @@
 
 - **Spend:** ~**$1.36** estimated OpenRouter (under $2 cap, but over the intended mutation budget).
 - **Promotions:** **1 / 5** — **`contracts_specialist_v3`** accepted vs frozen v1 baseline.
-- **Deliverables:** full comparison archive, experiment-log records, mutation lineage, automation fixes, draft PR **#64**.
+- **Deliverables:** on **`main`** via PR **#64** (merged 2026-09-28): comparisons, experiment log, mutations, scripts.
+- **Spend policy:** **STOP** on further `--real` runs — see [gepa_ab_budget_status.md](gepa_ab_budget_status.md); preflight honors `EVALS_REAL_RUNS_DISABLED` / `EVALS_SPEND_APPROVAL_REQUIRED`.
 
 ## Accepted promotion
 
@@ -54,8 +55,8 @@ Documented in experiment log; all **REJECT** except contracts v3 above. Notable:
 | Merger/corporate v2 drafted & tested | **Yes** |
 | Gate 5 (+120 chars specialists) | **Yes** |
 | Publish `reports/gepa-comparisons` + log records | **Yes** |
-| Commit via PR to main | **PR #64** (CI green; rebase onto main in progress) |
-| **≥3/5 promotions** | **No (1/5)** |
+| Commit via PR to main | **Yes** — `8459aa6` |
+| **≥3/5 promotions** | **No (1/5)** — blocked unless budget re-opened |
 
 ## DeepSeek v4.1 Flash cross-check (N=20, seed 42)
 

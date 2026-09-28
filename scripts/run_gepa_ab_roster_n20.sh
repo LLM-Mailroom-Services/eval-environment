@@ -4,6 +4,9 @@
 # Override sample: GEPA_AB_SAMPLE (default 50 for CI surface). Hard cap: GEPA_AB_BUDGET_USD.
 set -euo pipefail
 cd "$(dirname "$0")/.."
+# shellcheck disable=SC1091
+source scripts/gepa_spend_guard.sh
+gepa_require_spend_approval
 export PYTHONUNBUFFERED=1
 export BRAINTRUST_PROJECT="${BRAINTRUST_PROJECT:-Mailroom-Evals}"
 export GEPA_AB_MODEL="${GEPA_AB_MODEL:-qwen/qwen3.7-flash}"

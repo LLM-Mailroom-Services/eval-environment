@@ -59,6 +59,8 @@ specialty skill:
 10. **Refresh the viewer snapshot.** When the experiment log changes,
     re-run `scripts/export_site_snapshot.py` and commit
     `web/data/snapshot.json` — the Vercel viewer reads only that file.
+    Then re-run `scripts/render_report_charts.py` and commit
+    `web/data/charts/` + `reports/charts/README.md` (CI checks both).
 
 ## Commands
 
@@ -102,6 +104,9 @@ upstream, then re-copy. Tests isolate the beacon dir (conftest autouse).
 | `BRAINTRUST_API_KEY` / `BRAINTRUST_PROJECT` | Braintrust sink (auto when set) |
 | `PHOENIX_ENDPOINT` / `PHOENIX_PROJECT` | Phoenix sink (local default) |
 | `EVALS_TRACE_BACKEND` | `auto` default; `none` in tests |
+| `EVALS_REAL_RUNS_DISABLED` | set `1` to block all `--real` runs at preflight |
+| `EVALS_SPEND_APPROVAL_REQUIRED` | when `1`, require `EVALS_SPEND_APPROVED=1` or `EVALS_SPEND_APPROVED_USD` before `--real` |
+| `GEPA_SPEND_APPROVED` | must be `1` before any `scripts/run_gepa_*.sh` paid eval |
 | `EXPERIMENT_LOG_PATH` / `EXPERIMENT_LOG_MD_PATH` / `EVALS_EXPERIMENTS_DIR` | tests redirect all three |
 
 `OBSERVABILITY_PROVIDER` and `MAILROOM_BASE_DIR` are set BY the runner — do

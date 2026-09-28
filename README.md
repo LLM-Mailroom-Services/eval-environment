@@ -278,7 +278,15 @@ markdown). The Vercel viewer additionally reads one generated snapshot:
 ```bash
 uv run python scripts/export_site_snapshot.py          # regenerate web/data/snapshot.json
 uv run python scripts/export_site_snapshot.py --check  # exit 1 if stale vs the log
+uv run python scripts/render_report_charts.py          # re-render the Charts tab from the snapshot
+uv run python scripts/render_report_charts.py --check  # exit 1 if charts are stale
 ```
+
+The Charts tab (and the same SVGs in [reports/charts](reports/charts/README.md))
+shows per-document-type performance from the snapshot: extraction score by
+type and model, per-document and per-subclass score strips, API cost per
+document, the LLM sorter's confusion matrices, subclass accuracy, collapse
+signal and confidence calibration, and a surrogate ALE of latency on score.
 
 Refresh discipline: whenever the experiment log changes, re-export and
 commit the snapshot — the viewer then shows it on the next Vercel deploy.

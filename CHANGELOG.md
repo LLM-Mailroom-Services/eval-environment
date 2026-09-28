@@ -5,6 +5,15 @@ All notable changes to mailroom-evals are documented here. Format based on
 
 ## [Unreleased]
 
+### Fixed
+
+- **Resumed-run wall time** — API-leg reports label `duration_s` as the resume
+  segment only when `params.skipped_already_run` > 0, and omit the
+  serial-vs-batched ratio (it divided a 100-case latency sum by a 1-case wall
+  time on `20260927T101544Z-eval-classification`). Dated correction notes on
+  that run and on the `qwen3-8b` merger run, which was served by
+  `qwen/qwen3.7-flash`.
+
 ### Changed
 
 - **Report excellence (sandbox parity)** — API-leg comparison reports, calibration

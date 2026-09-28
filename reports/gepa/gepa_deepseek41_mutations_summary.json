@@ -1,0 +1,59 @@
+{
+  "model": "deepseek/deepseek-v4.1-flash",
+  "seed": 42,
+  "n": 20,
+  "baselines": "20260927 DeepSeek v1 frozen (seed 42)",
+  "results": [
+    {
+      "task": "correspondence",
+      "baseline": "20260927T105317Z-eval-correspondence",
+      "candidate": "20260928T084907Z-eval-correspondence",
+      "mutation": "correspondence_specialist_v2",
+      "accepted": "no",
+      "delta": -0.0172,
+      "ci_lo": -0.0453,
+      "ci_hi": 0.0034
+    },
+    {
+      "task": "insurance_claims",
+      "baseline": "20260927T105400Z-eval-insurance_claims",
+      "candidate": "20260928T085028Z-eval-insurance_claims",
+      "mutation": "insurance_claims_specialist_v2",
+      "accepted": "no",
+      "delta": -0.0062,
+      "ci_lo": -0.0166,
+      "ci_hi": 0.0026
+    },
+    {
+      "task": "contracts",
+      "baseline": "20260927T105549Z-eval-contracts",
+      "candidate": "20260928T085148Z-eval-contracts",
+      "mutation": "contracts_specialist_v3",
+      "accepted": "no",
+      "delta": 0.1082,
+      "ci_lo": -0.0354,
+      "ci_hi": 0.2551
+    },
+    {
+      "task": "merger_agreement",
+      "baseline": "20260927T110153Z-eval-merger_agreement",
+      "candidate": "20260928T085426Z-eval-merger_agreement",
+      "mutation": "merger_agreement_specialist_v2",
+      "accepted": "no",
+      "delta": 0.1861,
+      "ci_lo": -0.0525,
+      "ci_hi": 0.4216
+    },
+    {
+      "task": "corporate_records",
+      "baseline": "20260927T110828Z-eval-corporate_records",
+      "candidate": "20260928T085821Z-eval-corporate_records",
+      "mutation": "corporate_records_specialist_v2",
+      "accepted": "yes",
+      "delta": 0.0209,
+      "ci_lo": 0.0006,
+      "ci_hi": 0.0402
+    }
+  ],
+  "promotions_accepted": 1
+}

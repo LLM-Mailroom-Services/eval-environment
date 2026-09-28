@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "classifier": {
+      "url": "https://classifier.dev/mcp",
+      "headers": {
+        "Authorization": "Bearer ${env:CLASSIFIER_API_KEY}"
+      }
+    }
+  }
+}

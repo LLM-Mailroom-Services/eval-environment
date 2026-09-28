@@ -306,10 +306,22 @@ def render_reproduce(summary: dict[str, Any]) -> list[str]:
     return lines
 
 
+def _repo_rel(path: str) -> str:
+    """Strip absolute workspace prefixes so committed reports stay portable."""
+    p = path.replace("\\", "/")
+    for marker in ("/eval-environment/", "/workspace/"):
+        if marker in p:
+            return p.split(marker, 1)[1]
+    if p.startswith("/"):
+        return p.lstrip("/")
+    return p
+
+
 def render_artifacts(summary: dict[str, Any]) -> list[str]:
     run_id = summary.get("run_id") or "<run_id>"
     dataset = summary.get("dataset") or {}
     manifest = dataset.get("subset_manifest_path") or f"data/experiments/{run_id}/subset_manifest.json"
+    manifest = _repo_rel(str(manifest))
     lines = [
         "## Artifacts",
         "",
@@ -322,7 +334,7 @@ def render_artifacts(summary: dict[str, Any]) -> list[str]:
     ]
     comp = summary.get("comparison_report")
     if comp:
-        lines.append(f"| `{comp}` | Modal-comparable API-leg write-up |")
+        lines.append(f"| `{_repo_rel(str(comp))}` | Modal-comparable API-leg write-up |")
     lines.append("")
     return lines
 

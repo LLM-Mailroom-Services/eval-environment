@@ -158,7 +158,7 @@ uv run python scripts/render_comparison_reports.py --run-id 20260927T054211Z-eva
 | `data/experiments/20260927T054211Z-eval-insurance_claims/cases.jsonl` | per-case rows (scores, tokens, latency) |
 | `data/experiments/20260927T054211Z-eval-insurance_claims/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
 | `reports/experiment_log/20260927T054211Z-eval-insurance_claims.md` | experiment-log markdown mirror |
-| `/workspace/reports/api-comparisons/granite-4.2-8b/insurance_claims/RUN-20-INSURANCE_CLAIM-GRANITE-4.2-8B-REPORT.md` | Modal-comparable API-leg write-up |
+| `reports/api-comparisons/granite-4.2-8b/insurance_claims/RUN-20-INSURANCE_CLAIM-GRANITE-4.2-8B-REPORT.md` | Modal-comparable API-leg write-up |
 
 ## Caveats / notes
 

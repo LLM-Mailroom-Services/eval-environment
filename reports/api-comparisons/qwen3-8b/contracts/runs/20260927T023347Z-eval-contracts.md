@@ -170,7 +170,7 @@ uv run python scripts/render_comparison_reports.py --run-id 20260927T023347Z-eva
 | `data/experiments/20260927T023347Z-eval-contracts/cases.jsonl` | per-case rows (scores, tokens, latency) |
 | `data/experiments/20260927T023347Z-eval-contracts/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
 | `reports/experiment_log/20260927T023347Z-eval-contracts.md` | experiment-log markdown mirror |
-| `/workspace/reports/api-comparisons/qwen3-8b/RUN-20-CONTRACT-QWEN3-8B-REPORT.md` | Modal-comparable API-leg write-up |
+| `reports/api-comparisons/qwen3-8b/RUN-20-CONTRACT-QWEN3-8B-REPORT.md` | Modal-comparable API-leg write-up |
 
 ## Caveats / notes
 

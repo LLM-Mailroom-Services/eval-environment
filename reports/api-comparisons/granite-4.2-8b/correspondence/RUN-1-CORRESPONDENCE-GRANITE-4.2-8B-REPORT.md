@@ -132,7 +132,7 @@ uv run python scripts/render_comparison_reports.py --run-id 20260927T051851Z-eva
 | `data/experiments/20260927T051851Z-eval-correspondence/cases.jsonl` | per-case rows (scores, tokens, latency) |
 | `data/experiments/20260927T051851Z-eval-correspondence/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
 | `reports/experiment_log/20260927T051851Z-eval-correspondence.md` | experiment-log markdown mirror |
-| `/workspace/reports/api-comparisons/granite-4.2-8b/correspondence/RUN-1-CORRESPONDENCE-GRANITE-4.2-8B-REPORT.md` | Modal-comparable API-leg write-up |
+| `reports/api-comparisons/granite-4.2-8b/correspondence/RUN-1-CORRESPONDENCE-GRANITE-4.2-8B-REPORT.md` | Modal-comparable API-leg write-up |
 
 ## Caveats / notes
 

@@ -161,7 +161,7 @@ uv run python scripts/render_comparison_reports.py --run-id 20260927T060322Z-eva
 | `data/experiments/20260927T060322Z-eval-merger_agreement/cases.jsonl` | per-case rows (scores, tokens, latency) |
 | `data/experiments/20260927T060322Z-eval-merger_agreement/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
 | `reports/experiment_log/20260927T060322Z-eval-merger_agreement.md` | experiment-log markdown mirror |
-| `/workspace/reports/api-comparisons/granite-4.2-8b/merger_agreement/RUN-20-MERGER_AGREEMENT-GRANITE-4.2-8B-REPORT.md` | Modal-comparable API-leg write-up |
+| `reports/api-comparisons/granite-4.2-8b/merger_agreement/RUN-20-MERGER_AGREEMENT-GRANITE-4.2-8B-REPORT.md` | Modal-comparable API-leg write-up |
 
 ## Caveats / notes
 

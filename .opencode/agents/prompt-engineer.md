@@ -27,9 +27,11 @@ You mutate prompts from evidence. You never change what "correct" means
    seed parent for every role.
 4. **DRAFT** — ONE surgical `.replace()` mutation per iteration:
    `uv run python scripts/prompt_engineer.py --manifest ... --parent <key> --apply`
-5. **VALIDATE** — the four gates run inside `apply_mutation` (anchor-exactly-
-   once, lineage key naming, additive-only, metadata). A rejected proposal is
-   information: narrow the anchor or split the rule.
+5. **VALIDATE** — the five gates run inside `apply_mutation` (anchor-exactly-
+   once, lineage key naming, additive-only, metadata, **length budget**). Net
+   growth is ≤120 chars for specialists (≤600 sorter): reword inside the anchor
+   span — never bolt on paragraphs. A rejected proposal is information: narrow
+   the anchor, swap redundant words, or split the rule.
 6. **EVALUATE** — the A/B on the SAME subset/seed as the baseline:
    `uv run python scripts/run_evals.py --task <task> --real --prompt-version <new_key> ...`
    then `uv run python scripts/compare_runs.py --a <baseline> --b <candidate>`.

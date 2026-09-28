@@ -95,13 +95,15 @@ arXiv 2507.19457):
 OBSERVE (score_run.py --export-failures → data/manifests/<run>.failures.jsonl)
   → DECOMPOSE (clusters + evidence) → SELECT PARENT (Pareto frontier from the log)
   → DRAFT (ONE surgical .replace() per iteration)
-  → VALIDATE (4 gates) → APPLY (prompts/mutations.json + prompts/<key>.md)
+  → VALIDATE (5 gates) → APPLY (prompts/mutations.json + prompts/<key>.md)
   → EVALUATE (same subset/seed A/B) → ACCEPT (paired delta CI lo > 0)
 ```
 
-**The four gates** (`evals.prompts.mutations.validate_mutation`): anchor
+**The five gates** (`evals.prompts.mutations.validate_mutation`): anchor
 occurs exactly once · new key unused + lineage naming (`<role>_v<N+1>`) ·
-additive-only (parent preserved outside the anchor span) · metadata recorded.
+additive-only (parent preserved outside the anchor span) · metadata recorded ·
+**length budget** (net growth ≤120 chars for specialists, ≤600 for sorter —
+surgical in-anchor edits; prompt size is a deployment constraint).
 A failing proposal is rejected, never applied.
 
 **Tools**: `scripts/prompt_engineer.py` (DRAFT, `--dry-run`/`--apply`),

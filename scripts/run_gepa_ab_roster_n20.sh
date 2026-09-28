@@ -137,8 +137,17 @@ for spec in "${SPECS[@]}"; do
     echo "SKIP compare — missing run_id" | tee -a "$LOG"
     continue
   fi
-  CMP_OUT="$(uv run python scripts/compare_runs.py --a "$BASE_RUN" --b "$CAND_RUN" --record --json 2>&1 | tee -a "$LOG")"
-  ACCEPTED="$(echo "$CMP_OUT" | uv run python -c "import sys,json; d=json.load(sys.stdin); p=(d.get('paired_case_deltas') or {}); v=next(iter(p.values()),{}); print('yes' if v.get('ci_lo',0)>0 else 'no')" 2>/dev/null || echo "unknown")"
+  CMP_JSON="$(mktemp)"
+  uv run python scripts/compare_runs.py --a "$BASE_RUN" --b "$CAND_RUN" --record --json >"$CMP_JSON" 2>>"$LOG"
+  cat "$CMP_JSON" >>"$LOG"
+  ACCEPTED="$(CMP_JSON="$CMP_JSON" uv run python -c "
+import json, os
+d = json.load(open(os.environ['CMP_JSON']))
+p = d.get('paired_case_deltas') or {}
+v = next(iter(p.values()), {})
+print('yes' if (v.get('ci_lo') or 0) > 0 else 'no')
+" 2>/dev/null || echo "unknown")"
+  rm -f "$CMP_JSON"
   RESULT_LINES+=("{\"task\":\"${TASK#eval:}\",\"baseline\":\"$BASE_RUN\",\"candidate\":\"$CAND_RUN\",\"v2\":\"$V2\",\"accepted\":\"$ACCEPTED\"}")
 done
 

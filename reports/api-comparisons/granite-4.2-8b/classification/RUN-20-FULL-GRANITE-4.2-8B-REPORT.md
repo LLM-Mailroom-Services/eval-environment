@@ -90,6 +90,18 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 |---|---|---|---|---|---|---|
 | `sorter` | 118 | 933912 | 33329 | 967241 | 0.0644 | ibm-granite/granite-4.2-8b |
 
+## Analyst insights & findings
+
+- **Concurrency efficiency:** Σ latency 537.2 s over wall 184.3 s = **2.91×** effective parallelism at c8 (36% of the ideal 8×).
+- **Tail:** slowest doc `corpus:ground_truth:train:contract_94_merger_agreement.txt` (mixed_cash_stock_election) 174.0 s = 94% of wall — p95/p50 = 30.28×.
+- **Prompt length vs latency:** Pearson r = 0.94 across 20 docs (prefill-bound).
+- **Decode budget:** mean completion 1666 tok/doc, mean prompt 46696 tok/doc.
+- **Field-level extraction:** 0/20 docs have extraction F1 = 0 — when non-zero overall scores still appear, entity/structure components may carry the headline.
+
+## Figures
+
+Static SVG charts (latency bar, subclass means) are generated in the Modal sandbox repo (`scripts/sand032/report.py` + `/dataviz`). This API-leg report keeps the **table views**: **Strata (subclass)** and **Per-document scores** below.
+
 ## Per-document scores
 
 | # | doc id | subclass | overall | f1 | latency s | tok in | tok out | error |
@@ -114,6 +126,24 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | 18 | `corpus:ground_truth:train:inpatient:196641176967981:1.txt` | inpatient | — | — | 2.6248 | 6094 | 159 | — |
 | 19 | `corpus:ground_truth:train:0001047469-06-011763_a2173128zex-3_1.htm` | charter_amendment | — | — | 4.9986 | 14430 | 336 | — |
 | 20 | `corpus:ground_truth:train:outpatient:542502281397875:1.txt` | outpatient | — | — | 3.0053 | 6003 | 190 | — |
+
+## Reproduce
+
+```bash
+uv run python scripts/run_evals.py --task eval:classification --real --sample 20 --seed 42 --concurrency 8 --decode-profile granite-4.2-8b --subset "full"
+uv run python scripts/score_run.py --run-id 20260927T070900Z-eval-classification --recompute
+uv run python scripts/render_comparison_reports.py --run-id 20260927T070900Z-eval-classification
+```
+
+## Artifacts
+
+| path | role |
+| --- | --- |
+| `reports/experiment_log.jsonl` | append-only run summary (this run_id) |
+| `data/experiments/20260927T070900Z-eval-classification/cases.jsonl` | per-case rows (scores, tokens, latency) |
+| `data/experiments/20260927T070900Z-eval-classification/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
+| `reports/experiment_log/20260927T070900Z-eval-classification.md` | experiment-log markdown mirror |
+| `reports/api-comparisons/granite-4.2-8b/classification/RUN-20-FULL-GRANITE-4.2-8B-REPORT.md` | Modal-comparable API-leg write-up |
 
 ## Caveats / notes
 

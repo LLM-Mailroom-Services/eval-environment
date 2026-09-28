@@ -54,6 +54,7 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | overall_score | 0.7974 |
 | scorer_errors | 0 |
 | thinking_recovered (stripped + re-scored) | 0 |
+| overall (per-doc) | **0.7974** (sd 0.1022, min 0.6515, max 0.9666) |
 
 ## Serving / cost metrics (API leg)
 
@@ -89,6 +90,31 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 |---|---|---|---|---|---|---|
 | `insurance_claims_specialist` | 20 | 40636 | 41615 | 82251 | 0.0135 | deepseek/deepseek-v4.1-flash |
 
+## Analyst insights & findings
+
+- **Concurrency efficiency:** Σ latency 302.0 s over wall 107.3 s = **2.81×** effective parallelism at c8 (35% of the ideal 8×).
+- **Tail:** slowest doc `corpus:ground_truth:train:carrier:887623388590174.txt` (carrier) 92.1 s = 86% of wall — p95/p50 = 9.98×.
+- **Prompt length vs latency:** Pearson r = 0.65 across 20 docs (prefill-bound).
+- **Decode budget:** mean completion 2081 tok/doc, mean prompt 2032 tok/doc.
+- **Subclass spread:** best `auto` 0.912 (n=8), worst `property` 0.651 (n=1).
+- **Field-level extraction:** 0/20 docs have extraction F1 = 0 — when non-zero overall scores still appear, entity/structure components may carry the headline.
+
+## Figures
+
+Static SVG charts (latency bar, subclass means) are generated in the Modal sandbox repo (`scripts/sand032/report.py` + `/dataviz`). This API-leg report keeps the **table views**: **Strata (subclass)** and **Per-document scores** below.
+
+## Strata (subclass)
+
+| subclass | n | mean overall |
+| --- | ---: | ---: |
+| auto | 8 | 0.9117 |
+| pde | 5 | 0.7058 |
+| carrier | 3 | 0.7310 |
+| outpatient | 2 | 0.7287 |
+| inpatient | 1 | 0.8227 |
+| property | 1 | 0.6515 |
+| **total** | **20** | **0.7974** |
+
 ## Per-document scores
 
 | # | doc id | subclass | overall | f1 | latency s | tok in | tok out | error |
@@ -115,6 +141,24 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | 20 | `corpus:ground_truth:train:property:266855223.txt` | property | 0.6515 | 0.4800 | 79.7450 | 4384 | 5473 | — |
 
 - scored rows: 20/20; min=0.6515 max=0.9666 mean=0.7974
+
+## Reproduce
+
+```bash
+uv run python scripts/run_evals.py --task eval:insurance_claims --real --sample 20 --seed 42 --concurrency 8 --subset "class:insurance_claim"
+uv run python scripts/score_run.py --run-id 20260927T105400Z-eval-insurance_claims --recompute
+uv run python scripts/render_comparison_reports.py --run-id 20260927T105400Z-eval-insurance_claims
+```
+
+## Artifacts
+
+| path | role |
+| --- | --- |
+| `reports/experiment_log.jsonl` | append-only run summary (this run_id) |
+| `data/experiments/20260927T105400Z-eval-insurance_claims/cases.jsonl` | per-case rows (scores, tokens, latency) |
+| `data/experiments/20260927T105400Z-eval-insurance_claims/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
+| `reports/experiment_log/20260927T105400Z-eval-insurance_claims.md` | experiment-log markdown mirror |
+| `reports/api-comparisons/deepseek-v4.1-flash/insurance_claims/RUN-20-INSURANCE_CLAIM-DEEPSEEK-V4.1-FLASH-REPORT.md` | Modal-comparable API-leg write-up |
 
 ## Caveats / notes
 

@@ -163,6 +163,10 @@ def test_render_report_carries_modal_comparable_metrics():
         "Run configuration", "Runtime performance",
         "Per-agent usage", "Per-document scores",
         "docs ok / total",
+        "Analyst insights & findings",
+        "Strata (subclass)",
+        "## Reproduce",
+        "## Artifacts",
     ):
         assert needle in text, f"missing comparable metric: {needle}"
     # Per-doc rows keep the Modal columns incl. the parse_error flag.

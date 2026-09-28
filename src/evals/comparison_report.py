@@ -59,6 +59,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from evals import run_report_analytics as rra
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_REPORTS_DIR = REPO_ROOT / "reports" / "api-comparisons"
 
@@ -403,6 +405,12 @@ def render_report(summary: dict[str, Any], case_rows: list[dict[str, Any]]) -> s
         if isinstance(value, (int, float)) and not isinstance(value, bool):
             lines.append(f"| {key} | {round(value, 5)} |")
     lines.append(f"| thinking_recovered (stripped + re-scored) | {params.get('thinking_recovered', 0)} |")
+    stats = rra.headline_score_stats(case_rows)
+    if stats.get("mean") is not None:
+        lines.append(
+            f"| overall (per-doc) | **{stats['mean']:.4f}** "
+            f"(sd {stats['sd']:.4f}, min {stats['min']:.4f}, max {stats['max']:.4f}) |"
+        )
     lines.append("")
 
     lines.append("## Serving / cost metrics (API leg)")
@@ -458,6 +466,13 @@ def render_report(summary: dict[str, Any], case_rows: list[dict[str, Any]]) -> s
             )
         lines.append("")
 
+    lines.extend(
+        rra.render_analyst_insights(summary, case_rows, wall=wall, p50=p50, p95=p95)
+    )
+    lines.extend(rra.render_scoring_method(summary, case_rows))
+    lines.extend(rra.render_figures_note())
+    lines.extend(rra.render_strata(case_rows))
+
     lines.append("## Per-document scores")
     lines.append("")
     lines.append("| # | doc id | subclass | overall | f1 | latency s | tok in | tok out | error |")
@@ -491,6 +506,9 @@ def render_report(summary: dict[str, Any], case_rows: list[dict[str, Any]]) -> s
             f"min={min(scored):.4f} max={max(scored):.4f} mean={sum(scored) / len(scored):.4f}"
         )
     lines.append("")
+
+    lines.extend(rra.render_reproduce(summary))
+    lines.extend(rra.render_artifacts(summary))
 
     lines.append("## Caveats / notes")
     lines.append("")

@@ -41,6 +41,30 @@ def render_md(comparison: dict) -> str:
                   "| score key | delta | CI lo | CI hi | n |", "|---|---|---|---|---|"]
         for key, ci in paired.items():
             lines.append(f"| {key} | {ci['delta']} | {ci['ci_lo']} | {ci['ci_hi']} | {ci['n']} |")
+        primary = next(iter(paired.values()), None)
+        if primary is not None:
+            verdict = "candidate **wins** (CI lo > 0)" if primary["ci_lo"] > 0 else "no significant gain (CI crosses 0)"
+            lines += ["", "## Analyst interpretation", "", f"- Primary paired delta: {verdict}."]
+    run_a = comparison.get("run_a", {}).get("run_id", "<run_a>")
+    run_b = comparison.get("run_b", {}).get("run_id", "<run_b>")
+    lines += [
+        "",
+        "## Reproduce",
+        "",
+        "```bash",
+        f"uv run python scripts/compare_runs.py --a {run_a} --b {run_b}",
+        f"uv run python scripts/compare_runs.py --a {run_a} --b {run_b} --md reports/comparisons/",
+        "```",
+        "",
+        "## Artifacts",
+        "",
+        "| path | role |",
+        "| --- | --- |",
+        f"| `data/experiments/{run_a}/cases.jsonl` | baseline case rows |",
+        f"| `data/experiments/{run_b}/cases.jsonl` | candidate case rows |",
+        "| `reports/comparisons/<stamp>-compare.json` | structured comparison (when using `--md`) |",
+        "",
+    ]
     return "\n".join(lines) + "\n"
 
 

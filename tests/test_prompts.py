@@ -287,6 +287,21 @@ def test_mutation_gates_reject():
         )
 
 
+def test_mutation_gate_length_budget():
+    parent = resolve("boss_v1")
+    anchor = "PRODUCTION DOCTRINE (mailroom pipeline):"
+    assert parent.text.count(anchor) == 1
+    bloated = anchor + (" X" * 200)
+    with pytest.raises(mutations.MutationError, match="net prompt growth"):
+        mutations.validate_mutation(
+            parent_key="boss_v1",
+            new_key="boss_v2",
+            anchor=anchor,
+            replacement=bloated,
+            note="test length gate",
+        )
+
+
 def test_all_versions_layer_priority():
     versions = all_versions()
     assert versions["sorter_v1"].lineage == "frozen"

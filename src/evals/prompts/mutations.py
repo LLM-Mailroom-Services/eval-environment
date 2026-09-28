@@ -10,6 +10,8 @@ lineage registry:
     3. ADDITIVE — the mutation is additive-only: parent text preserved as a
        strict prefix (no deletion beyond the anchor span's tail edit).
     4. METADATA — parent + change note recorded; registry stays consistent.
+    5. LENGTH — net prompt growth is bounded (deployment token budget); prefer
+       rewording inside the anchor span over appending new paragraphs.
 
 Mutations are REGISTERED in-process here (and persisted by appending to
 ``lineage.py``'s mutation table via ``persist_mutations``); the frozen
@@ -27,6 +29,16 @@ from typing import Any
 from .lineage import PromptVersion, resolve, sha256
 
 MUTATIONS_PATH = Path(__file__).resolve().parents[3] / "prompts" / "mutations.json"
+
+# Gate 5 default: specialists/sorter prompts are length-sensitive in production.
+MUTATION_MAX_NET_CHARS_DEFAULT = 120
+MUTATION_MAX_NET_CHARS_SORTER = 600  # historical sorter v2/v3 moves; still one rule each
+
+
+def max_net_chars_for_role(role: str) -> int | None:
+    if role.startswith("sorter"):
+        return MUTATION_MAX_NET_CHARS_SORTER
+    return MUTATION_MAX_NET_CHARS_DEFAULT
 
 
 class MutationError(ValueError):
@@ -48,8 +60,9 @@ def validate_mutation(
     anchor: str,
     replacement: str,
     note: str,
+    max_net_chars: int | None = None,
 ) -> tuple[str, dict[str, Any]]:
-    """Run all four gates. Returns (mutated_text, metadata). Raises MutationError."""
+    """Run all five gates. Returns (mutated_text, metadata). Raises MutationError."""
     parent: PromptVersion = resolve(parent_key)
     parent_text = parent.text
 
@@ -80,6 +93,15 @@ def validate_mutation(
     if not mutated.startswith(prefix) or not mutated.endswith(suffix):
         raise MutationError("mutation is not additive-only (parent text altered outside the anchor span)")
 
+    limit = max_net_chars if max_net_chars is not None else max_net_chars_for_role(role)
+    if limit is not None:
+        net = len(mutated) - len(parent_text)
+        if net > limit:
+            raise MutationError(
+                f"net prompt growth +{net} chars exceeds limit {limit} for {parent_key} "
+                f"(deployment length budget — tighten the anchor edit or swap words in-place)"
+            )
+
     meta = {
         "key": new_key,
         "parent": parent_key,
@@ -88,6 +110,7 @@ def validate_mutation(
         "anchor_head": anchor[:60],
         "sha256": sha256(mutated),
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
+        "net_chars": len(mutated) - len(parent_text),
     }
     return mutated, meta
 
@@ -100,11 +123,12 @@ def apply_mutation(
     replacement: str,
     note: str,
     persist: bool = True,
+    max_net_chars: int | None = None,
 ) -> dict[str, Any]:
     """Validate + register one mutation. Returns the metadata record."""
     mutated, meta = validate_mutation(
         parent_key=parent_key, new_key=new_key, anchor=anchor,
-        replacement=replacement, note=note,
+        replacement=replacement, note=note, max_net_chars=max_net_chars,
     )
     meta["text"] = mutated
     if persist:

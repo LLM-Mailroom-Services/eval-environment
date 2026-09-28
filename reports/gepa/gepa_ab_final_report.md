@@ -54,7 +54,7 @@ Documented in experiment log; all **REJECT** except contracts v3 above. Notable:
 | Merger/corporate v2 drafted & tested | **Yes** |
 | Gate 5 (+120 chars specialists) | **Yes** |
 | Publish `reports/gepa-comparisons` + log records | **Yes** |
-| Commit via PR to main | **PR #64 draft** (merge pending) |
+| Commit via PR to main | **PR #64** (CI green; rebase onto main in progress) |
 | **≥3/5 promotions** | **No (1/5)** |
 
 ## Recommended next steps (no spend implied)

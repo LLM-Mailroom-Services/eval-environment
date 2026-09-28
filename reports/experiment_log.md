@@ -2,10 +2,12 @@
 
 One row per run (append-only source of truth: `reports/experiment_log.jsonl`). Each run's full detail (dataset provenance, metrics, per-agent performance, case table) lives in its own file under `reports/experiment_log/<run_id>.md` — this index never grows a per-run section inline, so it stays readable regardless of history size. OpenRouter/Braintrust N-doc waves also get a standalone, Modal-comparable write-ups under `reports/api-comparisons/` (see `INDEX.md`; per-run files under `<model>/<task>/runs/`).
 
-## Real evaluation waves (real mode, n≥10 cases) — 59
+## Real evaluation waves (real mode, n≥10 cases) — 61
 
 | run_id | family | task | mode | model | subset | n | key metric | errors |
 |---|---|---|---|---|---|---|---|---|
+| [20260928T083627Z-eval-corporate_records](experiment_log/20260928T083627Z-eval-corporate_records.md) | eval | corporate_records | real | qwen/qwen3.7-flash | class:corporate_record | 50 | — | 0 |
+| [20260928T083110Z-eval-correspondence](experiment_log/20260928T083110Z-eval-correspondence.md) | eval | correspondence | real | qwen/qwen3.7-flash | class:correspondence | 50 | — | 0 |
 | [20260928T081536Z-eval-corporate_records](experiment_log/20260928T081536Z-eval-corporate_records.md) | eval | corporate_records | real | qwen/qwen3.7-flash | class:corporate_record | 50 | — | 0 |
 | [20260928T081119Z-eval-correspondence](experiment_log/20260928T081119Z-eval-correspondence.md) | eval | correspondence | real | qwen/qwen3.7-flash | class:correspondence | 50 | — | 0 |
 | [20260928T080826Z-eval-merger_agreement](experiment_log/20260928T080826Z-eval-merger_agreement.md) | eval | merger_agreement | real | qwen/qwen3.7-flash | class:merger_agreement | 20 | — | 0 |
@@ -140,3 +142,4 @@ One row per run (append-only source of truth: `reports/experiment_log.jsonl`). E
 | 2026-09-28T08:11:17+00:00 | 20260928T080542Z-eval-merger_agreement | 20260928T080826Z-eval-merger_agreement | REJECTED | — |
 | 2026-09-28T08:15:33+00:00 | 20260928T052606Z-eval-correspondence | 20260928T081119Z-eval-correspondence | REJECTED | — |
 | 2026-09-28T08:20:15+00:00 | 20260928T062251Z-eval-corporate_records | 20260928T081536Z-eval-corporate_records | REJECTED | — |
+| 2026-09-28T08:41:21+00:00 | 20260928T052606Z-eval-correspondence | 20260928T083110Z-eval-correspondence | REJECTED | — |

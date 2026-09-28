@@ -19,7 +19,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from evals.viz.report_charts import outputs  # noqa: E402
+from evals.viz.report_charts import outputs
 
 SNAPSHOT = REPO_ROOT / "web" / "data" / "snapshot.json"
 CHARTS_DIR = REPO_ROOT / "web" / "data" / "charts"

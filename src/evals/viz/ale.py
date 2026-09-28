@@ -131,7 +131,7 @@ def ale(rows: list[dict], outcome: str, num: list[str], feature: str, cat: str |
         raise ValueError(f"{feature}: too few stable bootstrap refits ({len(draws)}/{boot})")
     draws = np.array(draws)
     q = cv_quality(D, X, cats, y, kind, rng)
-    r4 = lambda a: [round(float(v), 4) for v in a]  # noqa: E731
+    r4 = lambda a: [round(float(v), 4) for v in a]
     return {
         "feature": feature, "outcome": outcome, "kind": kind, "n": int(sel.sum()), "n_fit": len(y),
         "x": r4(edges), "ale": r4(main), "lo": r4(np.percentile(draws, 5, axis=0)), "hi": r4(np.percentile(draws, 95, axis=0)),

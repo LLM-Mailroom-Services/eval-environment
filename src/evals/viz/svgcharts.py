@@ -41,8 +41,8 @@ class _Svg:
                  font_weight=weight, transform=f"rotate({rotate} {_n(x)} {_n(y)})" if rotate else None)
 
     def render(self) -> str:
-        head = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{self.w}" height="{self.h}" '
-                f'viewBox="0 0 {self.w} {self.h}" font-family="{escape(FONT)}" role="img">',
+        head = [(f'<svg xmlns="http://www.w3.org/2000/svg" width="{self.w}" height="{self.h}" '
+                 f'viewBox="0 0 {self.w} {self.h}" font-family="{escape(FONT)}" role="img">'),
                 f"<title>{escape(self.title)}</title>",
                 f'<rect width="{self.w}" height="{self.h}" fill="{BG}"/>',
                 f'<text x="16" y="24" font-size="15" font-weight="600" fill="{INK}">{escape(self.title)}</text>']
@@ -81,7 +81,7 @@ def grouped_bars(title: str, cats: list[str], series: list[tuple[str, str, list]
     ticks = nice_ticks(ymax if ymax is not None else max(vals + [ref[0] if ref else 0, 1e-9]))
     top = ticks[-1]
     tick_fmt = tick_fmt or fmt
-    y = lambda v: T + (1 - v / top) * (height - T - B)  # noqa: E731
+    y = lambda v: T + (1 - v / top) * (height - T - B)
     for t in ticks:
         s.add("line", x1=L, x2=width - R, y1=y(t), y2=y(t), stroke=GRID)
         s.text(L - 6, y(t) + 4, tick_fmt(t), anchor="end")
@@ -116,7 +116,7 @@ def hbars(title: str, labels: list[str], series: list[tuple[str, str, list]], *,
     vals = [v for _, _, vs in series for v in vs if v is not None]
     ticks = nice_ticks(max(vals + [1e-9]), 4)
     top = ticks[-1]
-    x = lambda v: L + v / top * (width - L - R)  # noqa: E731
+    x = lambda v: L + v / top * (width - L - R)
     for t in ticks:
         s.add("line", x1=x(t), x2=x(t), y1=T - 4, y2=height - 30, stroke=GRID)
         s.text(x(t), height - 14, fmt(t), anchor="middle")
@@ -178,8 +178,8 @@ def lines(title: str, series: list[dict], *, subtitle: str = "", x_label: str = 
         y0, y1 = min(ys + [0.0]), max(ys + [0.0])
         pad = (y1 - y0) * 0.08 or 0.1
         y0, y1 = y0 - (pad if y0 < 0 else 0), y1 + pad
-    X = lambda v: L + (v - x0) / (x1 - x0) * (width - L - R)  # noqa: E731
-    Y = lambda v: T + (1 - (v - y0) / (y1 - y0)) * (height - T - B)  # noqa: E731
+    X = lambda v: L + (v - x0) / (x1 - x0) * (width - L - R)
+    Y = lambda v: T + (1 - (v - y0) / (y1 - y0)) * (height - T - B)
     for t in _span_ticks(y0, y1):
         s.add("line", x1=L, x2=width - R, y1=Y(t), y2=Y(t), stroke=AXIS if abs(t) < 1e-12 else GRID)
         s.text(L - 6, Y(t) + 4, y_fmt(t), anchor="end")
@@ -249,7 +249,7 @@ def strips(title: str, groups: list[tuple[str, list[tuple[str, str, list[float]]
     height = 80 + 22 * n_rows + 20 * len(groups) + 34
     s = _Svg(width, height, title, subtitle)
     L, R, T = label_w, 20, 70
-    X = lambda v: L + v / x_max * (width - L - R)  # noqa: E731
+    X = lambda v: L + v / x_max * (width - L - R)
     for t in _span_ticks(0.0, x_max):
         s.add("line", x1=X(t), x2=X(t), y1=float(T), y2=float(height - 30), stroke=GRID)
         s.text(X(t), height - 14, x_fmt(t), anchor="middle")

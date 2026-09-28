@@ -143,6 +143,7 @@ uv run python scripts/render_comparison_reports.py --run-id 20260927T043145Z-eva
 | `data/experiments/20260927T043145Z-eval-classification/cases.jsonl` | per-case rows (scores, tokens, latency) |
 | `data/experiments/20260927T043145Z-eval-classification/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
 | `reports/experiment_log/20260927T043145Z-eval-classification.md` | experiment-log markdown mirror |
+| `reports/api-comparisons/qwen3-8b/classification/RUN-20-FULL-QWEN3-8B-REPORT.md` | Modal-comparable API-leg write-up |
 
 ## Caveats / notes
 

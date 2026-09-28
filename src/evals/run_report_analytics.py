@@ -332,9 +332,11 @@ def render_artifacts(summary: dict[str, Any]) -> list[str]:
         f"| `{manifest}` | canonical draw fingerprint (filenames + content hashes) |",
         f"| `reports/experiment_log/{run_id}.md` | experiment-log markdown mirror |",
     ]
-    comp = summary.get("comparison_report")
-    if comp:
-        lines.append(f"| `{_repo_rel(str(comp))}` | Modal-comparable API-leg write-up |")
+    from evals import comparison_report as cr
+
+    # Always cite the canonical wave stem (experiment log may store a stale path).
+    comp = cr.repo_relative_path(cr.report_path(summary))
+    lines.append(f"| `{comp}` | Modal-comparable API-leg write-up |")
     lines.append("")
     return lines
 

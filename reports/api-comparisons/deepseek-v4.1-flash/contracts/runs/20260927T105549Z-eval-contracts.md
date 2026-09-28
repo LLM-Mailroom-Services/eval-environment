@@ -170,7 +170,7 @@ uv run python scripts/render_comparison_reports.py --run-id 20260927T105549Z-eva
 | `data/experiments/20260927T105549Z-eval-contracts/cases.jsonl` | per-case rows (scores, tokens, latency) |
 | `data/experiments/20260927T105549Z-eval-contracts/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
 | `reports/experiment_log/20260927T105549Z-eval-contracts.md` | experiment-log markdown mirror |
-| `reports/api-comparisons/deepseek-v4.1-flash/contracts/runs/20260927T105549Z-eval-contracts.md` | Modal-comparable API-leg write-up |
+| `reports/api-comparisons/deepseek-v4.1-flash/contracts/RUN-20-CONTRACT-DEEPSEEK-V4.1-FLASH-REPORT.md` | Modal-comparable API-leg write-up |
 
 ## Caveats / notes
 

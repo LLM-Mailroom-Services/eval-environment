@@ -158,7 +158,7 @@ uv run python scripts/render_comparison_reports.py --run-id 20260927T105400Z-eva
 | `data/experiments/20260927T105400Z-eval-insurance_claims/cases.jsonl` | per-case rows (scores, tokens, latency) |
 | `data/experiments/20260927T105400Z-eval-insurance_claims/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
 | `reports/experiment_log/20260927T105400Z-eval-insurance_claims.md` | experiment-log markdown mirror |
-| `reports/api-comparisons/deepseek-v4.1-flash/insurance_claims/runs/20260927T105400Z-eval-insurance_claims.md` | Modal-comparable API-leg write-up |
+| `reports/api-comparisons/deepseek-v4.1-flash/insurance_claims/RUN-20-INSURANCE_CLAIM-DEEPSEEK-V4.1-FLASH-REPORT.md` | Modal-comparable API-leg write-up |
 
 ## Caveats / notes
 

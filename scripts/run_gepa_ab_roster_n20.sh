@@ -46,7 +46,7 @@ run_arm() {
     --prompt-source frozen \
     --trace-backend braintrust \
     --concurrency "$GEPA_AB_CONCURRENCY" \
-    2>&1 | tee -a "$LOG"
+    2>&1 | tee -a "$LOG" >/dev/null
   uv run python -c "
 from evals import experiment_log
 task = '${task#eval:}'
@@ -62,8 +62,21 @@ print(runs[-1]['run_id'] if runs else '')
 
 : >"$LOG"
 RESULT_LINES=()
+if [[ -n "${GEPA_AB_SEED_RESULTS:-}" ]]; then
+  while IFS= read -r line; do
+    [[ -n "$line" ]] && RESULT_LINES+=("$line")
+  done <<< "$GEPA_AB_SEED_RESULTS"
+fi
+# Optional resume: skip first N roster entries (after fixing run_arm / manual compares).
+GEPA_AB_ROSTER_SKIP="${GEPA_AB_ROSTER_SKIP:-0}"
 
+idx=0
 for spec in "${SPECS[@]}"; do
+  if (( idx < GEPA_AB_ROSTER_SKIP )); then
+    idx=$((idx + 1))
+    continue
+  fi
+  idx=$((idx + 1))
   # shellcheck disable=SC2086
   set -- $spec
   TASK="$1"; CLASS="$2"; V2="$3"

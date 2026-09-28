@@ -45,7 +45,7 @@ for r in experiment_log.load_runs():
         break
 else:
     print(0)
-"
+" 2>/dev/null | grep -E '^[0-9]+(\.[0-9]+)?$' | tail -1
 }
 
 _spent_total() {
@@ -96,7 +96,7 @@ runs = [r for r in experiment_log.load_runs() if r.get('task')==task and r.get('
 runs = [r for r in runs if (r.get('params') or {}).get('sample') == sample or (r.get('dataset') or {}).get('n_selected') == sample]
 runs = [r for r in runs if (r.get('prompt_version')==pv if pv else not r.get('prompt_version'))]
 print(runs[-1]['run_id'] if runs else '')
-" 2>/dev/null | tail -1 | tr -d '\r')"
+" 2>/dev/null | grep -E '^[0-9]{8}T[0-9]{6}Z-eval-' | tail -1 | tr -d '\r')"
   if [[ -n "$run_id" && "$run_id" == *eval-* ]]; then
     cost="$(run_arm_cost_usd "$run_id" 2>/dev/null | tail -1 | tr -d '\r')"
     if [[ "$cost" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
@@ -147,7 +147,7 @@ import json
 from pathlib import Path
 lines = '''$(printf '%s\n' "${RESULT_LINES[@]}")'''.strip().splitlines()
 rows = [json.loads(l) for l in lines if l.strip()]
-spent = float('''$(awk '{s+=$1} END {print s+0}' "$GEPA_AB_SPENT_FILE" 2>/dev/null || echo 0)''')
+spent = float('''$(awk '/^[0-9]+(\.[0-9]+)?$/ { s += $1 } END { printf "%.6f", s + 0 }' "$GEPA_AB_SPENT_FILE" 2>/dev/null || echo 0)''')
 Path('$SUMMARY').write_text(json.dumps({
     'model': '$GEPA_AB_MODEL', 'seed': $GEPA_AB_SEED, 'n': $GEPA_AB_SAMPLE,
     'budget_usd_cap': float('$GEPA_AB_BUDGET_USD'),

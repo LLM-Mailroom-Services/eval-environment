@@ -2,10 +2,13 @@
 
 One row per run (append-only source of truth: `reports/experiment_log.jsonl`). Each run's full detail (dataset provenance, metrics, per-agent performance, case table) lives in its own file under `reports/experiment_log/<run_id>.md` — this index never grows a per-run section inline, so it stays readable regardless of history size. OpenRouter/Braintrust N-doc waves also get a standalone, Modal-comparable write-ups under `reports/api-comparisons/` (see `INDEX.md`; per-run files under `<model>/<task>/runs/`).
 
-## Real evaluation waves (real mode, n≥10 cases) — 66
+## Real evaluation waves (real mode, n≥10 cases) — 69
 
 | run_id | family | task | mode | model | subset | n | key metric | errors |
 |---|---|---|---|---|---|---|---|---|
+| [20260928T093403Z-eval-merger_agreement](experiment_log/20260928T093403Z-eval-merger_agreement.md) | eval | merger_agreement | real | deepseek/deepseek-v4.1-flash | class:merger_agreement | 50 | — | 0 |
+| [20260928T090253Z-eval-correspondence](experiment_log/20260928T090253Z-eval-correspondence.md) | eval | correspondence | real | qwen/qwen3.7-flash | class:correspondence | 50 | — | 0 |
+| [20260928T090247Z-eval-merger_agreement](experiment_log/20260928T090247Z-eval-merger_agreement.md) | eval | merger_agreement | real | deepseek/deepseek-v4.1-flash | class:merger_agreement | 50 | — | 0 |
 | [20260928T085821Z-eval-corporate_records](experiment_log/20260928T085821Z-eval-corporate_records.md) | eval | corporate_records | real | deepseek/deepseek-v4.1-flash | class:corporate_record | 20 | — | 0 |
 | [20260928T085426Z-eval-merger_agreement](experiment_log/20260928T085426Z-eval-merger_agreement.md) | eval | merger_agreement | real | deepseek/deepseek-v4.1-flash | class:merger_agreement | 20 | — | 0 |
 | [20260928T085148Z-eval-contracts](experiment_log/20260928T085148Z-eval-contracts.md) | eval | contracts | real | deepseek/deepseek-v4.1-flash | class:contract | 20 | — | 0 |
@@ -153,3 +156,6 @@ One row per run (append-only source of truth: `reports/experiment_log.jsonl`). E
 | 2026-09-28T08:51:45+00:00 | 20260927T105400Z-eval-insurance_claims | 20260928T085028Z-eval-insurance_claims | REJECTED | — |
 | 2026-09-28T08:54:23+00:00 | 20260927T105549Z-eval-contracts | 20260928T085148Z-eval-contracts | REJECTED | — |
 | 2026-09-28T08:58:18+00:00 | 20260927T110153Z-eval-merger_agreement | 20260928T085426Z-eval-merger_agreement | REJECTED | — |
+| 2026-09-28T09:00:10+00:00 | 20260927T110828Z-eval-corporate_records | 20260928T085821Z-eval-corporate_records | ACCEPTED | corporate_records_specialist_v2 |
+| 2026-09-28T09:33:38+00:00 | 20260928T052606Z-eval-correspondence | 20260928T090253Z-eval-correspondence | REJECTED | — |
+| 2026-09-28T09:42:12+00:00 | 20260928T090247Z-eval-merger_agreement | 20260928T093403Z-eval-merger_agreement | REJECTED | — |

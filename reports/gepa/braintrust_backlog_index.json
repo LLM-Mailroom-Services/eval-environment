@@ -1,0 +1,681 @@
+{
+  "schema": "gepa-braintrust-backlog-index",
+  "version": 1,
+  "project": "Mailroom-Evals",
+  "tasks": {
+    "contracts": {
+      "n_runs": 10,
+      "runs": [
+        {
+          "run_id": "20260926T223211Z-eval-contracts",
+          "task": "contracts",
+          "model": null,
+          "prompt_version": null,
+          "experiment": "20260926T223211Z-eval-contracts",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals"
+          },
+          "metrics": {
+            "n": 0,
+            "errors": 0
+          }
+        },
+        {
+          "run_id": "20260926T223222Z-eval-contracts",
+          "task": "contracts",
+          "model": "qwen/qwen3.7-flash",
+          "prompt_version": null,
+          "experiment": "20260926T223222Z-eval-contracts",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals"
+          },
+          "metrics": {
+            "n": 1,
+            "overall_score": 0.7,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260926T224038Z-eval-contracts",
+          "task": "contracts",
+          "model": "qwen/qwen3.7-flash",
+          "prompt_version": null,
+          "experiment": "20260926T224038Z-eval-contracts",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals"
+          },
+          "metrics": {
+            "n": 1,
+            "overall_score": 0.7,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260926T232556Z-eval-contracts",
+          "task": "contracts",
+          "model": null,
+          "prompt_version": null,
+          "experiment": "20260926T232556Z-eval-contracts",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals"
+          },
+          "metrics": {
+            "n": 0,
+            "errors": 0
+          }
+        },
+        {
+          "run_id": "20260926T232610Z-eval-contracts",
+          "task": "contracts",
+          "model": "qwen/qwen3.7-flash",
+          "prompt_version": null,
+          "experiment": "20260926T232610Z-eval-contracts",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260926T232610Z-eval-contracts",
+            "dataset": "mailroom-hf-46a4d3c2",
+            "dataset_records": 1
+          },
+          "metrics": {
+            "n": 1,
+            "overall_score": 0.7167,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260926T235347Z-eval-contracts",
+          "task": "contracts",
+          "model": "qwen/qwen3-8b",
+          "prompt_version": null,
+          "experiment": "20260926T235347Z-eval-contracts",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260926T235347Z-eval-contracts",
+            "dataset": "mailroom-hf-46a4d3c2",
+            "dataset_records": 20
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.6199,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T023347Z-eval-contracts",
+          "task": "contracts",
+          "model": "qwen/qwen3-8b",
+          "prompt_version": null,
+          "experiment": "20260927T023347Z-eval-contracts",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T023347Z-eval-contracts",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.0762,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T035621Z-eval-contracts",
+          "task": "contracts",
+          "model": "qwen/qwen3-8b",
+          "prompt_version": null,
+          "experiment": "20260927T035621Z-eval-contracts",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T035621Z-eval-contracts",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.6169,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T054738Z-eval-contracts",
+          "task": "contracts",
+          "model": "ibm-granite/granite-4.2-8b",
+          "prompt_version": null,
+          "experiment": "20260927T054738Z-eval-contracts",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T054738Z-eval-contracts",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.4769,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T105549Z-eval-contracts",
+          "task": "contracts",
+          "model": "deepseek/deepseek-v4.1-flash",
+          "prompt_version": null,
+          "experiment": "20260927T105549Z-eval-contracts",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T105549Z-eval-contracts",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.5137,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        }
+      ],
+      "n_failures_merged": 21
+    },
+    "corporate_records": {
+      "n_runs": 4,
+      "runs": [
+        {
+          "run_id": "20260927T022810Z-eval-corporate_records",
+          "task": "corporate_records",
+          "model": "qwen/qwen3-8b",
+          "prompt_version": null,
+          "experiment": "20260927T022810Z-eval-corporate_records",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T022810Z-eval-corporate_records",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.1824,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T042239Z-eval-corporate_records",
+          "task": "corporate_records",
+          "model": "qwen/qwen3-8b",
+          "prompt_version": null,
+          "experiment": "20260927T042239Z-eval-corporate_records",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T042239Z-eval-corporate_records",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.4004,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T065622Z-eval-corporate_records",
+          "task": "corporate_records",
+          "model": "ibm-granite/granite-4.2-8b",
+          "prompt_version": null,
+          "experiment": "20260927T065622Z-eval-corporate_records",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T065622Z-eval-corporate_records",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.4156,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T110828Z-eval-corporate_records",
+          "task": "corporate_records",
+          "model": "deepseek/deepseek-v4.1-flash",
+          "prompt_version": null,
+          "experiment": "20260927T110828Z-eval-corporate_records",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T110828Z-eval-corporate_records",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.4415,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        }
+      ],
+      "n_failures_merged": 20
+    },
+    "correspondence": {
+      "n_runs": 8,
+      "runs": [
+        {
+          "run_id": "20260926T234358Z-eval-correspondence",
+          "task": "correspondence",
+          "model": "qwen/qwen3-8b",
+          "prompt_version": null,
+          "experiment": "20260926T234358Z-eval-correspondence",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260926T234358Z-eval-correspondence",
+            "dataset": "mailroom-hf-46a4d3c2",
+            "dataset_records": 20
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.3179,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T022738Z-eval-correspondence",
+          "task": "correspondence",
+          "model": "qwen/qwen3-8b",
+          "prompt_version": null,
+          "experiment": "20260927T022738Z-eval-correspondence",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T022738Z-eval-correspondence",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.0,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T033031Z-eval-correspondence",
+          "task": "correspondence",
+          "model": "qwen/qwen3-8b",
+          "prompt_version": null,
+          "experiment": "20260927T033031Z-eval-correspondence",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T033031Z-eval-correspondence",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.513,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T044805Z-eval-correspondence",
+          "task": "correspondence",
+          "model": "ibm-granite/granite-4.2-8b",
+          "prompt_version": null,
+          "experiment": "20260927T044805Z-eval-correspondence",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T044805Z-eval-correspondence",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.0999,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T051851Z-eval-correspondence",
+          "task": "correspondence",
+          "model": "ibm-granite/granite-4.2-8b",
+          "prompt_version": null,
+          "experiment": "20260927T051851Z-eval-correspondence",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T051851Z-eval-correspondence",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 1,
+            "overall_score": 0.3513,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T052637Z-eval-correspondence",
+          "task": "correspondence",
+          "model": "ibm-granite/granite-4.2-8b",
+          "prompt_version": null,
+          "experiment": "20260927T052637Z-eval-correspondence",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T052637Z-eval-correspondence",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.3793,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T053647Z-eval-correspondence",
+          "task": "correspondence",
+          "model": "ibm-granite/granite-4.2-8b",
+          "prompt_version": null,
+          "experiment": "20260927T053647Z-eval-correspondence",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T053647Z-eval-correspondence",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.4065,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T105317Z-eval-correspondence",
+          "task": "correspondence",
+          "model": "deepseek/deepseek-v4.1-flash",
+          "prompt_version": null,
+          "experiment": "20260927T105317Z-eval-correspondence",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T105317Z-eval-correspondence",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.4419,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        }
+      ],
+      "n_failures_merged": 20
+    },
+    "insurance_claims": {
+      "n_runs": 5,
+      "runs": [
+        {
+          "run_id": "20260926T234603Z-eval-insurance_claims",
+          "task": "insurance_claims",
+          "model": "qwen/qwen3-8b",
+          "prompt_version": null,
+          "experiment": "20260926T234603Z-eval-insurance_claims",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260926T234603Z-eval-insurance_claims",
+            "dataset": "mailroom-hf-46a4d3c2",
+            "dataset_records": 20
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.8056,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T023050Z-eval-insurance_claims",
+          "task": "insurance_claims",
+          "model": "qwen/qwen3-8b",
+          "prompt_version": null,
+          "experiment": "20260927T023050Z-eval-insurance_claims",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T023050Z-eval-insurance_claims",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.202,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T035135Z-eval-insurance_claims",
+          "task": "insurance_claims",
+          "model": "qwen/qwen3-8b",
+          "prompt_version": null,
+          "experiment": "20260927T035135Z-eval-insurance_claims",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T035135Z-eval-insurance_claims",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.7488,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T054211Z-eval-insurance_claims",
+          "task": "insurance_claims",
+          "model": "ibm-granite/granite-4.2-8b",
+          "prompt_version": null,
+          "experiment": "20260927T054211Z-eval-insurance_claims",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T054211Z-eval-insurance_claims",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.7135,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T105400Z-eval-insurance_claims",
+          "task": "insurance_claims",
+          "model": "deepseek/deepseek-v4.1-flash",
+          "prompt_version": null,
+          "experiment": "20260927T105400Z-eval-insurance_claims",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T105400Z-eval-insurance_claims",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.7974,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        }
+      ],
+      "n_failures_merged": 16
+    },
+    "merger_agreement": {
+      "n_runs": 6,
+      "runs": [
+        {
+          "run_id": "20260927T014814Z-eval-merger_agreement",
+          "task": "merger_agreement",
+          "model": "qwen/qwen3-8b",
+          "prompt_version": null,
+          "experiment": "20260927T014814Z-eval-merger_agreement",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T014814Z-eval-merger_agreement",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 2,
+            "overall_score": 0.0,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T020724Z-eval-merger_agreement",
+          "task": "merger_agreement",
+          "model": "qwen/qwen3.7-flash",
+          "prompt_version": null,
+          "experiment": "20260927T020724Z-eval-merger_agreement",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T020724Z-eval-merger_agreement",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 2,
+            "overall_score": 0.346,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T022750Z-eval-merger_agreement",
+          "task": "merger_agreement",
+          "model": "qwen/qwen3.7-flash",
+          "prompt_version": null,
+          "experiment": "20260927T022750Z-eval-merger_agreement",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T022750Z-eval-merger_agreement",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.3748,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T060322Z-eval-merger_agreement",
+          "task": "merger_agreement",
+          "model": "ibm-granite/granite-4.2-8b",
+          "prompt_version": null,
+          "experiment": "20260927T060322Z-eval-merger_agreement",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T060322Z-eval-merger_agreement",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.387,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T082404Z-eval-merger_agreement",
+          "task": "merger_agreement",
+          "model": "ibm-granite/granite-4.2-8b",
+          "prompt_version": null,
+          "experiment": "20260927T082404Z-eval-merger_agreement",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T082404Z-eval-merger_agreement",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.4548,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        },
+        {
+          "run_id": "20260927T110153Z-eval-merger_agreement",
+          "task": "merger_agreement",
+          "model": "deepseek/deepseek-v4.1-flash",
+          "prompt_version": null,
+          "experiment": "20260927T110153Z-eval-merger_agreement",
+          "trace_ids": {
+            "backend": "braintrust",
+            "project": "Mailroom-Evals",
+            "experiment": "20260927T110153Z-eval-merger_agreement",
+            "dataset": null,
+            "dataset_records": 0
+          },
+          "metrics": {
+            "n": 20,
+            "overall_score": 0.2423,
+            "errors": 0,
+            "scorer_errors": 0
+          }
+        }
+      ],
+      "n_failures_merged": 20
+    }
+  }
+}

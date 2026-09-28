@@ -18,7 +18,12 @@ You mutate prompts from evidence. You never change what "correct" means
 ## The loop
 
 1. **OBSERVE** — pick the run: `evals.experiment_log.load_runs()`; read its
-   case rows. Export the failure manifest:
+   case rows. Ground failures in the Braintrust backlog (all real specialist
+   experiments in the log):
+   `uv run python scripts/gepa_observe_specialists.py --braintrust-backlog --all-defaults`
+   or merge log exports + trace excerpts:
+   `uv run python scripts/gepa_observe_specialists.py --all-defaults --enrich-braintrust`.
+   Single-run export still works:
    `uv run python scripts/score_run.py --run-id <id> --export-failures data/manifests/<id>.failures.jsonl`
 2. **DECOMPOSE** — cluster misses by expected class, miss type, and evidence
    quotes (`scripts/prompt_engineer.py --manifest ... --dry-run`).

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="340" viewBox="0 0 760 340" font-family="system-ui,-apple-system,&#x27;Segoe UI&#x27;,Roboto,sans-serif" role="img">
+<title>ALE: latency on extraction score · Correspondence</title>
+<rect width="760" height="340" fill="#ffffff"/>
+<text x="16" y="24" font-size="15" font-weight="600" fill="#0b0b0b">ALE: latency on extraction score · Correspondence</text>
+<text x="16" y="42" font-size="11.5" fill="#6f6e69">Ridge surrogate with model as a factor, n = 60, cross-validated R² 0.137. Latency stands in for document length</text>
+<line x1="58" x2="742" y1="242.24" y2="242.24" stroke="#e1e0d9"/>
+<text x="52" y="246.24" font-size="11" fill="#6f6e69" text-anchor="end">-0.20</text>
+<line x1="58" x2="742" y1="183.83" y2="183.83" stroke="#c3c2b7"/>
+<text x="52" y="187.83" font-size="11" fill="#6f6e69" text-anchor="end">+0.00</text>
+<line x1="58" x2="742" y1="125.41" y2="125.41" stroke="#e1e0d9"/>
+<text x="52" y="129.41" font-size="11" fill="#6f6e69" text-anchor="end">+0.20</text>
+<text x="107.83" y="304" font-size="11" fill="#6f6e69" text-anchor="middle">1</text>
+<text x="233.59" y="304" font-size="11" fill="#6f6e69" text-anchor="middle">4</text>
+<text x="359.34" y="304" font-size="11" fill="#6f6e69" text-anchor="middle">16</text>
+<text x="485.09" y="304" font-size="11" fill="#6f6e69" text-anchor="middle">64</text>
+<text x="610.84" y="304" font-size="11" fill="#6f6e69" text-anchor="middle">256</text>
+<text x="736.59" y="304" font-size="11" fill="#6f6e69" text-anchor="middle">1024</text>
+<text x="400" y="328" font-size="11" fill="#3d3d3a" text-anchor="middle">latency per document (s, log scale)</text>
+<text x="14" y="182" font-size="11" fill="#3d3d3a" text-anchor="middle" transform="rotate(-90 14 182)">Δ score</text>
+<line x1="140.15" x2="140.15" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="190.55" x2="190.55" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="248.19" x2="248.19" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="266.32" x2="266.32" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="296.23" x2="296.23" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="312.07" x2="312.07" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="328.46" x2="328.46" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="385.61" x2="385.61" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="430.37" x2="430.37" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="447.03" x2="447.03" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="460.67" x2="460.67" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="478.84" x2="478.84" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="506.86" x2="506.86" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="514.31" x2="514.31" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="524.02" x2="524.02" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="529.6" x2="529.6" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="539.72" x2="539.72" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="552.36" x2="552.36" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="560.35" x2="560.35" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<polygon points="58,195.1 190.55,187.56 266.32,184.35 312.07,180.79 385.61,175.33 447.03,171.76 478.84,167.85 514.31,162.47 529.6,158.53 552.36,154.27 742,90.62 742,209.38 552.36,177.08 529.6,177.37 514.31,180.93 478.84,187.71 447.03,190.31 385.61,200.15 312.07,203.8 266.32,208.51 190.55,221.94 58,273.38" fill="#2a78d6" fill-opacity="0.16"/>
+<polyline points="58,240.05 190.55,210.49 266.32,200.07 312.07,195.77 385.61,189.75 447.03,179.91 478.84,175.91 514.31,168.99 529.6,166.1 552.36,163 742,136.45" fill="none" stroke="#2a78d6" stroke-width="2.2" stroke-linejoin="round"/>
+<circle cx="58" cy="240.05" r="2.6" fill="#2a78d6"/>
+<circle cx="190.55" cy="210.49" r="2.6" fill="#2a78d6"/>
+<circle cx="266.32" cy="200.07" r="2.6" fill="#2a78d6"/>
+<circle cx="312.07" cy="195.77" r="2.6" fill="#2a78d6"/>
+<circle cx="385.61" cy="189.75" r="2.6" fill="#2a78d6"/>
+<circle cx="447.03" cy="179.91" r="2.6" fill="#2a78d6"/>
+<circle cx="478.84" cy="175.91" r="2.6" fill="#2a78d6"/>
+<circle cx="514.31" cy="168.99" r="2.6" fill="#2a78d6"/>
+<circle cx="529.6" cy="166.1" r="2.6" fill="#2a78d6"/>
+<circle cx="552.36" cy="163" r="2.6" fill="#2a78d6"/>
+<circle cx="742" cy="136.45" r="2.6" fill="#2a78d6"/>
+<line x1="58" x2="72" y1="58" y2="58" stroke="#2a78d6" stroke-width="2.5"/>
+<text x="76" y="62" font-size="11" fill="#3d3d3a" text-anchor="start">ALE (90% bootstrap band)</text>
+</svg>

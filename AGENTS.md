@@ -59,6 +59,8 @@ specialty skill:
 10. **Refresh the viewer snapshot.** When the experiment log changes,
     re-run `scripts/export_site_snapshot.py` and commit
     `web/data/snapshot.json` — the Vercel viewer reads only that file.
+    Then re-run `scripts/render_report_charts.py` and commit
+    `web/data/charts/` + `reports/charts/README.md` (CI checks both).
 
 ## Commands
 

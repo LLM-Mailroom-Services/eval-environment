@@ -74,11 +74,16 @@ for spec in "${SPECS[@]}"; do
     continue
   fi
   CMP_JSON="$(mktemp)"
-  uv run python scripts/compare_runs.py --a "$BASELINE" --b "$CAND_RUN" --record --json --md "$REPORT_DIR" >"$CMP_JSON" 2>>"$LOG"
+  uv run python scripts/compare_runs.py --a "$BASELINE" --b "$CAND_RUN" --record --json --md "$REPORT_DIR" >"$CMP_JSON" 2>>"$LOG" || true
   cat "$CMP_JSON" >>"$LOG"
   ACCEPTED="$(CMP_JSON="$CMP_JSON" uv run python -c "
-import json, os
-d = json.load(open(os.environ['CMP_JSON']))
+import json, os, sys
+raw = open(os.environ['CMP_JSON']).read().strip()
+# compare_runs may append a REJECTED/ACCEPTED line after JSON when --record
+if raw.startswith('{'):
+    end = raw.rfind('}')
+    raw = raw[: end + 1] if end >= 0 else raw
+d = json.loads(raw)
 p = d.get('paired_case_deltas') or {}
 v = next(iter(p.values()), {})
 print('yes' if (v.get('ci_lo') or 0) > 0 else 'no')

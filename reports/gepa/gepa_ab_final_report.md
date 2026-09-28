@@ -57,6 +57,15 @@ Documented in experiment log; all **REJECT** except contracts v3 above. Notable:
 | Commit via PR to main | **PR #64** (CI green; rebase onto main in progress) |
 | **≥3/5 promotions** | **No (1/5)** |
 
+## DeepSeek v4.1 Flash cross-check (N=20, seed 42)
+
+GEPA-best mutations re-tested against **2026-09-27** DeepSeek v1 baselines ([full table](gepa_deepseek41_mutations_report.md)):
+
+- **Accepted:** `corporate_records_specialist_v2` (CI lo **+0.0006**)
+- **Large mean gains, CI crosses 0 @ N=20:** merger v2 (+0.19), contracts v3 (+0.11)
+
+Runner: `scripts/run_gepa_deepseek41_best_mutations_n20.sh`
+
 ## Recommended next steps (no spend implied)
 
 1. **Merge PR #64** to land artifacts and `contracts_specialist_v3` lineage.

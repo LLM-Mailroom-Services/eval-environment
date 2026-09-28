@@ -1,5 +1,7 @@
 # Run report — `20260927T022750Z-eval-merger_agreement` (API leg)
 
+> **Correction (2026-09-28):** this run is filed under `qwen3-8b` because that was its decode profile, but the model that served it was `qwen/qwen3.7-flash` (see the engine row and the per-agent models column). Do not compare it with Qwen3-8B results as the same model.
+
 Comparison report for the OpenRouter API leg, metric-for-metric against
 the Modal/vLLM leg reports (same wave+class stem = paired report).
 

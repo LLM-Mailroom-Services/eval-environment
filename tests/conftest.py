@@ -69,3 +69,9 @@ def fixture_case() -> dict:
         "split": "train",
         "row": {},
     }
+
+
+@pytest.fixture(autouse=True)
+def _isolated_beacon_dir(tmp_path, monkeypatch):
+    """Runs publish mailroom beacons — keep test runs out of ~/.mailroom/jobs."""
+    monkeypatch.setenv("MAILROOM_BEACON_DIR", str(tmp_path / "_beacons"))

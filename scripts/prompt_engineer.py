@@ -65,6 +65,8 @@ GT vs prediction), the mechanism, a scope guard against over-firing, and \
 where possible a worked example.
 - Prefer corpus-convention rules ("the ground truth follows the folder") over \
 legal reasoning when the misses follow a labeling convention.
+- When failure_clusters include braintrust.trace_excerpt.reasoning, treat that \
+text as primary reflective evidence (what the model actually thought on the miss).
 - Known GT artifacts are NOT prompt-fixable: say so and skip.
 - Counterfactual discipline: name what your rule could break on OTHER corpora \
 and add the carve-out preemptively.
@@ -97,12 +99,19 @@ def decompose(rows: list[dict], *, focus: str | None = None) -> dict:
     for row in rows[:200]:
         key = str(row.get("expected_doc_class") or "?")
         if len(examples[key]) < 5:
-            examples[key].append({
+            ex: dict = {
                 "filename": row.get("filename"),
                 "expected": row.get("expected_doc_class"),
                 "predicted": (row.get("prediction") or {}).get("doc_type"),
                 "scores": row.get("scores"),
-            })
+            }
+            if row.get("braintrust"):
+                ex["braintrust"] = row.get("braintrust")
+            if row.get("trace_excerpt"):
+                ex["trace_excerpt"] = row.get("trace_excerpt")
+            if row.get("expected_fields"):
+                ex["expected_fields"] = row.get("expected_fields")
+            examples[key].append(ex)
     return {"n_failures": len(rows), "by_class": dict(by_class), "by_type": dict(by_error), "examples": dict(examples)}
 
 

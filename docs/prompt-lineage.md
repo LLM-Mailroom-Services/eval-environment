@@ -92,8 +92,10 @@ Ports the proven iteration-OS from llm-entity-extraction
 arXiv 2507.19457):
 
 ```
-OBSERVE (score_run.py --export-failures → data/manifests/<run>.failures.jsonl)
-  → DECOMPOSE (clusters + evidence) → SELECT PARENT (Pareto frontier from the log)
+OBSERVE (score_run.py --export-failures and/or Braintrust readonly experiment fetch
+  via scripts/gepa_observe_specialists.py --braintrust-backlog / --enrich-braintrust)
+  → DECOMPOSE (clusters + evidence, incl. LLM reasoning excerpts from traces)
+  → SELECT PARENT (Pareto frontier from the log)
   → DRAFT (ONE surgical .replace() per iteration)
   → VALIDATE (5 gates) → APPLY (prompts/mutations.json + prompts/<key>.md)
   → EVALUATE (same subset/seed A/B) → ACCEPT (paired delta CI lo > 0)

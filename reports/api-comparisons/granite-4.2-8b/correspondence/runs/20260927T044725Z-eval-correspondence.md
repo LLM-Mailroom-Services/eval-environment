@@ -53,6 +53,7 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | overall_score | 0.0 |
 | scorer_errors | 0 |
 | thinking_recovered (stripped + re-scored) | 0 |
+| overall (per-doc) | **0.0000** (sd 0.0000, min 0.0000, max 0.0000) |
 
 ## Serving / cost metrics (API leg)
 
@@ -88,6 +89,26 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 |---|---|---|---|---|---|---|
 | `correspondence_specialist` | 2 | 20 | 20 | 40 | — | mock-model |
 
+## Analyst insights & findings
+
+- **Concurrency efficiency:** Σ latency 0.0 s over wall 2.5 s = **0.00×** effective parallelism at c1 (0% of the ideal 1×).
+- **Tail:** slowest doc `corpus:ground_truth:train:allen-p/deleted_items/65.` (email) 0.0 s = 0% of wall — p95/p50 = 1.00×.
+- **Decode budget:** mean completion 10 tok/doc, mean prompt 10 tok/doc.
+- **Subclass spread:** best `email` 0.000 (n=1), worst `email` 0.000 (n=1).
+- **Field-level extraction:** 2/2 docs have extraction F1 = 0 — when non-zero overall scores still appear, entity/structure components may carry the headline.
+
+## Figures
+
+Static SVG charts (latency bar, subclass means) are generated in the Modal sandbox repo (`scripts/sand032/report.py` + `/dataviz`). This API-leg report keeps the **table views**: **Strata (subclass)** and **Per-document scores** below.
+
+## Strata (subclass)
+
+| subclass | n | mean overall |
+| --- | ---: | ---: |
+| email | 1 | 0.0000 |
+| memo | 1 | 0.0000 |
+| **total** | **2** | **0.0000** |
+
 ## Per-document scores
 
 | # | doc id | subclass | overall | f1 | latency s | tok in | tok out | error |
@@ -96,6 +117,24 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | 2 | `corpus:ground_truth:train:arnold-j/deleted_items/395.` | memo | 0.0000 | 0.0000 | 0.0006 | 10 | 10 | — |
 
 - scored rows: 2/2; min=0.0000 max=0.0000 mean=0.0000
+
+## Reproduce
+
+```bash
+uv run python scripts/run_evals.py --task eval:correspondence --mock --n 2 --seed 42 --concurrency 1 --decode-profile granite-4.2-8b --subset "class:correspondence"
+uv run python scripts/score_run.py --run-id 20260927T044725Z-eval-correspondence --recompute
+uv run python scripts/render_comparison_reports.py --run-id 20260927T044725Z-eval-correspondence
+```
+
+## Artifacts
+
+| path | role |
+| --- | --- |
+| `reports/experiment_log.jsonl` | append-only run summary (this run_id) |
+| `data/experiments/20260927T044725Z-eval-correspondence/cases.jsonl` | per-case rows (scores, tokens, latency) |
+| `data/experiments/20260927T044725Z-eval-correspondence/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
+| `reports/experiment_log/20260927T044725Z-eval-correspondence.md` | experiment-log markdown mirror |
+| `/workspace/reports/api-comparisons/granite-4.2-8b/correspondence/RUN-2-CORRESPONDENCE-GRANITE-4.2-8B-REPORT.md` | Modal-comparable API-leg write-up |
 
 ## Caveats / notes
 

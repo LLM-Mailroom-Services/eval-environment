@@ -54,6 +54,7 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | overall_score | 0.4156 |
 | scorer_errors | 0 |
 | thinking_recovered (stripped + re-scored) | 0 |
+| overall (per-doc) | **0.4156** (sd 0.1813, min 0.0000, max 0.7063) |
 
 ## Serving / cost metrics (API leg)
 
@@ -89,6 +90,34 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 |---|---|---|---|---|---|---|
 | `corporate_records_specialist` | 22 | 196299 | 127441 | 323740 | 0.0436 | ibm-granite/granite-4.2-8b |
 
+## Analyst insights & findings
+
+- **Concurrency efficiency:** Σ latency 1902.9 s over wall 508.6 s = **3.74×** effective parallelism at c8 (47% of the ideal 8×).
+- **Tail:** slowest doc `corpus:ground_truth:train:0000950137-05-002026_c91812a1exv4w1.txt` (indenture) 412.9 s = 81% of wall — p95/p50 = 2.38×.
+- **Prompt length vs latency:** Pearson r = 0.71 across 20 docs (prefill-bound).
+- **Decode budget:** mean completion 6372 tok/doc, mean prompt 9815 tok/doc.
+- **Subclass spread:** best `articles_of_incorporation` 0.691 (n=2), worst `subsidiary_list` 0.232 (n=2).
+- **Field-level extraction:** 10/20 docs have extraction F1 = 0 — when non-zero overall scores still appear, entity/structure components may carry the headline.
+
+## Figures
+
+Static SVG charts (latency bar, subclass means) are generated in the Modal sandbox repo (`scripts/sand032/report.py` + `/dataviz`). This API-leg report keeps the **table views**: **Strata (subclass)** and **Per-document scores** below.
+
+## Strata (subclass)
+
+| subclass | n | mean overall |
+| --- | ---: | ---: |
+| charter_amendment | 4 | 0.3573 |
+| indenture | 3 | 0.3083 |
+| officer_certificate | 3 | 0.2897 |
+| articles_of_incorporation | 2 | 0.6906 |
+| board_resolution | 2 | 0.4166 |
+| rights_instrument | 2 | 0.6452 |
+| subsidiary_list | 2 | 0.2318 |
+| bylaws | 1 | 0.5500 |
+| powers_of_attorney | 1 | 0.5708 |
+| **total** | **20** | **0.4156** |
+
 ## Per-document scores
 
 | # | doc id | subclass | overall | f1 | latency s | tok in | tok out | error |
@@ -115,6 +144,24 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | 20 | `corpus:ground_truth:train:0001683168-23-005255_cardiff_ex0302.htm` | officer_certificate | 0.3025 | 0.0000 | 2.5044 | 4880 | 166 | — |
 
 - scored rows: 20/20; min=0.0000 max=0.7063 mean=0.4156
+
+## Reproduce
+
+```bash
+uv run python scripts/run_evals.py --task eval:corporate_records --real --sample 20 --seed 42 --concurrency 8 --decode-profile granite-4.2-8b --subset "class:corporate_record"
+uv run python scripts/score_run.py --run-id 20260927T065622Z-eval-corporate_records --recompute
+uv run python scripts/render_comparison_reports.py --run-id 20260927T065622Z-eval-corporate_records
+```
+
+## Artifacts
+
+| path | role |
+| --- | --- |
+| `reports/experiment_log.jsonl` | append-only run summary (this run_id) |
+| `data/experiments/20260927T065622Z-eval-corporate_records/cases.jsonl` | per-case rows (scores, tokens, latency) |
+| `data/experiments/20260927T065622Z-eval-corporate_records/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
+| `reports/experiment_log/20260927T065622Z-eval-corporate_records.md` | experiment-log markdown mirror |
+| `/workspace/reports/api-comparisons/granite-4.2-8b/corporate_records/RUN-20-CORPORATE_RECORD-GRANITE-4.2-8B-REPORT.md` | Modal-comparable API-leg write-up |
 
 ## Caveats / notes
 

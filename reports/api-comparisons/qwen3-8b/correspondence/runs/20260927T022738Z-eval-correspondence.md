@@ -54,6 +54,7 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | overall_score | 0.0 |
 | scorer_errors | 0 |
 | thinking_recovered (stripped + re-scored) | 0 |
+| overall (per-doc) | **0.0000** (sd 0.0000, min 0.0000, max 0.0000) |
 
 ## Serving / cost metrics (API leg)
 
@@ -89,6 +90,30 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 |---|---|---|---|---|---|---|
 | `correspondence_specialist` | 20 | 48452 | 50672 | 99124 | 0.0287 | qwen/qwen3-8b |
 
+## Analyst insights & findings
+
+- **Concurrency efficiency:** Σ latency 1126.4 s over wall 191.0 s = **5.90×** effective parallelism at c8 (74% of the ideal 8×).
+- **Tail:** slowest doc `corpus:ground_truth:train:donoho-l/inbox/35.` (email) 147.6 s = 77% of wall — p95/p50 = 5.32×.
+- **Prompt length vs latency:** Pearson r = 0.29 across 20 docs (not prefill-dominated).
+- **Decode budget:** mean completion 2534 tok/doc, mean prompt 2423 tok/doc.
+- **Subclass spread:** best `email` 0.000 (n=10), worst `email` 0.000 (n=10).
+- **Field-level extraction:** 20/20 docs have extraction F1 = 0 — when non-zero overall scores still appear, entity/structure components may carry the headline.
+
+## Figures
+
+Static SVG charts (latency bar, subclass means) are generated in the Modal sandbox repo (`scripts/sand032/report.py` + `/dataviz`). This API-leg report keeps the **table views**: **Strata (subclass)** and **Per-document scores** below.
+
+## Strata (subclass)
+
+| subclass | n | mean overall |
+| --- | ---: | ---: |
+| email | 10 | 0.0000 |
+| press_release | 4 | 0.0000 |
+| notice | 3 | 0.0000 |
+| letter | 2 | 0.0000 |
+| meeting_request | 1 | 0.0000 |
+| **total** | **20** | **0.0000** |
+
 ## Per-document scores
 
 | # | doc id | subclass | overall | f1 | latency s | tok in | tok out | error |
@@ -115,6 +140,24 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | 20 | `corpus:ground_truth:train:dorland-c/_sent_mail/78.` | email | 0.0000 | 0.0000 | 82.5544 | 1511 | 4340 | — |
 
 - scored rows: 20/20; min=0.0000 max=0.0000 mean=0.0000
+
+## Reproduce
+
+```bash
+uv run python scripts/run_evals.py --task eval:correspondence --real --sample 20 --seed 42 --concurrency 8 --decode-profile qwen3-8b --subset "class:correspondence"
+uv run python scripts/score_run.py --run-id 20260927T022738Z-eval-correspondence --recompute
+uv run python scripts/render_comparison_reports.py --run-id 20260927T022738Z-eval-correspondence
+```
+
+## Artifacts
+
+| path | role |
+| --- | --- |
+| `reports/experiment_log.jsonl` | append-only run summary (this run_id) |
+| `data/experiments/20260927T022738Z-eval-correspondence/cases.jsonl` | per-case rows (scores, tokens, latency) |
+| `data/experiments/20260927T022738Z-eval-correspondence/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
+| `reports/experiment_log/20260927T022738Z-eval-correspondence.md` | experiment-log markdown mirror |
+| `/workspace/reports/api-comparisons/qwen3-8b/RUN-20-CORRESPONDENCE-QWEN3-8B-REPORT.md` | Modal-comparable API-leg write-up |
 
 ## Caveats / notes
 

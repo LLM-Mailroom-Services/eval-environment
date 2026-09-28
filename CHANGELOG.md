@@ -7,6 +7,11 @@ All notable changes to mailroom-evals are documented here. Format based on
 
 ### Changed
 
+- **Report excellence (sandbox parity)** — API-leg comparison reports, calibration
+  write-ups, and `compare_runs` markdown now include analyst insights, strata,
+  scoring-method context (CUAD/MAUD), reproduce/artifacts blocks aligned with
+  `mailroom-sandbox/scripts/sand032/report.py`. Regenerate API reports via
+  `scripts/render_comparison_reports.py`.
 - **Corpus pin → v9.1** — document and skill citations for
   `Lucius-Morningstar/mailroom-dataset` now target revision
   `ed7576b676343e0b402ec5412cded301e629bdee` (supersedes GT-closure

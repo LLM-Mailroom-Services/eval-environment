@@ -54,6 +54,7 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | overall_score | 0.7488 |
 | scorer_errors | 0 |
 | thinking_recovered (stripped + re-scored) | 0 |
+| overall (per-doc) | **0.7488** (sd 0.0822, min 0.6300, max 0.9000) |
 
 ## Serving / cost metrics (API leg)
 
@@ -89,6 +90,31 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 |---|---|---|---|---|---|---|
 | `insurance_claims_specialist` | 37 | 75955 | 50885 | 126840 | 0.0320 | qwen/qwen3-8b |
 
+## Analyst insights & findings
+
+- **Concurrency efficiency:** Σ latency 1013.6 s over wall 203.3 s = **4.99×** effective parallelism at c8 (62% of the ideal 8×).
+- **Tail:** slowest doc `corpus:ground_truth:train:pde:233364488871784.txt` (pde) 150.6 s = 74% of wall — p95/p50 = 5.44×.
+- **Prompt length vs latency:** Pearson r = 0.19 across 20 docs (not prefill-dominated).
+- **Decode budget:** mean completion 2544 tok/doc, mean prompt 3798 tok/doc.
+- **Subclass spread:** best `auto` 0.837 (n=8), worst `pde` 0.658 (n=5).
+- **Field-level extraction:** 0/20 docs have extraction F1 = 0 — when non-zero overall scores still appear, entity/structure components may carry the headline.
+
+## Figures
+
+Static SVG charts (latency bar, subclass means) are generated in the Modal sandbox repo (`scripts/sand032/report.py` + `/dataviz`). This API-leg report keeps the **table views**: **Strata (subclass)** and **Per-document scores** below.
+
+## Strata (subclass)
+
+| subclass | n | mean overall |
+| --- | ---: | ---: |
+| auto | 8 | 0.8371 |
+| pde | 5 | 0.6580 |
+| carrier | 3 | 0.7007 |
+| outpatient | 2 | 0.7287 |
+| inpatient | 1 | 0.7535 |
+| property | 1 | 0.6768 |
+| **total** | **20** | **0.7488** |
+
 ## Per-document scores
 
 | # | doc id | subclass | overall | f1 | latency s | tok in | tok out | error |
@@ -115,6 +141,24 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | 20 | `corpus:ground_truth:train:property:266855223.txt` | property | 0.6768 | 0.5385 | 53.6211 | 9083 | 2389 | — |
 
 - scored rows: 20/20; min=0.6300 max=0.9000 mean=0.7488
+
+## Reproduce
+
+```bash
+uv run python scripts/run_evals.py --task eval:insurance_claims --real --sample 20 --seed 42 --concurrency 8 --decode-profile qwen3-8b --subset "class:insurance_claim"
+uv run python scripts/score_run.py --run-id 20260927T035135Z-eval-insurance_claims --recompute
+uv run python scripts/render_comparison_reports.py --run-id 20260927T035135Z-eval-insurance_claims
+```
+
+## Artifacts
+
+| path | role |
+| --- | --- |
+| `reports/experiment_log.jsonl` | append-only run summary (this run_id) |
+| `data/experiments/20260927T035135Z-eval-insurance_claims/cases.jsonl` | per-case rows (scores, tokens, latency) |
+| `data/experiments/20260927T035135Z-eval-insurance_claims/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
+| `reports/experiment_log/20260927T035135Z-eval-insurance_claims.md` | experiment-log markdown mirror |
+| `/workspace/reports/api-comparisons/qwen3-8b/RUN-20-INSURANCE_CLAIM-QWEN3-8B-REPORT.md` | Modal-comparable API-leg write-up |
 
 ## Caveats / notes
 

@@ -89,11 +89,40 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 |---|---|---|---|---|---|---|
 | `sorter` | 3 | 360 | 180 | 540 | 0.0001 | ibm-granite/granite-4.2-8b |
 
+## Analyst insights & findings
+
+- **Concurrency efficiency:** Σ latency 0.2 s over wall 2.8 s = **0.06×** effective parallelism at c1 (6% of the ideal 1×).
+- **Tail:** slowest doc `corpus:ground_truth:train:0001062993-15-000198_s1011515_ex3z2.htm` (powers_of_attorney) 0.2 s = 6% of wall — p95/p50 = 1.00×.
+- **Decode budget:** mean completion 180 tok/doc, mean prompt 360 tok/doc.
+- **Field-level extraction:** 0/1 docs have extraction F1 = 0 — when non-zero overall scores still appear, entity/structure components may carry the headline.
+
+## Figures
+
+Static SVG charts (latency bar, subclass means) are generated in the Modal sandbox repo (`scripts/sand032/report.py` + `/dataviz`). This API-leg report keeps the **table views**: **Strata (subclass)** and **Per-document scores** below.
+
 ## Per-document scores
 
 | # | doc id | subclass | overall | f1 | latency s | tok in | tok out | error |
 |---|---|---|---|---|---|---|---|---|
 | 1 | `corpus:ground_truth:train:0001062993-15-000198_s1011515_ex3z2.htm` | powers_of_attorney | — | — | 0.1717 | 360 | 180 | — |
+
+## Reproduce
+
+```bash
+uv run python scripts/run_evals.py --task eval:classification --mock --n 1 --seed 42 --concurrency 1 --decode-profile granite-4.2-8b --subset "full"
+uv run python scripts/score_run.py --run-id 20260927T051729Z-eval-classification --recompute
+uv run python scripts/render_comparison_reports.py --run-id 20260927T051729Z-eval-classification
+```
+
+## Artifacts
+
+| path | role |
+| --- | --- |
+| `reports/experiment_log.jsonl` | append-only run summary (this run_id) |
+| `data/experiments/20260927T051729Z-eval-classification/cases.jsonl` | per-case rows (scores, tokens, latency) |
+| `data/experiments/20260927T051729Z-eval-classification/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
+| `reports/experiment_log/20260927T051729Z-eval-classification.md` | experiment-log markdown mirror |
+| `/workspace/reports/api-comparisons/granite-4.2-8b/classification/RUN-1-FULL-GRANITE-4.2-8B-REPORT.md` | Modal-comparable API-leg write-up |
 
 ## Caveats / notes
 

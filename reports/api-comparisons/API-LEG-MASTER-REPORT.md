@@ -1,6 +1,6 @@
 # SAND-027 API leg — master comparison report
 
-Generated: `2026-09-27T11:21:11Z` from `reports/experiment_log.jsonl` via `scripts/render_comparison_reports.py`.
+Generated: `2026-09-28T01:07:08Z` from `reports/experiment_log.jsonl` via `scripts/render_comparison_reports.py`.
 
 Use this file for cross-model Leg B summaries; drill into per-run detail via the linked canonical stems or [INDEX.md](INDEX.md) (every report-worthy run).
 
@@ -32,7 +32,6 @@ Use this file for cross-model Leg B summaries; drill into per-run detail via the
 | merger agreements | `20260927T082404Z-eval-merger_agreement` | overall 0.4548 | 38 | $0.177431 | [RUN-20-MERGER_AGREEMENT-GRANITE-4.2-8B-REPORT.md](granite-4.2-8b/merger_agreement/RUN-20-MERGER_AGREEMENT-GRANITE-4.2-8B-REPORT.md) |
 | corporate records | `20260927T065622Z-eval-corporate_records` | overall 0.4156 | 22 | $0.043637 | [RUN-20-CORPORATE_RECORD-GRANITE-4.2-8B-REPORT.md](granite-4.2-8b/corporate_records/RUN-20-CORPORATE_RECORD-GRANITE-4.2-8B-REPORT.md) |
 | sorter / classification | `20260927T070900Z-eval-classification` | class 0.9000; subclass 0.6000 | 118 | $0.064366 | [RUN-20-FULL-GRANITE-4.2-8B-REPORT.md](granite-4.2-8b/classification/RUN-20-FULL-GRANITE-4.2-8B-REPORT.md) |
-| sorter / classification | `20260927T100340Z-eval-classification` | class 0.9400; subclass 0.4900 | 291 | $0.150648 | [RUN-100-FULL-GRANITE-4.2-8B-REPORT.md](granite-4.2-8b/classification/RUN-100-FULL-GRANITE-4.2-8B-REPORT.md) |
 
 ## Paired comparison (Granite − Qwen, same seed-42 draws)
 
@@ -43,8 +42,8 @@ Use this file for cross-model Leg B summaries; drill into per-run detail via the
 | contracts | 0.6169 | 0.4769 | -0.1400 |
 | merger agreements | 0.3748 | 0.4548 | +0.0800 |
 | corporate records | 0.4004 | 0.4156 | +0.0152 |
-| sorter / classification (class accuracy) | class 0.7000 | class 0.9400 | +0.2400 |
-| sorter / classification (subclass accuracy) | 0.0500 | 0.4900 | +0.4400 |
+| sorter / classification (class accuracy) | class 0.7000 | class 0.9000 | +0.2000 |
+| sorter / classification (subclass accuracy) | 0.0500 | 0.6000 | +0.5500 |
 
 ## Superseded runs (append-only log; do not use for pairing)
 

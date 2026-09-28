@@ -45,6 +45,18 @@ rollups), decode posture (budgets/sampling/timeout), dataset provenance +
 subset-manifest paths. Engine-only metrics (cold boot, gpu_seconds) are
 recorded as `N/A (serverless API)`.
 
+Sandbox-parity narrative blocks (same vocabulary as
+`mailroom-sandbox/scripts/sand032/report.py`):
+
+- **Analyst insights & findings** — concurrency efficiency, tail latency,
+  prompt-length correlation, subclass spread, field-F1 zeros
+- **Scoring method** — CUAD / MAUD context for contracts and merger tasks
+- **Strata (subclass)** — mean overall by expected subclass
+- **Reproduce** / **Artifacts** — CLI replay and on-disk paths
+
+SVG figures stay in the Modal sandbox repo; API-leg reports use strata +
+per-document tables as the figure table views.
+
 ## Generation
 
 Reports are emitted automatically by `run_task` whenever `--decode-profile`

@@ -14,9 +14,8 @@ Regenerated from the experiment log by `scripts/render_comparison_reports.py`.
 | merger agreements | `20260927T082404Z-eval-merger_agreement` | overall 0.4548 | 0 / 0 | 38 | $0.177431 | [report](merger_agreement/RUN-20-MERGER_AGREEMENT-GRANITE-4.2-8B-REPORT.md) |
 | corporate records | `20260927T065622Z-eval-corporate_records` | overall 0.4156 | 0 / 0 | 22 | $0.043637 | [report](corporate_records/RUN-20-CORPORATE_RECORD-GRANITE-4.2-8B-REPORT.md) |
 | sorter / classification | `20260927T070900Z-eval-classification` | class 0.9000; subclass 0.6000 | 0 / 0 | 118 | $0.064366 | [report](classification/RUN-20-FULL-GRANITE-4.2-8B-REPORT.md) |
-| sorter / classification | `20260927T100340Z-eval-classification` | class 0.9400; subclass 0.4900 | 0 / 0 | 291 | $0.150648 | [report](classification/RUN-100-FULL-GRANITE-4.2-8B-REPORT.md) |
 
-Suite total: **220 evaluated case rows**, **533 recorded LLM calls**, and **$0.563951 estimated API cost** (aggregate per-agent pricing).
+Suite total: **120 evaluated case rows**, **242 recorded LLM calls**, and **$0.413303 estimated API cost** (aggregate per-agent pricing).
 
 ## Granite-specific posture
 

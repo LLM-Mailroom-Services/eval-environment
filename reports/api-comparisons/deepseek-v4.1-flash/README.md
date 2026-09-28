@@ -13,6 +13,5 @@ Regenerated from the experiment log by `scripts/render_comparison_reports.py`.
 | contracts | `20260927T105549Z-eval-contracts` | overall 0.5137 | 0 / 0 | 23 | $0.050233 | [report](contracts/RUN-20-CONTRACT-DEEPSEEK-V4.1-FLASH-REPORT.md) |
 | merger agreements | `20260927T110153Z-eval-merger_agreement` | overall 0.2423 | 0 / 0 | 15 | $0.075246 | [report](merger_agreement/RUN-20-MERGER_AGREEMENT-DEEPSEEK-V4.1-FLASH-REPORT.md) |
 | corporate records | `20260927T110828Z-eval-corporate_records` | overall 0.4415 | 0 / 0 | 21 | $0.019675 | [report](corporate_records/RUN-20-CORPORATE_RECORD-DEEPSEEK-V4.1-FLASH-REPORT.md) |
-| sorter / classification | `20260927T101544Z-eval-classification` | class 1.0000; subclass 0.0000 | 0 / 0 | 329 | $0.100112 | [report](classification/RUN-100-FULL-DEEPSEEK-V4.1-FLASH-REPORT.md) |
 
-Suite total: **101 evaluated case rows**, **428 recorded LLM calls**, and **$0.270820 estimated API cost** (aggregate per-agent pricing).
+Suite total: **100 evaluated case rows**, **99 recorded LLM calls**, and **$0.170708 estimated API cost** (aggregate per-agent pricing).

@@ -90,6 +90,18 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 |---|---|---|---|---|---|---|
 | `sorter` | 150 | 1213021 | 16132 | 1229153 | 0.1493 | qwen/qwen3-8b |
 
+## Analyst insights & findings
+
+- **Concurrency efficiency:** Σ latency 661.1 s over wall 194.3 s = **3.40×** effective parallelism at c8 (43% of the ideal 8×).
+- **Tail:** slowest doc `corpus:ground_truth:train:contract_94_merger_agreement.txt` (mixed_cash_stock_election) 180.8 s = 93% of wall — p95/p50 = 24.23×.
+- **Prompt length vs latency:** Pearson r = 1.00 across 20 docs (prefill-bound).
+- **Decode budget:** mean completion 807 tok/doc, mean prompt 60651 tok/doc.
+- **Field-level extraction:** 0/20 docs have extraction F1 = 0 — when non-zero overall scores still appear, entity/structure components may carry the headline.
+
+## Figures
+
+Static SVG charts (latency bar, subclass means) are generated in the Modal sandbox repo (`scripts/sand032/report.py` + `/dataviz`). This API-leg report keeps the **table views**: **Strata (subclass)** and **Per-document scores** below.
+
 ## Per-document scores
 
 | # | doc id | subclass | overall | f1 | latency s | tok in | tok out | error |
@@ -114,6 +126,23 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | 18 | `corpus:ground_truth:train:inpatient:196641176967981:1.txt` | inpatient | — | — | 4.6574 | 6313 | 104 | — |
 | 19 | `corpus:ground_truth:train:0001047469-06-011763_a2173128zex-3_1.htm` | charter_amendment | — | — | 7.8767 | 14663 | 182 | — |
 | 20 | `corpus:ground_truth:train:outpatient:542502281397875:1.txt` | outpatient | — | — | 4.3687 | 6191 | 96 | — |
+
+## Reproduce
+
+```bash
+uv run python scripts/run_evals.py --task eval:classification --real --sample 20 --seed 42 --concurrency 8 --subset "full"
+uv run python scripts/score_run.py --run-id 20260927T043145Z-eval-classification --recompute
+uv run python scripts/render_comparison_reports.py --run-id 20260927T043145Z-eval-classification
+```
+
+## Artifacts
+
+| path | role |
+| --- | --- |
+| `reports/experiment_log.jsonl` | append-only run summary (this run_id) |
+| `data/experiments/20260927T043145Z-eval-classification/cases.jsonl` | per-case rows (scores, tokens, latency) |
+| `data/experiments/20260927T043145Z-eval-classification/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
+| `reports/experiment_log/20260927T043145Z-eval-classification.md` | experiment-log markdown mirror |
 
 ## Caveats / notes
 

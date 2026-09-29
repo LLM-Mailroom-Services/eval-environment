@@ -1,0 +1,43 @@
+{
+  "run_a": {
+    "run_id": "20260928T080542Z-eval-merger_agreement",
+    "prompt_version": null,
+    "model": "qwen/qwen3.7-flash"
+  },
+  "run_b": {
+    "run_id": "20260928T080826Z-eval-merger_agreement",
+    "prompt_version": "merger_agreement_specialist_v2",
+    "model": "qwen/qwen3.7-flash"
+  },
+  "metric_deltas": {
+    "errors": {
+      "a": 0,
+      "b": 0,
+      "delta": 0
+    },
+    "n": {
+      "a": 20,
+      "b": 20,
+      "delta": 0
+    },
+    "overall_score": {
+      "a": 0.4065,
+      "b": 0.3964,
+      "delta": -0.0101
+    },
+    "scorer_errors": {
+      "a": 0,
+      "b": 0,
+      "delta": 0
+    }
+  },
+  "paired_case_deltas": {
+    "overall_score": {
+      "delta": -0.0101,
+      "ci_lo": -0.0759,
+      "ci_hi": 0.0654,
+      "n": 20
+    }
+  },
+  "n_shared_cases": 20
+}

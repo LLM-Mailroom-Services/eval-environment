@@ -1,0 +1,42 @@
+{
+  "cross_split_duplicates_in_selection": {},
+  "filename_leak_audit": {
+    "clean": true,
+    "doc_text_contains_doc_type": 4,
+    "doc_text_contains_subclass": 300,
+    "title_contains_doc_type": 0,
+    "title_contains_subclass": 9,
+    "title_eq_filename": 0,
+    "title_eq_filename_pct": 0.0,
+    "title_looks_like_filename": 0
+  },
+  "filter_stats": {
+    "enron_blind_rows": 24951,
+    "enron_gt_rows": 24951,
+    "fresh_joined": 24866,
+    "selected": 1000,
+    "skipped_empty": 0,
+    "skipped_filename_overlap": 85,
+    "skipped_label": 0,
+    "skipped_no_blind": 0,
+    "skipped_sha_overlap": 0
+  },
+  "gates_ok": true,
+  "per_doc_type": {
+    "correspondence": 1000
+  },
+  "per_subclass": {
+    "email": 981,
+    "letter": 5,
+    "memo": 6,
+    "notice": 7,
+    "press_release": 1
+  },
+  "seed": 42,
+  "sources": {
+    "corpus_test": 323,
+    "enron_repo": "Lucius-Morningstar/enron-correspondence-dedup",
+    "enron_split": "test"
+  },
+  "title_nonempty": 964
+}

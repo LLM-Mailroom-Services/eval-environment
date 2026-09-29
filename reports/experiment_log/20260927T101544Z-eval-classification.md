@@ -9,7 +9,7 @@
 | git | commit: 53a9d88 · dirty: True |
 | started / finished | 2026-09-27T10:45:45+00:00 → 2026-09-27T10:46:33+00:00 |
 | duration_s | 4.8 |
-| comparison report | reports/api-comparisons/deepseek-deepseek-v4.1-flash/classi… |
+| comparison report | reports/api-comparisons/deepseek-v4.1-flash/classification/… |
 | error | — |
 
 ### Run configuration

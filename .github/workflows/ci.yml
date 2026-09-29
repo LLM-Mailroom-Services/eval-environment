@@ -25,3 +25,7 @@ jobs:
         run: uv run python scripts/render_experiment_log.py --validate
       - name: Viewer snapshot
         run: uv run python scripts/export_site_snapshot.py --check
+      - name: Report charts
+        run: uv run python scripts/render_report_charts.py --check
+      - name: Viewer smoke
+        run: node scripts/viewer_smoke.js

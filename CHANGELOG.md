@@ -15,8 +15,11 @@ All notable changes to mailroom-evals are documented here. Format based on
   9.5). All 15 `web/data/charts` SVGs regenerated; data unchanged.
 - **Broken link** in `RUN-03-MODERNBERT-HELDOUT-TEST-REPORT.md` to the
   held-out eval JSON.
-- `scripts/render_comparison_reports.py` covers `qwen3.7-flash` (the
-  comparison README for it must be rendered where `data/experiments/` lives).
+- `scripts/render_comparison_reports.py` covers `qwen3.7-flash`, and its
+  missing suite README `reports/api-comparisons/qwen3.7-flash/README.md` is
+  added (12 canonical stems, 550 case rows, 809 LLM calls, $0.579319). It was
+  rendered by `render_model_suite_readme` from the committed experiment log;
+  every row matches its canonical report (run id, score, calls, cost).
 - **Resumed-run wall time** — API-leg reports label `duration_s` as the resume
   segment only when `params.skipped_already_run` > 0, and omit the
   serial-vs-batched ratio (it divided a 100-case latency sum by a 1-case wall

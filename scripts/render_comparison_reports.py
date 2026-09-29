@@ -148,7 +148,9 @@ def main() -> int:
     )
     print(comparison_report.repo_relative_path(master_path))
 
-    for model_key in ("qwen3-8b", "granite-4.2-8b", "deepseek-v4.1-flash"):
+    # qwen3.7-flash is the production model (llm-mailroom 0.7.1); its suite
+    # README was never written because it was missing from this list.
+    for model_key in ("qwen3-8b", "granite-4.2-8b", "deepseek-v4.1-flash", "qwen3.7-flash"):
         readme = reports_root / model_key / "README.md"
         readme.parent.mkdir(parents=True, exist_ok=True)
         readme.write_text(

@@ -191,7 +191,7 @@
           }
         }
       ],
-      "n_failures_merged": 21
+      "n_failures_merged": null
     },
     "corporate_records": {
       "n_runs": 4,
@@ -443,7 +443,7 @@
           }
         }
       ],
-      "n_failures_merged": 20
+      "n_failures_merged": null
     },
     "insurance_claims": {
       "n_runs": 5,
@@ -549,7 +549,7 @@
           }
         }
       ],
-      "n_failures_merged": 16
+      "n_failures_merged": null
     },
     "merger_agreement": {
       "n_runs": 6,
@@ -675,7 +675,7 @@
           }
         }
       ],
-      "n_failures_merged": 20
+      "n_failures_merged": null
     }
   }
 }

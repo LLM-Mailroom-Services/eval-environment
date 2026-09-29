@@ -59,6 +59,8 @@ specialty skill:
 10. **Refresh the viewer snapshot.** When the experiment log changes,
     re-run `scripts/export_site_snapshot.py` and commit
     `web/data/snapshot.json` — the Vercel viewer reads only that file.
+    Then re-run `scripts/render_report_charts.py` and commit
+    `web/data/charts/` + `reports/charts/README.md` (CI checks both).
 
 ## Commands
 
@@ -85,6 +87,14 @@ uv run python scripts/render_experiment_log.py --validate
 uv run python scripts/render_experiment_log.py       # rebuild markdown
 ```
 
+**Live progress (mailroom.beacon/v1):** every `run_task` publishes a heartbeat to
+`$MAILROOM_BEACON_DIR` (default `~/.mailroom/jobs`) from `_execute_cases` — one job per
+run, updated per completed case, finished on exit (failed on exception). View all
+mailroom-family jobs with the sandbox board: `sandbox board` (browser, localhost:8767) or
+`sandbox board --tui`. `src/evals/beacon.py` is vendored verbatim from
+local-mailroom-sandbox (`tests/test_beacon_wiring.py` pins its source hash) — change it
+upstream, then re-copy. Tests isolate the beacon dir (conftest autouse).
+
 ## Environment
 
 | variable | note |
@@ -94,6 +104,9 @@ uv run python scripts/render_experiment_log.py       # rebuild markdown
 | `BRAINTRUST_API_KEY` / `BRAINTRUST_PROJECT` | Braintrust sink (auto when set) |
 | `PHOENIX_ENDPOINT` / `PHOENIX_PROJECT` | Phoenix sink (local default) |
 | `EVALS_TRACE_BACKEND` | `auto` default; `none` in tests |
+| `EVALS_REAL_RUNS_DISABLED` | set `1` to block all `--real` runs at preflight |
+| `EVALS_SPEND_APPROVAL_REQUIRED` | when `1`, require `EVALS_SPEND_APPROVED=1` or `EVALS_SPEND_APPROVED_USD` before `--real` |
+| `GEPA_SPEND_APPROVED` | must be `1` before any `scripts/run_gepa_*.sh` paid eval |
 | `EXPERIMENT_LOG_PATH` / `EXPERIMENT_LOG_MD_PATH` / `EVALS_EXPERIMENTS_DIR` | tests redirect all three |
 
 `OBSERVABILITY_PROVIDER` and `MAILROOM_BASE_DIR` are set BY the runner — do

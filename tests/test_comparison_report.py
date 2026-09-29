@@ -275,3 +275,12 @@ def test_run_task_decode_profile_writes_report(monkeypatch, sample_case):
     # No profile -> no report (pipeline-default runs don't emit it).
     result2 = run_task("eval:contracts", mock=True, invoke_mode="agent", n=1)
     assert not result2.summary.get("comparison_report")
+
+
+def test_render_report_labels_resumed_wall_and_skips_serial_ratio():
+    summary = _summary()
+    summary["params"] = {**(summary.get("params") or {}),
+                         "skipped_already_run": 99}
+    text = comparison_report.render_report(summary, _ROWS)
+    assert "resume segment only; 99 earlier cases" in text
+    assert "Serial-vs-batched" not in text

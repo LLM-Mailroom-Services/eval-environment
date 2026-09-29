@@ -1,5 +1,7 @@
 # Run report — `20260927T101544Z-eval-classification` (API leg)
 
+> **Correction (2026-09-28):** this run was resumed: 99 of its 100 cases ran in an earlier segment, and the logged 4.8 s wall time (and the 10:45:45 start) cover only the final resume segment. Scores, tokens, cost and per-call latencies cover all 100 cases, so the "Serial-vs-batched proof" ratio below (666.7 s over 4.8 s at concurrency 1) is not meaningful. The full-run wall time was not recorded. The report renderer now labels resumed wall times and omits that ratio.
+
 Comparison report for the OpenRouter API leg, metric-for-metric against
 the Modal/vLLM leg reports (same wave+class stem = paired report).
 

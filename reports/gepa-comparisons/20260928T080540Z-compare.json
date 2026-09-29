@@ -1,0 +1,43 @@
+{
+  "run_a": {
+    "run_id": "20260928T075346Z-eval-contracts",
+    "prompt_version": null,
+    "model": "qwen/qwen3.7-flash"
+  },
+  "run_b": {
+    "run_id": "20260928T075959Z-eval-contracts",
+    "prompt_version": "contracts_specialist_v2",
+    "model": "qwen/qwen3.7-flash"
+  },
+  "metric_deltas": {
+    "errors": {
+      "a": 0,
+      "b": 0,
+      "delta": 0
+    },
+    "n": {
+      "a": 20,
+      "b": 20,
+      "delta": 0
+    },
+    "overall_score": {
+      "a": 0.5464,
+      "b": 0.5167,
+      "delta": -0.0297
+    },
+    "scorer_errors": {
+      "a": 0,
+      "b": 0,
+      "delta": 0
+    }
+  },
+  "paired_case_deltas": {
+    "overall_score": {
+      "delta": -0.0297,
+      "ci_lo": -0.1337,
+      "ci_hi": 0.0505,
+      "n": 20
+    }
+  },
+  "n_shared_cases": 20
+}

@@ -1,0 +1,43 @@
+{
+  "run_a": {
+    "run_id": "20260927T110828Z-eval-corporate_records",
+    "prompt_version": null,
+    "model": "deepseek/deepseek-v4.1-flash"
+  },
+  "run_b": {
+    "run_id": "20260928T085821Z-eval-corporate_records",
+    "prompt_version": "corporate_records_specialist_v2",
+    "model": "deepseek/deepseek-v4.1-flash"
+  },
+  "metric_deltas": {
+    "errors": {
+      "a": 0,
+      "b": 0,
+      "delta": 0
+    },
+    "n": {
+      "a": 20,
+      "b": 20,
+      "delta": 0
+    },
+    "overall_score": {
+      "a": 0.4415,
+      "b": 0.4624,
+      "delta": 0.0209
+    },
+    "scorer_errors": {
+      "a": 0,
+      "b": 0,
+      "delta": 0
+    }
+  },
+  "paired_case_deltas": {
+    "overall_score": {
+      "delta": 0.0209,
+      "ci_lo": 0.0006,
+      "ci_hi": 0.0402,
+      "n": 20
+    }
+  },
+  "n_shared_cases": 20
+}

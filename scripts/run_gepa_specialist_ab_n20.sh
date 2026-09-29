@@ -3,6 +3,9 @@
 # Same class draw as SAND-027 (seed 42). Default eval model: Qwen 3.7 Flash (override via GEPA_AB_MODEL).
 set -euo pipefail
 cd "$(dirname "$0")/.."
+# shellcheck disable=SC1091
+source scripts/gepa_spend_guard.sh
+gepa_require_spend_approval
 export PYTHONUNBUFFERED=1
 export BRAINTRUST_PROJECT="${BRAINTRUST_PROJECT:-Mailroom-Evals}"
 

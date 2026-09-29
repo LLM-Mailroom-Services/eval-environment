@@ -1,7 +1,7 @@
 # Held-out test report — ModernBERT run-3 (GPU eval harness)
 
 Full-context evaluation export:
-[`eval_run3_20260921.json`](./eval_run3_20260921.json) (copy of
+[`eval_run3_20260921.json`](../held-out-test/eval_run3_20260921.json) (copy of
 `mailroom-ml/reports/eval_run3_20260921.json`). Checkpoint
 `/checkpoints/runs/20260921-132753`, artifact sha
 `56a4e8919cc3ae11d6bcfc13ec012677409afff99daf167cdd4fb70a6e1754f9`.

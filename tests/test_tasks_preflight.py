@@ -122,6 +122,29 @@ def test_preflight_real_requires_credentials(monkeypatch):
         report.raise_if_failed()
 
 
+def test_preflight_real_blocked_when_disabled(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setenv("EVALS_REAL_RUNS_DISABLED", "1")
+    spec = get_task("eval:contracts")
+    report = run_preflight(spec, mock=False)
+    assert not report.ok
+    assert any(i.code == "real_spend_guard" for i in report.errors)
+
+
+def test_preflight_real_requires_spend_approval_when_flagged(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setenv("EVALS_SPEND_APPROVAL_REQUIRED", "1")
+    monkeypatch.delenv("EVALS_SPEND_APPROVED", raising=False)
+    monkeypatch.delenv("EVALS_SPEND_APPROVED_USD", raising=False)
+    spec = get_task("eval:contracts")
+    report = run_preflight(spec, mock=False)
+    assert not report.ok
+    assert any(i.code == "real_spend_guard" for i in report.errors)
+    monkeypatch.setenv("EVALS_SPEND_APPROVED", "1")
+    report = run_preflight(spec, mock=False)
+    assert report.ok
+
+
 def test_preflight_rejects_langfuse_backend():
     spec = get_task("eval:intake")
     report = run_preflight(spec, mock=True, trace_backend="langfuse")

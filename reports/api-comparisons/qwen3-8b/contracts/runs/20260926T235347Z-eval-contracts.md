@@ -54,6 +54,7 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | overall_score | 0.6199 |
 | scorer_errors | 0 |
 | thinking_recovered (stripped + re-scored) | 0 |
+| overall (per-doc) | **0.6199** (sd 0.1790, min 0.2236, max 1.0000) |
 
 ## Serving / cost metrics (API leg)
 
@@ -89,6 +90,43 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 |---|---|---|---|---|---|---|
 | `contracts_specialist` | 24 | 339923 | 40872 | 380795 | 0.0584 | qwen/qwen3-8b |
 
+## Analyst insights & findings
+
+- **Concurrency efficiency:** Σ latency 1133.7 s over wall 1284.9 s = **0.88×** effective parallelism at c1 (88% of the ideal 1×).
+- **Tail:** slowest doc `corpus:ground_truth:train:PfHospitalityGroupInc_20150923_10-12G_EX-10.1_9266710_EX-10.1_Franchise Agreement1.pdf` (Franchise) 119.6 s = 9% of wall — p95/p50 = 2.01×.
+- **Prompt length vs latency:** Pearson r = 0.83 across 20 docs (prefill-bound).
+- **Decode budget:** mean completion 2044 tok/doc, mean prompt 16996 tok/doc.
+- **Subclass spread:** best `Consulting Agreements` 1.000 (n=1), worst `Marketing` 0.224 (n=1).
+- **Field-level extraction:** 4/20 docs have extraction F1 = 0 — when non-zero overall scores still appear, entity/structure components may carry the headline.
+
+## Scoring method — CUAD contracts
+
+Headline **overall_score** uses the pipeline contracts extraction rubric. Pinned Hub contract GT is often CUAD label-native; pair with sandbox Modal reports for full CUAD micro-F1 when the scorer emits `cuad_*` keys on case rows.
+
+## Figures
+
+Static SVG charts (latency bar, subclass means) are generated in the Modal sandbox repo (`scripts/sand032/report.py` + `/dataviz`). This API-leg report keeps the **table views**: **Strata (subclass)** and **Per-document scores** below.
+
+## Strata (subclass)
+
+| subclass | n | mean overall |
+| --- | ---: | ---: |
+| Strategic Alliance | 4 | 0.6495 |
+| Distributor | 3 | 0.6426 |
+| IP | 2 | 0.3514 |
+| Collaboration | 1 | 0.6267 |
+| Consulting Agreements | 1 | 1.0000 |
+| Development | 1 | 0.7424 |
+| Endorsement | 1 | 0.9445 |
+| Franchise | 1 | 0.5893 |
+| Joint Venture _ Filing | 1 | 0.6785 |
+| License_Agreements | 1 | 0.6297 |
+| Maintenance | 1 | 0.4051 |
+| Marketing | 1 | 0.2236 |
+| Promotion | 1 | 0.6016 |
+| Sponsorship | 1 | 0.7272 |
+| **total** | **20** | **0.6199** |
+
 ## Per-document scores
 
 | # | doc id | subclass | overall | f1 | latency s | tok in | tok out | error |
@@ -115,6 +153,24 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | 20 | `corpus:ground_truth:train:IGENEBIOTECHNOLOGYINC_05_13_2003-EX-1-JOINT VENTURE AGREEMENT.PDF` | Joint Venture _ Filing | 0.6785 | 0.1428 | 68.1727 | 19092 | 2675 | — |
 
 - scored rows: 20/20; min=0.2236 max=1.0000 mean=0.6199
+
+## Reproduce
+
+```bash
+uv run python scripts/run_evals.py --task eval:contracts --real --sample 20 --seed 42 --concurrency 1 --decode-profile qwen3-8b --subset "class:contract"
+uv run python scripts/score_run.py --run-id 20260926T235347Z-eval-contracts --recompute
+uv run python scripts/render_comparison_reports.py --run-id 20260926T235347Z-eval-contracts
+```
+
+## Artifacts
+
+| path | role |
+| --- | --- |
+| `reports/experiment_log.jsonl` | append-only run summary (this run_id) |
+| `data/experiments/20260926T235347Z-eval-contracts/cases.jsonl` | per-case rows (scores, tokens, latency) |
+| `data/experiments/20260926T235347Z-eval-contracts/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
+| `reports/experiment_log/20260926T235347Z-eval-contracts.md` | experiment-log markdown mirror |
+| `reports/api-comparisons/qwen3-8b/contracts/RUN-20-CONTRACT-QWEN3-8B-REPORT.md` | Modal-comparable API-leg write-up |
 
 ## Caveats / notes
 

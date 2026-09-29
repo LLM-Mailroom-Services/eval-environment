@@ -45,6 +45,11 @@ BRAINTRUST_PROJECT=mailroom-evals   # default project for eval runs
 Cross-reference: every experiment-log record carries the same `run_id` and
 trace ids, so log rows ↔ traces are joinable.
 
+GEPA OBSERVE pulls the specialist backlog from Braintrust readonly experiments
+(experiment name = `run_id`) via `evals.gepa.braintrust_backlog` /
+`scripts/gepa_observe_specialists.py --braintrust-backlog` (eval roots + nested
+LLM reasoning excerpts; never raw document text).
+
 ## Boundaries
 
 Pytest forces tracing off (`EVALS_TRACE_BACKEND=none`). Braintrust is never

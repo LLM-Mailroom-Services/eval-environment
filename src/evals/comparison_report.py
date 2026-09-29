@@ -59,6 +59,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from evals import run_report_analytics as rra
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_REPORTS_DIR = REPO_ROOT / "reports" / "api-comparisons"
 
@@ -321,8 +323,17 @@ def render_report(summary: dict[str, Any], case_rows: list[dict[str, Any]]) -> s
     cost_per_doc_est = (cost_est / n_scored) if isinstance(cost_est, (int, float)) and n_scored else None
 
     wall = summary.get("duration_s")
+    # A resumed run's duration_s covers only the resume segment, while the
+    # metrics and case rows cover every case. Label it and skip the
+    # serial-vs-batched ratio, which would divide a full-run latency sum by a
+    # partial wall time (20260927T101544Z: 666.7 s over 4.8 s at concurrency 1).
+    resumed = int(params.get("skipped_already_run") or 0)
+    wall_label = _fmt(wall)
+    if resumed and wall is not None:
+        wall_label = (f"{_fmt(wall)} (resume segment only; {resumed} earlier "
+                      "cases ran before it, full-run wall not recorded)")
     # Serial-vs-batched proof (same arithmetic the Modal reports print).
-    serial_sum = sum(latencies) if latencies else None
+    serial_sum = sum(latencies) if latencies and not resumed else None
 
     cap = summary.get("cost_cap") or {}
     headline = next((metrics[k] for k in HEADLINE_MEAN_KEYS if k in metrics), None)
@@ -382,7 +393,7 @@ def render_report(summary: dict[str, Any], case_rows: list[dict[str, Any]]) -> s
     lines.append("|---|---|")
     lines.append(f"| started_at | `{_fmt(summary.get('started_at'))}` |")
     lines.append(f"| finished_at | `{_fmt(summary.get('finished_at'))}` |")
-    lines.append(f"| duration_s (wall) | {_fmt(wall)} |")
+    lines.append(f"| duration_s (wall) | {wall_label} |")
     lines.append(f"| latency_ms_mean | {_fmt(performance.get('latency_ms_mean'))} |")
     lines.append(f"| latency_ms_p95 | {_fmt(performance.get('latency_ms_p95'))} |")
     lines.append("")
@@ -403,13 +414,19 @@ def render_report(summary: dict[str, Any], case_rows: list[dict[str, Any]]) -> s
         if isinstance(value, (int, float)) and not isinstance(value, bool):
             lines.append(f"| {key} | {round(value, 5)} |")
     lines.append(f"| thinking_recovered (stripped + re-scored) | {params.get('thinking_recovered', 0)} |")
+    stats = rra.headline_score_stats(case_rows)
+    if stats.get("mean") is not None:
+        lines.append(
+            f"| overall (per-doc) | **{stats['mean']:.4f}** "
+            f"(sd {stats['sd']:.4f}, min {stats['min']:.4f}, max {stats['max']:.4f}) |"
+        )
     lines.append("")
 
     lines.append("## Serving / cost metrics (API leg)")
     lines.append("")
     lines.append("| metric | value |")
     lines.append("|---|---|")
-    lines.append(f"| wall (run duration) | {_fmt(wall)} s |")
+    lines.append(f"| wall (run duration) | {wall_label} s |")
     lines.append(f"| concurrency | {_fmt(params.get('concurrency'))} |")
     lines.append("| cold boot | N/A (serverless API — no cold boot) |")
     lines.append("| gpu_seconds | N/A (no local GPU) |")
@@ -458,6 +475,13 @@ def render_report(summary: dict[str, Any], case_rows: list[dict[str, Any]]) -> s
             )
         lines.append("")
 
+    lines.extend(
+        rra.render_analyst_insights(summary, case_rows, wall=wall, p50=p50, p95=p95)
+    )
+    lines.extend(rra.render_scoring_method(summary, case_rows))
+    lines.extend(rra.render_figures_note())
+    lines.extend(rra.render_strata(case_rows))
+
     lines.append("## Per-document scores")
     lines.append("")
     lines.append("| # | doc id | subclass | overall | f1 | latency s | tok in | tok out | error |")
@@ -491,6 +515,9 @@ def render_report(summary: dict[str, Any], case_rows: list[dict[str, Any]]) -> s
             f"min={min(scored):.4f} max={max(scored):.4f} mean={sum(scored) / len(scored):.4f}"
         )
     lines.append("")
+
+    lines.extend(rra.render_reproduce(summary))
+    lines.extend(rra.render_artifacts(summary))
 
     lines.append("## Caveats / notes")
     lines.append("")
@@ -648,6 +675,11 @@ MODEL_SUITE_INTRO = {
         "(decode profile `granite-4.2-8b`), traced to Braintrust project "
         "`Mailroom-Evals`. Same canonical seed-42 draws as the Qwen suite."
     ),
+    "qwen3.7-flash": (
+        "OpenRouter API results for `qwen/qwen3.7-flash`, the production model "
+        "for every llm-mailroom 0.7.1 agent. N=20, 50 and 100 waves (seed 42, "
+        "concurrency 8); these legs ran the mutated prompt lineage."
+    ),
     "deepseek-v4.1-flash": (
         "OpenRouter API results for `deepseek/deepseek-v4.1-flash`, "
         "SAND-027 Leg B N=20 specialist waves (seed 42, frozen v1 prompts, "
@@ -692,6 +724,8 @@ def render_model_suite_readme(
         title = "Qwen 3 8B"
     elif model_key == "granite-4.2-8b":
         title = "Granite 4.2 8B"
+    elif model_key == "qwen3.7-flash":
+        title = "Qwen3.7 Flash"
 
     lines = [
         f"# {title} — SAND-027 Leg B N=20 suite",

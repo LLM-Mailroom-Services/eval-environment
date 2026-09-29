@@ -54,6 +54,7 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | overall_score | 0.1824 |
 | scorer_errors | 0 |
 | thinking_recovered (stripped + re-scored) | 0 |
+| overall (per-doc) | **0.1824** (sd 0.2124, min 0.0000, max 0.5976) |
 
 ## Serving / cost metrics (API leg)
 
@@ -89,6 +90,34 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 |---|---|---|---|---|---|---|
 | `corporate_records_specialist` | 22 | 190774 | 39458 | 230232 | 0.0403 | qwen/qwen3-8b |
 
+## Analyst insights & findings
+
+- **Concurrency efficiency:** Σ latency 1013.5 s over wall 352.0 s = **2.88×** effective parallelism at c8 (36% of the ideal 8×).
+- **Tail:** slowest doc `corpus:ground_truth:train:0000950137-05-002026_c91812a1exv4w1.txt` (indenture) 318.8 s = 91% of wall — p95/p50 = 10.65×.
+- **Prompt length vs latency:** Pearson r = 0.70 across 20 docs (prefill-bound).
+- **Decode budget:** mean completion 1973 tok/doc, mean prompt 9539 tok/doc.
+- **Subclass spread:** best `bylaws` 0.550 (n=1), worst `subsidiary_list` 0.000 (n=2).
+- **Field-level extraction:** 16/20 docs have extraction F1 = 0 — when non-zero overall scores still appear, entity/structure components may carry the headline.
+
+## Figures
+
+Static SVG charts (latency bar, subclass means) are generated in the Modal sandbox repo (`scripts/sand032/report.py` + `/dataviz`). This API-leg report keeps the **table views**: **Strata (subclass)** and **Per-document scores** below.
+
+## Strata (subclass)
+
+| subclass | n | mean overall |
+| --- | ---: | ---: |
+| charter_amendment | 4 | 0.1282 |
+| indenture | 3 | 0.2397 |
+| officer_certificate | 3 | 0.1530 |
+| articles_of_incorporation | 2 | 0.2928 |
+| board_resolution | 2 | 0.1115 |
+| rights_instrument | 2 | 0.2988 |
+| subsidiary_list | 2 | 0.0000 |
+| bylaws | 1 | 0.5500 |
+| powers_of_attorney | 1 | 0.0000 |
+| **total** | **20** | **0.1824** |
+
 ## Per-document scores
 
 | # | doc id | subclass | overall | f1 | latency s | tok in | tok out | error |
@@ -115,6 +144,24 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | 20 | `corpus:ground_truth:train:0001683168-23-005255_cardiff_ex0302.htm` | officer_certificate | 0.0000 | 0.0000 | 18.4797 | 4686 | 845 | — |
 
 - scored rows: 20/20; min=0.0000 max=0.5976 mean=0.1824
+
+## Reproduce
+
+```bash
+uv run python scripts/run_evals.py --task eval:corporate_records --real --sample 20 --seed 42 --concurrency 8 --decode-profile qwen3-8b --subset "class:corporate_record"
+uv run python scripts/score_run.py --run-id 20260927T022810Z-eval-corporate_records --recompute
+uv run python scripts/render_comparison_reports.py --run-id 20260927T022810Z-eval-corporate_records
+```
+
+## Artifacts
+
+| path | role |
+| --- | --- |
+| `reports/experiment_log.jsonl` | append-only run summary (this run_id) |
+| `data/experiments/20260927T022810Z-eval-corporate_records/cases.jsonl` | per-case rows (scores, tokens, latency) |
+| `data/experiments/20260927T022810Z-eval-corporate_records/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
+| `reports/experiment_log/20260927T022810Z-eval-corporate_records.md` | experiment-log markdown mirror |
+| `reports/api-comparisons/qwen3-8b/corporate_records/RUN-20-CORPORATE_RECORD-QWEN3-8B-REPORT.md` | Modal-comparable API-leg write-up |
 
 ## Caveats / notes
 

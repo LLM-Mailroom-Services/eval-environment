@@ -54,6 +54,7 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | overall_score | 0.4415 |
 | scorer_errors | 0 |
 | thinking_recovered (stripped + re-scored) | 0 |
+| overall (per-doc) | **0.4415** (sd 0.1792, min 0.2137, max 0.7688) |
 
 ## Serving / cost metrics (API leg)
 
@@ -89,6 +90,34 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 |---|---|---|---|---|---|---|
 | `corporate_records_specialist` | 21 | 186564 | 45325 | 231889 | 0.0197 | deepseek/deepseek-v4.1-flash |
 
+## Analyst insights & findings
+
+- **Concurrency efficiency:** Σ latency 213.9 s over wall 91.6 s = **2.33×** effective parallelism at c8 (29% of the ideal 8×).
+- **Tail:** slowest doc `corpus:ground_truth:train:0001144204-16-109616_v442647_ex3-1.htm` (charter_amendment) 72.0 s = 79% of wall — p95/p50 = 2.44×.
+- **Prompt length vs latency:** Pearson r = 0.10 across 20 docs (not prefill-dominated).
+- **Decode budget:** mean completion 2266 tok/doc, mean prompt 9328 tok/doc.
+- **Subclass spread:** best `articles_of_incorporation` 0.747 (n=2), worst `officer_certificate` 0.252 (n=3).
+- **Field-level extraction:** 10/20 docs have extraction F1 = 0 — when non-zero overall scores still appear, entity/structure components may carry the headline.
+
+## Figures
+
+Static SVG charts (latency bar, subclass means) are generated in the Modal sandbox repo (`scripts/sand032/report.py` + `/dataviz`). This API-leg report keeps the **table views**: **Strata (subclass)** and **Per-document scores** below.
+
+## Strata (subclass)
+
+| subclass | n | mean overall |
+| --- | ---: | ---: |
+| charter_amendment | 4 | 0.2936 |
+| indenture | 3 | 0.3183 |
+| officer_certificate | 3 | 0.2519 |
+| articles_of_incorporation | 2 | 0.7469 |
+| board_resolution | 2 | 0.4473 |
+| rights_instrument | 2 | 0.6214 |
+| subsidiary_list | 2 | 0.4651 |
+| bylaws | 1 | 0.6500 |
+| powers_of_attorney | 1 | 0.7333 |
+| **total** | **20** | **0.4415** |
+
 ## Per-document scores
 
 | # | doc id | subclass | overall | f1 | latency s | tok in | tok out | error |
@@ -115,6 +144,24 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | 20 | `corpus:ground_truth:train:0001683168-23-005255_cardiff_ex0302.htm` | officer_certificate | 0.2682 | 0.0000 | 4.6437 | 4659 | 611 | — |
 
 - scored rows: 20/20; min=0.2137 max=0.7688 mean=0.4415
+
+## Reproduce
+
+```bash
+uv run python scripts/run_evals.py --task eval:corporate_records --real --sample 20 --seed 42 --concurrency 8 --subset "class:corporate_record"
+uv run python scripts/score_run.py --run-id 20260927T110828Z-eval-corporate_records --recompute
+uv run python scripts/render_comparison_reports.py --run-id 20260927T110828Z-eval-corporate_records
+```
+
+## Artifacts
+
+| path | role |
+| --- | --- |
+| `reports/experiment_log.jsonl` | append-only run summary (this run_id) |
+| `data/experiments/20260927T110828Z-eval-corporate_records/cases.jsonl` | per-case rows (scores, tokens, latency) |
+| `data/experiments/20260927T110828Z-eval-corporate_records/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
+| `reports/experiment_log/20260927T110828Z-eval-corporate_records.md` | experiment-log markdown mirror |
+| `reports/api-comparisons/deepseek-v4.1-flash/corporate_records/RUN-20-CORPORATE_RECORD-DEEPSEEK-V4.1-FLASH-REPORT.md` | Modal-comparable API-leg write-up |
 
 ## Caveats / notes
 

@@ -675,6 +675,11 @@ MODEL_SUITE_INTRO = {
         "(decode profile `granite-4.2-8b`), traced to Braintrust project "
         "`Mailroom-Evals`. Same canonical seed-42 draws as the Qwen suite."
     ),
+    "qwen3.7-flash": (
+        "OpenRouter API results for `qwen/qwen3.7-flash`, the production model "
+        "for every llm-mailroom 0.7.1 agent. N=20, 50 and 100 waves (seed 42, "
+        "concurrency 8); these legs ran the mutated prompt lineage."
+    ),
     "deepseek-v4.1-flash": (
         "OpenRouter API results for `deepseek/deepseek-v4.1-flash`, "
         "SAND-027 Leg B N=20 specialist waves (seed 42, frozen v1 prompts, "
@@ -719,6 +724,8 @@ def render_model_suite_readme(
         title = "Qwen 3 8B"
     elif model_key == "granite-4.2-8b":
         title = "Granite 4.2 8B"
+    elif model_key == "qwen3.7-flash":
+        title = "Qwen3.7 Flash"
 
     lines = [
         f"# {title} — SAND-027 Leg B N=20 suite",

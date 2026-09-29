@@ -3,50 +3,50 @@
 <rect width="760" height="340" fill="#ffffff"/>
 <text x="16" y="24" font-size="15" font-weight="600" fill="#0b0b0b">ALE: latency on extraction score · Corporate records</text>
 <text x="16" y="42" font-size="11.5" fill="#6f6e69">Ridge surrogate with model as a factor, n = 80, cross-validated R² -0.082. Latency stands in for document length</text>
-<line x1="58" x2="742" y1="235.45" y2="235.45" stroke="#c3c2b7"/>
-<text x="52" y="239.45" font-size="11" fill="#6f6e69" text-anchor="end">+0.00</text>
-<line x1="58" x2="742" y1="181.81" y2="181.81" stroke="#e1e0d9"/>
-<text x="52" y="185.81" font-size="11" fill="#6f6e69" text-anchor="end">+0.10</text>
-<line x1="58" x2="742" y1="128.17" y2="128.17" stroke="#e1e0d9"/>
-<text x="52" y="132.17" font-size="11" fill="#6f6e69" text-anchor="end">+0.20</text>
-<text x="125.32" y="304" font-size="11" fill="#6f6e69" text-anchor="middle">4</text>
-<text x="309.69" y="304" font-size="11" fill="#6f6e69" text-anchor="middle">16</text>
-<text x="494.05" y="304" font-size="11" fill="#6f6e69" text-anchor="middle">64</text>
-<text x="678.42" y="304" font-size="11" fill="#6f6e69" text-anchor="middle">256</text>
-<text x="400" y="328" font-size="11" fill="#3d3d3a" text-anchor="middle">latency per document (s, log scale)</text>
-<text x="14" y="182" font-size="11" fill="#3d3d3a" text-anchor="middle" transform="rotate(-90 14 182)">Δ score</text>
-<line x1="88.29" x2="88.29" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
-<line x1="143.81" x2="143.81" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
-<line x1="172.72" x2="172.72" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
-<line x1="204.63" x2="204.63" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
-<line x1="246.2" x2="246.2" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
-<line x1="276.94" x2="276.94" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
-<line x1="326.28" x2="326.28" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
-<line x1="385.71" x2="385.71" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
-<line x1="392.9" x2="392.9" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
-<line x1="397.08" x2="397.08" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
-<line x1="404.16" x2="404.16" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
-<line x1="409.83" x2="409.83" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
-<line x1="422.9" x2="422.9" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
-<line x1="438.87" x2="438.87" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
-<line x1="494.52" x2="494.52" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
-<line x1="516.88" x2="516.88" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
-<line x1="547.7" x2="547.7" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
-<line x1="585.42" x2="585.42" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
-<line x1="650.01" x2="650.01" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
-<polygon points="58,129.99 143.81,184.39 204.63,214.69 276.94,232.66 385.71,228.91 397.08,226.6 409.83,225.32 438.87,225.48 516.88,215.61 585.42,201.71 742,90.62 742,262.06 585.42,256.8 516.88,258.9 438.87,273.38 409.83,270.8 397.08,270.59 385.71,271.07 276.94,269.95 204.63,260.45 143.81,252.94 58,257.55" fill="#2a78d6" fill-opacity="0.16"/>
-<polyline points="58,195.97 143.81,216.89 204.63,234.44 276.94,247.85 385.71,247.2 397.08,246.5 409.83,246.13 438.87,246.88 516.88,239.53 585.42,234.38 742,193.51" fill="none" stroke="#2a78d6" stroke-width="2.2" stroke-linejoin="round"/>
-<circle cx="58" cy="195.97" r="2.6" fill="#2a78d6"/>
-<circle cx="143.81" cy="216.89" r="2.6" fill="#2a78d6"/>
-<circle cx="204.63" cy="234.44" r="2.6" fill="#2a78d6"/>
-<circle cx="276.94" cy="247.85" r="2.6" fill="#2a78d6"/>
-<circle cx="385.71" cy="247.2" r="2.6" fill="#2a78d6"/>
-<circle cx="397.08" cy="246.5" r="2.6" fill="#2a78d6"/>
-<circle cx="409.83" cy="246.13" r="2.6" fill="#2a78d6"/>
-<circle cx="438.87" cy="246.88" r="2.6" fill="#2a78d6"/>
-<circle cx="516.88" cy="239.53" r="2.6" fill="#2a78d6"/>
-<circle cx="585.42" cy="234.38" r="2.6" fill="#2a78d6"/>
+<line x1="59" x2="742" y1="235.45" y2="235.45" stroke="#c3c2b7"/>
+<text x="53" y="239.45" font-size="11" fill="#6f6e69" text-anchor="end">+0.00</text>
+<line x1="59" x2="742" y1="181.81" y2="181.81" stroke="#e1e0d9"/>
+<text x="53" y="185.81" font-size="11" fill="#6f6e69" text-anchor="end">+0.10</text>
+<line x1="59" x2="742" y1="128.17" y2="128.17" stroke="#e1e0d9"/>
+<text x="53" y="132.17" font-size="11" fill="#6f6e69" text-anchor="end">+0.20</text>
+<text x="126.22" y="304" font-size="11" fill="#6f6e69" text-anchor="middle">4</text>
+<text x="310.32" y="304" font-size="11" fill="#6f6e69" text-anchor="middle">16</text>
+<text x="494.42" y="304" font-size="11" fill="#6f6e69" text-anchor="middle">64</text>
+<text x="678.51" y="304" font-size="11" fill="#6f6e69" text-anchor="middle">256</text>
+<text x="400.5" y="328" font-size="11" fill="#3d3d3a" text-anchor="middle">latency per document (s, log scale)</text>
+<text x="13.43" y="182" font-size="11" fill="#3d3d3a" text-anchor="middle" transform="rotate(-90 13.43 182)">Δ score</text>
+<line x1="89.25" x2="89.25" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="144.69" x2="144.69" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="173.55" x2="173.55" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="205.41" x2="205.41" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="246.93" x2="246.93" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="277.62" x2="277.62" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="326.89" x2="326.89" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="386.23" x2="386.23" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="393.41" x2="393.41" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="397.58" x2="397.58" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="404.65" x2="404.65" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="410.31" x2="410.31" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="423.36" x2="423.36" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="439.32" x2="439.32" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="494.88" x2="494.88" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="517.21" x2="517.21" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="547.98" x2="547.98" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="585.65" x2="585.65" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<line x1="650.14" x2="650.14" y1="288" y2="282" stroke="#3d3d3a" stroke-opacity="0.5"/>
+<polygon points="59,129.99 144.69,184.39 205.41,214.69 277.62,232.66 386.23,228.91 397.58,226.6 410.31,225.32 439.32,225.48 517.21,215.61 585.65,201.71 742,90.62 742,262.06 585.65,256.8 517.21,258.9 439.32,273.38 410.31,270.8 397.58,270.59 386.23,271.07 277.62,269.95 205.41,260.45 144.69,252.94 59,257.55" fill="#2a78d6" fill-opacity="0.16"/>
+<polyline points="59,195.97 144.69,216.89 205.41,234.44 277.62,247.85 386.23,247.2 397.58,246.5 410.31,246.13 439.32,246.88 517.21,239.53 585.65,234.38 742,193.51" fill="none" stroke="#2a78d6" stroke-width="2.2" stroke-linejoin="round"/>
+<circle cx="59" cy="195.97" r="2.6" fill="#2a78d6"/>
+<circle cx="144.69" cy="216.89" r="2.6" fill="#2a78d6"/>
+<circle cx="205.41" cy="234.44" r="2.6" fill="#2a78d6"/>
+<circle cx="277.62" cy="247.85" r="2.6" fill="#2a78d6"/>
+<circle cx="386.23" cy="247.2" r="2.6" fill="#2a78d6"/>
+<circle cx="397.58" cy="246.5" r="2.6" fill="#2a78d6"/>
+<circle cx="410.31" cy="246.13" r="2.6" fill="#2a78d6"/>
+<circle cx="439.32" cy="246.88" r="2.6" fill="#2a78d6"/>
+<circle cx="517.21" cy="239.53" r="2.6" fill="#2a78d6"/>
+<circle cx="585.65" cy="234.38" r="2.6" fill="#2a78d6"/>
 <circle cx="742" cy="193.51" r="2.6" fill="#2a78d6"/>
-<line x1="58" x2="72" y1="58" y2="58" stroke="#2a78d6" stroke-width="2.5"/>
-<text x="76" y="62" font-size="11" fill="#3d3d3a" text-anchor="start">ALE (90% bootstrap band)</text>
+<line x1="59" x2="73" y1="58" y2="58" stroke="#2a78d6" stroke-width="2.5"/>
+<text x="77" y="62" font-size="11" fill="#3d3d3a" text-anchor="start">ALE (90% bootstrap band)</text>
 </svg>

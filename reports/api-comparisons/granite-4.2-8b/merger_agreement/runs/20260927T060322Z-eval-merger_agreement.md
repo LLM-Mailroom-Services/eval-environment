@@ -54,6 +54,7 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | overall_score | 0.387 |
 | scorer_errors | 0 |
 | thinking_recovered (stripped + re-scored) | 0 |
+| overall (per-doc) | **0.3870** (sd 0.2131, min 0.0990, max 0.7222) |
 
 ## Serving / cost metrics (API leg)
 
@@ -89,6 +90,34 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 |---|---|---|---|---|---|---|
 | `merger_agreement_specialist` | 170 | 2044275 | 1259169 | 3303444 | 0.4374 | ibm-granite/granite-4.2-8b |
 
+## Analyst insights & findings
+
+- **Concurrency efficiency:** Σ latency 21311.7 s over wall 3041.9 s = **7.01×** effective parallelism at c8 (88% of the ideal 8×).
+- **Tail:** slowest doc `corpus:ground_truth:train:contract_100_merger_agreement.txt` (all_stock) 1950.6 s = 64% of wall — p95/p50 = 1.72×.
+- **Prompt length vs latency:** Pearson r = 0.55 across 20 docs (prefill-bound).
+- **Decode budget:** mean completion 62958 tok/doc, mean prompt 102214 tok/doc.
+- **Subclass spread:** best `all_cash` 0.591 (n=5), worst `other` 0.195 (n=9).
+- **Field-level extraction:** 8/20 docs have extraction F1 = 0 — when non-zero overall scores still appear, entity/structure components may carry the headline.
+
+## Scoring method — merger extraction
+
+Headline **overall_score** uses the pipeline extraction rubric on MAUD-labeled merger agreements; field F1 may be 0 when GT is label-native only.
+
+## Figures
+
+Static SVG charts (latency bar, subclass means) are generated in the Modal sandbox repo (`scripts/sand032/report.py` + `/dataviz`). This API-leg report keeps the **table views**: **Strata (subclass)** and **Per-document scores** below.
+
+## Strata (subclass)
+
+| subclass | n | mean overall |
+| --- | ---: | ---: |
+| other | 9 | 0.1950 |
+| all_cash | 5 | 0.5913 |
+| mixed_cash_stock | 3 | 0.5259 |
+| all_stock | 2 | 0.4453 |
+| mixed_cash_stock_election | 1 | 0.5588 |
+| **total** | **20** | **0.3870** |
+
 ## Per-document scores
 
 | # | doc id | subclass | overall | f1 | latency s | tok in | tok out | error |
@@ -115,6 +144,24 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | 20 | `corpus:ground_truth:train:contract_19_merger_agreement.txt` | mixed_cash_stock | 0.5500 | 0.1667 | 750.7011 | 99739 | 57127 | — |
 
 - scored rows: 20/20; min=0.0990 max=0.7222 mean=0.3870
+
+## Reproduce
+
+```bash
+uv run python scripts/run_evals.py --task eval:merger_agreement --real --sample 20 --seed 42 --concurrency 8 --decode-profile granite-4.2-8b --subset "class:merger_agreement"
+uv run python scripts/score_run.py --run-id 20260927T060322Z-eval-merger_agreement --recompute
+uv run python scripts/render_comparison_reports.py --run-id 20260927T060322Z-eval-merger_agreement
+```
+
+## Artifacts
+
+| path | role |
+| --- | --- |
+| `reports/experiment_log.jsonl` | append-only run summary (this run_id) |
+| `data/experiments/20260927T060322Z-eval-merger_agreement/cases.jsonl` | per-case rows (scores, tokens, latency) |
+| `data/experiments/20260927T060322Z-eval-merger_agreement/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
+| `reports/experiment_log/20260927T060322Z-eval-merger_agreement.md` | experiment-log markdown mirror |
+| `reports/api-comparisons/granite-4.2-8b/merger_agreement/RUN-20-MERGER_AGREEMENT-GRANITE-4.2-8B-REPORT.md` | Modal-comparable API-leg write-up |
 
 ## Caveats / notes
 

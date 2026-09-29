@@ -1,6 +1,6 @@
 # SAND-027 API leg — master comparison report
 
-Generated: `2026-09-27T09:08:54Z` from `reports/experiment_log.jsonl` via `scripts/render_comparison_reports.py`.
+Generated: `2026-09-28T01:09:02Z` from `reports/experiment_log.jsonl` via `scripts/render_comparison_reports.py`.
 
 Use this file for cross-model Leg B summaries; drill into per-run detail via the linked canonical stems or [INDEX.md](INDEX.md) (every report-worthy run).
 

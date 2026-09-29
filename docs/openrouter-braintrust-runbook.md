@@ -249,6 +249,7 @@ call (see `LARGE_COMPLETION_MODELS` in `src/evals/specialist_llm.py`).
 |---|---|---|
 | `qwen/qwen3-8b` | **48K multi-chunk** (8–10 calls/doc) | live evidence: ~8,192 completion-token hard cap truncates unchunked ~390K-char docs → parse_error |
 | `qwen/qwen3.7-flash` | **one call/doc** (budget 2 with retry) | 1M context / 65K completion on OpenRouter; 465K-char docs fit in one pass |
+| `deepseek/deepseek-v4.1-flash` | **one call/doc on all five classes** (budget 2 with retry) | 1M context; pinned N=20 maxima through 464,926-char merger fit in one pass — `bash scripts/run_deepseek41_specialists_n20.sh` |
 | `ibm-granite/granite-4.2-8b` | **~280K source span** (1 call for most N=20 rows; ≤2 for the 465K outlier) | 131K context minus 32K merger `max_tokens`; do not inherit the 48K qwen3-8b path |
 
 Do **not** run Granite (or qwen3.7-flash) merger evals with the qwen3-8b
@@ -280,6 +281,18 @@ uv run python -u scripts/run_evals.py \
 `--sample 20` draws a stratified sample across all five doc classes (not a
 single-class N=20 like the specialist waves); use `--subset class:<name>`
 instead of `full` if a single-class classification slice is wanted.
+
+N=100 sorter waves (same seed-42 `full` draw for cross-model comparison):
+
+```bash
+bash scripts/run_granite_sorter_n100.sh
+bash scripts/run_qwen37_sorter_n100.sh
+bash scripts/run_deepseek41_sorter_n100.sh
+```
+
+Then `uv run python scripts/render_comparison_reports.py`,
+`uv run python scripts/render_experiment_log.py --validate`, and
+`EVALS_TRACE_BACKEND=none uv run python scripts/export_site_snapshot.py`.
 
 Pipe raw `tee` output to a scratch path outside the repo (e.g. `/tmp/run.log`
 as above), not under `reports/`. `reports/` is git-tracked and reserved for

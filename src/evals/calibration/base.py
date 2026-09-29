@@ -225,4 +225,24 @@ def render_md(task: str, payload: dict[str, Any]) -> str:
     if caveats:
         lines += ["", "## Caveats", ""]
         lines += [f"- {c}" for c in caveats]
+    lines += [
+        "",
+        "## Reproduce",
+        "",
+        "```bash",
+        f"uv run python scripts/run_evals.py --task calibration:{task} --mock --n 3",
+        f"uv run python scripts/run_evals.py --task calibration:{task} --real",
+        "```",
+        "",
+        "## Artifacts",
+        "",
+        "| path | role |",
+        "| --- | --- |",
+        f"| `reports/calibration/{task}/<stamp>/report.json` | machine-readable calibration payload |",
+        f"| `reports/calibration/{task}/<stamp>/report.md` | this write-up (report-only thresholds) |",
+        f"| `reports/experiment_log.jsonl` | run summary for the calibration task |",
+        "",
+        "_Threshold recommendations are **report-only** — never auto-written to pipeline configs._",
+        "",
+    ]
     return "\n".join(lines) + "\n"

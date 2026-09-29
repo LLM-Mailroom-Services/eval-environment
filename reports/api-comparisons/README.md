@@ -18,7 +18,7 @@ against the Modal/vLLM leg reports kept in the sandbox repo
 | `runs/` | immutable per-run write-up (one markdown file per experiment-log run id) | `20260927T033031Z-eval-correspondence.md` |
 | `INDEX.md` | catalog of every run write-up + link to its canonical wave stem when present | — |
 | `API-LEG-MASTER-REPORT.md` | cross-model master rollup (Qwen vs Granite, superseded runs) | regenerated with the script below |
-| `<model>/README.md` | per-model N=20 suite summary (`qwen3-8b`, `granite-4.2-8b`) | — |
+| `<model>/README.md` | per-model suite summary (`qwen3-8b`, `granite-4.2-8b`, `deepseek-v4.1-flash`, `qwen3.7-flash`) | — |
 | `wave` | draw size: `--sample` when set, else `--n` | `20`, `50` |
 | `CLASS` | subset class uppercased | `CORRESPONDENCE`, `INSURANCE_CLAIM`, `CONTRACT`, `MERGER_AGREEMENT`, `CORPORATE_RECORD`; `ALL` for whole-corpus runs |
 | stem | `RUN-<wave>-<CLASS>` | pairs with the Modal report of the same stem |
@@ -44,6 +44,18 @@ metrics, per-agent usage, per-document score table, **run configuration**
 rollups), decode posture (budgets/sampling/timeout), dataset provenance +
 subset-manifest paths. Engine-only metrics (cold boot, gpu_seconds) are
 recorded as `N/A (serverless API)`.
+
+Sandbox-parity narrative blocks (same vocabulary as
+`mailroom-sandbox/scripts/sand032/report.py`):
+
+- **Analyst insights & findings** — concurrency efficiency, tail latency,
+  prompt-length correlation, subclass spread, field-F1 zeros
+- **Scoring method** — CUAD / MAUD context for contracts and merger tasks
+- **Strata (subclass)** — mean overall by expected subclass
+- **Reproduce** / **Artifacts** — CLI replay and on-disk paths
+
+SVG figures stay in the Modal sandbox repo; API-leg reports use strata +
+per-document tables as the figure table views.
 
 ## Generation
 

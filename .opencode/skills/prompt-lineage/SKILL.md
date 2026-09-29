@@ -51,6 +51,8 @@ key/lineage/sha256), `pipeline_git` (llm-mailroom commit), and
 2. KEY — unused + `<role>_v<parent.version+1>` naming
 3. ADDITIVE — parent preserved outside the anchor span
 4. METADATA — parent + change note recorded
+5. LENGTH — net growth ≤120 chars (specialists) / ≤600 (sorter); surgical
+   in-anchor edits only — prompt length is a deployment constraint
 
 One rule per mutation, one A/B per mutation, same subset/seed. The OBSERVE
 input is `score_run.py --export-failures`. Judge rubrics for post-hoc scoring

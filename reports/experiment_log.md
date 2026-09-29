@@ -2,10 +2,57 @@
 
 One row per run (append-only source of truth: `reports/experiment_log.jsonl`). Each run's full detail (dataset provenance, metrics, per-agent performance, case table) lives in its own file under `reports/experiment_log/<run_id>.md` — this index never grows a per-run section inline, so it stays readable regardless of history size. OpenRouter/Braintrust N-doc waves also get a standalone, Modal-comparable write-ups under `reports/api-comparisons/` (see `INDEX.md`; per-run files under `<model>/<task>/runs/`).
 
-## Real evaluation waves (real mode, n≥10 cases) — 22
+## Real evaluation waves (real mode, n≥10 cases) — 69
 
 | run_id | family | task | mode | model | subset | n | key metric | errors |
 |---|---|---|---|---|---|---|---|---|
+| [20260928T093403Z-eval-merger_agreement](experiment_log/20260928T093403Z-eval-merger_agreement.md) | eval | merger_agreement | real | deepseek/deepseek-v4.1-flash | class:merger_agreement | 50 | — | 0 |
+| [20260928T090253Z-eval-correspondence](experiment_log/20260928T090253Z-eval-correspondence.md) | eval | correspondence | real | qwen/qwen3.7-flash | class:correspondence | 50 | — | 0 |
+| [20260928T090247Z-eval-merger_agreement](experiment_log/20260928T090247Z-eval-merger_agreement.md) | eval | merger_agreement | real | deepseek/deepseek-v4.1-flash | class:merger_agreement | 50 | — | 0 |
+| [20260928T085821Z-eval-corporate_records](experiment_log/20260928T085821Z-eval-corporate_records.md) | eval | corporate_records | real | deepseek/deepseek-v4.1-flash | class:corporate_record | 20 | — | 0 |
+| [20260928T085426Z-eval-merger_agreement](experiment_log/20260928T085426Z-eval-merger_agreement.md) | eval | merger_agreement | real | deepseek/deepseek-v4.1-flash | class:merger_agreement | 20 | — | 0 |
+| [20260928T085148Z-eval-contracts](experiment_log/20260928T085148Z-eval-contracts.md) | eval | contracts | real | deepseek/deepseek-v4.1-flash | class:contract | 20 | — | 0 |
+| [20260928T085028Z-eval-insurance_claims](experiment_log/20260928T085028Z-eval-insurance_claims.md) | eval | insurance_claims | real | deepseek/deepseek-v4.1-flash | class:insurance_claim | 20 | — | 0 |
+| [20260928T084907Z-eval-correspondence](experiment_log/20260928T084907Z-eval-correspondence.md) | eval | correspondence | real | deepseek/deepseek-v4.1-flash | class:correspondence | 20 | — | 0 |
+| [20260928T083627Z-eval-corporate_records](experiment_log/20260928T083627Z-eval-corporate_records.md) | eval | corporate_records | real | qwen/qwen3.7-flash | class:corporate_record | 50 | — | 0 |
+| [20260928T083110Z-eval-correspondence](experiment_log/20260928T083110Z-eval-correspondence.md) | eval | correspondence | real | qwen/qwen3.7-flash | class:correspondence | 50 | — | 0 |
+| [20260928T081536Z-eval-corporate_records](experiment_log/20260928T081536Z-eval-corporate_records.md) | eval | corporate_records | real | qwen/qwen3.7-flash | class:corporate_record | 50 | — | 0 |
+| [20260928T081119Z-eval-correspondence](experiment_log/20260928T081119Z-eval-correspondence.md) | eval | correspondence | real | qwen/qwen3.7-flash | class:correspondence | 50 | — | 0 |
+| [20260928T080826Z-eval-merger_agreement](experiment_log/20260928T080826Z-eval-merger_agreement.md) | eval | merger_agreement | real | qwen/qwen3.7-flash | class:merger_agreement | 20 | — | 0 |
+| [20260928T080542Z-eval-merger_agreement](experiment_log/20260928T080542Z-eval-merger_agreement.md) | eval | merger_agreement | real | qwen/qwen3.7-flash | class:merger_agreement | 20 | — | 0 |
+| [20260928T075959Z-eval-contracts](experiment_log/20260928T075959Z-eval-contracts.md) | eval | contracts | real | qwen/qwen3.7-flash | class:contract | 20 | — | 0 |
+| [20260928T075346Z-eval-contracts](experiment_log/20260928T075346Z-eval-contracts.md) | eval | contracts | real | qwen/qwen3.7-flash | class:contract | 20 | — | 0 |
+| [20260928T075116Z-eval-corporate_records](experiment_log/20260928T075116Z-eval-corporate_records.md) | eval | corporate_records | real | qwen/qwen3.7-flash | class:corporate_record | 20 | — | 0 |
+| [20260928T074850Z-eval-corporate_records](experiment_log/20260928T074850Z-eval-corporate_records.md) | eval | corporate_records | real | qwen/qwen3.7-flash | class:corporate_record | 20 | — | 0 |
+| [20260928T073402Z-eval-correspondence](experiment_log/20260928T073402Z-eval-correspondence.md) | eval | correspondence | real | qwen/qwen3.7-flash | class:correspondence | 100 | — | 0 |
+| [20260928T072519Z-eval-correspondence](experiment_log/20260928T072519Z-eval-correspondence.md) | eval | correspondence | real | qwen/qwen3.7-flash | class:correspondence | 100 | — | 0 |
+| [20260928T070803Z-eval-merger_agreement](experiment_log/20260928T070803Z-eval-merger_agreement.md) | eval | merger_agreement | real | qwen/qwen3.7-flash | class:merger_agreement | 50 | — | 0 |
+| [20260928T070248Z-eval-insurance_claims](experiment_log/20260928T070248Z-eval-insurance_claims.md) | eval | insurance_claims | real | qwen/qwen3.7-flash | class:insurance_claim | 50 | — | 0 |
+| [20260928T065316Z-eval-corporate_records](experiment_log/20260928T065316Z-eval-corporate_records.md) | eval | corporate_records | real | qwen/qwen3.7-flash | class:corporate_record | 50 | — | 0 |
+| [20260928T064850Z-eval-correspondence](experiment_log/20260928T064850Z-eval-correspondence.md) | eval | correspondence | real | qwen/qwen3.7-flash | class:correspondence | 50 | — | 0 |
+| [20260928T063713Z-eval-contracts](experiment_log/20260928T063713Z-eval-contracts.md) | eval | contracts | real | qwen/qwen3.7-flash | class:contract | 50 | — | 0 |
+| [20260928T062755Z-eval-corporate_records](experiment_log/20260928T062755Z-eval-corporate_records.md) | eval | corporate_records | real | qwen/qwen3.7-flash | class:corporate_record | 50 | — | 0 |
+| [20260928T062251Z-eval-corporate_records](experiment_log/20260928T062251Z-eval-corporate_records.md) | eval | corporate_records | real | qwen/qwen3.7-flash | class:corporate_record | 50 | — | 0 |
+| [20260928T061548Z-eval-merger_agreement](experiment_log/20260928T061548Z-eval-merger_agreement.md) | eval | merger_agreement | real | qwen/qwen3.7-flash | class:merger_agreement | 50 | — | 0 |
+| [20260928T060919Z-eval-merger_agreement](experiment_log/20260928T060919Z-eval-merger_agreement.md) | eval | merger_agreement | real | qwen/qwen3.7-flash | class:merger_agreement | 50 | — | 0 |
+| [20260928T055822Z-eval-contracts](experiment_log/20260928T055822Z-eval-contracts.md) | eval | contracts | real | qwen/qwen3.7-flash | class:contract | 50 | — | 0 |
+| [20260928T054828Z-eval-contracts](experiment_log/20260928T054828Z-eval-contracts.md) | eval | contracts | real | qwen/qwen3.7-flash | class:contract | 50 | — | 0 |
+| [20260928T054349Z-eval-insurance_claims](experiment_log/20260928T054349Z-eval-insurance_claims.md) | eval | insurance_claims | real | qwen/qwen3.7-flash | class:insurance_claim | 50 | — | 0 |
+| [20260928T053903Z-eval-insurance_claims](experiment_log/20260928T053903Z-eval-insurance_claims.md) | eval | insurance_claims | real | qwen/qwen3.7-flash | class:insurance_claim | 50 | — | 0 |
+| [20260928T053010Z-eval-correspondence](experiment_log/20260928T053010Z-eval-correspondence.md) | eval | correspondence | real | qwen/qwen3.7-flash | class:correspondence | 50 | — | 0 |
+| [20260928T052606Z-eval-correspondence](experiment_log/20260928T052606Z-eval-correspondence.md) | eval | correspondence | real | qwen/qwen3.7-flash | class:correspondence | 50 | — | 0 |
+| [20260928T051905Z-eval-insurance_claims](experiment_log/20260928T051905Z-eval-insurance_claims.md) | eval | insurance_claims | real | qwen/qwen3.7-flash | class:insurance_claim | 20 | — | 0 |
+| [20260928T051701Z-eval-insurance_claims](experiment_log/20260928T051701Z-eval-insurance_claims.md) | eval | insurance_claims | real | qwen/qwen3.7-flash | class:insurance_claim | 20 | — | 0 |
+| [20260928T050325Z-eval-correspondence](experiment_log/20260928T050325Z-eval-correspondence.md) | eval | correspondence | real | qwen/qwen3.7-flash | class:correspondence | 20 | — | 0 |
+| [20260928T050127Z-eval-correspondence](experiment_log/20260928T050127Z-eval-correspondence.md) | eval | correspondence | real | qwen/qwen3.7-flash | class:correspondence | 20 | — | 0 |
+| [20260927T110828Z-eval-corporate_records](experiment_log/20260927T110828Z-eval-corporate_records.md) | eval | corporate_records | real | deepseek/deepseek-v4.1-flash | class:corporate_record | 20 | — | 0 |
+| [20260927T110153Z-eval-merger_agreement](experiment_log/20260927T110153Z-eval-merger_agreement.md) | eval | merger_agreement | real | deepseek/deepseek-v4.1-flash | class:merger_agreement | 20 | — | 0 |
+| [20260927T105549Z-eval-contracts](experiment_log/20260927T105549Z-eval-contracts.md) | eval | contracts | real | deepseek/deepseek-v4.1-flash | class:contract | 20 | — | 0 |
+| [20260927T105400Z-eval-insurance_claims](experiment_log/20260927T105400Z-eval-insurance_claims.md) | eval | insurance_claims | real | deepseek/deepseek-v4.1-flash | class:insurance_claim | 20 | — | 0 |
+| [20260927T105317Z-eval-correspondence](experiment_log/20260927T105317Z-eval-correspondence.md) | eval | correspondence | real | deepseek/deepseek-v4.1-flash | class:correspondence | 20 | — | 0 |
+| [20260927T101544Z-eval-classification](experiment_log/20260927T101544Z-eval-classification.md) | eval | classification | real | deepseek/deepseek-v4.1-flash | full | 100 | class_accuracy=0.95 | 0 |
+| [20260927T101020Z-eval-classification](experiment_log/20260927T101020Z-eval-classification.md) | eval | classification | real | qwen/qwen3.7-flash | full | 100 | class_accuracy=0.91 | 0 |
+| [20260927T100340Z-eval-classification](experiment_log/20260927T100340Z-eval-classification.md) | eval | classification | real | ibm-granite/granite-4.2-8b | full | 100 | class_accuracy=0.94 | 0 |
 | [20260927T082404Z-eval-merger_agreement](experiment_log/20260927T082404Z-eval-merger_agreement.md) | eval | merger_agreement | real | ibm-granite/granite-4.2-8b | class:merger_agreement | 20 | — | 0 |
 | [20260927T070900Z-eval-classification](experiment_log/20260927T070900Z-eval-classification.md) | eval | classification | real | ibm-granite/granite-4.2-8b | full | 20 | class_accuracy=0.9 | 0 |
 | [20260927T065622Z-eval-corporate_records](experiment_log/20260927T065622Z-eval-corporate_records.md) | eval | corporate_records | real | ibm-granite/granite-4.2-8b | class:corporate_record | 20 | — | 0 |
@@ -29,10 +76,13 @@ One row per run (append-only source of truth: `reports/experiment_log.jsonl`). E
 | [20260926T234603Z-eval-insurance_claims](experiment_log/20260926T234603Z-eval-insurance_claims.md) | eval | insurance_claims | real | qwen/qwen3-8b | class:insurance_claim | 20 | — | 0 |
 | [20260926T234358Z-eval-correspondence](experiment_log/20260926T234358Z-eval-correspondence.md) | eval | correspondence | real | qwen/qwen3-8b | class:correspondence | 20 | — | 0 |
 
-## Exploratory / debug real runs (real mode, n<10 cases) — 11
+## Exploratory / debug real runs (real mode, n<10 cases) — 14
 
 | run_id | family | task | mode | model | subset | n | key metric | errors |
 |---|---|---|---|---|---|---|---|---|
+| [20260927T101544Z-eval-classification](experiment_log/20260927T101544Z-eval-classification.md) | eval | classification | real | deepseek/deepseek-v4.1-flash | full | 1 | class_accuracy=1.0 | 0 |
+| [20260927T101526Z-eval-classification](experiment_log/20260927T101526Z-eval-classification.md) | eval | classification | real | — | full | 0 | — | 0 |
+| [20260927T093106Z-eval-classification](experiment_log/20260927T093106Z-eval-classification.md) | eval | classification | real | — | full | 0 | — | 0 |
 | [20260927T051851Z-eval-correspondence](experiment_log/20260927T051851Z-eval-correspondence.md) | eval | correspondence | real | ibm-granite/granite-4.2-8b | class:correspondence | 1 | — | 0 |
 | [20260927T020724Z-eval-merger_agreement](experiment_log/20260927T020724Z-eval-merger_agreement.md) | eval | merger_agreement | real | qwen/qwen3.7-flash | class:merger_agreement | 2 | — | 0 |
 | [20260927T014814Z-eval-merger_agreement](experiment_log/20260927T014814Z-eval-merger_agreement.md) | eval | merger_agreement | real | qwen/qwen3-8b | class:merger_agreement | 2 | — | 0 |
@@ -76,3 +126,36 @@ One row per run (append-only source of truth: `reports/experiment_log.jsonl`). E
 | [20260926T223146Z-eval-boss](experiment_log/20260926T223146Z-eval-boss.md) | eval | boss | mock | mock-model | fixtures | 2 | — | 0 |
 | [20260926T223145Z-eval-archivist](experiment_log/20260926T223145Z-eval-archivist.md) | eval | archivist | mock | — | fixtures | 2 | — | 0 |
 | [20260926T223144Z-eval-arbiter](experiment_log/20260926T223144Z-eval-arbiter.md) | eval | arbiter | mock | mock-model | fixtures | 2 | — | 0 |
+
+## A/B comparisons
+
+| recorded_at | run_a | run_b | accepted | promoted_version |
+|---|---|---|---|---|
+| 2026-09-28T05:15:05+00:00 | 20260928T050127Z-eval-correspondence | 20260928T050325Z-eval-correspondence | REJECTED | — |
+| 2026-09-28T05:21:45+00:00 | 20260928T051701Z-eval-insurance_claims | 20260928T051905Z-eval-insurance_claims | REJECTED | — |
+| 2026-09-28T05:38:25+00:00 | 20260928T052606Z-eval-correspondence | 20260928T053010Z-eval-correspondence | REJECTED | — |
+| 2026-09-28T05:48:25+00:00 | 20260928T053903Z-eval-insurance_claims | 20260928T054349Z-eval-insurance_claims | REJECTED | — |
+| 2026-09-28T06:09:16+00:00 | 20260928T054828Z-eval-contracts | 20260928T055822Z-eval-contracts | REJECTED | — |
+| 2026-09-28T06:22:48+00:00 | 20260928T060919Z-eval-merger_agreement | 20260928T061548Z-eval-merger_agreement | REJECTED | — |
+| 2026-09-28T06:33:13+00:00 | 20260928T062251Z-eval-corporate_records | 20260928T062755Z-eval-corporate_records | REJECTED | — |
+| 2026-09-28T06:48:47+00:00 | 20260928T054828Z-eval-contracts | 20260928T063713Z-eval-contracts | ACCEPTED | contracts_specialist_v3 |
+| 2026-09-28T06:53:13+00:00 | 20260928T052606Z-eval-correspondence | 20260928T064850Z-eval-correspondence | REJECTED | — |
+| 2026-09-28T06:58:18+00:00 | 20260928T062251Z-eval-corporate_records | 20260928T065316Z-eval-corporate_records | REJECTED | — |
+| 2026-09-28T07:08:00+00:00 | 20260928T053903Z-eval-insurance_claims | 20260928T070248Z-eval-insurance_claims | REJECTED | — |
+| 2026-09-28T07:16:15+00:00 | 20260928T060919Z-eval-merger_agreement | 20260928T070803Z-eval-merger_agreement | REJECTED | — |
+| 2026-09-28T07:46:53+00:00 | 20260928T072519Z-eval-correspondence | 20260928T073402Z-eval-correspondence | REJECTED | — |
+| 2026-09-28T07:46:57+00:00 | 20260928T072519Z-eval-correspondence | 20260928T073402Z-eval-correspondence | REJECTED | — |
+| 2026-09-28T07:53:43+00:00 | 20260928T074850Z-eval-corporate_records | 20260928T075116Z-eval-corporate_records | REJECTED | — |
+| 2026-09-28T08:05:40+00:00 | 20260928T075346Z-eval-contracts | 20260928T075959Z-eval-contracts | REJECTED | — |
+| 2026-09-28T08:11:17+00:00 | 20260928T080542Z-eval-merger_agreement | 20260928T080826Z-eval-merger_agreement | REJECTED | — |
+| 2026-09-28T08:15:33+00:00 | 20260928T052606Z-eval-correspondence | 20260928T081119Z-eval-correspondence | REJECTED | — |
+| 2026-09-28T08:20:15+00:00 | 20260928T062251Z-eval-corporate_records | 20260928T081536Z-eval-corporate_records | REJECTED | — |
+| 2026-09-28T08:41:21+00:00 | 20260928T052606Z-eval-correspondence | 20260928T083110Z-eval-correspondence | REJECTED | — |
+| 2026-09-28T08:48:41+00:00 | 20260928T062251Z-eval-corporate_records | 20260928T083627Z-eval-corporate_records | REJECTED | — |
+| 2026-09-28T08:50:25+00:00 | 20260927T105317Z-eval-correspondence | 20260928T084907Z-eval-correspondence | REJECTED | — |
+| 2026-09-28T08:51:45+00:00 | 20260927T105400Z-eval-insurance_claims | 20260928T085028Z-eval-insurance_claims | REJECTED | — |
+| 2026-09-28T08:54:23+00:00 | 20260927T105549Z-eval-contracts | 20260928T085148Z-eval-contracts | REJECTED | — |
+| 2026-09-28T08:58:18+00:00 | 20260927T110153Z-eval-merger_agreement | 20260928T085426Z-eval-merger_agreement | REJECTED | — |
+| 2026-09-28T09:00:10+00:00 | 20260927T110828Z-eval-corporate_records | 20260928T085821Z-eval-corporate_records | ACCEPTED | corporate_records_specialist_v2 |
+| 2026-09-28T09:33:38+00:00 | 20260928T052606Z-eval-correspondence | 20260928T090253Z-eval-correspondence | REJECTED | — |
+| 2026-09-28T09:42:12+00:00 | 20260928T090247Z-eval-merger_agreement | 20260928T093403Z-eval-merger_agreement | REJECTED | — |

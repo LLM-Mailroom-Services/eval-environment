@@ -1,5 +1,7 @@
 # Run report — `20260927T022750Z-eval-merger_agreement` (API leg)
 
+> **Correction (2026-09-28):** this run is filed under `qwen3-8b` because that was its decode profile, but the model that served it was `qwen/qwen3.7-flash` (see the engine row and the per-agent models column). Do not compare it with Qwen3-8B results as the same model.
+
 Comparison report for the OpenRouter API leg, metric-for-metric against
 the Modal/vLLM leg reports (same wave+class stem = paired report).
 
@@ -54,6 +56,7 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | overall_score | 0.3748 |
 | scorer_errors | 0 |
 | thinking_recovered (stripped + re-scored) | 0 |
+| overall (per-doc) | **0.3748** (sd 0.2199, min 0.0000, max 0.6945) |
 
 ## Serving / cost metrics (API leg)
 
@@ -89,6 +92,34 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 |---|---|---|---|---|---|---|
 | `merger_agreement_specialist` | 18 | 1422210 | 114281 | 1536491 | 0.0575 | qwen/qwen3.7-flash |
 
+## Analyst insights & findings
+
+- **Concurrency efficiency:** Σ latency 905.7 s over wall 142.0 s = **6.38×** effective parallelism at c8 (80% of the ideal 8×).
+- **Tail:** slowest doc `corpus:ground_truth:train:contract_66_merger_agreement.txt` (all_stock) 54.8 s = 39% of wall — p95/p50 = 1.13×.
+- **Prompt length vs latency:** Pearson r = 0.17 across 20 docs (not prefill-dominated).
+- **Decode budget:** mean completion 5714 tok/doc, mean prompt 71110 tok/doc.
+- **Subclass spread:** best `all_cash` 0.630 (n=5), worst `mixed_cash_stock_election` 0.000 (n=1).
+- **Field-level extraction:** 13/20 docs have extraction F1 = 0 — when non-zero overall scores still appear, entity/structure components may carry the headline.
+
+## Scoring method — merger extraction
+
+Headline **overall_score** uses the pipeline extraction rubric on MAUD-labeled merger agreements; field F1 may be 0 when GT is label-native only.
+
+## Figures
+
+Static SVG charts (latency bar, subclass means) are generated in the Modal sandbox repo (`scripts/sand032/report.py` + `/dataviz`). This API-leg report keeps the **table views**: **Strata (subclass)** and **Per-document scores** below.
+
+## Strata (subclass)
+
+| subclass | n | mean overall |
+| --- | ---: | ---: |
+| other | 9 | 0.2327 |
+| all_cash | 5 | 0.6301 |
+| mixed_cash_stock | 3 | 0.3583 |
+| all_stock | 2 | 0.5880 |
+| mixed_cash_stock_election | 1 | 0.0000 |
+| **total** | **20** | **0.3748** |
+
 ## Per-document scores
 
 | # | doc id | subclass | overall | f1 | latency s | tok in | tok out | error |
@@ -115,6 +146,24 @@ the Modal/vLLM leg reports (same wave+class stem = paired report).
 | 20 | `corpus:ground_truth:train:contract_19_merger_agreement.txt` | mixed_cash_stock | 0.5750 | 0.1818 | 44.8187 | 81016 | 6397 | — |
 
 - scored rows: 20/20; min=0.0000 max=0.6945 mean=0.3748
+
+## Reproduce
+
+```bash
+uv run python scripts/run_evals.py --task eval:merger_agreement --real --sample 20 --seed 42 --concurrency 8 --decode-profile qwen3-8b --subset "class:merger_agreement"
+uv run python scripts/score_run.py --run-id 20260927T022750Z-eval-merger_agreement --recompute
+uv run python scripts/render_comparison_reports.py --run-id 20260927T022750Z-eval-merger_agreement
+```
+
+## Artifacts
+
+| path | role |
+| --- | --- |
+| `reports/experiment_log.jsonl` | append-only run summary (this run_id) |
+| `data/experiments/20260927T022750Z-eval-merger_agreement/cases.jsonl` | per-case rows (scores, tokens, latency) |
+| `data/experiments/20260927T022750Z-eval-merger_agreement/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
+| `reports/experiment_log/20260927T022750Z-eval-merger_agreement.md` | experiment-log markdown mirror |
+| `reports/api-comparisons/qwen3-8b/merger_agreement/RUN-20-MERGER_AGREEMENT-QWEN3-8B-REPORT.md` | Modal-comparable API-leg write-up |
 
 ## Caveats / notes
 

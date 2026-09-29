@@ -1,0 +1,8 @@
+{
+  "name": "heldout-plus-v1",
+  "n_docs": 1000,
+  "seed": 42,
+  "enron_repo": "Lucius-Morningstar/enron-correspondence-dedup",
+  "cleaning": "deterministic_normalize + semantic-only titles (subject -> exhibit_description -> empty; never filename)",
+  "dedup": "filename exclusion + content-sha (different filename) vs train+val and canonical test"
+}

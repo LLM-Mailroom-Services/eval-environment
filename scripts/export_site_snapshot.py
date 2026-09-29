@@ -79,8 +79,12 @@ def _trim_prediction(prediction: Any) -> Any:
 
 def _trim_run(record: dict) -> dict:
     run = {key: record.get(key) for key in _RUN_KEYS}
-    run["headline"] = _headline(record.get("metrics") or {})
-    run["n_cases"] = len(elog.load_cases(record["run_id"]))
+    metrics = record.get("metrics") or {}
+    run["headline"] = _headline(metrics)
+    # Use the run-summary count so --check stays hermetic: data/experiments/
+    # case files are gitignored and absent in CI.
+    n = metrics.get("n")
+    run["n_cases"] = int(n) if n is not None else len(elog.load_cases(record["run_id"]))
     return run
 
 

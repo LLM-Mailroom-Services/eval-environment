@@ -59,6 +59,8 @@ specialty skill:
 10. **Refresh the viewer snapshot.** When the experiment log changes,
     re-run `scripts/export_site_snapshot.py` and commit
     `web/data/snapshot.json` — the Vercel viewer reads only that file.
+    Then re-run `scripts/render_report_charts.py` and commit
+    `web/data/charts/` + `reports/charts/README.md` (CI checks both).
 
 ## Commands
 
@@ -84,6 +86,14 @@ uv run pytest tests/ -q                              # hermetic test suite (124 
 uv run python scripts/render_experiment_log.py --validate
 uv run python scripts/render_experiment_log.py       # rebuild markdown
 ```
+
+**Live progress (mailroom.beacon/v1):** every `run_task` publishes a heartbeat to
+`$MAILROOM_BEACON_DIR` (default `~/.mailroom/jobs`) from `_execute_cases` — one job per
+run, updated per completed case, finished on exit (failed on exception). View all
+mailroom-family jobs with the sandbox board: `sandbox board` (browser, localhost:8767) or
+`sandbox board --tui`. `src/evals/beacon.py` is vendored verbatim from
+local-mailroom-sandbox (`tests/test_beacon_wiring.py` pins its source hash) — change it
+upstream, then re-copy. Tests isolate the beacon dir (conftest autouse).
 
 ## Environment
 

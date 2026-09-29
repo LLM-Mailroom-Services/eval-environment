@@ -30,6 +30,7 @@ from . import (
     tracing,
 )
 from . import invoke as invoke_mod
+from .beacon import Beacon
 from .cases import load_cases
 from .openrouter_roster import apply_model_override, validate_model_slug
 from .preflight import run_preflight
@@ -751,15 +752,33 @@ def _execute_cases(
         run_dir=run_dir,
         run_id=run_id,
     )
-    if workers == 1 or len(cases) <= 1:
-        return [_run_one_case(case, **kwargs) for case in cases]
-    logger.info("evals_case_pool", workers=workers, n=len(cases))
-    ordered: list[dict[str, Any] | None] = [None] * len(cases)
-    with ThreadPoolExecutor(max_workers=workers) as pool:
-        futs = {pool.submit(_run_one_case, case, **kwargs): i for i, case in enumerate(cases)}
-        for fut in as_completed(futs):
-            ordered[futs[fut]] = fut.result()
-    return [row for row in ordered if row is not None]
+    # mailroom.beacon/v1: live progress for `sandbox board` (never raises into the run).
+    beacon = Beacon(
+        f"evals-{summary['run_id']}",
+        package="eval-environment",
+        title=f"{spec.task_id} · {summary['mode']} · n={len(cases)}",
+        total=len(cases),
+    )
+    finished: list[dict[str, Any]] = []
+
+    def _progress(row: dict[str, Any]) -> dict[str, Any]:
+        finished.append(row)
+        errors = sum(1 for r in finished if r.get("error"))
+        beacon.update(phase="SCORING", done=len(finished), ok=len(finished) - errors, errors=errors)
+        if row.get("error"):
+            beacon.log(f"{row.get('case_id', '?')} error: {str(row['error'])[:160]}")
+        return row
+
+    with beacon:
+        if workers == 1 or len(cases) <= 1:
+            return [_progress(_run_one_case(case, **kwargs)) for case in cases]
+        logger.info("evals_case_pool", workers=workers, n=len(cases))
+        ordered: list[dict[str, Any] | None] = [None] * len(cases)
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futs = {pool.submit(_run_one_case, case, **kwargs): i for i, case in enumerate(cases)}
+            for fut in as_completed(futs):
+                ordered[futs[fut]] = _progress(fut.result())
+        return [row for row in ordered if row is not None]
 
 
 def _run_one_case(

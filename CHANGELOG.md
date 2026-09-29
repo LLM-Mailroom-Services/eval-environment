@@ -5,6 +5,28 @@ All notable changes to mailroom-evals are documented here. Format based on
 
 ## [Unreleased]
 
+### Fixed
+
+- **Report chart layout** (`src/evals/viz/svgcharts.py`) — long subtitles
+  wrap instead of running off the right edge (classification calibration);
+  legends are laid out by measured text width and carry the reference-line
+  key, so they no longer collide with value labels (classification subclass);
+  bar and heatmap labels are measured; confusion-matrix text is 10 px (was
+  9.5). All 15 `web/data/charts` SVGs regenerated; data unchanged.
+- **Broken link** in `RUN-03-MODERNBERT-HELDOUT-TEST-REPORT.md` to the
+  held-out eval JSON.
+- `scripts/render_comparison_reports.py` covers `qwen3.7-flash`, and its
+  missing suite README `reports/api-comparisons/qwen3.7-flash/README.md` is
+  added (12 canonical stems, 550 case rows, 809 LLM calls, $0.579319). It was
+  rendered by `render_model_suite_readme` from the committed experiment log;
+  every row matches its canonical report (run id, score, calls, cost).
+- **Resumed-run wall time** — API-leg reports label `duration_s` as the resume
+  segment only when `params.skipped_already_run` > 0, and omit the
+  serial-vs-batched ratio (it divided a 100-case latency sum by a 1-case wall
+  time on `20260927T101544Z-eval-classification`). Dated correction notes on
+  that run and on the `qwen3-8b` merger run, which was served by
+  `qwen/qwen3.7-flash`.
+
 ### Changed
 
 - **Report excellence (sandbox parity)** — API-leg comparison reports, calibration

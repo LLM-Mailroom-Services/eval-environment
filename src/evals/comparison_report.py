@@ -323,8 +323,17 @@ def render_report(summary: dict[str, Any], case_rows: list[dict[str, Any]]) -> s
     cost_per_doc_est = (cost_est / n_scored) if isinstance(cost_est, (int, float)) and n_scored else None
 
     wall = summary.get("duration_s")
+    # A resumed run's duration_s covers only the resume segment, while the
+    # metrics and case rows cover every case. Label it and skip the
+    # serial-vs-batched ratio, which would divide a full-run latency sum by a
+    # partial wall time (20260927T101544Z: 666.7 s over 4.8 s at concurrency 1).
+    resumed = int(params.get("skipped_already_run") or 0)
+    wall_label = _fmt(wall)
+    if resumed and wall is not None:
+        wall_label = (f"{_fmt(wall)} (resume segment only; {resumed} earlier "
+                      "cases ran before it, full-run wall not recorded)")
     # Serial-vs-batched proof (same arithmetic the Modal reports print).
-    serial_sum = sum(latencies) if latencies else None
+    serial_sum = sum(latencies) if latencies and not resumed else None
 
     cap = summary.get("cost_cap") or {}
     headline = next((metrics[k] for k in HEADLINE_MEAN_KEYS if k in metrics), None)
@@ -384,7 +393,7 @@ def render_report(summary: dict[str, Any], case_rows: list[dict[str, Any]]) -> s
     lines.append("|---|---|")
     lines.append(f"| started_at | `{_fmt(summary.get('started_at'))}` |")
     lines.append(f"| finished_at | `{_fmt(summary.get('finished_at'))}` |")
-    lines.append(f"| duration_s (wall) | {_fmt(wall)} |")
+    lines.append(f"| duration_s (wall) | {wall_label} |")
     lines.append(f"| latency_ms_mean | {_fmt(performance.get('latency_ms_mean'))} |")
     lines.append(f"| latency_ms_p95 | {_fmt(performance.get('latency_ms_p95'))} |")
     lines.append("")
@@ -417,7 +426,7 @@ def render_report(summary: dict[str, Any], case_rows: list[dict[str, Any]]) -> s
     lines.append("")
     lines.append("| metric | value |")
     lines.append("|---|---|")
-    lines.append(f"| wall (run duration) | {_fmt(wall)} s |")
+    lines.append(f"| wall (run duration) | {wall_label} s |")
     lines.append(f"| concurrency | {_fmt(params.get('concurrency'))} |")
     lines.append("| cold boot | N/A (serverless API — no cold boot) |")
     lines.append("| gpu_seconds | N/A (no local GPU) |")
@@ -666,6 +675,11 @@ MODEL_SUITE_INTRO = {
         "(decode profile `granite-4.2-8b`), traced to Braintrust project "
         "`Mailroom-Evals`. Same canonical seed-42 draws as the Qwen suite."
     ),
+    "qwen3.7-flash": (
+        "OpenRouter API results for `qwen/qwen3.7-flash`, the production model "
+        "for every llm-mailroom 0.7.1 agent. N=20, 50 and 100 waves (seed 42, "
+        "concurrency 8); these legs ran the mutated prompt lineage."
+    ),
     "deepseek-v4.1-flash": (
         "OpenRouter API results for `deepseek/deepseek-v4.1-flash`, "
         "SAND-027 Leg B N=20 specialist waves (seed 42, frozen v1 prompts, "
@@ -710,6 +724,8 @@ def render_model_suite_readme(
         title = "Qwen 3 8B"
     elif model_key == "granite-4.2-8b":
         title = "Granite 4.2 8B"
+    elif model_key == "qwen3.7-flash":
+        title = "Qwen3.7 Flash"
 
     lines = [
         f"# {title} — SAND-027 Leg B N=20 suite",

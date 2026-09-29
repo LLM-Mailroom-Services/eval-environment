@@ -1,0 +1,62 @@
+[
+ {
+  "file": "extraction_score_by_type.svg",
+  "title": "Extraction score by document type"
+ },
+ {
+  "file": "extraction_per_document.svg",
+  "title": "Per-document extraction scores"
+ },
+ {
+  "file": "extraction_by_subclass.svg",
+  "title": "Extraction score by subclass"
+ },
+ {
+  "file": "cost_per_document.svg",
+  "title": "API cost per document"
+ },
+ {
+  "file": "classification_confusion_deepseek-v4.1-flash.svg",
+  "title": "LLM sorter confusion matrix · DeepSeek V4.1 Flash"
+ },
+ {
+  "file": "classification_confusion_granite-4.2-8b.svg",
+  "title": "LLM sorter confusion matrix · Granite 4.2 8B"
+ },
+ {
+  "file": "classification_confusion_qwen3.7-flash.svg",
+  "title": "LLM sorter confusion matrix · Qwen3.7 Flash"
+ },
+ {
+  "file": "classification_subclass.svg",
+  "title": "LLM sorter subclass accuracy"
+ },
+ {
+  "file": "classification_collapse.svg",
+  "title": "LLM sorter collapse signal"
+ },
+ {
+  "file": "classification_calibration.svg",
+  "title": "LLM sorter calibration"
+ },
+ {
+  "file": "ale_latency_correspondence.svg",
+  "title": "ALE: latency on extraction score · Correspondence"
+ },
+ {
+  "file": "ale_latency_insurance_claims.svg",
+  "title": "ALE: latency on extraction score · Insurance claims"
+ },
+ {
+  "file": "ale_latency_corporate_records.svg",
+  "title": "ALE: latency on extraction score · Corporate records"
+ },
+ {
+  "file": "ale_latency_contracts.svg",
+  "title": "ALE: latency on extraction score · Contracts"
+ },
+ {
+  "file": "ale_latency_merger_agreement.svg",
+  "title": "ALE: latency on extraction score · Merger agreements"
+ }
+]

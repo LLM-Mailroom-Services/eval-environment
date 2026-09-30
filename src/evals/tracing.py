@@ -11,15 +11,20 @@ first agent instantiation so llm-mailroom's ``llm/client.get_llm`` wraps the
 OpenAI client with the matching instrumentation — every LLM call inside a
 node/agent invocation auto-traces.
 
-One root span per case, named after the node's stable observation name
-(`classify-document`, `extract-fields`, …). Input/output are CURATED
-(identifiers + scores, never raw document text). Scorer metrics attach to
-the span (Braintrust ``log(metrics=...)`` / Phoenix span attributes).
+One Experiment row per specialist (or node) invocation — never a document
+inventory row, and never a sibling extract-fields / pipeline-node row.
+Nested LLM spans attach under the specialist parent. Do not
+``Experiment.log`` a second row. Input/output are CURATED:
+no raw document text, no ground-truth labels, and no filename-bearing
+``case_id`` strings (use ``public_case_ref`` + ``doc_text_sha256`` to
+join back to the experiment log). Scorer metrics attach to the span
+(Braintrust ``log(metrics=...)`` / Phoenix span attributes).
 Tracing failures log warnings and never fail a run.
 """
 
 from __future__ import annotations
 
+import hashlib
 import os
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -109,6 +114,109 @@ except Exception:  # pragma: no cover - langchain-core is a pipeline dependency
     _LCBaseHandler = object  # type: ignore[assignment,misc]
 
 
+_LANGCHAIN_ROLE_TO_OPENAI: dict[str, str] = {
+    "system": "system",
+    "human": "user",
+    "ai": "assistant",
+    "tool": "tool",
+    "function": "function",
+}
+
+_TRACE_MESSAGE_MAX_CHARS = 12_000
+
+
+def _raw_message_content(content: Any) -> str:
+    if content is None:
+        return ""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts: list[str] = []
+        for block in content:
+            if isinstance(block, dict):
+                kind = block.get("type")
+                if kind == "text":
+                    parts.append(str(block.get("text") or ""))
+                elif kind == "image_url":
+                    parts.append("[image]")
+                else:
+                    parts.append(str(block))
+            else:
+                parts.append(str(block))
+        return "\n".join(parts)
+    try:
+        return str(content)
+    except Exception:
+        return ""
+
+
+def _truncate_for_trace(text: str, max_chars: int | None = None) -> tuple[str, int, bool]:
+    """Keep the start of the message in traces; annotate when the tail is cut."""
+    limit = max_chars if max_chars is not None else _TRACE_MESSAGE_MAX_CHARS
+    total = len(text)
+    if total <= limit:
+        return text, total, False
+    omitted = total - limit
+    suffix = f"\n\n[trace truncated: {omitted} of {total} characters omitted]"
+    budget = limit - len(suffix)
+    if budget <= 0:
+        suffix = f"\n[+{omitted} chars truncated]"
+        budget = max(0, limit - len(suffix))
+    return text[:budget] + suffix, total, True
+
+
+def _content_to_trace_str(content: Any) -> tuple[str, int, bool]:
+    """Curate message body for trace sinks: prefix preserved, long tails truncated."""
+    raw = _raw_message_content(content)
+    return _truncate_for_trace(raw, _TRACE_MESSAGE_MAX_CHARS)
+
+
+def _serialize_chat_message(message: Any) -> dict[str, Any] | None:
+    """Map one LangChain / OpenAI chat message to {role, content} for traces."""
+    if isinstance(message, str):
+        content, total, truncated = _content_to_trace_str(message)
+        return _trace_message_record("user", content, total, truncated)
+    if isinstance(message, dict):
+        role = message.get("role")
+        if role:
+            content, total, truncated = _content_to_trace_str(message.get("content"))
+            return _trace_message_record(str(role), content, total, truncated)
+    msg_type = getattr(message, "type", None)
+    if msg_type and hasattr(message, "content"):
+        role = _LANGCHAIN_ROLE_TO_OPENAI.get(str(msg_type), str(msg_type))
+        content, total, truncated = _content_to_trace_str(message.content)
+        return _trace_message_record(role, content, total, truncated)
+    return None
+
+
+def _trace_message_record(role: str, content: str, total_chars: int, truncated: bool) -> dict[str, Any]:
+    rec: dict[str, Any] = {"role": role, "content": content, "trace_content_chars": total_chars}
+    if truncated:
+        rec["trace_content_truncated"] = True
+    return rec
+
+
+def format_langchain_llm_input(payload: Any) -> list[dict[str, Any]]:
+    """Flatten LangChain batched chat inputs into OpenAI-style message dicts."""
+    out: list[dict[str, str]] = []
+    for group in payload or []:
+        if getattr(group, "type", None) and hasattr(group, "content"):
+            rec = _serialize_chat_message(group)
+            if rec:
+                out.append(rec)
+            continue
+        if isinstance(group, (list, tuple)):
+            for message in group:
+                rec = _serialize_chat_message(message)
+                if rec:
+                    out.append(rec)
+            continue
+        rec = _serialize_chat_message(group)
+        if rec:
+            out.append(rec)
+    return out
+
+
 class _LangchainLLMHandler(_LCBaseHandler):
     """Braintrust span writer for LangChain-agent LLM calls (see installer)."""
 
@@ -120,27 +228,13 @@ class _LangchainLLMHandler(_LCBaseHandler):
 
         return braintrust
 
-    def _curate(self, message: Any) -> str | None:
-        try:
-            return str(message)[:4000]
-        except Exception:
-            return None
-
-    def _flatten(self, payload: Any) -> list[str | None]:
-        out: list[str | None] = []
-        for group in payload or []:
-            if hasattr(group, "content"):
-                out.append(self._curate(group))
-            else:
-                for message in group:
-                    out.append(self._curate(message))
-        return out
-
     def on_chat_model_start(self, serialized: Any, messages: Any, *, run_id: Any = None, **kwargs: Any) -> None:
         try:
             bt = self._braintrust()
             self._spans[run_id] = bt.start_span(
-                name="Chat Completion", type="llm", input=self._flatten(messages)
+                name="Chat Completion",
+                type="llm",
+                input={"messages": format_langchain_llm_input(messages)},
             )
         except Exception:
             logger.warning("evals_langchain_span_start_failed", exc_info=True)
@@ -207,12 +301,32 @@ def _install_langchain_llm_spans() -> None:
         logger.warning("evals_langchain_callback_register_failed", exc_info=True)
 
 
+def doc_text_sha256(case: dict[str, Any]) -> str:
+    """sha256 of the case document text (experiment-log join key)."""
+    return hashlib.sha256(str(case.get("text") or "").encode("utf-8")).hexdigest()
+
+
+def public_case_ref(case: dict[str, Any]) -> str:
+    """Trace-safe case reference: corpus position without filename or GT tokens.
+
+    Full ``case["id"]`` values embed the corpus filename (often revealing
+    doc type / subtype). Sinks use this ref; the append-only experiment log
+    keeps the canonical ``case_id``.
+    """
+    raw = str(case.get("id") or "")
+    digest = doc_text_sha256(case)[:12]
+    if raw.startswith("corpus:"):
+        parts = raw.split(":", 3)
+        if len(parts) == 4:
+            return f"{parts[0]}:{parts[1]}:{parts[2]}:doc#{digest}"
+    id_digest = hashlib.sha256(raw.encode("utf-8")).hexdigest()[:12]
+    return f"eval-case:doc#{id_digest}"
+
+
 def _curate_case_input(case: dict[str, Any]) -> dict[str, Any]:
     return {
-        "case_id": case.get("id"),
-        "filename": case.get("filename"),
-        "expected_doc_class": case.get("expected_doc_class"),
-        "expected_subclass": case.get("expected_subclass"),
+        "case_ref": public_case_ref(case),
+        "doc_text_sha256": doc_text_sha256(case),
         "chars": len(str(case.get("text") or "")),
         "config": case.get("config"),
         "split": case.get("split"),
@@ -230,6 +344,9 @@ class _NoopSpan:
 
     def update_metadata(self, metadata: dict[str, Any]) -> Any:
         return self
+
+    def log_document_row(self, **_event: Any) -> None:
+        return None
 
     @property
     def trace_ref(self) -> dict[str, Any] | None:
@@ -252,34 +369,64 @@ def case_span(
     node_name: str,
     case: dict[str, Any],
     run_meta: dict[str, Any],
+    span_name: str | None = None,
+    specialist: str | None = None,
 ) -> Iterator[Any]:
-    """One root span per case with curated input; yields a span handle with
-    ``set_output`` / ``set_metrics``. Yields a no-op when backend is none."""
+    """One parent Experiment row per specialist (or node) call.
+
+    ``span_name`` / ``specialist`` name the row. Nested LLM spans belong
+    under this parent. Documents are not logged as their own rows; extract-fields
+    and other pipeline nodes must not appear as sibling Experiment rows.
+    """
     if backend == "none":
         yield _noop
         return
+    parent_name = span_name or specialist or node_name
     as_type = NODE_OBSERVATION_TYPES.get(node_name, "span")
     meta = dict(run_meta or {})
-    meta.setdefault("case_id", case.get("id"))
-    meta.setdefault("filename", case.get("filename"))
+    meta.setdefault("case_ref", public_case_ref(case))
+    meta.setdefault("doc_text_sha256", doc_text_sha256(case))
+    if specialist:
+        meta.setdefault("specialist", specialist)
+        meta["eval_target"] = specialist
+    else:
+        meta.setdefault("eval_target", node_name)
     try:
         if backend == "braintrust":
             import braintrust
 
-            with braintrust.start_span(
-                name=node_name,
-                type=as_type,
-                input=_curate_case_input(case),
-                metadata=meta or None,
-                tags=list(meta.get("tags") or []) or None,
-            ) as span:
+            from evals.braintrust_experiment import current_experiment
+
+            exp = current_experiment()
+            # Specialist (or node) parent only. Do not key the row by document
+            # sha / dataset_record_id — that surfaces the corpus document as
+            # its own Braintrust row beside the specialist call.
+            span_kwargs: dict[str, Any] = {
+                "name": parent_name,
+                "type": "eval",
+                "input": _curate_case_input(case),
+                "metadata": meta or {},
+                "tags": list(meta.get("tags") or []) or None,
+            }
+            span_cm = (
+                exp.start_span(**span_kwargs)
+                if exp is not None
+                else braintrust.start_span(
+                    name=parent_name,
+                    type=as_type,
+                    input=_curate_case_input(case),
+                    metadata=meta or None,
+                    tags=list(meta.get("tags") or []) or None,
+                )
+            )
+            with span_cm as span:
                 yield _BraintrustHandle(span)
             return
         if backend == "phoenix":
             from opentelemetry import trace
 
             tracer = trace.get_tracer("mailroom-evals")
-            with tracer.start_as_current_span(node_name) as span:
+            with tracer.start_as_current_span(parent_name) as span:
                 _otel_attrs(span, as_type, _curate_case_input(case), meta)
                 yield _PhoenixHandle(span)
             return
@@ -344,6 +491,16 @@ class _BraintrustHandle:
             pass
         return self
 
+    def log_document_row(self, **event: Any) -> None:
+        """Attach scores/output to this case's Experiment row (never a sibling)."""
+        payload = {key: value for key, value in event.items() if value is not None}
+        if not payload:
+            return
+        try:
+            self._span.log(**payload)
+        except Exception:
+            pass
+
 
 class _PhoenixHandle:
     def __init__(self, span: Any) -> None:
@@ -390,6 +547,9 @@ class _PhoenixHandle:
             pass
         return self
 
+    def log_document_row(self, **_event: Any) -> None:
+        return None
+
 
 def flush(backend: str) -> None:
     """Force-export buffered spans for the backend. Never raises."""
@@ -422,6 +582,13 @@ def run_span(
         return
     try:
         if backend == "braintrust":
+            from evals.braintrust_experiment import current_experiment
+
+            # An open Experiment already has one row per specialist call. A
+            # sibling evals-run span shows up as an extra root in the UI.
+            if current_experiment() is not None:
+                yield _noop
+                return
             import braintrust
 
             with braintrust.start_span(

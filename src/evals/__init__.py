@@ -26,4 +26,4 @@ load_dotenv(dotenv_path=Path(__file__).resolve().parents[2] / ".env", override=F
 # crash — the dojo's defaults ({} -> per-field heuristic) apply.
 from evals import dojo_wiring  # noqa: F401  (import-time side effect)
 
-__version__ = "0.3.0"
+__version__ = "0.5.0"

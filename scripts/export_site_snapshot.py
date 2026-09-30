@@ -5,7 +5,7 @@ The viewer (web/) is a zero-dependency static site: this script bakes the
 append-only experiment log, the task catalog, the corpus pin, the frozen
 prompt lineage, and environment health into ONE tracked JSON file that
 Vercel serves. Refresh discipline: run this whenever the experiment log
-changes, then commit the result (the raw log stays local per .gitignore).
+changes, then commit `reports/` and the snapshot together.
 
     uv run python scripts/export_site_snapshot.py            # write snapshot
     uv run python scripts/export_site_snapshot.py --check    # exit 1 if stale
@@ -79,8 +79,12 @@ def _trim_prediction(prediction: Any) -> Any:
 
 def _trim_run(record: dict) -> dict:
     run = {key: record.get(key) for key in _RUN_KEYS}
-    run["headline"] = _headline(record.get("metrics") or {})
-    run["n_cases"] = len(elog.load_cases(record["run_id"]))
+    metrics = record.get("metrics") or {}
+    run["headline"] = _headline(metrics)
+    # Use the run-summary count so --check stays hermetic: data/experiments/
+    # case files are gitignored and absent in CI.
+    n = metrics.get("n")
+    run["n_cases"] = int(n) if n is not None else len(elog.load_cases(record["run_id"]))
     return run
 
 
@@ -130,7 +134,15 @@ def _prompts() -> dict:
         for key, meta in sorted(manifest["versions"].items())
     ]
     mutations_path = REPO_ROOT / "prompts" / "mutations.json"
-    mutations = json.loads(mutations_path.read_text()) if mutations_path.exists() else []
+    mutations_raw = json.loads(mutations_path.read_text()) if mutations_path.exists() else []
+    # Current file schema is {"mutations": [...]}; accept the legacy bare
+    # list too. Passing the wrapper object through made the viewer render
+    # `mutations.length` as undefined and fail its smoke test.
+    mutations = (
+        mutations_raw.get("mutations", [])
+        if isinstance(mutations_raw, dict)
+        else mutations_raw
+    )
     return {
         "lineage_id": manifest["lineage_id"],
         "frozen_version": manifest["frozen_version"],

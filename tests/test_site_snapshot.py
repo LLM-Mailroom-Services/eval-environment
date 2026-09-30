@@ -41,7 +41,11 @@ def test_build_snapshot_shape(logged_run):
     env = snapshot["environment"]
     assert len(env["tasks"]) == 31
     assert env["corpus"]["revision"] == "46a4d3c240a36671cde0182fff4960f6b8b73aca"
-    assert len(env["prompts"]["versions"]) == 14
+    assert len(env["prompts"]["versions"]) == 15
+    assert isinstance(env["prompts"]["mutations"], list)
+    mutations_path = Path(__file__).resolve().parents[1] / "prompts" / "mutations.json"
+    expected_n = len(json.loads(mutations_path.read_text(encoding="utf-8")).get("mutations", []))
+    assert len(env["prompts"]["mutations"]) == expected_n
     assert "prompt-lineage" in env["inventory"]["skills"]
     assert "prompt-engineer" in env["inventory"]["subagents"]
     assert env["inventory"]["test_count"] > 60

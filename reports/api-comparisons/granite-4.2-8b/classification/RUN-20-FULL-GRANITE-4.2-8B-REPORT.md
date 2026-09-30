@@ -1,0 +1,152 @@
+# Run report — `20260927T070900Z-eval-classification` (API leg)
+
+Comparison report for the OpenRouter API leg, metric-for-metric against
+the Modal/vLLM leg reports (same wave+class stem = paired report).
+
+| | |
+|---|---|
+| run_id | `20260927T070900Z-eval-classification` |
+| task / agent | `classification` |
+| prompt | `—` (frozen) |
+| engine | `ibm-granite/granite-4.2-8b` (OpenRouter API) |
+| profile / provider | `granite-4.2-8b` / `openrouter` |
+| dataset | Lucius-Morningstar/mailroom-dataset rev `46a4d3c240a36671cde0182fff4960f6b8b73aca` |
+| subset / draw | `full` — 20 docs, seed 42 |
+| timestamp | `2026-09-27T07:09:00+00:00` |
+| pipeline git | `28cb4be816fbb60e56cd3bb2ab72f8d9be1ab636` |
+| subset manifest | `data/experiments/20260927T070900Z-eval-classification/subset_manifest.json` |
+| eval git | `1d9f8d2` |
+| finished | `2026-09-27T07:12:02+00:00` |
+
+## Run configuration
+
+| control | value |
+|---|---|
+| family / invoke | eval / node |
+| mode | real |
+| concurrency | 8 |
+| seed | 42 |
+| sample / n | 20 / None |
+| scorer | classification |
+| decode profile | granite-4.2-8b |
+| prompt source / lineage | frozen / frozen |
+| trace backend | braintrust |
+| resumed_from | — |
+| dry_run | False |
+| trace ids | `{'backend': 'braintrust', 'project': 'Mailroom-Evals', 'experiment': '20260927T070900Z-eval-classification', 'dataset': None, 'dataset_records': 0}` |
+
+## Runtime performance
+
+| metric | value |
+|---|---|
+| started_at | `2026-09-27T07:09:00+00:00` |
+| finished_at | `2026-09-27T07:12:02+00:00` |
+| duration_s (wall) | 184.3000 |
+| latency_ms_mean | 26860.9 |
+| latency_ms_p95 | 111121.3 |
+
+## Headline results
+
+| metric | value |
+|---|---|
+| docs ok / total | **20 / 20** (`errors=0`) |
+| class_accuracy | 0.9 |
+| errors | 0 |
+| scorer_errors | 0 |
+| subclass_accuracy | 0.6 |
+| thinking_recovered (stripped + re-scored) | 0 |
+
+## Serving / cost metrics (API leg)
+
+| metric | value |
+|---|---|
+| wall (run duration) | 184.3000 s |
+| concurrency | 8 |
+| cold boot | N/A (serverless API — no cold boot) |
+| gpu_seconds | N/A (no local GPU) |
+| cost expected (wave planning) | **0.8000** USD |
+| cost actual (derived from case rows) | **0.0644** USD |
+| cost estimated (roster token rates) | **0.0644** USD |
+| cost per document (actual) | 0.0032 USD |
+| cost per document (estimated) | 0.0032 USD |
+| latency e2e / p50 / p95 / max | 184.3000 / 3.6696 / 111.1213 / 174.0132 s |
+| prompt / completion / total tokens | 933912 / 33329 / 967241 |
+| cost cap | 1.5000 USD (profile) -> **under_cap** |
+
+**Serial-vs-batched proof:** sum(per-doc latency) = 537.2 s vs wall = 184.3 s -> wall/serial factor 2.91x at concurrency 8.
+
+## Decode posture
+
+| control | value |
+|---|---|
+| sampling override | `{"temperature": 1.0, "top_p": 0.95, "seed": 42}` |
+| sampling injected on wire | True |
+| per-agent completion budgets | `{"contracts_specialist": 16384, "corporate_records_specialist": 16384, "correspondence_specialist": 16384, "insurance_claims_specialist": 12288, "merger_agreement_specialist": 32768}` |
+| per-call timeout | 600 s |
+
+## Per-agent usage
+
+| agent | calls | prompt tok | completion tok | total tok | cost est | models |
+|---|---|---|---|---|---|---|
+| `sorter` | 118 | 933912 | 33329 | 967241 | 0.0644 | ibm-granite/granite-4.2-8b |
+
+## Analyst insights & findings
+
+- **Concurrency efficiency:** Σ latency 537.2 s over wall 184.3 s = **2.91×** effective parallelism at c8 (36% of the ideal 8×).
+- **Tail:** slowest doc `corpus:ground_truth:train:contract_94_merger_agreement.txt` (mixed_cash_stock_election) 174.0 s = 94% of wall — p95/p50 = 30.28×.
+- **Prompt length vs latency:** Pearson r = 0.94 across 20 docs (prefill-bound).
+- **Decode budget:** mean completion 1666 tok/doc, mean prompt 46696 tok/doc.
+- **Field-level extraction:** 0/20 docs have extraction F1 = 0 — when non-zero overall scores still appear, entity/structure components may carry the headline.
+
+## Figures
+
+Static SVG charts (latency bar, subclass means) are generated in the Modal sandbox repo (`scripts/sand032/report.py` + `/dataviz`). This API-leg report keeps the **table views**: **Strata (subclass)** and **Per-document scores** below.
+
+## Per-document scores
+
+| # | doc id | subclass | overall | f1 | latency s | tok in | tok out | error |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `corpus:ground_truth:train:property:261501663.txt` | property | — | — | 3.6696 | 7206 | 171 | — |
+| 2 | `corpus:ground_truth:train:inpatient:196841176990879:1.txt` | inpatient | — | — | 9.7479 | 6087 | 192 | — |
+| 3 | `corpus:ground_truth:train:insurbias-425.txt` | auto | — | — | 2.8564 | 5839 | 151 | — |
+| 4 | `corpus:ground_truth:train:brawner-s/all_documents/59.` | email | — | — | 3.8993 | 6195 | 187 | — |
+| 5 | `corpus:ground_truth:train:0000912057-01-507164_a2041839zex-4_38.txt` | rights_instrument | — | — | 6.3046 | 13636 | 372 | — |
+| 6 | `corpus:ground_truth:train:dasovich-j/all_documents/9309.` | press_release | — | — | 3.2054 | 6114 | 142 | — |
+| 7 | `corpus:ground_truth:train:dasovich-j/all_documents/9178.` | press_release | — | — | 2.8426 | 5832 | 149 | — |
+| 8 | `corpus:ground_truth:train:0000950130-01-502904_dex211.txt` | subsidiary_list | — | — | 2.7020 | 5844 | 134 | — |
+| 9 | `corpus:ground_truth:train:inpatient:196091177001318:1.txt` | inpatient | — | — | 2.7587 | 6094 | 162 | — |
+| 10 | `corpus:ground_truth:train:inpatient:196831176969260:1.txt` | inpatient | — | — | 3.1110 | 6070 | 192 | — |
+| 11 | `corpus:ground_truth:train:0001193125-14-273392_d715499dex415.htm` | indenture | — | — | 3.1009 | 8466 | 179 | — |
+| 12 | `corpus:ground_truth:train:contract_117_merger_agreement.txt` | all_stock | — | — | 111.1213 | 115533 | 5383 | — |
+| 13 | `corpus:ground_truth:train:property:262952775.txt` | property | — | — | 5.1676 | 14874 | 319 | — |
+| 14 | `corpus:ground_truth:train:0000950123-03-010752_y88696a1exv4w7.txt` | indenture | — | — | 97.5466 | 260636 | 6850 | — |
+| 15 | `corpus:ground_truth:train:contract_4_merger_agreement.txt` | all_cash | — | — | 92.1201 | 115241 | 4573 | — |
+| 16 | `corpus:ground_truth:train:carrier:887493388020303.txt` | carrier | — | — | 2.4212 | 6013 | 142 | — |
+| 17 | `corpus:ground_truth:train:contract_94_merger_agreement.txt` | mixed_cash_stock_election | — | — | 174.0132 | 317705 | 13346 | — |
+| 18 | `corpus:ground_truth:train:inpatient:196641176967981:1.txt` | inpatient | — | — | 2.6248 | 6094 | 159 | — |
+| 19 | `corpus:ground_truth:train:0001047469-06-011763_a2173128zex-3_1.htm` | charter_amendment | — | — | 4.9986 | 14430 | 336 | — |
+| 20 | `corpus:ground_truth:train:outpatient:542502281397875:1.txt` | outpatient | — | — | 3.0053 | 6003 | 190 | — |
+
+## Reproduce
+
+```bash
+uv run python scripts/run_evals.py --task eval:classification --real --sample 20 --seed 42 --concurrency 8 --decode-profile granite-4.2-8b --subset "full"
+uv run python scripts/score_run.py --run-id 20260927T070900Z-eval-classification --recompute
+uv run python scripts/render_comparison_reports.py --run-id 20260927T070900Z-eval-classification
+```
+
+## Artifacts
+
+| path | role |
+| --- | --- |
+| `reports/experiment_log.jsonl` | append-only run summary (this run_id) |
+| `data/experiments/20260927T070900Z-eval-classification/cases.jsonl` | per-case rows (scores, tokens, latency) |
+| `data/experiments/20260927T070900Z-eval-classification/subset_manifest.json` | canonical draw fingerprint (filenames + content hashes) |
+| `reports/experiment_log/20260927T070900Z-eval-classification.md` | experiment-log markdown mirror |
+| `reports/api-comparisons/granite-4.2-8b/classification/RUN-20-FULL-GRANITE-4.2-8B-REPORT.md` | Modal-comparable API-leg write-up |
+
+## Caveats / notes
+
+- mode: **real**; trace backend: `braintrust`
+- decode profile: `granite-4.2-8b`; budgets/timeout per issue #18 §3
+- Pair with the Modal leg: same `RUN-<wave>-<CLASS>` stem in `local-mailroom-sandbox/reports/` (e.g. `RUN-20-CORRESPONDENCE-AWQ-REPORT.md`).

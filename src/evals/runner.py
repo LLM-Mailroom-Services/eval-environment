@@ -15,18 +15,28 @@ from __future__ import annotations
 import json
 import subprocess
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import UTC
 from pathlib import Path
 from typing import Any
 
 import structlog
 
-from . import experiment_log, scoring, tracing
+from . import (
+    comparison_report,
+    decode_budget,
+    experiment_log,
+    scoring,
+    tracing,
+)
 from . import invoke as invoke_mod
+from .beacon import Beacon
 from .cases import load_cases
 from .openrouter_roster import apply_model_override, validate_model_slug
+from .preflight import run_preflight
 from .prompts import registry as prompts_registry
 from .registry import AGENT_CATALOG, TaskSpec, get_task
+from .tasks.base import read_subset_manifest, write_scoring_suite, write_subset_manifest
 
 logger = structlog.get_logger(__name__)
 
@@ -111,14 +121,45 @@ def run_task(
     dry_run: bool = False,
     pilot: bool = False,
     resume_run_id: str | None = None,
+    require_trace_sink: bool = False,
+    skip_preflight: bool = False,
+    decode_profile: str | None = None,
 ) -> RunResult:
     """Execute one task. Returns the run summary + per-case rows."""
     spec = get_task(task_id)
+    subset = subset or spec.default_subset
+    if spec.name in invoke_mod.TASK_SPECIALIST:
+        # Merger (and the other class specialists) are agent calls. extract_node
+        # is not the eval path — it emits extra pipeline nodes and can CUAD-enrich.
+        invoke_mode = "agent"
+
+    # Preflight BEFORE any corpus load / prompt injection / LLM spend.
+    # Real mode hard-fails on missing credentials, bad model/prompt/subset,
+    # or an explicitly requested Braintrust sink without a key.
+    preflight_report = None
+    if not skip_preflight:
+        preflight_report = run_preflight(
+            spec,
+            mock=mock,
+            invoke_mode=invoke_mode,
+            subset=subset,
+            model=model,
+            prompt_version=prompt_version,
+            prompt_source=prompt_source,
+            trace_backend=trace_backend,
+            require_trace_sink=require_trace_sink,
+        )
+        if not preflight_report.ok:
+            # Non-negotiable #1: every run logs — including failures. A
+            # preflight-blocked run writes a failed run-summary line before
+            # raising, so `--task all` storms stay visible in the log.
+            _log_preflight_failure(spec, preflight_report, mock=mock)
+        preflight_report.raise_if_failed()
+
     if invoke_mode == "agent" and not spec.supports_agent_mode:
         raise ValueError(f"task {spec.task_id} does not support agent-mode invocation")
     if model:
         validate_model_slug(model)
-    subset = subset or spec.default_subset
     backend = tracing.resolve_backend(trace_backend)
     if mock and trace_backend is None:
         backend = "none"  # mocked clients are not wrappable; keep CI hermetic
@@ -183,8 +224,48 @@ def run_task(
     if dry_run:
         cases = cases[:1]
 
+    run_id = resume_run_id or experiment_log.new_run_id(spec.family, spec.name)
+    effective_run_dir = run_dir or (experiment_log.experiments_dir() / run_id)
+    effective_run_dir.mkdir(parents=True, exist_ok=True)
+    (effective_run_dir / "wave_lock.json").write_text(
+        json.dumps(
+            {
+                "task": spec.name,
+                "task_id": spec.task_id,
+                "model": model or DEFAULT_MODEL,
+                "decode_profile": decode_profile,
+                "prompt_version": prompt_version,
+                "prompt_source": prompt_source,
+                "sample": sample,
+                "seed": seed,
+                "subset": subset,
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    # Lock the exact case set BEFORE any LLM spend (reproducibility).
+    # On resume the manifest already exists in the run dir and is the locked
+    # FULL case set — never truncate it with the not-yet-run remainder
+    # (a partial resume used to overwrite it); read it back instead.
+    if resume_run_id:
+        subset_lock = read_subset_manifest(effective_run_dir)
+    else:
+        subset_lock = write_subset_manifest(
+            cases,
+            run_dir=effective_run_dir,
+            provenance={**dataset_prov, "subset": subset, "seed": seed, "sample": sample, "n": n},
+        )
+
+    # Decode-profile state is declared before the summary so both the params
+    # block and the execution block see it.
+    thinking_recovered = 0
+    budget_applied_outer: dict[str, Any] | None = None
+    budget = decode_budget.get_profile(decode_profile)
+
     summary: dict[str, Any] = {
-        "run_id": resume_run_id or experiment_log.new_run_id(spec.family, spec.name),
+        "run_id": run_id,
         "family": spec.family,
         "task": spec.name,
         "invoke": invoke_mode,
@@ -196,6 +277,8 @@ def run_task(
         "prompt_versions": prompt_snapshot,
         "trace_backend": backend,
         "started_at": experiment_log.utc_now(),
+        "preflight": preflight_report.as_dict() if preflight_report else None,
+        "task_framing": (preflight_report.framing if preflight_report else None),
         "params": {
             "concurrency": concurrency,
             "sample": sample,
@@ -205,11 +288,18 @@ def run_task(
             "scorer": spec.scorer,
             "resumed_from": resume_run_id,
             "skipped_already_run": len(prior_ids),
+            "decode_profile": decode_profile,
+            "decode_budget_applied": budget_applied_outer,
+            "thinking_recovered": thinking_recovered,
         },
         "dataset": {
             **dataset_prov,
             "subset": subset,
             "repo": dataset_prov.get("repo"),
+            "case_ids": subset_lock.get("case_ids"),
+            "filenames": subset_lock.get("filenames"),
+            "subset_manifest_path": subset_lock.get("manifest_json"),
+            "subset_manifest_jsonl": subset_lock.get("manifest_jsonl"),
         },
     }
 
@@ -218,20 +308,61 @@ def run_task(
     try:
         if not dry_run:
             with apply_model_override(model):
-                with invoke_mod.Isolation():
-                    tracing.apply_provider_env(backend)
-                    if mock:
-                        invoke_mod.install_mocks()
-                    tracing.configure(backend)
-                    case_rows = _execute_cases(
-                        spec, cases, invoke_mode=invoke_mode, backend=backend,
-                        mock=mock, model=model, prompt_version=prompt_version,
-                        summary=summary,
-                    )
-                    # Off-path writes (relations daemon, async-deferred audit/catalog
-                    # coroutines) must land inside the isolated base dir — drain
-                    # before the env is restored, for every task.
-                    invoke_mod.drain_daemons(1.0 if spec.name == "pipeline_chain" else 0.5)
+                with decode_budget.apply_decode_budget(budget) as budget_applied:
+                    # NOTE: the applied map is captured AFTER the block (below)
+                    # — config merges populate it lazily during execution.
+                    with invoke_mod.Isolation():
+                        tracing.apply_provider_env(backend)
+                        if mock:
+                            invoke_mod.install_mocks()
+                        tracing.configure(backend)
+                        bt_experiment: dict[str, Any] | None = None
+                        if backend == "braintrust":
+                            from .braintrust_experiment import begin_eval_run, end_eval_run, experiments_enabled
+
+                            if experiments_enabled(mock, backend):
+                                bt_experiment = begin_eval_run(
+                                    run_id=run_id,
+                                    task_id=spec.task_id,
+                                    cases=cases,
+                                    dataset_prov={**dataset_prov, **(summary.get("dataset") or {})},
+                                    run_metadata=run_meta_stub(spec, summary),
+                                )
+                                if bt_experiment:
+                                    summary["braintrust_experiment"] = bt_experiment
+                        try:
+                            case_rows = _execute_cases(
+                                spec, cases, invoke_mode=invoke_mode, backend=backend,
+                                mock=mock, model=model, prompt_version=prompt_version,
+                                summary=summary,
+                                run_dir=effective_run_dir,
+                                run_id=run_id,
+                            )
+                            # Granite thinking envelopes zero cases at the JSON
+                            # parse (issue #18 §4); strip + re-parse any
+                            # _parse_error predictions before scoring.
+                            for row in case_rows:
+                                recovered_pred, did = decode_budget.recover_prediction(
+                                    (row.get("prediction") or {})
+                                    if isinstance(row.get("prediction"), dict) else None
+                                )
+                                if did and recovered_pred is not None:
+                                    # Case rows carry the expected_* fields, so
+                                    # they double as the scoring `case` argument.
+                                    row["prediction"] = recovered_pred
+                                    row["scores"] = _score_case(spec.name, spec.scorer, row, recovered_pred)
+                                    thinking_recovered += 1
+                        finally:
+                            pass  # Braintrust finalize+flush after run summary is built
+                        # Off-path writes (relations daemon, async-deferred audit/catalog
+                        # coroutines) must land inside the isolated base dir — drain
+                        # before the env is restored, for every task.
+                        invoke_mod.drain_daemons(1.0 if spec.name == "pipeline_chain" else 0.5)
+                    # Capture AFTER execution: the applied map fills lazily as
+                    # agents consult the merged load_config during the run.
+                    budget_applied_outer = dict(budget_applied)
+                    # params dict was built pre-run — re-bind the final map.
+                    summary["params"]["decode_budget_applied"] = budget_applied_outer
     except Exception as exc:
         error = f"{type(exc).__name__}: {exc}"
         logger.exception("evals_run_failed", task=spec.task_id)
@@ -244,38 +375,109 @@ def run_task(
     summary["duration_s"] = round(time.time() - started, 1)
     summary["error"] = error
     summary["metrics"] = scoring.summarize_scores(case_rows) if case_rows else {"n": 0, "errors": 0}
-    summary["performance"] = scoring.summarize_performance(case_rows) if case_rows else {}
-    if not summary["model"]:
-        # Provenance: the model that actually dominated the run's token spend
-        # (agent models resolve per-agent from the pipeline taxonomy).
-        by_agent = (summary["performance"] or {}).get("by_agent") or {}
+    if not summary["model"] and case_rows:
+        # Provenance: dominant model by token spend (needed before cost rollup).
+        by_agent_preview = scoring.summarize_agent_usage(
+            [r.get("agent_usage") for r in case_rows if r.get("agent_usage")]
+        )
         dominant = max(
-            by_agent.items(),
+            by_agent_preview.items(),
             key=lambda kv: kv[1].get("total_tokens") or 0,
             default=(None, {}),
         )[0]
-        summary["model"] = ((by_agent.get(dominant) or {}).get("models") or [None])[0]
-    summary["trace_ids"] = _trace_ids(backend)
+        summary["model"] = ((by_agent_preview.get(dominant) or {}).get("models") or [None])[0]
+    params_for_perf = summary.get("params") or {}
+    wave_n = int(
+        params_for_perf.get("sample")
+        or params_for_perf.get("n")
+        or (summary.get("metrics") or {}).get("n")
+        or 0
+    )
+    from .decode_budget import expected_cost_for_wave
+
+    summary["performance"] = (
+        scoring.summarize_performance(
+            case_rows,
+            run_model=summary.get("model"),
+            expected_cost_usd=expected_cost_for_wave(params_for_perf.get("decode_profile"), wave_n),
+        )
+        if case_rows
+        else {}
+    )
+    trace_ids = _trace_ids(backend) or {}
+    if summary.get("braintrust_experiment"):
+        trace_ids = {**trace_ids, **summary["braintrust_experiment"]}
+    summary["trace_ids"] = trace_ids or None
     summary["pipeline_git"] = _pipeline_git()
-    summary["prompts_snapshot_path"] = _write_prompts_snapshot(summary, run_dir)
+    summary["prompts_snapshot_path"] = _write_prompts_snapshot(summary, effective_run_dir)
+    if case_rows:
+        # Full scoring suite artifact (all deterministic keys). Sink spans carry
+        # ESSENTIAL_SCORES only; this file + case rows are the complete surface.
+        summary["scoring_suite"] = write_scoring_suite(
+            case_rows,
+            run_dir=effective_run_dir,
+            scorer=spec.scorer,
+            essential_on_sink=scoring.essential_rollup(spec.scorer, case_rows),
+        )
     if spec.family == "calibration" and not error:
         summary["calibration"] = _calibration_block(spec, case_rows)
 
     # Run-level rollup span: the sink's per-run dashboard entry (essential
     # aggregates only). Emitted even on run error, so the sink shows the run.
+    perf = summary.get("performance") or {}
     with tracing.run_span(backend, run_meta={**run_meta_stub(spec, summary)}) as span:
         span.set_output({
             "metrics": {k: summary["metrics"].get(k) for k in _essential_keys(spec)},
-            "performance": {"latency_ms_mean": summary["performance"].get("latency_ms_mean")},
+            "performance": perf,
+            "duration_s": summary.get("duration_s"),
+            "cost_usd_est_total": perf.get("cost_usd_est_total"),
+            "cost_cap": summary.get("cost_cap"),
             "error": error,
         })
+        rollup = scoring.essential_rollup(spec.scorer, case_rows)
         span.set_metrics({
-            **scoring.essential_rollup(spec.scorer, case_rows),
+            **scoring.sink_score_metrics(spec.scorer, rollup, max_scores=scoring.SINK_SCORE_METRICS_MAX),
             **({"ece": summary["calibration"]["ece"]}
                if isinstance(summary.get("calibration"), dict) and isinstance(summary["calibration"].get("ece"), (int, float)) else {}),
+            **(
+                {
+                    "duration_s": float(summary["duration_s"]),
+                    "cost_usd_est_total": float(perf["cost_usd_est_total"]),
+                }
+                if isinstance(summary.get("duration_s"), (int, float))
+                and isinstance(perf.get("cost_usd_est_total"), (int, float))
+                else {}
+            ),
         })
 
-    written = experiment_log.write_run(summary, case_rows, run_dir=run_dir)
+    if backend == "braintrust" and summary.get("braintrust_experiment") and not dry_run:
+        from .braintrust_experiment import end_eval_run, finalize_eval_run
+
+        finalize_eval_run(summary)
+        end_eval_run()
+
+    # Comparison report (Modal-comparable, filed by model/task): emitted for
+    # decode-profile runs and substantive real eval waves (n≥20); never fails the run.
+    if (budget or comparison_report.is_wave_run(summary)) and case_rows and not dry_run:
+        try:
+            from .decode_budget import get_profile
+
+            profile_for_report = budget or get_profile(summary["params"].get("decode_profile")) or {}
+            if budget:
+                summary["params"]["decode_sampling"] = budget.get("sampling")
+                summary["params"]["decode_call_timeout_s"] = budget.get("call_timeout_s")
+            cap = comparison_report.cap_status(summary, profile_for_report)
+            if cap:
+                summary["cost_cap"] = cap
+            report_file = comparison_report.write_report(summary, case_rows)
+            summary["comparison_report"] = (
+                comparison_report.repo_relative_path(report_file) if report_file else None
+            )
+        except Exception as exc:  # report is auxiliary — log and move on
+            logger.warning("comparison_report_failed", task=spec.task_id, error=str(exc))
+            summary["comparison_report"] = None
+
+    written = experiment_log.write_run(summary, case_rows, run_dir=effective_run_dir)
     try:
         experiment_log.write_markdown()
     except Exception:
@@ -285,6 +487,43 @@ def run_task(
 
 def _essential_keys(spec: TaskSpec) -> list[str]:
     return list(scoring.ESSENTIAL_SCORES.get(scoring.essential_scorer(spec.scorer), ()))
+
+
+def _log_preflight_failure(
+    spec: TaskSpec, report: Any, *, mock: bool
+) -> None:
+    """Append a failed run-summary line for a preflight-blocked run.
+
+    Non-negotiable #1: every run logs — including failures. Preflight fires
+    before the run try/except, so without this a blocked task (e.g. a missing
+    real-mode credential across a ``--task all`` sweep) would be invisible in
+    ``reports/experiment_log.jsonl``. Best-effort: a logging failure must not
+    mask the original preflight error.
+    """
+    try:
+        now = experiment_log.utc_now()
+        run_id = experiment_log.new_run_id(spec.family, spec.name)
+        summary: dict[str, Any] = {
+            "run_id": run_id,
+            "family": spec.family,
+            "task": spec.name,
+            "invoke": None,
+            "mode": "mock" if mock else "real",
+            "model": None,
+            "trace_backend": "none",
+            "started_at": now,
+            "finished_at": now,
+            "preflight": report.as_dict(),
+            "params": {"blocked_by": "preflight"},
+            "dataset": {"subset": report.resolved.get("subset"), "n_selected": 0},
+            "metrics": {"n": 0, "errors": 0},
+            "performance": {},
+            "error": f"PreflightError: {'; '.join(f'{i.code}: {i.message}' for i in report.errors)}",
+        }
+        experiment_log.write_run(summary, [], run_dir=experiment_log.experiments_dir() / run_id)
+        logger.warning("evals_preflight_failure_logged", run_id=run_id, task=spec.task_id)
+    except Exception:
+        logger.warning("evals_preflight_failure_log_failed", task=spec.task_id, exc_info=True)
 
 
 def _flush_health(backend: str) -> dict[str, Any] | None:
@@ -359,13 +598,56 @@ def run_meta_stub(spec: TaskSpec, summary: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# The five extraction tasks share one node_name ("extract-fields") in
+# AGENT_CATALOG, whose "agents" list therefore names all five specialists
+# together. Any lookup that walks that shared list and returns the first
+# hit (rather than the one THIS task is designated to) silently reports
+# "contracts_specialist" for every other extraction task, since it is
+# listed first — each specialist must map to exactly one class/task, never
+# stand in for another (issue: merger_agreement/corporate_records/
+# correspondence/insurance_claims run metadata reported
+# prompt_version=contracts_specialist_v1 despite the actual OpenRouter call
+# correctly using the designated specialist — confirmed live on Braintrust
+# experiment 20260927T020724Z-eval-merger_agreement).
+EXTRACTION_TASK_SPECIALIST: dict[str, str] = {
+    "contracts": "contracts_specialist",
+    "merger_agreement": "merger_agreement_specialist",
+    "corporate_records": "corporate_records_specialist",
+    "correspondence": "correspondence_specialist",
+    "insurance_claims": "insurance_claims_specialist",
+}
+
+
+def _specialist_name(spec: TaskSpec, agent_usage: dict[str, Any] | None) -> str | None:
+    """The specialist that evaluated this document (one agent per extraction case)."""
+    designated = EXTRACTION_TASK_SPECIALIST.get(spec.name)
+    if designated:
+        return designated
+    catalog = AGENT_CATALOG.get(spec.node_name) or {}
+    specialists = list(catalog.get("agents") or [])
+    usage = agent_usage or {}
+    hits = [name for name in specialists if name in usage]
+    if hits:
+        return hits[0]
+    return None
+
+
 def _primary_prompt_key(spec: TaskSpec, summary: dict[str, Any]) -> str | None:
     """The task's primary agent-role prompt key (span metadata provenance).
 
     ``summary["prompt_version"]`` only carries an explicit --prompt-version
     override; the per-role snapshot (prompt_versions) is what actually ran.
+    Extraction tasks resolve to their ONE designated specialist first
+    (``EXTRACTION_TASK_SPECIALIST``) rather than the first entry in the
+    shared "extract-fields" catalog list, which is always
+    ``contracts_specialist`` regardless of the task.
     """
     versions = summary.get("prompt_versions") or {}
+    designated = EXTRACTION_TASK_SPECIALIST.get(spec.name)
+    if designated:
+        slot = versions.get(designated)
+        if isinstance(slot, dict) and slot.get("key"):
+            return slot["key"]
     catalog = AGENT_CATALOG.get(spec.node_name) or {}
     for role in catalog.get("agents") or []:
         slot = versions.get(role)
@@ -440,8 +722,9 @@ def _execute_cases(
     model: str | None,
     prompt_version: str | None,
     summary: dict[str, Any],
+    run_dir: Path | None = None,
+    run_id: str | None = None,
 ) -> list[dict[str, Any]]:
-    rows: list[dict[str, Any]] = []
     run_meta = {
         "run_id": summary["run_id"],
         "task": spec.task_id,
@@ -457,70 +740,174 @@ def _execute_cases(
         "subset": summary["dataset"].get("subset"),
         "tags": [spec.family, spec.name, summary["mode"]],
     }
-    for case in cases:
-        timer = scoring.Timer()
-        error: str | None = None
-        prediction: dict[str, Any] = {}
-        try:
-            from pipeline.limits import reset_run_usage
+    workers = max(1, int((summary.get("params") or {}).get("concurrency") or 1))
+    kwargs = dict(
+        spec=spec,
+        invoke_mode=invoke_mode,
+        backend=backend,
+        mock=mock,
+        model=model,
+        summary=summary,
+        run_meta=run_meta,
+        run_dir=run_dir,
+        run_id=run_id,
+    )
+    # mailroom.beacon/v1: live progress for `sandbox board` (never raises into the run).
+    beacon = Beacon(
+        f"evals-{summary['run_id']}",
+        package="eval-environment",
+        title=f"{spec.task_id} · {summary['mode']} · n={len(cases)}",
+        total=len(cases),
+    )
+    finished: list[dict[str, Any]] = []
 
-            reset_run_usage()  # per-case token accounting
-        except Exception:
-            pass
-        with tracing.case_span(backend, node_name=spec.node_name, case=case, run_meta=run_meta) as span:
-            try:
-                prediction = invoke_mod.invoke(spec.name, case, mode=invoke_mode) or {}
-            except Exception as exc:
-                error = f"{type(exc).__name__}: {exc}"
+    def _progress(row: dict[str, Any]) -> dict[str, Any]:
+        finished.append(row)
+        errors = sum(1 for r in finished if r.get("error"))
+        beacon.update(phase="SCORING", done=len(finished), ok=len(finished) - errors, errors=errors)
+        if row.get("error"):
+            beacon.log(f"{row.get('case_id', '?')} error: {str(row['error'])[:160]}")
+        return row
+
+    with beacon:
+        if workers == 1 or len(cases) <= 1:
+            return [_progress(_run_one_case(case, **kwargs)) for case in cases]
+        logger.info("evals_case_pool", workers=workers, n=len(cases))
+        ordered: list[dict[str, Any] | None] = [None] * len(cases)
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futs = {pool.submit(_run_one_case, case, **kwargs): i for i, case in enumerate(cases)}
+            for fut in as_completed(futs):
+                ordered[futs[fut]] = _progress(fut.result())
+        return [row for row in ordered if row is not None]
+
+
+def _run_one_case(
+    case: dict[str, Any],
+    *,
+    spec: TaskSpec,
+    invoke_mode: str,
+    backend: str,
+    mock: bool,
+    model: str | None,
+    summary: dict[str, Any],
+    run_meta: dict[str, Any],
+    run_dir: Path | None,
+    run_id: str | None,
+) -> dict[str, Any]:
+    timer = scoring.Timer()
+    error: str | None = None
+    prediction: dict[str, Any] = {}
+    try:
+        from pipeline.limits import reset_run_usage
+
+        reset_run_usage()  # per-case token accounting (thread ContextVar)
+    except Exception:
+        pass
+    specialist = _specialist_name(spec, None)
+    with tracing.case_span(
+        backend,
+        node_name=spec.node_name,
+        case=case,
+        run_meta=run_meta,
+        span_name=specialist or spec.node_name,
+        specialist=specialist,
+    ) as span:
+        try:
+            prediction = invoke_mod.invoke(spec.name, case, mode=invoke_mode) or {}
+        except Exception as exc:
+            error = f"{type(exc).__name__}: {exc}"
+            if _huge_int_parse_error(exc):
+                logger.warning(
+                    "evals_truncated_json_parse",
+                    case=case.get("id"),
+                    error=error,
+                )
+                prediction = {
+                    "extracted_data": {"_parse_error": True, "confidence": 0.0},
+                    "extraction_confidence": 0.0,
+                    "error": "truncated_json_integer",
+                }
+                error = None
+            else:
                 logger.warning("evals_case_failed", case=case.get("id"), error=error)
-            latency = timer.ms()
-            scores = {} if error else _score_case(spec.name, spec.scorer, case, prediction)
-            usage = _last_usage()
-            case_model = model or next(
-                (m for slot in (usage or {}).get("by_agent", {}).values() for m in slot.get("models", [])),
-                None,
-            )
-            if case_model:
-                span.update_metadata({"model": case_model})
-            perf = scoring.performance_row(latency, usage, case_model)
-            span.set_output({"scores": scores, "error": error})
-            # Sinks carry ESSENTIAL scores only — the full set lives in the
-            # experiment log's case rows (post-hoc suite scores everything).
-            span.set_metrics(scoring.essential_metrics(spec.scorer, scores))
-            case_trace = getattr(span, "trace_ref", None)
-        rows.append(
-            {
-                "case_id": case.get("id"),
-                "filename": case.get("filename"),
-                "expected_doc_class": case.get("expected_doc_class"),
-                "expected_subclass": case.get("expected_subclass"),
-                "review_expected": case.get("review_expected"),
-                "retry_expected": case.get("retry_expected"),
-                "fixture_kind": case.get("fixture_kind"),
-                "fixture_cell": case.get("calibration_cell"),
-                "fixture_outcome": case.get("arbiter_outcome"),
-                "failure_stage": case.get("failure_stage"),
-                # sha256 of the exact text judged — enables verified post-hoc
-                # text re-load from the pinned corpus (lean logs, full fidelity).
-                "doc_text_sha256": scoring.sha256_text(str(case.get("text") or "")),
-                "prediction": prediction or None,
-                "scores": scores,
-                "latency_ms": perf["latency_ms"],
-                "tokens": {
-                    "prompt": perf["prompt_tokens"],
-                    "completion": perf["completion_tokens"],
-                    "total": perf["total_tokens"],
-                },
-                "cost_usd": perf["cost_usd_est"],
-                # per-agent token/call attribution for this case (the
-                # accumulator's by_agent map — every agent that fired)
-                "agent_usage": _agent_usage(),
-                "trace": case_trace,
-                "error": error,
-            }
+        latency = timer.ms()
+        recovered_pred, recovered = decode_budget.recover_prediction(
+            prediction if isinstance(prediction, dict) else None
         )
-        tracing.flush(backend)
-    return rows
+        if recovered and recovered_pred is not None:
+            prediction = recovered_pred
+            params = summary.setdefault("params", {})
+            params["thinking_recovered"] = int(params.get("thinking_recovered") or 0) + 1
+        scores = {} if error else _score_case(spec.name, spec.scorer, case, prediction)
+        usage = _last_usage()
+        case_model = model or next(
+            (m for slot in (usage or {}).get("by_agent", {}).values() for m in slot.get("models", [])),
+            None,
+        )
+        if case_model:
+            span.update_metadata({"model": case_model})
+        if isinstance(prediction, dict) and prediction.get("prompt_key"):
+            span.update_metadata({
+                "prompt_key": prediction["prompt_key"],
+                "specialist": prediction.get("specialist") or specialist,
+            })
+        perf = scoring.performance_row(latency, usage, case_model)
+        span.set_output({"scores": scores, "error": error})
+        span.set_metrics(scoring.essential_metrics(spec.scorer, scores))
+        agent_usage = _agent_usage()
+        specialist = _specialist_name(spec, agent_usage) or specialist
+        tokens = {
+            "prompt": perf["prompt_tokens"],
+            "completion": perf["completion_tokens"],
+            "total": perf["total_tokens"],
+        }
+        if backend == "braintrust":
+            from .braintrust_experiment import log_case_scores
+
+            log_case_scores(
+                case,
+                scorer=spec.scorer,
+                scores=scores,
+                error=error,
+                prediction=prediction if isinstance(prediction, dict) else None,
+                specialist=specialist,
+                latency_ms=perf["latency_ms"],
+                cost_usd=perf["cost_usd_est"],
+                tokens=tokens,
+                span=span,
+            )
+        case_trace = getattr(span, "trace_ref", None)
+    row = {
+        "case_id": case.get("id"),
+        "filename": case.get("filename"),
+        "specialist": specialist,
+        "expected_doc_class": case.get("expected_doc_class"),
+        "expected_subclass": case.get("expected_subclass"),
+        "review_expected": case.get("review_expected"),
+        "retry_expected": case.get("retry_expected"),
+        "fixture_kind": case.get("fixture_kind"),
+        "fixture_cell": case.get("calibration_cell"),
+        "fixture_outcome": case.get("arbiter_outcome"),
+        "failure_stage": case.get("failure_stage"),
+        "doc_text_sha256": scoring.sha256_text(str(case.get("text") or "")),
+        "prediction": prediction or None,
+        "scores": scores,
+        "latency_ms": perf["latency_ms"],
+        "tokens": tokens,
+        "cost_usd": perf["cost_usd_est"],
+        "agent_usage": _agent_usage(),
+        "trace": case_trace,
+        "error": error,
+    }
+    if run_dir is not None and run_id and not mock:
+        experiment_log.append_case_row(run_dir, run_id, row)
+    tracing.flush(backend)
+    return row
+
+
+def _huge_int_parse_error(exc: BaseException) -> bool:
+    msg = str(exc).lower()
+    return "integer string conversion" in msg or "int_max_str_digits" in msg
 
 
 def _last_usage() -> dict[str, Any] | None:

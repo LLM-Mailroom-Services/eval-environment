@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import json
 import random
+from collections import Counter
 from typing import Any
 
 from pipeline.hf_corpora import (
@@ -110,12 +111,26 @@ def _truthy(value: Any) -> bool | None:
 
 
 def _is_empty_container(value: Any) -> bool:
-    """v9 GT empties: the literal strings '{}' / '[]' mean "no items"."""
+    """v9 GT empties: the literal strings '{}' / '[]' mean "no items".
+
+    Array-likes count too. Schema-v9 list-typed cells come back from
+    ``DataFrame.to_dict(orient="records")`` as ``numpy.ndarray``, which is
+    neither ``dict`` nor ``list`` — without the array branch an empty-array GT
+    value reads as a *stated* value and silently survives into
+    ``expected_fields``. Classification is delegated to
+    ``extraction_scope.is_empty_gt`` / ``is_missing_scalar`` so both emptiness
+    sites share one definition; the literal-string quirk above stays local
+    because the v9 GT path encodes "no items" as those two strings.
+    """
+    from evals.extraction_scope import is_empty_gt, is_missing_scalar
+
     if isinstance(value, str) and value.strip() in ("{}", "[]"):
         return True
     if isinstance(value, (dict, list)):
         return len(value) == 0
-    return False
+    if hasattr(value, "size") and hasattr(value, "shape"):
+        return is_empty_gt(value)
+    return is_missing_scalar(value)
 
 
 def _expand_gt_fields(row: dict[str, Any]) -> dict[str, Any]:
@@ -146,7 +161,11 @@ def _expand_gt_fields(row: dict[str, Any]) -> dict[str, Any]:
                 value = json.loads(value)
             except (json.JSONDecodeError, ValueError):
                 pass
-        if value is None or value == "" or _is_empty_container(value):
+        # ``value == ""`` is element-wise for an ndarray (bool() then raises on
+        # a multi-cell array), so blankness is tested as a str.
+        if value is None or (
+            isinstance(value, str) and not value.strip()
+        ) or _is_empty_container(value):
             continue
         merged.setdefault(key, value)
     return merged
@@ -370,9 +389,24 @@ def load_cases(
     cases = [_case_from_row(r, config=config, split=split) for r in raw_rows]
     selected = cases
     if sample is not None:
-        selected = stratified_sample(cases, int(sample), seed=seed)
+        # Cases expose ``expected_doc_class``; corpus rows use ``expected``.
+        by = "expected_doc_class" if cases and "expected_doc_class" in cases[0] else "expected"
+        selected = stratified_sample(cases, int(sample), seed=seed, by=by)
+        if spec["kind"] in ("full", "train") and int(sample) >= len(HUB_CLASSES):
+            drawn = {str(c.get("expected_doc_class") or "") for c in selected} - {""}
+            missing = set(HUB_CLASSES) - drawn
+            if missing:
+                raise ValueError(
+                    f"stratified sample n={sample} seed={seed} subset={subset!r} "
+                    f"missing doc classes: {sorted(missing)} (drawn={sorted(drawn)})"
+                )
     if n is not None:
         selected = selected[: max(0, int(n))]
+    class_counts: dict[str, int] | None = None
+    if selected:
+        class_counts = dict(
+            sorted(Counter(str(c.get("expected_doc_class") or "?") for c in selected).items())
+        )
     provenance = {
         "subset_spec": spec,
         "repo": FULL_CORPUS_ID,
@@ -383,6 +417,7 @@ def load_cases(
         "n_selected": len(selected),
         "sample": sample,
         "seed": seed,
+        "class_counts": class_counts,
     }
     if spec["kind"] == "corpus":
         provenance["repo"] = resolve_corpus(_SUBSET_CORPUS[spec["value"]])["id"]

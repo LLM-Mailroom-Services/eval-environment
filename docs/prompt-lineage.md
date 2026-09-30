@@ -4,11 +4,12 @@ mailroom-evals owns a **frozen, versioned prompt lineage** — the official
 prompt version 1 (`mailroom-dataset-v1`) that GEPA mutations iterate on — while
 staying wired to the mailroom pipeline's live lineage for cross-source A/Bs.
 
-## The three resolution layers
+## The four resolution layers
 
 | layer | lineage id | source | when used |
 |---|---|---|---|
-| **frozen** | `mailroom-dataset-v1` | `src/evals/prompts/frozen_v1.py` (generated) | **default for every eval run** — the stable measurement baseline |
+| **frozen** | `mailroom-dataset-v1` | `src/evals/prompts/frozen_v1.py` (generated) | **default for every eval run** — concise specialists + production freeze for other roles |
+| **archived** | same lineage, v0 | `src/evals/prompts/archived_production.py` | `--prompt-source archived` or `--prompt-version <role>_v0` — the pre-concise production specialists (not the development baseline) |
 | **mutation** | same lineage, v2+ | `prompts/mutations.json` (GEPA output) | A/B candidates; recorded with parent + change note |
 | **production** | pipeline | `llm.prompts.prompt_templates` | `--prompt-source production` — the pipeline's own templates |
 
@@ -25,7 +26,7 @@ and the Langfuse pipeline evaluator rubrics:
 | frozen key | source |
 |---|---|
 | `sorter_v1` | `sorter` (production) |
-| `contracts_specialist_v1` … `insurance_claims_specialist_v1` | their production templates |
+| `contracts_specialist_v1` … `insurance_claims_specialist_v1`, `merger_agreement_specialist_v1` | sandbox concise prompts (`Exios66/local-mailroom-sandbox` @ `303e7f0bb05d`; promoted via `scripts/promote_sandbox_specialist.py upgrade-frozen-specialists`) |
 | `sorter_reviewer_v1` / `arbiter_v1` / `boss_v1` | `sorter_reviewer` / `arbiter` / `boss` (production) |
 | `judge_v1` / `judge-classification_v1` / `judge-correctness_v1` | `judge*` (production) |
 | `intake_v1` | production `INTAKE_SYSTEM_PROMPT` |
@@ -34,15 +35,31 @@ and the Langfuse pipeline evaluator rubrics:
 The pipeline taxonomy has five canonical document classes: contract,
 corporate_record, correspondence, insurance_claim, merger_agreement.
 merger_agreement is the MAUD class (agreement and plan of merger); contract
-is the CUAD commercial-contract class — they share the contracts specialist.
+is the CUAD commercial-contract class. Each has its OWN specialist: MAUD
+extraction runs on `merger_agreement_specialist_v1` and CUAD contracts on
+`contracts_specialist_v1` / mutations — they are not interchangeable, and
+`contracts_specialist_v1` explicitly forbids MAUD output (`merger_consideration`
+null, `maud_clauses` []). The eval catalog wires them separately
+(`evals.invoke.TASK_SPECIALIST["merger_agreement"]` →
+`merger_agreement_specialist`, and `AGENT_CATALOG` catalogs it for
+`extract-fields` + `document-pipeline`).
 
 Artifacts: `prompts/<key>.md` (human-readable mirror — never hand-edit),
 `prompts/manifest.json` (pipeline git commit, source keys, sha256 per
 version, freeze stamp).
 
 **Drift check**: `uv run python scripts/freeze_prompts.py --check` — compares
-every frozen sha256 against the live pipeline. Drift means the pipeline
-prompts moved: re-freeze to cut a new version (never silently mutate v1).
+every frozen sha256 against the live pipeline. Keys with `source_kind: sandbox`
+in `prompts/manifest.json` are pinned to the sandbox promotion and skipped.
+Drift on production-sourced keys means the pipeline prompts moved: re-freeze
+those keys (never silently mutate v1).
+
+**Adding a frozen v1 key for a new role** (e.g. a specialist that has none):
+`uv run python scripts/promote_sandbox_specialist.py freeze-new --role <role>
+--sandbox-stem <stem> [--sandbox-root <checkout>]` — the official path. It reads
+the sandbox stem, rebuilds the frozen module from the current snapshot with the
+new role appended, rewrites every mirror + the manifest, and refuses to clobber
+an existing role. Never hand-write `prompts/<key>.md` or the frozen module.
 
 ## Runtime injection
 
@@ -75,16 +92,20 @@ Ports the proven iteration-OS from llm-entity-extraction
 arXiv 2507.19457):
 
 ```
-OBSERVE (score_run.py --export-failures → data/manifests/<run>.failures.jsonl)
-  → DECOMPOSE (clusters + evidence) → SELECT PARENT (Pareto frontier from the log)
+OBSERVE (score_run.py --export-failures and/or Braintrust readonly experiment fetch
+  via scripts/gepa_observe_specialists.py --braintrust-backlog / --enrich-braintrust)
+  → DECOMPOSE (clusters + evidence, incl. LLM reasoning excerpts from traces)
+  → SELECT PARENT (Pareto frontier from the log)
   → DRAFT (ONE surgical .replace() per iteration)
-  → VALIDATE (4 gates) → APPLY (prompts/mutations.json + prompts/<key>.md)
+  → VALIDATE (5 gates) → APPLY (prompts/mutations.json + prompts/<key>.md)
   → EVALUATE (same subset/seed A/B) → ACCEPT (paired delta CI lo > 0)
 ```
 
-**The four gates** (`evals.prompts.mutations.validate_mutation`): anchor
+**The five gates** (`evals.prompts.mutations.validate_mutation`): anchor
 occurs exactly once · new key unused + lineage naming (`<role>_v<N+1>`) ·
-additive-only (parent preserved outside the anchor span) · metadata recorded.
+additive-only (parent preserved outside the anchor span) · metadata recorded ·
+**length budget** (net growth ≤120 chars for specialists, ≤600 for sorter —
+surgical in-anchor edits; prompt size is a deployment constraint).
 A failing proposal is rejected, never applied.
 
 **Tools**: `scripts/prompt_engineer.py` (DRAFT, `--dry-run`/`--apply`),

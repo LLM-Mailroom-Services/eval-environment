@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from evals.calibration import base
 
 
@@ -66,3 +68,23 @@ def test_write_report(tmp_path):
     assert "Calibration report — classify" in text
     assert "REPORT-ONLY" in text
     assert "small sample" in text
+
+
+def test_calibration_reports_root_respects_env_override(monkeypatch, tmp_path):
+    """Without EVALS_CALIBRATION_REPORTS_DIR, write_report()'s default target
+    is the real git-tracked reports/calibration/ tree — every mock-mode
+    pytest run of a calibration task would otherwise litter it with
+    throwaway timestamped dirs (that is what happened before this env var
+    existed: reports/calibration/classify/<timestamp>/ accumulated dozens of
+    untracked pytest-only report pairs). conftest's hermetic fixture sets
+    this for every test; this pins the mechanism it relies on."""
+    monkeypatch.delenv("EVALS_CALIBRATION_REPORTS_DIR", raising=False)
+    assert base.calibration_reports_root() == Path("reports") / "calibration"
+    monkeypatch.setenv("EVALS_CALIBRATION_REPORTS_DIR", str(tmp_path / "cal-reports"))
+    assert base.calibration_reports_root() == tmp_path / "cal-reports"
+
+
+def test_write_report_default_dir_uses_env_override(monkeypatch, tmp_path):
+    monkeypatch.setenv("EVALS_CALIBRATION_REPORTS_DIR", str(tmp_path / "cal-reports"))
+    json_path, _ = base.write_report("classify", {"generated_at": "now"})
+    assert json_path.is_relative_to(tmp_path / "cal-reports" / "classify")

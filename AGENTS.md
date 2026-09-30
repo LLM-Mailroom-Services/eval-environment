@@ -21,9 +21,10 @@ specialty skill:
 
 1. **Every run logs.** One run-summary line to `reports/experiment_log.jsonl`
    per run — including failures and mock runs. No exceptions.
-2. **Pin the corpus.** Repo `Lucius-Morningstar/mailroom-dataset` (schema v9),
-   revision `46a4d3c240a36671cde0182fff4960f6b8b73aca` (the GT-closure
-   republish of 2026-09-13; the v8 parent
+2. **Pin the corpus.** Repo `Lucius-Morningstar/mailroom-dataset` (schema v9 /
+   v9.1 content pin), revision `ed7576b676343e0b402ec5412cded301e629bdee`
+   (Hub tag `v9.1` not published yet — pin SHA; supersedes GT-closure
+   `46a4d3c240a36671cde0182fff4960f6b8b73aca`; the v8 parent
    `mailroom-corpus` @ `eafe1ab4c0d330d8f9c7a5fb254155e75d290828` stays frozen
    for lineage reference). Join `ground_truth` ⇆ `default` on `filename`; never
    zip positionally; expand the nested `gt_fields` JSON payload before scoring.
@@ -58,6 +59,8 @@ specialty skill:
 10. **Refresh the viewer snapshot.** When the experiment log changes,
     re-run `scripts/export_site_snapshot.py` and commit
     `web/data/snapshot.json` — the Vercel viewer reads only that file.
+    Then re-run `scripts/render_report_charts.py` and commit
+    `web/data/charts/` + `reports/charts/README.md` (CI checks both).
 
 ## Commands
 
@@ -84,6 +87,14 @@ uv run python scripts/render_experiment_log.py --validate
 uv run python scripts/render_experiment_log.py       # rebuild markdown
 ```
 
+**Live progress (mailroom.beacon/v1):** every `run_task` publishes a heartbeat to
+`$MAILROOM_BEACON_DIR` (default `~/.mailroom/jobs`) from `_execute_cases` — one job per
+run, updated per completed case, finished on exit (failed on exception). View all
+mailroom-family jobs with the sandbox board: `sandbox board` (browser, localhost:8767) or
+`sandbox board --tui`. `src/evals/beacon.py` is vendored verbatim from
+local-mailroom-sandbox (`tests/test_beacon_wiring.py` pins its source hash) — change it
+upstream, then re-copy. Tests isolate the beacon dir (conftest autouse).
+
 ## Environment
 
 | variable | note |
@@ -93,6 +104,9 @@ uv run python scripts/render_experiment_log.py       # rebuild markdown
 | `BRAINTRUST_API_KEY` / `BRAINTRUST_PROJECT` | Braintrust sink (auto when set) |
 | `PHOENIX_ENDPOINT` / `PHOENIX_PROJECT` | Phoenix sink (local default) |
 | `EVALS_TRACE_BACKEND` | `auto` default; `none` in tests |
+| `EVALS_REAL_RUNS_DISABLED` | set `1` to block all `--real` runs at preflight |
+| `EVALS_SPEND_APPROVAL_REQUIRED` | when `1`, require `EVALS_SPEND_APPROVED=1` or `EVALS_SPEND_APPROVED_USD` before `--real` |
+| `GEPA_SPEND_APPROVED` | must be `1` before any `scripts/run_gepa_*.sh` paid eval |
 | `EXPERIMENT_LOG_PATH` / `EXPERIMENT_LOG_MD_PATH` / `EVALS_EXPERIMENTS_DIR` | tests redirect all three |
 
 `OBSERVABILITY_PROVIDER` and `MAILROOM_BASE_DIR` are set BY the runner — do
@@ -116,3 +130,10 @@ Follow `.opencode/skills/eval-engineering/SKILL.md`: register a `TaskSpec` in
 modes unless procedural), scoring in `src/evals/scoring.py`, then mock smoke
 (`--mock --n 3`) before any real run. One-off scripts outside the registry
 are not acceptable.
+
+## Cursor Cloud specific instructions
+
+- Bootstrap with `bash scripts/cloud-agent-install.sh` (also the Cloud Agent `install` command). It installs `uv` into `/usr/local/bin` (no shell-profile edits), clones the gitignored pipeline path from `[tool.uv.sources] mailroom`, and runs `uv sync --extra dev --frozen`. Re-running it is safe.
+- This branch pins `Digital-Mailroom` at `e5eeac603edf27f9fe4f306cf086aa9c31965d9a` (`mailroom` 0.7.1, workspace `llm-dojo-scoring` 0.15.0). `main` uses `../llm-mailroom` and the script pins that clone at `28cb4be816fbb60e56cd3bb2ab72f8d9be1ab636`. On that standalone checkout the script removes `[tool.uv.sources]` so `uv run` uses the git pin instead of a workspace member that is not present. Do not rewrite `uv.lock` to follow a newer pipeline tip.
+- Hermetic checks: `uv run pytest tests/ -q`, `uv run python scripts/freeze_prompts.py --check`, `node scripts/viewer_smoke.js`. Product smoke: `uv run python scripts/run_evals.py --list`, then `uv run python scripts/run_evals.py --task eval:classification --mock --n 3`. `--mock` does not call an LLM. `--real` needs `OPENROUTER_API_KEY`.
+- The eval viewer is static. The environment terminal `eval-viewer` serves `web/` on port 4173 (`http://localhost:4173/`, snapshot at `data/snapshot.json`). Do not export `OBSERVABILITY_PROVIDER` or `MAILROOM_BASE_DIR`.

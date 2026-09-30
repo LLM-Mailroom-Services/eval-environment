@@ -38,6 +38,10 @@ ESSENTIAL_SCORES: dict[str, tuple[str, ...]] = {
     "pipeline": ("stage_agrees", "class_correct"),
 }
 
+# Max headline scores forwarded to Braintrust ``scores=`` (quota). Span metrics
+# use the full ESSENTIAL_SCORES set; experiment ``scores`` stay tighter.
+SINK_SCORE_METRICS_MAX = 2
+
 
 # Calibration probe scorers reuse their eval node's essential set (the
 # per-case scores are the node's own) — applied in essential_metrics /
@@ -56,6 +60,41 @@ CALIBRATION_ESSENTIAL_ALIAS: dict[str, str] = {
 def essential_scorer(scorer: str) -> str:
     """Resolve a calibration probe scorer to its eval node's scorer."""
     return CALIBRATION_ESSENTIAL_ALIAS.get(scorer, scorer)
+
+
+# Numeric 0–1 score keys forwarded as Braintrust experiment ``scores`` on
+# *each document row*. Count/flags stay in metadata (quota + 0–1 contract).
+_BT_SCORE_SKIP = frozenset({"n_expected_fields", "scorer_error"})
+
+
+def row_score_metrics(scores: dict[str, Any] | None) -> dict[str, float]:
+    """One document's full 0–1 score surface for a Braintrust experiment row."""
+    out: dict[str, float] = {}
+    for key, value in (scores or {}).items():
+        if key in _BT_SCORE_SKIP:
+            continue
+        if isinstance(value, bool):
+            out[key] = 1.0 if value else 0.0
+            continue
+        if isinstance(value, (int, float)):
+            f = float(value)
+            if 0.0 <= f <= 1.0:
+                out[key] = f
+    return out
+
+
+def sink_score_metrics(scorer: str, scores: dict[str, Any], *, max_scores: int | None = None) -> dict[str, float]:
+    """Minimal headline scores for Braintrust experiment scoring (quota-safe)."""
+    limit = max_scores if max_scores is not None else SINK_SCORE_METRICS_MAX
+    wanted = ESSENTIAL_SCORES.get(essential_scorer(scorer), ())[: max(0, limit)]
+    out: dict[str, float] = {}
+    for key in wanted:
+        value = scores.get(key)
+        if isinstance(value, bool):
+            out[key] = float(value)
+        elif isinstance(value, (int, float)) and not isinstance(value, bool):
+            out[key] = float(value)
+    return out
 
 
 def essential_metrics(scorer: str, scores: dict[str, Any]) -> dict[str, float]:
@@ -342,24 +381,56 @@ def performance_row(latency_ms: float, usage: dict[str, Any] | None, model: str 
     }
 
 
-def summarize_performance(rows: list[dict[str, Any]]) -> dict[str, Any]:
+def summarize_performance(
+    rows: list[dict[str, Any]],
+    *,
+    run_model: str | None = None,
+    expected_cost_usd: float | None = None,
+) -> dict[str, Any]:
     latencies = [r["latency_ms"] for r in rows if isinstance(r.get("latency_ms"), (int, float))]
     prompt = sum(int(_row_tokens(r, "prompt")) for r in rows)
     completion = sum(int(_row_tokens(r, "completion")) for r in rows)
-    costs = [
-        r.get(cost_key)
-        for r in rows
-        for cost_key in ("cost_usd", "cost_usd_est")
-        if isinstance(r.get(cost_key), (int, float))
+    actual_costs = [
+        r.get("cost_usd") for r in rows if isinstance(r.get("cost_usd"), (int, float))
     ]
-    summary = {
+    cost_usd_total = round(sum(actual_costs), 6) if actual_costs else None
+
+    by_agent = summarize_agent_usage([r.get("agent_usage") for r in rows if r.get("agent_usage")])
+    # Prefer pricing aggregate per-agent token totals. Per-case costs are
+    # rounded to 6 decimals for storage; summing those rounded values creates
+    # measurable drift on N=20+ runs (and can zero tiny calls entirely).
+    est_from_agents: float | None = None
+    if by_agent:
+        agent_est = [
+            slot.get("cost_usd_est")
+            for slot in by_agent.values()
+            if isinstance(slot.get("cost_usd_est"), (int, float))
+        ]
+        if agent_est:
+            est_from_agents = round(sum(agent_est), 6)
+
+    cost_usd_est_total = est_from_agents
+    if cost_usd_est_total is None:
+        cost_usd_est_total = cost_for(prompt, completion, run_model) if run_model else None
+    if cost_usd_est_total is None:
+        row_costs = [
+            r.get(cost_key)
+            for r in rows
+            for cost_key in ("cost_usd", "cost_usd_est")
+            if isinstance(r.get(cost_key), (int, float))
+        ]
+        cost_usd_est_total = round(sum(row_costs), 6) if row_costs else cost_usd_total
+
+    summary: dict[str, Any] = {
         "latency_ms_mean": _mean([float(v) for v in latencies]),
         "latency_ms_p95": _p95([float(v) for v in latencies]),
         "tokens_prompt_total": prompt,
         "tokens_completion_total": completion,
-        "cost_usd_est_total": round(sum(costs), 6) if costs else None,
+        "cost_usd_total": cost_usd_total,
+        "cost_usd_est_total": cost_usd_est_total,
     }
-    by_agent = summarize_agent_usage([r.get("agent_usage") for r in rows if r.get("agent_usage")])
+    if expected_cost_usd is not None:
+        summary["expected_cost_usd"] = expected_cost_usd
     if by_agent:
         summary["by_agent"] = by_agent
     return summary

@@ -1,0 +1,43 @@
+{
+  "run_a": {
+    "run_id": "20260927T105400Z-eval-insurance_claims",
+    "prompt_version": null,
+    "model": "deepseek/deepseek-v4.1-flash"
+  },
+  "run_b": {
+    "run_id": "20260928T085028Z-eval-insurance_claims",
+    "prompt_version": "insurance_claims_specialist_v2",
+    "model": "deepseek/deepseek-v4.1-flash"
+  },
+  "metric_deltas": {
+    "errors": {
+      "a": 0,
+      "b": 0,
+      "delta": 0
+    },
+    "n": {
+      "a": 20,
+      "b": 20,
+      "delta": 0
+    },
+    "overall_score": {
+      "a": 0.7974,
+      "b": 0.7912,
+      "delta": -0.0062
+    },
+    "scorer_errors": {
+      "a": 0,
+      "b": 0,
+      "delta": 0
+    }
+  },
+  "paired_case_deltas": {
+    "overall_score": {
+      "delta": -0.0062,
+      "ci_lo": -0.0166,
+      "ci_hi": 0.0026,
+      "n": 20
+    }
+  },
+  "n_shared_cases": 20
+}

@@ -21,6 +21,13 @@ models:
     context_tokens: 128000
     input_per_million: 0.05
     output_per_million: 0.25
+  deepseek/deepseek-v4.1-flash:
+    label: DeepSeek V4.1 Flash
+    modality: text
+    # Verified 2026-09-27 via OpenRouter /api/v1/models (deepseek/deepseek-v4.1-flash).
+    context_tokens: 1048576
+    input_per_million: 0.035
+    output_per_million: 0.29
   deepseek/deepseek-v4-pro:
     label: DeepSeek V4 Pro
     modality: text
@@ -31,5 +38,22 @@ models:
     label: IBM Granite 4.2 8B
     modality: text
     context_tokens: 131072
+    # Verified 2026-09-27 against the live OpenRouter model page:
+    # https://openrouter.ai/ibm-granite/granite-4.2-8b
+    # Page also advertises $0.015/M cache-read tokens. The eval harness does
+    # not request prompt caching and conservatively prices every reported
+    # prompt token at the ordinary input rate; reports label this as an
+    # estimate, so any provider-side implicit cache hit can only make actual
+    # spend lower than the recorded value.
     input_per_million: 0.06
     output_per_million: 0.25
+  qwen/qwen3-8b:
+    label: Qwen 3 8B (Modal vLLM leg twin)
+    modality: text
+    context_tokens: 131072
+    # Live OpenRouter weighted average, verified 2026-09-26 via
+    # /api/v1/models (canonical qwen/qwen3-8b-04-28, HF id Qwen/Qwen3-8B —
+    # byte-equal to the Modal leg weights). Listing expires 2026-10-09:
+    # re-verify or re-pin before any later wave.
+    input_per_million: 0.117
+    output_per_million: 0.455

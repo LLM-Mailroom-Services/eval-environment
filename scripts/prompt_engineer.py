@@ -15,6 +15,8 @@ Validation gates (a proposal failing any gate is rejected, never applied):
     2. KEY     — new key unused + lineage naming (<role>_v<parent.version+1>)
     3. ADDITIVE— parent text preserved outside the anchor span
     4. METADATA— parent + change note recorded
+    5. LENGTH  — net growth ≤ 120 chars for specialists (600 for sorter); prefer
+       in-anchor rewording over appending paragraphs (deployment token budget)
 
 The tool never runs the A/B itself; it prints the exact runner command
 (one rule per iteration → one A/B per mutation):
@@ -50,14 +52,21 @@ META_SYSTEM = """You are the Prompt Engineer for a legal-document classification
 prompt program. You follow a strict iteration doctrine:
 
 - ONE rule per mutation. Never bundle unrelated fixes.
+- LENGTH BUDGET (non-negotiable): net prompt growth must stay ≤120 characters for \
+specialist prompts (≤600 for sorter). Do NOT append new paragraphs, bullet lists, \
+or "CRITICAL" blocks. Prefer swapping or tightening words INSIDE the anchor span; \
+if you add a phrase, delete redundant words in the same replacement so net growth \
+stays under budget.
 - Mutations are surgical .replace() edits on the parent prompt: you return an \
 ANCHOR (a verbatim substring of the parent, occurring exactly once) and its \
-REPLACEMENT (anchor preserved plus your insertion/edit).
+REPLACEMENT (the edited span — may reword anchor text, not only append).
 - Every rule carries: the concrete failure evidence it addresses (filename, \
 GT vs prediction), the mechanism, a scope guard against over-firing, and \
 where possible a worked example.
 - Prefer corpus-convention rules ("the ground truth follows the folder") over \
 legal reasoning when the misses follow a labeling convention.
+- When failure_clusters include braintrust.trace_excerpt.reasoning, treat that \
+text as primary reflective evidence (what the model actually thought on the miss).
 - Known GT artifacts are NOT prompt-fixable: say so and skip.
 - Counterfactual discipline: name what your rule could break on OTHER corpora \
 and add the carve-out preemptively.
@@ -90,12 +99,19 @@ def decompose(rows: list[dict], *, focus: str | None = None) -> dict:
     for row in rows[:200]:
         key = str(row.get("expected_doc_class") or "?")
         if len(examples[key]) < 5:
-            examples[key].append({
+            ex: dict = {
                 "filename": row.get("filename"),
                 "expected": row.get("expected_doc_class"),
                 "predicted": (row.get("prediction") or {}).get("doc_type"),
                 "scores": row.get("scores"),
-            })
+            }
+            if row.get("braintrust"):
+                ex["braintrust"] = row.get("braintrust")
+            if row.get("trace_excerpt"):
+                ex["trace_excerpt"] = row.get("trace_excerpt")
+            if row.get("expected_fields"):
+                ex["expected_fields"] = row.get("expected_fields")
+            examples[key].append(ex)
     return {"n_failures": len(rows), "by_class": dict(by_class), "by_type": dict(by_error), "examples": dict(examples)}
 
 
@@ -130,6 +146,12 @@ def main() -> int:
     parser.add_argument("--parent", default="sorter_v1", help="parent version key to mutate")
     parser.add_argument("--focus", default=None, help="restrict clustering to one expected class")
     parser.add_argument("--apply", action="store_true", help="validate + persist the proposal (default: dry-run)")
+    parser.add_argument(
+        "--max-net-chars",
+        type=int,
+        default=None,
+        help="Gate 5 net growth limit (default: role-based — 120 specialists, 600 sorter)",
+    )
     args = parser.parse_args()
 
     rows = load_manifest(Path(args.manifest))
@@ -155,16 +177,21 @@ def main() -> int:
                 parent_key=args.parent, new_key=new_key,
                 anchor=proposal["anchor"], replacement=proposal["replacement"],
                 note=proposal.get("note", ""),
+                max_net_chars=args.max_net_chars,
             )
             mutations.render_prompts_mirror()
-            print(f"  APPLIED → {meta['sha256'][:12]} (prompts/{new_key}.md)")
+            net = meta.get("net_chars", "?")
+            print(f"  APPLIED → {meta['sha256'][:12]} net={net:+} chars (prompts/{new_key}.md)")
         else:
             mutations.validate_mutation(
                 parent_key=args.parent, new_key=new_key,
                 anchor=proposal["anchor"], replacement=proposal["replacement"],
                 note=proposal.get("note", ""),
+                max_net_chars=args.max_net_chars,
             )
-            print("  gates PASS (dry-run — add --apply to persist)")
+            parent = resolve(args.parent)
+            net = len(proposal["replacement"]) - len(proposal["anchor"])
+            print(f"  gates PASS (dry-run net={net:+} chars — add --apply to persist)")
     except mutations.MutationError as exc:
         print(f"  REJECTED: {exc}")
         return 1

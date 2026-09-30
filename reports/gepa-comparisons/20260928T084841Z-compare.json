@@ -1,0 +1,43 @@
+{
+  "run_a": {
+    "run_id": "20260928T062251Z-eval-corporate_records",
+    "prompt_version": null,
+    "model": "qwen/qwen3.7-flash"
+  },
+  "run_b": {
+    "run_id": "20260928T083627Z-eval-corporate_records",
+    "prompt_version": "corporate_records_specialist_v5",
+    "model": "qwen/qwen3.7-flash"
+  },
+  "metric_deltas": {
+    "errors": {
+      "a": 0,
+      "b": 0,
+      "delta": 0
+    },
+    "n": {
+      "a": 50,
+      "b": 50,
+      "delta": 0
+    },
+    "overall_score": {
+      "a": 0.4186,
+      "b": 0.4178,
+      "delta": -0.0008
+    },
+    "scorer_errors": {
+      "a": 0,
+      "b": 0,
+      "delta": 0
+    }
+  },
+  "paired_case_deltas": {
+    "overall_score": {
+      "delta": -0.0007,
+      "ci_lo": -0.0125,
+      "ci_hi": 0.0098,
+      "n": 50
+    }
+  },
+  "n_shared_cases": 50
+}

@@ -21,7 +21,7 @@ experiment log — machine-readable JSONL, human-readable markdown tables.
 | At a glance | |
 |---|---|
 | **Pipeline under test** | [`llm-mailroom`](https://github.com/LLM-Mailroom-Services/Digital-Mailroom) — 13-node LangGraph state machine (pkg `mailroom`, resolved as a local editable path source) |
-| **Dataset** | [`Lucius-Morningstar/mailroom-dataset`](https://huggingface.co/datasets/Lucius-Morningstar/mailroom-dataset) schema v9, **pinned** to revision `46a4d3c2` (GT-closure) — 3,302 docs (2,979 train + 323 test); v8 parent `mailroom-corpus` @ `eafe1ab4` stays frozen for lineage reference |
+| **Dataset** | [`Lucius-Morningstar/mailroom-dataset`](https://huggingface.co/datasets/Lucius-Morningstar/mailroom-dataset) schema v9, **pinned** to revision `ed7576b6` (v9.1 SHA; Hub tag not published yet) — 3,302 docs (2,979 train + 323 test); v8 parent `mailroom-corpus` @ `eafe1ab4` stays frozen for lineage reference |
 | **Task families** | `eval:<node>` (performance) · `pilot:<node\|chain>` (cheap validation) · `calibration:<node>` (edge-test + threshold recommendation) |
 | **Invocation** | `--invoke node` (raw graph node fns with corpus-built `DocumentState`) or `--invoke agent` (agent classes directly) |
 | **Trace sinks** | Braintrust (when `BRAINTRUST_API_KEY` is set) → local Arize Phoenix → `none` — never Langfuse (per [mailroom-issues #7](https://github.com/LLM-Mailroom-Services/mailroom-issues/issues/7)) |
@@ -174,9 +174,10 @@ Each task also exists as `pilot:<name>`; the seven calibration tasks are
 
 The one loading path is `evals.cases` → `pipeline.hf_corpus_loader`: the
 `ground_truth` config (labels) joined to `default` (blind text) on
-`filename`, **pinned** to revision `46a4d3c240a36671cde0182fff4960f6b8b73aca`
-(schema v9 of `Lucius-Morningstar/mailroom-dataset` — the standalone successor
-of the frozen v8 `mailroom-corpus`; GT-closure republish of 2026-09-13), with
+`filename`, **pinned** to revision `ed7576b676343e0b402ec5412cded301e629bdee`
+(schema v9 / v9.1 content pin of `Lucius-Morningstar/mailroom-dataset` — the
+standalone successor of the frozen v8 `mailroom-corpus`; supersedes GT-closure
+`46a4d3c240a36671cde0182fff4960f6b8b73aca`), with
 `content_sha256` verification. Never
 zip rows positionally — always join. The nested `gt_fields` JSON payload
 (13 insurance fields + `cuad_clause_labels` + `maud_clause_labels`) is expanded
@@ -248,6 +249,11 @@ uv run python scripts/run_evals.py --task eval:classification --real --trace-bac
 - Langfuse is intentionally **not** a sink here — issue #7 names Phoenix
   and/or Braintrust.
 
+Full step-by-step replication for the OpenRouter-provider + Braintrust-sink
+path — specialists and the sorter, decode profiles, the concurrency=8
+reliability findings, and the full-corpus Dataset sync — lives in
+[`docs/openrouter-braintrust-runbook.md`](docs/openrouter-braintrust-runbook.md).
+
 ## Vercel viewer & dashboard
 
 `web/` is a zero-dependency static site — a **dedicated viewer of eval run
@@ -266,13 +272,21 @@ Environment (health checks, command surface, skills/subagents,
 non-negotiables). Project dashboard:
 [Vercel → eval-environment](https://vercel.com/lucius-projects-54efe0bb/eval-environment/A5xZpmnPeh8RB2H2Pjn3acTtn4RS).
 
-**Data flow**: the raw experiment log stays local (per `.gitignore`); the
-viewer reads one tracked, generated snapshot:
+**Data flow**: the experiment log is tracked under `reports/` (JSONL +
+markdown). The Vercel viewer additionally reads one generated snapshot:
 
 ```bash
 uv run python scripts/export_site_snapshot.py          # regenerate web/data/snapshot.json
 uv run python scripts/export_site_snapshot.py --check  # exit 1 if stale vs the log
+uv run python scripts/render_report_charts.py          # re-render the Charts tab from the snapshot
+uv run python scripts/render_report_charts.py --check  # exit 1 if charts are stale
 ```
+
+The Charts tab (and the same SVGs in [reports/charts](reports/charts/README.md))
+shows per-document-type performance from the snapshot: extraction score by
+type and model, per-document and per-subclass score strips, API cost per
+document, the LLM sorter's confusion matrices, subclass accuracy, collapse
+signal and confidence calibration, and a surrogate ALE of latency on score.
 
 Refresh discipline: whenever the experiment log changes, re-export and
 commit the snapshot — the viewer then shows it on the next Vercel deploy.
@@ -300,7 +314,7 @@ functions. Every push to `main` redeploys.
 Every eval run measures the **frozen `mailroom-evals-v1` lineage** — the
 official prompt version 1 snapshotted from the mailroom docclass lineage
 (KANBAN-090) plus the pipeline evaluator rubrics — injected into the live
-pipeline at runtime (`--prompt-source frozen|live-docclass|production`,
+pipeline at runtime (`--prompt-source frozen|archived|live-docclass|production`,
 `--prompt-version <key>` for explicit pins). Full details, the freeze/drift
 workflow, and the GEPA mutation scaffold live in
 [`docs/prompt-lineage.md`](docs/prompt-lineage.md).
@@ -468,8 +482,14 @@ Real runs can pin a single OpenRouter model for every pipeline agent with
 
 ```bash
 uv run python scripts/run_evals.py --task eval:classification --real \
-  --model ibm-granite/granite-4.2-8b --subset class:contract --sample 10 --seed 42
+  --model ibm-granite/granite-4.2-8b --decode-profile granite-4.2-8b \
+  --subset full --sample 10 --seed 42
 ```
+
+Granite's decode profile is required even for sorter/classification: it
+injects IBM's mandated `temperature=1.0`, `top_p=0.95`, `seed=42` sampling
+on the wire. Specialist tasks additionally receive Granite-specific
+thinking-ON completion budgets.
 
 > [!WARNING]
 > Archive/intake/chain evals write real bins, manifests, SQLite catalogs, and

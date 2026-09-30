@@ -189,6 +189,8 @@
         .metric-card .v { font-family: var(--font-mono); font-size: 1.15rem; font-weight: 600; }
         .bar-mini { height: 6px; border-radius: 3px; background: var(--bg-tertiary); overflow: hidden; margin-top: 6px; }
         .bar-mini > div { height: 100%; border-radius: 3px; }
+        .chart-fig { margin: 0; }
+        .chart-fig img { display: block; width: 100%; height: auto; border-radius: 6px; background: #fff; }
         .empty { text-align: center; color: var(--text-dim); padding: 48px 0; font-size: 0.9rem; }
         .error-panel { background: var(--red-dim); border: 1px solid rgba(248, 113, 113, 0.4); border-radius: var(--radius); padding: 20px; }
         .cmd {
@@ -225,6 +227,7 @@
                 <a href="#/runs" data-view="runs">Runs</a>
                 <a href="#/trends" data-view="trends">Trends</a>
                 <a href="#/compare" data-view="compare">Compare</a>
+                <a href="#/charts" data-view="charts">Charts</a>
                 <a href="#/tasks" data-view="tasks">Tasks</a>
                 <a href="#/corpus" data-view="corpus">Corpus</a>
                 <a href="#/prompts" data-view="prompts">Prompts</a>
@@ -330,6 +333,7 @@ function route() {
     if (view === "run" && arg) return viewRun(decodeURIComponent(arg));
     if (view === "trends") return viewTrends();
     if (view === "compare") return viewCompare();
+    if (view === "charts") return viewCharts();
     if (view === "tasks") return viewTasks();
     if (view === "corpus") return viewCorpus();
     if (view === "prompts") return viewPrompts();
@@ -843,6 +847,30 @@ function viewCorpus() {
         "</div>" +
         '<div class="card"><h3>Configs <span class="badge dim mono">' + c.configs.length + "</span></h3>" +
         '<div class="tbl-wrap"><table><thead><tr><th>slug</th><th>schema</th><th>role</th><th></th><th>docs</th><th>classes</th></tr></thead><tbody>' + cfgRows + "</tbody></table></div></div>";
+}
+
+// ── charts ───────────────────────────────────────────────────────
+// Static SVGs rendered from this snapshot by scripts/render_report_charts.py
+// (per-document-type scores, LLM sorter confusion/collapse/calibration, ALE).
+async function viewCharts() {
+    $main.innerHTML = '<div class="empty">Loading charts…</div>';
+    let list;
+    try {
+        const res = await fetch("data/charts/index.json", { cache: "no-cache" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        list = await res.json();
+    } catch (err) {
+        $main.innerHTML = '<div class="error-panel"><p>Could not load <span class="mono">data/charts/index.json</span> (' + esc(err.message) + ').</p>' +
+            '<div class="cmd">uv run python scripts/render_report_charts.py</div></div>';
+        return;
+    }
+    if (!location.hash.startsWith("#/charts")) return;  // navigated away while loading
+    $main.innerHTML =
+        '<div class="page-title">Charts</div>' +
+        '<div class="page-sub">Per-document-type performance from this snapshot: each (task, model) uses its latest real run. ' +
+        'Regenerate with <span class="mono">scripts/render_report_charts.py</span>.</div>' +
+        list.map(c => '<div class="card mb16"><figure class="chart-fig"><img loading="lazy" src="data/charts/' + encodeURIComponent(c.file) +
+            '" alt="' + esc(c.title) + '"></figure></div>').join("");
 }
 
 // ── prompts ──────────────────────────────────────────────────────

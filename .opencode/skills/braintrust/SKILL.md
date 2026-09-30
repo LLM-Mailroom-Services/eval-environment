@@ -18,16 +18,21 @@ BRAINTRUST_PROJECT=mailroom-evals   # default project for eval runs
 ## How this repo uses it
 
 - `evals.tracing` initializes via `mailroom.observability.braintrust_setup.configure()`
-  (`init_logger` → Logs/Traces view; NEVER `init()` — that routes to
-  Experiments and empties the trace page).
+  (`init_logger` → nested LLM spans). Real eval runs also open a per-run
+  **Experiment** via `evals.braintrust_experiment` (`braintrust.init` +
+  `init_dataset`) linked to the pinned HF corpus (`BRAINTRUST_EXPERIMENTS=auto`,
+  disable with `BRAINTRUST_EXPERIMENTS=off`).
 - The runner sets `OBSERVABILITY_PROVIDER=braintrust` so llm-mailroom's
   `llm/client.py:get_llm` wraps the OpenAI client (`braintrust.wrap_openai`)
   and every LLM call auto-logs as a `type=llm` span.
-- One root span per case: name = the task's node observation name
-  (e.g. `classify-document`), `input` = curated case summary (ids + class +
-  chars, never raw doc text), `output` = prediction + scores, `metadata` =
-  run_id, dataset config/split/revision, subset, invoke mode, model,
-  prompt_version. Scorer results land via `span.log(metrics=...)`.
+- One **Experiment row per specialist call** (20 docs → 20 specialist
+  rows). Documents are not inserted as Dataset rows. The parent span is
+  named for the specialist (`merger_agreement_specialist`, …) or the
+  node when there is no specialist. Nested LLM spans stay children.
+  Scores attach via `span.log` — never a second `Experiment.log`.
+  `input` = curated case summary (ids + chars, never raw doc text).
+  Pipeline nodes (`extract-fields`, classify, …) must not appear as
+  sibling rows on specialist evals.
 - `evals.tracing.flush()` after each case; `flush_health()` counters surface
   dropped events (never fail a run on tracing errors).
 
@@ -39,6 +44,11 @@ BRAINTRUST_PROJECT=mailroom-evals   # default project for eval runs
 
 Cross-reference: every experiment-log record carries the same `run_id` and
 trace ids, so log rows ↔ traces are joinable.
+
+GEPA OBSERVE pulls the specialist backlog from Braintrust readonly experiments
+(experiment name = `run_id`) via `evals.gepa.braintrust_backlog` /
+`scripts/gepa_observe_specialists.py --braintrust-backlog` (eval roots + nested
+LLM reasoning excerpts; never raw document text).
 
 ## Boundaries
 

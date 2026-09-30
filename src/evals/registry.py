@@ -4,7 +4,10 @@ Task ids: ``<family>:<name>`` (e.g. ``eval:classify``, ``pilot:chain``,
 ``calibration:judge``). Each spec pins the node's stable observation name
 (trace span name), the default subset, and the scorer family. The shared
 runner (``evals.runner``) executes any spec; task modules under
-``evals.tasks`` / ``evals.calibration`` add task-specific behavior.
+``evals.tasks`` frame each eval as a concrete agent/node request (system
+prompt role, entity schema, structured output) and host
+``build_cases`` / ``invoke`` / ``score`` helpers. Calibration analyzers live
+under ``evals.calibration``.
 """
 
 from __future__ import annotations
@@ -113,6 +116,7 @@ AGENT_CATALOG: dict[str, dict[str, Any]] = {
         "role": "Specialist extraction",
         "agents": [
             "contracts_specialist",
+            "merger_agreement_specialist",
             "corporate_records_specialist",
             "correspondence_specialist",
             "insurance_claims_specialist",
@@ -144,6 +148,7 @@ AGENT_CATALOG: dict[str, dict[str, Any]] = {
         "agents": [
             "intake", "image_extractor", "pdf_transcriber", "sorter",
             "sorter_reviewer", "contracts_specialist",
+            "merger_agreement_specialist",
             "corporate_records_specialist", "correspondence_specialist",
             "insurance_claims_specialist",
             "judge", "arbiter", "boss",

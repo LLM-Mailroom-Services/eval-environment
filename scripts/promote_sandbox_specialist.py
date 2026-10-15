@@ -238,6 +238,7 @@ def promote_mutation(
     sandbox_stem: str,
     note: str,
     sandbox_root: str | Path | None = None,
+    max_net_chars: int | None = None,
 ) -> dict:
     from evals.prompts.lineage import resolve
 
@@ -250,6 +251,7 @@ def promote_mutation(
         replacement=new_text,
         note=note,
         persist=True,
+        max_net_chars=max_net_chars,
     )
     mutations.render_prompts_mirror()
     return meta
@@ -345,6 +347,12 @@ def main() -> int:
         default=None,
         help="local sandbox checkout to read config/prompts/<stem>.txt from (default: fetch from GitHub)",
     )
+    mut.add_argument(
+        "--max-net-chars",
+        type=int,
+        default=None,
+        help="Gate 5 net growth limit (default: role-based — 120 specialists, 600 sorter)",
+    )
 
     upg = sub.add_parser(
         "upgrade-frozen-specialists",
@@ -404,6 +412,7 @@ def main() -> int:
             sandbox_stem=args.sandbox_stem,
             note=args.note,
             sandbox_root=args.sandbox_root,
+            max_net_chars=args.max_net_chars,
         )
         print(json.dumps({"key": meta["key"], "sha256": meta["sha256"], "parent": meta["parent"]}, indent=2))
         return 0

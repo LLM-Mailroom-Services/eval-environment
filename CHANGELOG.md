@@ -5,6 +5,26 @@ All notable changes to mailroom-evals are documented here. Format based on
 
 ## [Unreleased]
 
+### Added
+
+- **SAND-042 repaired specialists frozen as v4** (`prompts/mutations.json`,
+  `prompts/insurance_claims_specialist_v4.md`,
+  `prompts/merger_agreement_specialist_v4.md`). Full-text mutations of the
+  sandbox RCA stems at `Exios66/local-mailroom-sandbox@ecfe03b1d0af`:
+  - `insurance_claims_specialist_v4` ← `insurance_claims_specialist_simplified_v2`
+    (sha256 `1ca6e83c…58ea`, 8461 chars): per-source layout cues, no phantom
+    sorter `doc_subclass` handoff, bare-number `claimed_amount`.
+  - `merger_agreement_specialist_v4` ← `merger_agreement_specialist_maud_v2`
+    (sha256 `da316691…1946`, 33125 chars): MAUD answer catalog generated from
+    `llm_dojo_scoring.maud_schema`, no free text in `maud_clauses`, per-chunk
+    answering duty.
+  Both were built from frozen v1 / `maud_v1`, so they replace the v2/v3 GEPA
+  edits rather than extending them. Their net growth is above the 120-char
+  specialist gate on purpose and was applied with an explicit
+  `--max-net-chars`.
+- `scripts/promote_sandbox_specialist.py mutation --max-net-chars`, the same
+  Gate 5 override `scripts/prompt_engineer.py` already exposes.
+
 ### Fixed
 
 - **Report chart layout** (`src/evals/viz/svgcharts.py`) — long subtitles

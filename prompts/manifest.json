@@ -1,7 +1,7 @@
 {
   "lineage_id": "mailroom-dataset-v1",
   "frozen_version": 1,
-  "frozen_at": "2026-09-26T05:09:29+00:00",
+  "frozen_at": "2026-10-15T20:46:15+00:00",
   "pipeline_git_commit": null,
   "derivation": "llm-mailroom production prompt_templates (live production templates) + intake production template + Langfuse pipeline evaluator rubrics",
   "versions": {
@@ -19,15 +19,15 @@
     },
     "corporate_records_specialist_v1": {
       "source_kind": "sandbox",
-      "source_key": "corporate_records_specialist_simplified@303e7f0bb05d",
-      "sha256": "484e64dd847b7bb35afebca74edc1fb6c381f0f7d5e9367ad8673bec0b8af45c",
-      "chars": 5801
+      "source_key": "corporate_records_specialist_simplified@303e7f0bb05d+dojo-29-corrected",
+      "sha256": "fe13501f667fcd9f64f7dfbf8b0f124f81d9dd039f4109288b43f106f82b1399",
+      "chars": 5865
     },
     "correspondence_specialist_v1": {
       "source_kind": "sandbox",
-      "source_key": "correspondence_specialist_simplified@303e7f0bb05d",
-      "sha256": "eab63b5afd29906b1ad3aca2d7698bf5c15d4b7f4ce9ade3b744be535d18d4f3",
-      "chars": 6061
+      "source_key": "correspondence_specialist_simplified@303e7f0bb05d+dojo-29-corrected",
+      "sha256": "2b0b81ff98920b9207627707443e2b023db39212fda5bdcba7bfbded39fa38b6",
+      "chars": 6113
     },
     "insurance_claims_specialist_v1": {
       "source_kind": "sandbox",

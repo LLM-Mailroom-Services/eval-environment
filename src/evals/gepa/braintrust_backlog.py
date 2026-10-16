@@ -32,6 +32,10 @@ SPECIALIST_AGENT: dict[str, str] = {
 
 
 def _experiment_name(run: dict[str, Any]) -> str | None:
+    """Return a Braintrust run's experiment name, falling back to its run ID.
+
+    Return None for other backends or when neither identifier is present.
+    """
     trace = run.get("trace_ids") or {}
     if trace.get("backend") != "braintrust":
         return None
@@ -70,6 +74,10 @@ def discover_braintrust_specialist_runs(runs: list[dict[str, Any]]) -> dict[str,
 
 
 def _failure_score(ev: dict[str, Any]) -> float | None:
+    """Return the numeric overall score, or None if it is unavailable.
+
+    Consult metrics only when the score in scores is absent or None.
+    """
     scores = ev.get("scores") or {}
     overall = scores.get("overall_score")
     if overall is None:
@@ -78,6 +86,11 @@ def _failure_score(ev: dict[str, Any]) -> float | None:
 
 
 def _is_observe_failure(ev: dict[str, Any]) -> bool:
+    """Select events with an error, an overall score below 0.8, or a zero gate.
+
+    Gates are numeric scores ending in _correct, _agrees, _valid, or _ok.
+    An overall score of exactly 0.8 alone does not qualify.
+    """
     if ev.get("error"):
         return True
     overall = _failure_score(ev)
@@ -92,6 +105,11 @@ def _is_observe_failure(ev: dict[str, Any]) -> bool:
 
 
 def _reasoning_excerpt(llm_span: dict[str, Any], *, limit: int = 1200) -> str | None:
+    """Return the first nonblank reasoning string, stripped, or None.
+
+    For limits of at least three characters, overlong text is shortened to
+    limit characters, including the trailing "...".
+    """
     output = llm_span.get("output")
     if not output:
         return None
@@ -110,6 +128,11 @@ def _reasoning_excerpt(llm_span: dict[str, Any], *, limit: int = 1200) -> str | 
 
 
 def _parse_json_content(llm_span: dict[str, Any]) -> dict[str, Any] | None:
+    """Decode the first message content starting with "{" in an output list.
+
+    Return None if no candidate exists or the first candidate is invalid JSON;
+    an invalid candidate prevents trying later messages.
+    """
     output = llm_span.get("output")
     if not isinstance(output, list):
         return None
@@ -132,7 +155,12 @@ def fetch_experiment_events(
     project: str | None = None,
     set_current: bool = False,
 ) -> list[dict[str, Any]]:
-    """Load all rows from a readonly Braintrust experiment (network)."""
+    """Load all rows from a readonly Braintrust experiment (network).
+
+    A falsey project uses BRAINTRUST_PROJECT, defaulting to "Mailroom-Evals".
+    set_current controls whether the SDK makes this experiment current.
+    SDK import, initialization, and fetch errors propagate to the caller.
+    """
     import braintrust
 
     project = project or os.environ.get("BRAINTRUST_PROJECT", "Mailroom-Evals")
@@ -146,7 +174,11 @@ def fetch_experiment_events(
 
 
 def index_experiment_spans(events: list[dict[str, Any]]) -> tuple[dict[str, dict], dict[str, list[dict]]]:
-    """Map root eval spans by root_span_id; LLM spans by parent span_id."""
+    """Map root eval spans by root_span_id; LLM spans by first parent span_id.
+
+    Ignore other spans and LLM spans without parents. Later roots replace
+    earlier roots with the same ID; LLM spans retain their input order.
+    """
     roots: dict[str, dict] = {}
     llm_by_parent: dict[str, list[dict]] = defaultdict(list)
     for ev in events:
@@ -168,7 +200,15 @@ def root_to_observe_row(
     llm_spans: list[dict] | None = None,
     project: str | None = None,
 ) -> dict[str, Any]:
-    """Braintrust eval root → GEPA failure manifest row (+ trace grounding)."""
+    """Convert a Braintrust eval root to an OBSERVE row without filtering failures.
+
+    Include predictions, scores, expected fields, and trace identifiers.
+    llm_spans supplies related LLM events: the first span's JSON content is a
+    fallback for empty extracted data, and the last available model and
+    nonblank reasoning excerpt are retained. run_id labels the row; root
+    metadata takes precedence for the experiment name in its trace reference.
+    A falsey project uses BRAINTRUST_PROJECT, defaulting to "Mailroom-Evals".
+    """
     meta = root.get("metadata") or {}
     inp = root.get("input") or {}
     out = root.get("output") or {}
@@ -230,6 +270,10 @@ def root_to_observe_row(
 
 
 def _filename_from_case_ref(case_ref: str | None) -> str | None:
+    """Return a corpus reference's filename or doc# identifier, or None if empty.
+
+    References without a colon are returned unchanged.
+    """
     if not case_ref:
         return None
     # corpus:ground_truth:train:path/to/file → file basename
@@ -247,6 +291,12 @@ def failures_from_experiment(
     run_id: str | None = None,
     project: str | None = None,
 ) -> list[dict[str, Any]]:
+    """Fetch an experiment's failing eval roots as trace-grounded OBSERVE rows.
+
+    Select roots using _is_observe_failure and attach directly parented LLM
+    spans. A falsey run_id defaults to experiment_name. Fetch and conversion
+    errors propagate to the caller; no matching failures yields an empty list.
+    """
     run_id = run_id or experiment_name
     events = fetch_experiment_events(experiment_name, project=project)
     roots, llm_by_parent = index_experiment_spans(events)
@@ -267,7 +317,12 @@ def failures_from_experiment(
 
 
 def merge_observe_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Dedupe on case_id; keep the row with the lowest overall_score (worst miss)."""
+    """Deduplicate by case_id, falling back to filename; skip rows with neither.
+
+    Keep the lowest overall_score, treating zero, missing, and nonnumeric
+    scores as 1.0. Ties keep the earlier row and add source run IDs to it in
+    place. Returned rows are the original objects, ordered by first key seen.
+    """
     best: dict[str, dict[str, Any]] = {}
     for row in rows:
         key = str(row.get("case_id") or row.get("filename") or "")
@@ -295,7 +350,14 @@ def build_task_backlog_manifest(
     *,
     project: str | None = None,
 ) -> list[dict[str, Any]]:
-    """Merge failure rows across every Braintrust experiment for one specialist task."""
+    """Fetch and deduplicate failures from the supplied experiment entries.
+
+    Entries use experiment with run_id as a fallback; those with neither are
+    skipped. task does not filter the supplied entries. Per-experiment
+    fetch or conversion errors are caught and that experiment is skipped;
+    return an empty list if none supplies failures. Deduplication follows
+    merge_observe_rows.
+    """
     merged: list[dict[str, Any]] = []
     for entry in run_entries:
         exp = entry.get("experiment") or entry.get("run_id")
@@ -315,7 +377,13 @@ def enrich_manifest_from_braintrust(
     experiment_name: str,
     project: str | None = None,
 ) -> list[dict[str, Any]]:
-    """Attach Braintrust reasoning excerpts to existing score_run failure rows."""
+    """Attach Braintrust trace references and reasoning to existing failure rows.
+
+    Match document hashes first, then case IDs; later roots win duplicate
+    keys. Return rows in input order, copying matches and replacing only their
+    braintrust and trace_excerpt fields. Unmatched rows are returned unchanged.
+    Fetch and conversion errors propagate to the caller.
+    """
     events = fetch_experiment_events(experiment_name, project=project)
     roots, llm_by_parent = index_experiment_spans(events)
     by_sha: dict[str, dict] = {}
@@ -353,6 +421,12 @@ def write_backlog_index(
     *,
     manifest_stats: dict[str, int] | None = None,
 ) -> Path:
+    """Write a JSON backlog catalog, creating parents and overwriting path.
+
+    manifest_stats supplies merged failure counts by task; absent counts are
+    written as null. The project is BRAINTRUST_PROJECT or, when unset,
+    "Mailroom-Evals". Return path; serialization and filesystem errors propagate.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "schema": "gepa-braintrust-backlog-index",

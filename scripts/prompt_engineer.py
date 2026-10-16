@@ -85,7 +85,15 @@ def load_manifest(path: Path) -> list[dict]:
 
 
 def decompose(rows: list[dict], *, focus: str | None = None) -> dict:
-    """Cluster the failures: by expected class, by miss type, by frequency."""
+    """Count failures by expected class and miss type, with evidence examples.
+
+    A truthy focus restricts rows to that exact expected class. Error rows are
+    runtime_error; otherwise any numeric overall score is labeled low_score,
+    without a threshold check, and remaining rows are decision_miss.
+    Return n_failures, by_class, by_type, and up to five examples per class
+    from the first 200 filtered rows, including available Braintrust evidence
+    and expected fields.
+    """
     if focus:
         rows = [r for r in rows if r.get("expected_doc_class") == focus]
     by_class = Counter(str(r.get("expected_doc_class") or "?") for r in rows)

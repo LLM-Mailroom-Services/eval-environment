@@ -139,6 +139,11 @@ def merge_failures(run_ids: list[str], out_path: Path) -> tuple[int, int]:
 
 
 def _enrich_from_log_runs(rows: list[dict], run_ids: list[str]) -> list[dict]:
+    """Enrich rows from experiments named for runs, retaining prior successes.
+
+    Catch errors for each experiment and continue. Later matches replace
+    earlier trace evidence; return a new list without changing the input rows.
+    """
     enriched = list(rows)
     for run_id in run_ids:
         exp = run_id  # experiment name == run_id in this repo
@@ -150,6 +155,11 @@ def _enrich_from_log_runs(rows: list[dict], run_ids: list[str]) -> list[dict]:
 
 
 def _write_jsonl(path: Path, rows: list[dict]) -> int:
+    """Overwrite path with JSONL rows, create parent directories, and return the count.
+
+    Values unsupported by JSON are stringified. Serialization and filesystem
+    errors propagate and may leave a partially written file.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as fh:
         for row in rows:
@@ -158,11 +168,24 @@ def _write_jsonl(path: Path, rows: list[dict]) -> int:
 
 
 def _braintrust_backlog_for_task(task: str, entries: list[dict], out_path: Path) -> int:
+    """Write merged Braintrust failures to out_path and return the row count.
+
+    Failed experiments are skipped by build_task_backlog_manifest; output
+    errors propagate. The file is overwritten even when no failures are found.
+    """
     rows = bt.build_task_backlog_manifest(task, entries)
     return _write_jsonl(out_path, rows)
 
 
 def main() -> int:
+    """Export specialist OBSERVE manifests selected by command-line arguments.
+
+    Write the backlog index whenever logged Braintrust runs are discovered.
+    Export manifests from the log or Braintrust, optionally enriching log
+    exports with trace evidence. Return 0 on completion, including when
+    Braintrust experiments are skipped; argument errors exit with status 2.
+    Export subprocess and filesystem errors propagate.
+    """
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--task", choices=sorted(DEFAULT_RUNS), help="specialist task key (uses default run-id set)")
     parser.add_argument("--run-id", action="append", dest="run_ids", default=[], help="run_id to include (repeatable)")

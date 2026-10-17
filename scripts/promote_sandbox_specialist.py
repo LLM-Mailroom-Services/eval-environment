@@ -238,7 +238,28 @@ def promote_mutation(
     sandbox_stem: str,
     note: str,
     sandbox_root: str | Path | None = None,
+    max_net_chars: int | None = None,
 ) -> dict:
+    """Replace a parent prompt with sandbox text as its next persisted version.
+
+    A local ``sandbox_root/config/prompts/<sandbox_stem>.txt`` takes
+    precedence over fetching the stem from GitHub at ``sandbox_sha``.
+    ``new_key`` must be the unused next version key for the parent's role;
+    ``note`` is stored in the mutation record.
+
+    ``max_net_chars`` bounds ``len(new_text) - len(parent.text)`` inclusively,
+    so shrinking is allowed. ``None`` uses 600 characters for sorter-prefixed
+    roles and 120 for all others.
+
+    Return mutation metadata, including the complete replacement ``text``.
+    Append the mutation to ``prompts/mutations.json`` and regenerate Markdown
+    mirrors for every registered mutation. A mirror failure leaves the
+    mutation persisted.
+
+    Raise ``SystemExit`` for a missing local stem, ``KeyError`` for an unknown
+    parent, or ``mutations.MutationError`` for a failed validation gate.
+    File access, URL, decoding, and registry JSON errors propagate.
+    """
     from evals.prompts.lineage import resolve
 
     new_text = fetch_sandbox_prompt(sandbox_sha, sandbox_stem, sandbox_root=sandbox_root)
@@ -250,6 +271,7 @@ def promote_mutation(
         replacement=new_text,
         note=note,
         persist=True,
+        max_net_chars=max_net_chars,
     )
     mutations.render_prompts_mirror()
     return meta
@@ -331,6 +353,12 @@ def promote_freeze_new(
 
 
 def main() -> int:
+    """Run the requested promotion or archive command and print its JSON summary.
+
+    Parse ``sys.argv`` and return 0 on success. Commands persist mutations,
+    rewrite frozen prompts, or write archives and their Markdown mirrors.
+    Argument errors and help raise ``SystemExit``; command errors propagate.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="cmd", required=True)
 
@@ -344,6 +372,12 @@ def main() -> int:
         "--sandbox-root",
         default=None,
         help="local sandbox checkout to read config/prompts/<stem>.txt from (default: fetch from GitHub)",
+    )
+    mut.add_argument(
+        "--max-net-chars",
+        type=int,
+        default=None,
+        help="Gate 5 net growth limit (default: role-based — 120 specialists, 600 sorter)",
     )
 
     upg = sub.add_parser(
@@ -404,6 +438,7 @@ def main() -> int:
             sandbox_stem=args.sandbox_stem,
             note=args.note,
             sandbox_root=args.sandbox_root,
+            max_net_chars=args.max_net_chars,
         )
         print(json.dumps({"key": meta["key"], "sha256": meta["sha256"], "parent": meta["parent"]}, indent=2))
         return 0

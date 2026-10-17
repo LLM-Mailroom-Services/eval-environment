@@ -21,12 +21,19 @@ specialty skill:
 
 1. **Every run logs.** One run-summary line to `reports/experiment_log.jsonl`
    per run — including failures and mock runs. No exceptions.
-2. **Pin the corpus.** Repo `Lucius-Morningstar/mailroom-dataset` (schema v9 /
-   v9.1 content pin), revision `ed7576b676343e0b402ec5412cded301e629bdee`
-   (Hub tag `v9.1` not published yet — pin SHA; supersedes GT-closure
-   `46a4d3c240a36671cde0182fff4960f6b8b73aca`; the v8 parent
-   `mailroom-corpus` @ `eafe1ab4c0d330d8f9c7a5fb254155e75d290828` stays frozen
-   for lineage reference). Join `ground_truth` ⇆ `default` on `filename`; never
+2. **Pin the corpus.** Repo `Lucius-Morningstar/mailroom-dataset` (schema v9),
+   pinned to the published tag `v9.1` (`bc9eab28`, target commit dated
+   2026-09-27; data commit `ed7576b676343e0b402ec5412cded301e629bdee`),
+   superseding GT-closure
+   `46a4d3c240a36671cde0182fff4960f6b8b73aca`; latest published tag is `v9.2`
+   (`670e8bc6`; parent data commit `d49f60a4`), not adopted yet (a v9.2.1
+   corporate label repair exists as untagged branch `0a2f8292`, pushed
+   2026-10-17). Runtime resolves
+   `FULL_CORPUS_REVISION` from the installed `mailroom` package — the cloud
+   install's `28cb4be` pin still resolves the GT-closure SHA, so confirm the
+   resolved revision before scoring. The v8 parent `mailroom-corpus` @
+   `eafe1ab4c0d330d8f9c7a5fb254155e75d290828` stays frozen
+   for lineage reference. Join `ground_truth` ⇆ `default` on `filename`; never
    zip positionally; expand the nested `gt_fields` JSON payload before scoring.
 3. **Mock before real.** `--mock` must never touch the network. `--real`
    requires a configured LLM provider: `OPENROUTER_API_KEY` (primary), or
@@ -52,11 +59,11 @@ specialty skill:
    `performance.by_agent` with estimated cost — sourced from the pipeline
    usage accumulator (`pipeline.limits.record_usage(..., agent=...)`).
    `AGENT_CATALOG` (registry.py) maps every evaluated node to its agents.
-9. **Frozen lineage is immutable.** Never edit `src/evals/prompts/frozen_v1.py`
+10. **Frozen lineage is immutable.** Never edit `src/evals/prompts/frozen_v1.py`
    or `prompts/*.md` by hand; mutations append via
    `evals.prompts.mutations.apply_mutation` (four gates, one rule per A/B).
    Drift-check with `scripts/freeze_prompts.py --check`.
-10. **Refresh the viewer snapshot.** When the experiment log changes,
+11. **Refresh the viewer snapshot.** When the experiment log changes,
     re-run `scripts/export_site_snapshot.py` and commit
     `web/data/snapshot.json` — the Vercel viewer reads only that file.
     Then re-run `scripts/render_report_charts.py` and commit

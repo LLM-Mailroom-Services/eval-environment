@@ -21,7 +21,7 @@ experiment log — machine-readable JSONL, human-readable markdown tables.
 | At a glance | |
 |---|---|
 | **Pipeline under test** | [`llm-mailroom`](https://github.com/LLM-Mailroom-Services/Digital-Mailroom) — 13-node LangGraph state machine (pkg `mailroom`, resolved as a local editable path source) |
-| **Dataset** | [`Lucius-Morningstar/mailroom-dataset`](https://huggingface.co/datasets/Lucius-Morningstar/mailroom-dataset) schema v9, **pinned** to revision `ed7576b6` (v9.1 SHA; Hub tag not published yet) — 3,302 docs (2,979 train + 323 test); v8 parent `mailroom-corpus` @ `eafe1ab4` stays frozen for lineage reference |
+| **Dataset** | [`Lucius-Morningstar/mailroom-dataset`](https://huggingface.co/datasets/Lucius-Morningstar/mailroom-dataset) schema v9, **pinned** to the published tag `v9.1` (`bc9eab28`; data commit `ed7576b6`) — latest published tag `v9.2` is `670e8bc6`; 3,302 docs (2,979 train + 323 test); v8 parent `mailroom-corpus` @ `eafe1ab4` stays frozen for lineage reference |
 | **Task families** | `eval:<node>` (performance) · `pilot:<node\|chain>` (cheap validation) · `calibration:<node>` (edge-test + threshold recommendation) |
 | **Invocation** | `--invoke node` (raw graph node fns with corpus-built `DocumentState`) or `--invoke agent` (agent classes directly) |
 | **Trace sinks** | Braintrust (when `BRAINTRUST_API_KEY` is set) → local Arize Phoenix → `none` — never Langfuse (per [mailroom-issues #7](https://github.com/LLM-Mailroom-Services/mailroom-issues/issues/7)) |
@@ -174,11 +174,17 @@ Each task also exists as `pilot:<name>`; the seven calibration tasks are
 
 The one loading path is `evals.cases` → `pipeline.hf_corpus_loader`: the
 `ground_truth` config (labels) joined to `default` (blind text) on
-`filename`, **pinned** to revision `ed7576b676343e0b402ec5412cded301e629bdee`
-(schema v9 / v9.1 content pin of `Lucius-Morningstar/mailroom-dataset` — the
+`filename`, **pinned** to the published tag `v9.1` (`bc9eab28`, target commit
+dated 2026-09-27; data commit
+`ed7576b676343e0b402ec5412cded301e629bdee`; schema v9 of
+`Lucius-Morningstar/mailroom-dataset` — the
 standalone successor of the frozen v8 `mailroom-corpus`; supersedes GT-closure
-`46a4d3c240a36671cde0182fff4960f6b8b73aca`), with
-`content_sha256` verification. Never
+`46a4d3c240a36671cde0182fff4960f6b8b73aca`; latest published tag `v9.2` is
+`670e8bc6`), with
+`content_sha256` verification. The effective runtime revision is
+`FULL_CORPUS_REVISION` from the installed `mailroom` package — the cloud
+install's `28cb4be` pin still resolves the GT-closure SHA, so confirm the
+resolved revision before scoring. Never
 zip rows positionally — always join. The nested `gt_fields` JSON payload
 (13 insurance fields + `cuad_clause_labels` + `maud_clause_labels`) is expanded
 onto flat row keys before scoring.

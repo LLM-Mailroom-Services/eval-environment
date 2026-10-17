@@ -69,10 +69,17 @@ All notable changes to mailroom-evals are documented here. Format based on
 - **Corpus pin → v9.1** — document and skill citations for
   `Lucius-Morningstar/mailroom-dataset` now target revision
   `ed7576b676343e0b402ec5412cded301e629bdee` (supersedes GT-closure
-  `46a4d3c240a36671cde0182fff4960f6b8b73aca`; Hub tag `v9.1` not published
-  yet). Eval harness runtime still reads `FULL_CORPUS_REVISION` from the
-  `mailroom` dependency until the coordinated llm-mailroom pin lands
+  `46a4d3c240a36671cde0182fff4960f6b8b73aca`; Hub tag `v9.1` targets
+  `bc9eab28` (commit dated 2026-09-27), a README-only delta over the data
+  commit; latest published tag `v9.2` is `670e8bc6` (parent data commit
+  `d49f60a4`), not adopted). Eval-harness runtime
+  resolves `FULL_CORPUS_REVISION` from the installed `mailroom` dependency, so
+  the effective corpus revision follows the pinned pipeline version — confirm
+  the resolved revision before scoring
   ([#57](https://github.com/LLM-Mailroom-Services/eval-environment/issues/57)).
+- **Non-negotiable numbering in `AGENTS.md`** — the per-agent performance,
+  frozen lineage and viewer-snapshot items are now 9/10/11 (the list
+  previously carried two `9.` entries). No semantic change.
 
 ## [0.5.0] — 2026-09-27
 

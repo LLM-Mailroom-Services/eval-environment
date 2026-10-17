@@ -107,20 +107,68 @@ def verify_lineage() -> dict[str, Any]:
 
     Returns {"ok": bool, "drifted": [keys], "manifest": {...}} — a frozen key
     drifts when the live source's sha256 no longer matches the manifest.
+
+    Extra result fields keep failures loud and skips explicit:
+
+    - ``checked`` — number of manifest versions actually compared.
+    - ``skipped`` + ``warning`` — "no live pipeline source found at all"
+      (neither installed nor sibling checkout): an explicit, documented skip.
+      ``ok`` stays True but the marker fields make it obvious; no drift
+      conclusion is drawn.
+    - ``error`` + ``ok=False`` — "partial import detected": some pipeline
+      modules resolve but the rest do not (even after the fallback paths), or
+      the resolved live dict is below the manifest's non-sandbox floor.
+      Treated as loud failure, never folded into "no drift found".
     """
-    from .freeze_helpers import live_frozen_texts
+    from . import freeze_helpers
 
     manifest = json.loads(MANIFEST_PATH.read_text()) if MANIFEST_PATH.exists() else {}
-    drifted: list[str] = []
+    versions: dict[str, Any] = manifest.get("versions") or {}
+    # Honest floor: every non-sandbox manifest version (the sandbox stems are
+    # not diffed against live) must exist in the resolved live sources —
+    # currently 10 of 15 manifest versions.
+    floor = sum(1 for meta in versions.values() if meta.get("source_kind") != "sandbox")
+
+    def _result() -> dict[str, Any]:
+        return {"ok": False, "drifted": [], "checked": 0, "skipped": False, "manifest": manifest}
+
     try:
-        live = live_frozen_texts()
-    except ModuleNotFoundError:
-        live = None
-    for key, meta in (manifest.get("versions") or {}).items():
-        if meta.get("source_kind") == "sandbox":
-            continue
-        if live is None:
-            continue
-        if key in live and sha256(live[key]) != meta["sha256"]:
-            drifted.append(key)
-    return {"ok": not drifted, "drifted": drifted, "manifest": manifest}
+        live = freeze_helpers.live_frozen_texts()
+    except freeze_helpers.PartialPipelineSourceError as exc:
+        result = _result()
+        result["error"] = f"partial pipeline install (drift check degraded): {exc}"
+        return result
+    except freeze_helpers.PipelineSourceUnavailable as exc:
+        result = _result()
+        result["ok"] = True
+        result["skipped"] = True
+        result["warning"] = (
+            "drift check skipped: no live pipeline source found — nothing to "
+            f"diff against ({exc})"
+        )
+        return result
+    except ModuleNotFoundError as exc:
+        # Defensive: ``live_frozen_texts`` resolves all required modules up
+        # front, so a stray ModuleNotFoundError here is a transitive partial
+        # import — loud failure, never a vacuous ok=True.
+        result = _result()
+        result["error"] = f"partial pipeline import (drift check degraded): {exc}"
+        return result
+
+    if len(live) < floor:
+        result = _result()
+        result["error"] = (
+            f"live pipeline resolves to {len(live)} keys, below the floor of {floor} "
+            "non-sandbox manifest versions — partial import; failing loud instead of "
+            "reporting a vacuous drift-free pass"
+        )
+        return result
+
+    drifted = [
+        key
+        for key, meta in versions.items()
+        if meta.get("source_kind") != "sandbox" and key in live and sha256(live[key]) != meta["sha256"]
+    ]
+    checked = sum(1 for key, meta in versions.items() if meta.get("source_kind") != "sandbox" and key in live)
+
+    return {"ok": not drifted, "drifted": drifted, "checked": checked, "skipped": False, "manifest": manifest}

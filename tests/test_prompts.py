@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from evals.prompts import frozen_v1, mutations
+from evals.prompts import frozen_v1, freeze_helpers, mutations
 from evals.prompts.lineage import all_versions, resolve, roles, verify_lineage
 from evals.prompts.mirror_md import prompt_mirror_markdown, strip_mirror_heading
 from evals.prompts.registry import activate, deactivate, default_keys, resolved_snapshot
@@ -168,6 +168,169 @@ def test_verify_lineage_matches():
     result = verify_lineage()
     assert result["ok"], f"drifted: {result['drifted']}"
     assert len(result["manifest"]["versions"]) == 15
+
+
+# ---------------------------------------------------------------------------
+# Live-source resolution (src/evals/prompts/freeze_helpers.py).
+#
+# The probe must cover every pipeline module the fallback path needs, treat a
+# partial install as a loud failure, and mark "no source at all" as an
+# explicit documented skip. Mock-based: import_module/exists are injected, so
+# these tests never touch the real sys.path or import the pipeline.
+# ---------------------------------------------------------------------------
+
+
+def _fake_import(ok_modules: set[str]):
+    def import_module(name: str):
+        if name in ok_modules:
+            return object()  # a placeholder module, deliberately not cached
+        raise ModuleNotFoundError(name)
+
+    return import_module
+
+
+def test_required_pipeline_modules_covers_live_imports():
+    """REQUIRED_PIPELINE_MODULES must list every pipeline module the fallback
+    path imports — the reviewer's major: a one-module probe passes a
+    partially-installed pipeline and then dies on an unrelated import."""
+    import ast
+    import inspect
+
+    imported = {
+        node.module
+        for node in ast.walk(ast.parse(inspect.getsource(freeze_helpers.live_frozen_texts)))
+        if isinstance(node, ast.ImportFrom) and node.level == 0 and node.module
+    }
+    assert set(freeze_helpers.REQUIRED_PIPELINE_MODULES) == imported
+    assert "pipeline.env" in imported and "scripts.sync_evaluators" in imported
+
+
+def test_resolve_pipeline_source_installed_wins_over_sibling(tmp_path):
+    """Installed source is used without touching sys.path — even when every
+    fallback path exists on disk, the sibling is never consulted."""
+    exists_calls: list[str] = []
+
+    def exists(path: str) -> bool:
+        exists_calls.append(path)
+        return True
+
+    sys_path: list[str] = []
+    assert freeze_helpers.resolve_pipeline_source(
+        repo_root=tmp_path,
+        sys_path=sys_path,
+        import_module=_fake_import(set(freeze_helpers.REQUIRED_PIPELINE_MODULES)),
+        exists=exists,
+    ) == ("installed", [])
+    assert sys_path == []
+    assert exists_calls == []
+
+
+def test_resolve_pipeline_source_sibling_when_installed_missing(tmp_path):
+    """Sibling fallback is used when the installed pipeline is missing, and it
+    outranks the repo paths (it must shadow this repo's own top-level
+    ``scripts/`` package)."""
+    # repo at tmp_path/repo, so the real-world layout holds: the sibling
+    # checkout lives at repo_root.parent / "llm-mailroom" / "src".
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    sibling_root = tmp_path / "llm-mailroom"
+    (sibling_root / "src").mkdir(parents=True)
+    sibling = str(sibling_root / "src")
+    sys_path: list[str] = []
+
+    def import_module(name: str):
+        # fake an editable sibling that becomes importable once on sys.path
+        if sibling in sys_path:
+            return object()
+        raise ModuleNotFoundError(name)
+
+    mode, added = freeze_helpers.resolve_pipeline_source(
+        repo_root=repo_root, sys_path=sys_path, import_module=import_module
+    )
+    assert mode == "sibling", (mode, added)
+    assert sibling == added[-1]  # inserted last-at-0 → HIGHEST path priority
+    assert sys_path[0] == sibling
+
+
+def test_resolve_pipeline_source_nothing_found_is_explicit(tmp_path):
+    """Neither installed nor sibling: uncached explicit exception, the caller
+    documents a skip instead of silently narrowing the check."""
+    with pytest.raises(freeze_helpers.PipelineSourceUnavailable) as excinfo:
+        freeze_helpers.resolve_pipeline_source(
+            repo_root=tmp_path,
+            sys_path=[],
+            import_module=_fake_import(set()),
+            exists=lambda path: False,
+        )
+    message = str(excinfo.value)
+    for name in freeze_helpers.REQUIRED_PIPELINE_MODULES:
+        assert name in message
+
+
+def test_resolve_pipeline_source_partial_install_is_loud(tmp_path):
+    """Partial install (one module resolves, the rest missing even after the
+    fallback paths) fails loud, not vacuously narrow."""
+    ok = {"llm.prompts"}
+    with pytest.raises(freeze_helpers.PartialPipelineSourceError) as excinfo:
+        freeze_helpers.resolve_pipeline_source(
+            repo_root=tmp_path,
+            sys_path=[],
+            import_module=_fake_import(ok),
+            exists=lambda path: False,
+        )
+    missing = list(excinfo.value.missing)
+    assert missing == [name for name in freeze_helpers.REQUIRED_PIPELINE_MODULES if name not in ok]
+
+
+def test_verify_lineage_no_source_is_explicit_skip(monkeypatch):
+    """Neither-installed-nor-sibling: documented skip (ok=True + skipped +
+    warning), not a crash and not a silent vacuous pass."""
+    def no_source():
+        raise freeze_helpers.PipelineSourceUnavailable("no live pipeline source found")
+
+    monkeypatch.setattr(freeze_helpers, "live_frozen_texts", no_source)
+    result = verify_lineage()
+    assert result["ok"] is True
+    assert result["skipped"] is True
+    assert result["warning"].startswith("drift check skipped")
+    assert result["checked"] == 0
+    assert "error" not in result
+
+
+def test_verify_lineage_partial_import_is_loud_failure(monkeypatch):
+    """Partial import detected anywhere = loud failure, never ok=True."""
+    def partial():
+        raise freeze_helpers.PartialPipelineSourceError(["agents.intake", "scripts.sync_evaluators"])
+
+    monkeypatch.setattr(freeze_helpers, "live_frozen_texts", partial)
+    result = verify_lineage()
+    assert result["ok"] is False
+    assert "partial" in result["error"].lower()
+    assert "agents.intake" in result["error"]
+
+
+def test_verify_lineage_live_below_floor_is_loud_failure(monkeypatch):
+    """A live source that resolves but carries fewer keys than the manifest's
+    non-sandbox floor is a partial import — loud failure, not ok=True."""
+    def thin_live():
+        return {"sorter_v1": "drifted live text"}
+
+    monkeypatch.setattr(freeze_helpers, "live_frozen_texts", thin_live)
+    result = verify_lineage()
+    assert result["ok"] is False
+    assert result["skipped"] is False
+    assert "floor" in result["error"]
+    assert str(len(thin_live())) in result["error"]
+
+
+def test_verify_lineage_floor_matches_manifest_size():
+    """The floor is honest: every non-sandbox manifest version must exist in
+    the live sources (currently 10 of 15 manifest versions)."""
+    manifest = json.loads((Path(__file__).resolve().parents[1] / "prompts" / "manifest.json").read_text())
+    floor = len([m for m in manifest["versions"].values() if m.get("source_kind") != "sandbox"])
+    assert len(verify_lineage()["manifest"]["versions"]) == 15
+    assert floor == 10  # 15 versions, 5 platform-sandbox specialists not diffed
+
 
 
 def test_injection_and_restore():

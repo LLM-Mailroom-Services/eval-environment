@@ -54,10 +54,16 @@ from evals.prompts.mirror_md import prompt_mirror_markdown
 
 
 def _ensure_pipeline_importable() -> None:
-    pipeline_src = REPO_ROOT.parent / "Digital-Mailroom" / "packages" / "llm-mailroom" / "src"
-    path = str(pipeline_src)
-    if path not in sys.path:
-        sys.path.insert(0, path)
+    """Resolve the live pipeline via the shared freeze_helpers probe.
+
+    Same semantics as the drift check: imports ALL of
+    ``freeze_helpers.REQUIRED_PIPELINE_MODULES`` (a partial install raises
+    ``PartialPipelineSourceError`` loud), tries the installed environment
+    first, then the ``../llm-mailroom/src`` sibling checkout.
+    """
+    from evals.prompts import freeze_helpers
+
+    freeze_helpers.resolve_pipeline_source(repo_root=REPO_ROOT, sys_path=sys.path)
     from pipeline.env import load_env
 
     load_env()
@@ -91,15 +97,26 @@ def sha256(text: str) -> str:
 
 
 def pipeline_git_commit() -> str | None:
-    try:
-        out = subprocess.run(
-            ["git", "-C", str(REPO_ROOT.parent / "Digital-Mailroom" / "packages" / "llm-mailroom"),
-             "rev-parse", "HEAD"],
-            capture_output=True, text=True, timeout=10, check=False,
-        )
-        return out.stdout.strip() or None
-    except (OSError, subprocess.SubprocessError):
-        return None
+    """Provenance: the git HEAD of whichever pipeline checkout supplied the
+    live sources. The standalone `../llm-mailroom` sibling clone first; the
+    retired `../Digital-Mailroom/packages/llm-mailroom` monorepo layout is
+    preserved last for old checkouts only."""
+    checkouts = (
+        REPO_ROOT.parent / "llm-mailroom",
+        REPO_ROOT.parent / "Digital-Mailroom" / "packages" / "llm-mailroom",
+    )
+    for checkout in checkouts:
+        try:
+            out = subprocess.run(
+                ["git", "-C", str(checkout), "rev-parse", "HEAD"],
+                capture_output=True, text=True, timeout=10, check=False,
+            )
+        except (OSError, subprocess.SubprocessError):
+            continue
+        head = out.stdout.strip()
+        if head:
+            return head
+    return None
 
 
 def collect_frozen() -> dict[str, tuple[str, str, str]]:
@@ -209,10 +226,21 @@ def main() -> int:
             print("frozen lineage missing — run scripts/freeze_prompts.py first")
             return 1
         manifest = json.loads(MANIFEST_PATH.read_text())
+        from evals.prompts.freeze_helpers import PartialPipelineSourceError, PipelineSourceUnavailable
+
+        skipped = ""
         try:
             frozen = collect_frozen()
-        except ModuleNotFoundError:
+        except PipelineSourceUnavailable as exc:
+            # Explicit, documented skip: no live source anywhere, so there is
+            # nothing to diff against — this is NOT a silent "no drift" pass.
             frozen = None
+            skipped = f" (skipped: no live pipeline source — {exc})"
+        except (ModuleNotFoundError, PartialPipelineSourceError) as exc:
+            # A partial install (some pipeline modules resolve, the rest do
+            # not) must fail loudly, not vacuously skip.
+            print(f"LOUD FAIL: partial pipeline install — {exc}")
+            return 1
         drifted = []
         for key, meta in manifest["versions"].items():
             if meta.get("source_kind") == "sandbox":
@@ -225,7 +253,6 @@ def main() -> int:
         if drifted:
             print(f"DRIFT detected for: {drifted} — the pipeline prompts moved; re-run scripts/freeze_prompts.py to cut a new version")
             return 1
-        skipped = " (production keys skipped — llm-mailroom not importable)" if frozen is None else ""
         print(f"OK: {len(manifest['versions'])} frozen versions match the live pipeline (lineage {LINEAGE_ID}){skipped}")
         return 0
 

@@ -110,7 +110,7 @@ The pipeline under test is resolved from the sibling checkout:
 
 ```toml
 [tool.uv.sources]
-mailroom = { path = "../Digital-Mailroom/packages/llm-mailroom", editable = true }
+mailroom = { path = "../llm-mailroom", editable = true }
 ```
 
 > **Moving machines?** Re-point `[tool.uv.sources]` at the new checkout (or a

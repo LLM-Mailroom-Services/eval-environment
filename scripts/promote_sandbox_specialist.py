@@ -35,7 +35,12 @@ def sha256(text: str) -> str:
 
 
 def fetch_sandbox_prompt(sha: str, stem: str) -> str:
-    """Fetch and decode a sandbox prompt at the specified Git revision."""
+    """Fetch and decode a sandbox prompt at the specified Git revision.
+
+    ``stem`` names a file under the sandbox's ``config/prompts/`` directory,
+    without the ``.txt`` suffix. Return its UTF-8 text. URL/HTTP errors,
+    timeouts, and UTF-8 decoding errors propagate to the caller.
+    """
     url = (
         f"https://raw.githubusercontent.com/{SANDBOX_REPO}/{sha}"
         f"/config/prompts/{stem}.txt"
@@ -56,6 +61,14 @@ def promote_mutation(
 
     Replace the full parent text through the mutation gates and return the
     resulting mutation metadata.
+
+    ``new_key`` must be unused and name the parent's role at the next integer
+    version; ``note`` is stored as provenance. Append to
+    ``prompts/mutations.json`` and regenerate mirrors for all mutations.
+
+    Raise ``KeyError`` for an unknown parent or ``MutationError`` for a
+    rejected mutation. Fetch, JSON decoding, and file errors propagate;
+    a mirror failure can occur after the mutation has been persisted.
     """
     from evals.prompts.lineage import resolve
 
@@ -79,7 +92,14 @@ def _safe_ident(role: str) -> str:
 
 
 def _write_frozen_catalog(frozen: dict[str, tuple[str, str, str]]) -> None:
-    """Rewrite frozen_v1 + mirrors + manifest without importing the pipeline."""
+    """Rewrite frozen_v1 + mirrors + manifest without importing the pipeline.
+
+    ``frozen`` maps unversioned roles to ``(text, source_kind, source_key)``.
+    Replace the manifest's version entries with these roles, refreshing its
+    UTC timestamp while retaining existing lineage and pipeline metadata.
+    JSON decoding and file errors propagate; completed writes are not
+    rolled back if a later write fails.
+    """
     from datetime import UTC, datetime
 
     manifest_path = REPO_ROOT / "prompts" / "manifest.json"
@@ -155,6 +175,15 @@ def promote_freeze_new(
 
     Preserve existing role texts and provenance, and exit if the role is
     already frozen. Write the module, mirrors, and manifest for the catalog.
+
+    ``role`` is unversioned; ``source_label`` is stored verbatim as sandbox
+    provenance. Return the new key, SHA-256 digest, character count, sandbox
+    revision and stem, and total manifest version count.
+
+    Raise ``SystemExit`` for an existing role, after fetching its prompt.
+    Missing provenance raises ``KeyError``; a provenance string without a
+    colon raises ``ValueError``. Fetch, JSON decoding, and file errors also
+    propagate; completed writes are not rolled back.
     """
     new_text = fetch_sandbox_prompt(sandbox_sha, sandbox_stem)
     frozen: dict[str, tuple[str, str, str]] = {}

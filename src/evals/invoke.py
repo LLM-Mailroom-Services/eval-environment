@@ -461,7 +461,7 @@ def _invoke_agent(task: str, case: dict[str, Any]) -> dict[str, Any]:
     task = _canonical_task(task)
     if task == "retry":
         # Retry calibration probes the specialist on failure-shaped fixtures.
-        specialist = TASK_SPECIALIST.get(_specialist_for_class(doc_class), "contracts_specialist")
+        specialist = _specialist_for_class(doc_class) or "contracts_specialist"
         import importlib
 
         mod_name, cls_name = _SPECIALIST_CLASSES[specialist]

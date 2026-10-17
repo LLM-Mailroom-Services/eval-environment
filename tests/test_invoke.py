@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import Mock
 
 import pytest
 
@@ -106,3 +108,50 @@ def test_isolation_restores_base_dir(sample_case, monkeypatch, tmp_path):
         assert os.environ["MAILROOM_BASE_DIR"] != original
         assert Path(os.environ["MAILROOM_BASE_DIR"]).exists()
     assert os.environ["MAILROOM_BASE_DIR"] == original
+
+
+@pytest.mark.parametrize("doc_class, module_name, class_name", [
+    ("contract", "agents.contracts_specialist", "ContractsSpecialist"),
+    ("merger_agreement", "agents.merger_agreement_specialist", "MergerAgreementSpecialist"),
+    ("corporate_record", "agents.corporate_records_specialist", "CorporateRecordsSpecialist"),
+    ("correspondence", "agents.correspondence_specialist", "CorrespondenceSpecialist"),
+    ("insurance_claim", "agents.insurance_claims_specialist", "InsuranceClaimsSpecialist"),
+    ("unknown", "agents.contracts_specialist", "ContractsSpecialist"),
+    ("", "agents.contracts_specialist", "ContractsSpecialist"),
+])
+def test_retry_agent_dispatches_by_document_class(
+    sample_case, monkeypatch, doc_class, module_name, class_name
+):
+    import importlib
+
+    case = {**sample_case, "expected_doc_class": doc_class}
+    extraction = {"confidence": 0.9, "summary": "specialist result"}
+    specialist = Mock()
+    specialist.return_value.extract.return_value = extraction
+    load_module = Mock(return_value=SimpleNamespace(**{class_name: specialist}))
+    with monkeypatch.context() as patch:
+        patch.setattr(importlib, "import_module", load_module)
+        result = invoke.invoke("retry", case, mode="agent")
+
+    load_module.assert_called_once_with(module_name)
+    specialist.return_value.extract.assert_called_once_with(case["text"])
+    assert result == {
+        "extracted_data": extraction,
+        "extraction_confidence": 0.9,
+        "doc_type": doc_class,
+    }
+
+
+def test_retry_agent_propagates_specialist_failure(sample_case, monkeypatch):
+    import importlib
+
+    specialist = Mock()
+    specialist.return_value.extract.side_effect = RuntimeError("extraction failed")
+    load_module = Mock(return_value=SimpleNamespace(MergerAgreementSpecialist=specialist))
+    with monkeypatch.context() as patch:
+        patch.setattr(importlib, "import_module", load_module)
+        with pytest.raises(RuntimeError, match="extraction failed"):
+            invoke.invoke(
+                "retry", {**sample_case, "expected_doc_class": "merger_agreement"}, mode="agent"
+            )
+    load_module.assert_called_once_with("agents.merger_agreement_specialist")

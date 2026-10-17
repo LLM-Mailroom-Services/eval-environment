@@ -165,6 +165,9 @@ def promote_freeze_new(
         frozen[r] = (text, kind, source_key)
     if role in frozen:
         raise SystemExit(f"role {role!r} already frozen")
+    for existing_role in frozen:
+        if _safe_ident(role) == _safe_ident(existing_role):
+            raise SystemExit(f"role {role!r} collides with frozen role {existing_role!r}")
     frozen[role] = (new_text, "sandbox", source_label)
     _write_frozen_catalog(frozen)
     key = f"{role}_v1"

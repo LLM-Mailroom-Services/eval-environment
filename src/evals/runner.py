@@ -562,6 +562,7 @@ def _execute_cases(
     prompt_version: str | None,
     summary: dict[str, Any],
 ) -> list[dict[str, Any]]:
+    """Invoke and score each case, emit traces, and return result rows."""
     rows: list[dict[str, Any]] = []
     run_meta = {
         "run_id": summary["run_id"],

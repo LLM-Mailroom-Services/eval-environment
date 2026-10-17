@@ -26,6 +26,7 @@ _record_id_by_sha: dict[str, str] = {}
 
 
 def experiments_enabled(mock: bool, backend: str) -> bool:
+    """Enable experiments for real Braintrust runs with a key unless opted out."""
     if mock or backend != "braintrust":
         return False
     if not os.environ.get("BRAINTRUST_API_KEY"):
@@ -39,14 +40,17 @@ def experiments_enabled(mock: bool, backend: str) -> bool:
 
 
 def current_experiment() -> Any | None:
+    """Return the active Braintrust experiment, or None when none is open."""
     return _active_experiment
 
 
 def dataset_record_id(case: dict[str, Any]) -> str | None:
+    """Look up a case's dataset record ID by text hash, or return None."""
     return _record_id_by_sha.get(doc_text_sha256(case))
 
 
 def _dataset_name(revision: str) -> str:
+    """Use the configured dataset name or derive one from the revision prefix."""
     custom = os.environ.get("BRAINTRUST_DATASET_NAME")
     if custom:
         return custom
@@ -55,6 +59,7 @@ def _dataset_name(revision: str) -> str:
 
 
 def _dataset_input(case: dict[str, Any]) -> dict[str, Any]:
+    """Build dataset input from a public case reference and text length."""
     return {
         "case_ref": public_case_ref(case),
         "chars": len(str(case.get("text") or "")),
@@ -74,6 +79,7 @@ def _dataset_expected(case: dict[str, Any]) -> dict[str, Any]:
 
 
 def _dataset_metadata(case: dict[str, Any], prov: dict[str, Any]) -> dict[str, Any]:
+    """Collect HF provenance and corpus identifiers for a dataset row."""
     return {
         "hf_repo": prov.get("repo") or prov.get("id") or "Lucius-Morningstar/mailroom-dataset",
         "hf_revision": prov.get("revision"),
@@ -174,6 +180,7 @@ def begin_eval_run(
 
 
 def end_eval_run() -> None:
+    """Attempt to flush Braintrust events, then clear experiment and dataset state."""
     global _active_experiment, _dataset_handle, _record_id_by_sha
     try:
         from observability.braintrust_setup import flush_braintrust

@@ -14,11 +14,13 @@ from evals.braintrust_experiment import (
 
 
 def test_experiments_disabled_for_mock():
+    """Mock runs and non-Braintrust backends disable experiment tracking."""
     assert experiments_enabled(True, "braintrust") is False
     assert experiments_enabled(False, "none") is False
 
 
 def test_sink_score_metrics_caps_headline_count():
+    """Headline score selection respects the requested metric limit."""
     scores = {
         "overall_score": 0.8,
         "needs_judge_review": 0.0,
@@ -31,6 +33,7 @@ def test_sink_score_metrics_caps_headline_count():
 @patch("braintrust.init")
 @patch("braintrust.init_dataset")
 def test_begin_eval_run_upserts_dataset_rows(mock_init_dataset, mock_init, monkeypatch):
+    """Opening an experiment inserts case ground truth into a revision-named dataset."""
     monkeypatch.setenv("BRAINTRUST_API_KEY", "test-key")
     monkeypatch.setenv("BRAINTRUST_PROJECT", "Mailroom-Evals")
 
@@ -64,6 +67,7 @@ def test_begin_eval_run_upserts_dataset_rows(mock_init_dataset, mock_init, monke
 
 
 def test_log_case_scores_uses_headline_only():
+    """Experiment case logs forward headline scores without extra scoring metrics."""
     exp = MagicMock()
     with patch("evals.braintrust_experiment._active_experiment", exp):
         case = {"id": "x", "text": "doc", "expected_doc_class": "contract"}

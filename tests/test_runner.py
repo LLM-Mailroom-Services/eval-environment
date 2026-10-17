@@ -102,6 +102,7 @@ def test_run_task_error_recorded(monkeypatch, sample_case):
 
 
 def test_run_task_concurrency_runs_documents_in_parallel(monkeypatch, sample_case):
+    import threading
     import time
 
     from evals import invoke as invoke_mod
@@ -112,17 +113,26 @@ def test_run_task_concurrency_runs_documents_in_parallel(monkeypatch, sample_cas
     ]
     _stub_load_cases(monkeypatch, cases)
 
+    lock = threading.Lock()
+    state = {"active": 0, "peak": 0}
+
     def _slow(*_a, **_k):
+        with lock:
+            state["active"] += 1
+            state["peak"] = max(state["peak"], state["active"])
         time.sleep(0.35)
+        with lock:
+            state["active"] -= 1
         return {"doc_type": "contract", "confidence": 0.9}
 
     monkeypatch.setattr(invoke_mod, "invoke", _slow)
-    started = time.perf_counter()
     result = run_task("eval:classification", mock=True, n=4, concurrency=4)
-    elapsed = time.perf_counter() - started
     assert result.summary["metrics"]["n"] == 4
     assert result.summary["params"]["concurrency"] == 4
-    assert elapsed < 1.0  # serial would be ~1.4s
+    # Deterministic (was a fragile wall-clock bound): documents actually ran
+    # concurrently, not serially — peak in-flight invokes >= 2. A serial
+    # executor would hold peak at 1.
+    assert state["peak"] >= 2, f"documents ran serially (peak in-flight={state['peak']})"
 
 
 def test_extraction_task_specialist_map_covers_all_five_and_is_1to1():

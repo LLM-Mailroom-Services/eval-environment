@@ -28,8 +28,8 @@ SANDBOX_SPECIALIST_KEYS = (
 )
 PRE_EXISTING_SANDBOX_SHA256 = {
     "contracts_specialist_v1": "d91de3967cc3b12cbd222cc5a4ae167b39578125abc83be7422498dc5024fd24",
-    "corporate_records_specialist_v1": "484e64dd847b7bb35afebca74edc1fb6c381f0f7d5e9367ad8673bec0b8af45c",
-    "correspondence_specialist_v1": "eab63b5afd29906b1ad3aca2d7698bf5c15d4b7f4ce9ade3b744be535d18d4f3",
+    "corporate_records_specialist_v1": "fe13501f667fcd9f64f7dfbf8b0f124f81d9dd039f4109288b43f106f82b1399",
+    "correspondence_specialist_v1": "2b0b81ff98920b9207627707443e2b023db39212fda5bdcba7bfbded39fa38b6",
     "insurance_claims_specialist_v1": "6c2776bcbe00091200aecbcfd21c99f197398d929143dd0c7c722811fa100034",
     "merger_agreement_specialist_v1": "003232584d6890054d956398135f439b86692a1123683f58914c0393b5e1a00b",
 }

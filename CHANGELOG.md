@@ -49,6 +49,18 @@ All notable changes to mailroom-evals are documented here. Format based on
 
 ### Changed
 
+- **Re-froze two corrected `*_v1` specialists** to match the dojo
+  (`llm-dojo-scoring` `production_prompts` v1, Exios66/llm-dojo-scoring#29),
+  via `write_frozen` from `scripts/freeze_prompts.py` as driven by
+  `scripts/promote_sandbox_specialist.py` (no hand edits):
+  `correspondence_specialist_v1` (`other` bucket and `communication_type`
+  spec use `null` instead of an `other` token; 6061 -> 6113 chars, sha256
+  `eab63b5a...` -> `2b0b81ff...`) and `corporate_records_specialist_v1`
+  (`subsidiary_list` `filing_number` is null unless an official filing or
+  document number is stated; exhibit IDs do not qualify; 5801 -> 5865 chars,
+  sha256 `484e64dd...` -> `fe13501f...`). `PRE_EXISTING_SANDBOX_SHA256` pins in
+  `tests/test_prompts.py` updated deliberately.
+
 - **Report excellence (sandbox parity)** — API-leg comparison reports, calibration
   write-ups, and `compare_runs` markdown now include analyst insights, strata,
   scoring-method context (CUAD/MAUD), reproduce/artifacts blocks aligned with

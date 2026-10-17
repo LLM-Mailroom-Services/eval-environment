@@ -1,7 +1,7 @@
 {
  "schema": "eval-site-snapshot",
  "version": 1,
- "generated_at": "2026-10-17T11:20:41+00:00",
+ "generated_at": "2026-10-17T12:02:14+00:00",
  "health": {
   "log_valid": true,
   "log_problems": [],
@@ -33,15 +33,15 @@
      },
      "corporate_records_specialist_v1": {
       "source_kind": "sandbox",
-      "source_key": "corporate_records_specialist_simplified@303e7f0bb05d",
-      "sha256": "484e64dd847b7bb35afebca74edc1fb6c381f0f7d5e9367ad8673bec0b8af45c",
-      "chars": 5801
+      "source_key": "corporate_records_specialist_simplified@303e7f0bb05d+dojo-29-corrected",
+      "sha256": "fe13501f667fcd9f64f7dfbf8b0f124f81d9dd039f4109288b43f106f82b1399",
+      "chars": 5865
      },
      "correspondence_specialist_v1": {
       "source_kind": "sandbox",
-      "source_key": "correspondence_specialist_simplified@303e7f0bb05d",
-      "sha256": "eab63b5afd29906b1ad3aca2d7698bf5c15d4b7f4ce9ade3b744be535d18d4f3",
-      "chars": 6061
+      "source_key": "correspondence_specialist_simplified@303e7f0bb05d+dojo-29-corrected",
+      "sha256": "2b0b81ff98920b9207627707443e2b023db39212fda5bdcba7bfbded39fa38b6",
+      "chars": 6113
      },
      "insurance_claims_specialist_v1": {
       "source_kind": "sandbox",
@@ -922,16 +922,16 @@
     {
      "key": "corporate_records_specialist_v1",
      "source_kind": "sandbox",
-     "source_key": "corporate_records_specialist_simplified@303e7f0bb05d",
-     "sha256": "484e64dd847b7bb35afebca74edc1fb6c381f0f7d5e9367ad8673bec0b8af45c",
-     "chars": 5801
+     "source_key": "corporate_records_specialist_simplified@303e7f0bb05d+dojo-29-corrected",
+     "sha256": "fe13501f667fcd9f64f7dfbf8b0f124f81d9dd039f4109288b43f106f82b1399",
+     "chars": 5865
     },
     {
      "key": "correspondence_specialist_v1",
      "source_kind": "sandbox",
-     "source_key": "correspondence_specialist_simplified@303e7f0bb05d",
-     "sha256": "eab63b5afd29906b1ad3aca2d7698bf5c15d4b7f4ce9ade3b744be535d18d4f3",
-     "chars": 6061
+     "source_key": "correspondence_specialist_simplified@303e7f0bb05d+dojo-29-corrected",
+     "sha256": "2b0b81ff98920b9207627707443e2b023db39212fda5bdcba7bfbded39fa38b6",
+     "chars": 6113
     },
     {
      "key": "insurance_claims_specialist_v1",
@@ -1238,7 +1238,7 @@
      "key": "corporate_records_specialist_v7",
      "parent": "corporate_records_specialist_v6",
      "version": 7,
-     "note": "Amendment of the unreleased v7 draft: explicit certificate_of_formation line (+organizers[], registered_agent; omit authorized_capital) plus subsidiary_list guidance (subject_matter = the listing statement, keywords = subsidiary names). Stays v7.",
+     "note": "Amendment of the unreleased v7 draft: subsidiary_list guidance (subject_matter = the listing statement, keywords = subsidiary names). The certificate_of_formation line (+organizers[], registered_agent; omit authorized_capital) predates this amendment \u2014 it is already part of the interim ec3bccc2 draft. Stays v7.",
      "anchor_head": "You are the corporate-records specialist. THIS document is a",
      "sha256": "253559fcb7ac6b36878453821a4fab0aa94228ad5add77d5aeabb06bb265134c",
      "created_at": "2026-10-17T07:55:00+00:00",

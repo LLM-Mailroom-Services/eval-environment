@@ -300,16 +300,27 @@ def _install_langchain_llm_spans() -> None:
 
 
 def doc_text_sha256(case: dict[str, Any]) -> str:
-    """sha256 of the case document text (experiment-log join key)."""
+    """Return the document-text SHA-256 hex digest used to join experiment logs.
+
+    Missing or falsey ``text`` hashes as an empty string; other values are
+    converted to strings and encoded as UTF-8. Unencodable text raises
+    ``UnicodeEncodeError``.
+    """
     return hashlib.sha256(str(case.get("text") or "").encode("utf-8")).hexdigest()
 
 
 def public_case_ref(case: dict[str, Any]) -> str:
-    """Trace-safe case reference: corpus position without filename or GT tokens.
+    """Return a case reference with a digest in place of the identifying suffix.
 
-    Full ``case["id"]`` values embed the corpus filename (often revealing
-    doc type / subtype). Sinks use this ref; the append-only experiment log
-    keeps the canonical ``case_id``.
+    IDs shaped as ``corpus:<config>:<split>:<suffix>`` retain their prefix
+    and use ``doc#`` plus the first 12 hex characters of the text digest.
+    All other IDs use ``eval-case:doc#`` plus the first 12 hex characters
+    of the stringified ID's UTF-8 SHA-256 digest. Missing or falsey IDs
+    are treated as empty strings. Text hashing runs for all IDs, so
+    ``UnicodeEncodeError`` from either the text or the ID propagates.
+
+    Sinks use this reference; the append-only experiment log keeps the
+    canonical ``case_id``, which can embed a filename revealing document labels.
     """
     raw = str(case.get("id") or "")
     digest = doc_text_sha256(case)[:12]
@@ -322,6 +333,13 @@ def public_case_ref(case: dict[str, Any]) -> str:
 
 
 def _curate_case_input(case: dict[str, Any]) -> dict[str, Any]:
+    """Return a case reference, text digest, character count, config, and split.
+
+    Raw IDs, filenames, labels, and document text are omitted. ``chars``
+    counts characters in stringified text, treating missing or falsey
+    text as empty. ``config`` and ``split`` pass through, defaulting to
+    ``None``; hashing errors propagate.
+    """
     return {
         "case_ref": public_case_ref(case),
         "doc_text_sha256": doc_text_sha256(case),
@@ -365,8 +383,18 @@ def case_span(
     case: dict[str, Any],
     run_meta: dict[str, Any],
 ) -> Iterator[Any]:
-    """One root span per case with curated input; yields a span handle with
-    ``set_output`` / ``set_metrics``. Yields a no-op when backend is none."""
+    """Yield a per-case span handle with ``set_output`` / ``set_metrics``.
+
+    Input uses ``_curate_case_input``. ``run_meta`` is copied without
+    filtering; missing ``case_ref`` and ``doc_text_sha256`` entries are
+    filled from ``case``.
+
+    Yield a no-op for ``none``, unsupported backends, or backend setup
+    failures. Metadata preparation and text encoding errors propagate
+    before backend fallback handling. If the backend lets an ``Exception``
+    from the managed block or span cleanup escape, context exit raises
+    ``RuntimeError``.
+    """
     if backend == "none":
         yield _noop
         return

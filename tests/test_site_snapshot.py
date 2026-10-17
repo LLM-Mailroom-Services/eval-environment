@@ -40,7 +40,7 @@ def test_build_snapshot_shape(logged_run):
     # environment sections populated
     env = snapshot["environment"]
     assert len(env["tasks"]) == 31
-    assert env["corpus"]["revision"] == "46a4d3c240a36671cde0182fff4960f6b8b73aca"
+    assert env["corpus"]["revision"] == "v9.1"  # pinned pipeline 959bb0b (scripts/cloud-agent-install.sh)
     assert len(env["prompts"]["versions"]) == 15
     assert isinstance(env["prompts"]["mutations"], list)
     mutations_path = Path(__file__).resolve().parents[1] / "prompts" / "mutations.json"

@@ -16,15 +16,27 @@ def collect(collect_frozen: Callable[[], dict[str, tuple[str, str, str]]]) -> di
 
 
 def live_frozen_texts() -> dict[str, str]:
-    """The live texts behind every frozen key (drift-check source of truth)."""
+    """The live texts behind every frozen key (drift-check source of truth).
+
+    Resolution order: a pipeline installed in the active environment first
+    (e.g. a git-source override pinned to the release the frozen v1 snapshot
+    was cut against), then the editable sibling checkout ``../llm-mailroom/src``
+    when ``mailroom`` is not installed. The old Digital-Mailroom monorepo
+    layout (``../Digital-Mailroom/packages/llm-mailroom/src``) is gone, so it
+    is no longer probed.
+    """
     import sys
     from pathlib import Path
 
     repo_root = Path(__file__).resolve().parents[3]
-    pipeline_src = repo_root.parent / "Digital-Mailroom" / "packages" / "llm-mailroom" / "src"
-    for path in (str(repo_root / "src"), str(repo_root), str(pipeline_src)):
-        if path not in sys.path:
-            sys.path.insert(0, path)
+    try:
+        import llm.prompts  # noqa: F401  # already importable (installed or on sys.path)
+    except ModuleNotFoundError:
+        # Fall back to the sibling checkout's source tree.
+        sibling_src = str(repo_root.parent / "llm-mailroom" / "src")
+        for path in (str(repo_root / "src"), str(repo_root), sibling_src):
+            if Path(path).exists() and path not in sys.path:
+                sys.path.insert(0, path)
 
     from pipeline.env import load_env
 

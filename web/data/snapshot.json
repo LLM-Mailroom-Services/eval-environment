@@ -1,7 +1,7 @@
 {
  "schema": "eval-site-snapshot",
  "version": 1,
- "generated_at": "2026-10-17T11:04:13+00:00",
+ "generated_at": "2026-10-17T12:33:11+00:00",
  "health": {
   "log_valid": true,
   "log_problems": [],
@@ -867,7 +867,7 @@
   ],
   "corpus": {
    "repo": "Lucius-Morningstar/mailroom-dataset",
-   "revision": "46a4d3c240a36671cde0182fff4960f6b8b73aca",
+   "revision": "v9.1",
    "hub_classes": [
     "contract",
     "merger_agreement",
@@ -1216,7 +1216,7 @@
      "key": "corporate_records_specialist_v7",
      "parent": "corporate_records_specialist_v6",
      "version": 7,
-     "note": "Amendment of the unreleased v7 draft: explicit certificate_of_formation line (+organizers[], registered_agent; omit authorized_capital) plus subsidiary_list guidance (subject_matter = the listing statement, keywords = subsidiary names). Stays v7.",
+     "note": "Amendment of the unreleased v7 draft: subsidiary_list guidance (subject_matter = the listing statement, keywords = subsidiary names). The certificate_of_formation line (+organizers[], registered_agent; omit authorized_capital) predates this amendment \u2014 it is already part of the interim ec3bccc2 draft. Stays v7.",
      "anchor_head": "You are the corporate-records specialist. THIS document is a",
      "sha256": "253559fcb7ac6b36878453821a4fab0aa94228ad5add77d5aeabb06bb265134c",
      "created_at": "2026-10-17T07:55:00+00:00",

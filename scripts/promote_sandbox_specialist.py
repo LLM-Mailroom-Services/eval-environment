@@ -30,10 +30,17 @@ DEFAULT_SANDBOX_SHA = "97c0f940194f030504db0b49443caf90ce749d79"
 
 
 def sha256(text: str) -> str:
+    """Return the SHA-256 hex digest of the text's UTF-8 bytes."""
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def fetch_sandbox_prompt(sha: str, stem: str) -> str:
+    """Fetch UTF-8 prompt text from the sandbox repository at revision ``sha``.
+
+    ``stem`` names ``config/prompts/<stem>.txt`` without the suffix. The
+    request uses a 60-second timeout. HTTP, network, timeout, and UTF-8
+    decoding errors propagate to the caller.
+    """
     url = (
         f"https://raw.githubusercontent.com/{SANDBOX_REPO}/{sha}"
         f"/config/prompts/{stem}.txt"
@@ -50,6 +57,18 @@ def promote_mutation(
     sandbox_stem: str,
     note: str,
 ) -> dict:
+    """Replace a parent's full text with a sandbox prompt as its next version.
+
+    ``sandbox_sha`` selects the sandbox revision; ``sandbox_stem`` names the
+    prompt file without its ``.txt`` suffix. ``new_key`` must be the unused
+    ``<parent_role>_v<parent_version+1>`` key. ``note`` is stored as provenance.
+
+    Append to ``prompts/mutations.json``, regenerate all mutation Markdown
+    mirrors, and return metadata including the new text and its SHA-256 digest.
+    Raise ``KeyError`` for an unknown parent or ``mutations.MutationError``
+    for a failed mutation gate. Fetch, decoding, catalog JSON, and file I/O
+    errors propagate; the mutation remains persisted if mirror rendering fails.
+    """
     from evals.prompts.lineage import resolve
 
     new_text = fetch_sandbox_prompt(sandbox_sha, sandbox_stem)
@@ -73,6 +92,19 @@ def promote_freeze_new(
     sandbox_stem: str,
     source_label: str,
 ) -> dict:
+    """Add a sandbox prompt as a new frozen ``<role>_v1`` catalog entry.
+
+    ``sandbox_sha`` and ``sandbox_stem`` select the revision and prompt file
+    stem to fetch. ``source_label`` becomes the manifest's source key.
+    Rewrite the frozen module, manifest, and all frozen Markdown mirrors
+    using the existing in-memory v1 texts plus the new role.
+
+    Return the new key, text digest, character count, sandbox revision and
+    stem, and total manifest version count. Raise ``SystemExit`` if the role
+    is already frozen. Missing or malformed existing provenance raises
+    ``KeyError`` or ``ValueError``. Fetch, decoding, import, JSON, and file I/O
+    errors propagate; earlier writes are not rolled back on failure.
+    """
     from scripts.freeze_prompts import write_frozen
 
     new_text = fetch_sandbox_prompt(sandbox_sha, sandbox_stem)
@@ -101,6 +133,13 @@ def promote_freeze_new(
 
 
 def main() -> int:
+    """Run a promotion from CLI arguments and print its metadata as JSON.
+
+    ``mutation`` prints the key, digest, and parent; ``freeze-new`` prints
+    the full promotion metadata. Return 0 after a successful promotion.
+    Argument parsing raises ``SystemExit`` for help or invalid arguments;
+    promotion errors propagate.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="cmd", required=True)
 

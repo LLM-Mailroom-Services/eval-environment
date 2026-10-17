@@ -192,7 +192,7 @@ onto flat row keys before scoring.
 | config | train | test | contents |
 |---|---|---|---|
 | `default` | 2,979 | 323 | blind: `filename`, `doc_text`, `prompt`, `metadata` |
-| `ground_truth` | 2,979 | 323 | labels + provenance (36 columns; per-field GT nested in `gt_fields`) |
+| `ground_truth` | 2,979 | 323 | labels + provenance (36 columns at v9.1; 35 at v9.2 — `_published` dropped; per-field GT nested in `gt_fields`) |
 | `fixtures` | 26 | 6 | calibration cells (see [Calibration scenarios](#calibration-scenarios)) |
 | `bundles` | 47 | 3 | duplicate/bundle families |
 | `streams` | 59 | 3 | thread/stream scenarios |

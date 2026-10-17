@@ -26,9 +26,10 @@ this repo has exactly one of each.
 
 - Every run appends ONE run-summary line to `reports/experiment_log.jsonl`
   and carries Braintrust/Phoenix trace ids — no exceptions, including mock.
-- Corpus loads pin `Lucius-Morningstar/mailroom-dataset` (schema v9) revision
-  `ed7576b676343e0b402ec5412cded301e629bdee` (never float on Hub tip); expand
-  the nested `gt_fields` JSON payload before scoring.
+- Corpus loads pin `Lucius-Morningstar/mailroom-dataset` (schema v9) to the
+  published tag `v9.1` (`bc9eab28`; data commit
+  `ed7576b676343e0b402ec5412cded301e629bdee`) — never float on Hub tip;
+  expand the nested `gt_fields` JSON payload before scoring.
 - Mock mode (`--mock`) must never hit the network; real mode needs
   `OPENROUTER_API_KEY`.
 - Archive/intake evals run inside an isolated temp `MAILROOM_BASE_DIR`.

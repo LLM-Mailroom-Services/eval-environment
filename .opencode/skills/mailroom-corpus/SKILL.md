@@ -8,8 +8,11 @@ description: Schema, configs, and subset selection for Lucius-Morningstar/mailro
 The ONE loading path is `evals.cases` → `pipeline.hf_corpus_loader`
 (`Digital-Mailroom/packages/llm-mailroom/src/pipeline/hf_corpus_loader.py`).
 It joins the `ground_truth` config (labels) to `default` (blind text) on
-`filename`, pinned to revision `ed7576b676343e0b402ec5412cded301e629bdee`,
-with `content_sha256` verification. Never zip rows positionally — always join.
+`filename`, pinned to the published tag `v9.1` (`bc9eab28`; data commit
+`ed7576b676343e0b402ec5412cded301e629bdee`), with `content_sha256`
+verification. Never zip rows positionally — always join. The latest published
+tag `v9.2` (`670e8bc6`; parent data commit `d49f60a4`) is not adopted by the
+eval harness.
 
 **Lineage**: `mailroom-dataset` v1 (= schema v9 of the corpus family, 3,302
 rows) is the standalone successor of `Lucius-Morningstar/mailroom-corpus`
@@ -18,12 +21,12 @@ kept for lineage reference — never destroyed). The v8 base + 1,302 expansion
 draws: contract +91, corporate_record +411, correspondence +650,
 insurance_claim +150.
 
-## Configs (verified against the Dataset Viewer, v9.1 pin `ed7576b6` — supersedes GT-closure `46a4d3c2`)
+## Configs (verified against the Dataset Viewer; v9.1 tag `bc9eab28` / data commit `ed7576b6` — supersedes GT-closure `46a4d3c2`)
 
 | config | train | test | contents |
 | --- | --- | --- | --- |
 | `default` | 2979 | 323 | blind: `filename`, `doc_text`, `prompt`, `metadata` — zero labels by construction |
-| `ground_truth` | 2979 | 323 | labels + provenance (36 cols; per-field GT nested in `gt_fields`) |
+| `ground_truth` | 2979 | 323 | labels + provenance (36 cols at v9.1; 35 at v9.2 — `_published` dropped; per-field GT nested in `gt_fields`) |
 | `fixtures` | 26 | 6 | calibration cells (see [calibration](../calibration/SKILL.md)) |
 | `bundles` | 47 | 3 | duplicate/bundle families (`bundle_family`, `duplicate_type`) |
 | `streams` | 59 | 3 | thread/stream scenarios (`thread_position`, `thread_size`) |

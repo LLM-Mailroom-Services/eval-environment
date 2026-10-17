@@ -131,7 +131,7 @@ subagents:
     title: Trace Log Analyst
     home_package: llm-mailroom
     packages: [llm-mailroom, local-mailroom-sandbox, mailroom-dev]
-    family_source: llm-mailroom @ 28cb4be8
+    family_source: llm-mailroom @ 959bb0b
     tags: [langfuse, tracing, observability]
     harnesses: [cursor, opencode, opencode-global]
     opencode:
@@ -145,7 +145,7 @@ subagents:
     title: Mailroom Architecture Optimizer
     home_package: llm-mailroom
     packages: [llm-mailroom, local-mailroom-sandbox, mailroom-dev]
-    family_source: llm-mailroom @ 28cb4be8
+    family_source: llm-mailroom @ 959bb0b
     tags: [architecture, pipeline]
     harnesses: [cursor, opencode, opencode-global]
     opencode:
@@ -159,7 +159,7 @@ subagents:
     title: Legal Changelog Auditor
     home_package: llm-mailroom
     packages: [llm-mailroom, local-mailroom-sandbox, mailroom-dev]
-    family_source: llm-mailroom @ 28cb4be8
+    family_source: llm-mailroom @ 959bb0b
     tags: [governance, documentation]
     harnesses: [cursor, opencode, opencode-global]
     opencode:

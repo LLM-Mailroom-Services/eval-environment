@@ -17,7 +17,7 @@
 set -euo pipefail
 
 MAILROOM_REPO="https://github.com/Exios66/llm-mailroom.git"
-MAILROOM_REV="28cb4be816fbb60e56cd3bb2ab72f8d9be1ab636"
+MAILROOM_REV="959bb0bce1524aa4e0ee602ca37985664c6acbea"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"

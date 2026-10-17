@@ -77,6 +77,14 @@ All notable changes to mailroom-evals are documented here. Format based on
   the effective corpus revision follows the pinned pipeline version — confirm
   the resolved revision before scoring
   ([#57](https://github.com/LLM-Mailroom-Services/eval-environment/issues/57)).
+- **Runtime pin aligned to v9.1** — both bootstrap scripts now pin
+  `llm-mailroom` at `959bb0bce1524aa4e0ee602ca37985664c6acbea` (`mailroom`
+  0.7.1, dojo git pin v0.16.0), so `FULL_CORPUS_REVISION` resolves the
+  published tag `v9.1` instead of the GT-closure SHA. The viewer snapshot is
+  regenerated under that pin, and `scripts/export_site_snapshot.py --check`
+  now compares the environment, prompts, tasks, health and totals (not just
+  `runs`), so a silently stale snapshot fails CI. `tests/test_site_snapshot.py`
+  pins the corpus literal to `v9.1`.
 - **Non-negotiable numbering in `AGENTS.md`** — the per-agent performance,
   frozen lineage and viewer-snapshot items are now 9/10/11 (the list
   previously carried two `9.` entries). No semantic change.

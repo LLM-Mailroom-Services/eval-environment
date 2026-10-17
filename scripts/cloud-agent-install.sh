@@ -38,8 +38,8 @@ if "Digital-Mailroom" in rel.parts:
 else:
     dest = (root / rel).resolve()
     url = "https://github.com/Exios66/llm-mailroom.git"
-    # main @ 2026-09-24, mailroom 0.7.1 with dojo git pin v0.15.0
-    pin = "28cb4be816fbb60e56cd3bb2ab72f8d9be1ab636"
+    # main @ 2026-09-27, mailroom 0.7.1 with dojo git pin v0.16.0 (corpus pin v9.1)
+    pin = "959bb0bce1524aa4e0ee602ca37985664c6acbea"
 
 print(f"DEST={dest}")
 print(f"URL={url}")

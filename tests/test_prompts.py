@@ -10,6 +10,7 @@ from evals.prompts.registry import activate, deactivate, default_keys, resolved_
 
 
 def test_frozen_v1_complete():
+    """Check the frozen catalog's size, lineage, version keys, and provenance."""
     assert len(frozen_v1.VERSIONS) == 15
     assert frozen_v1.LINEAGE_ID == "mailroom-dataset-v1"
     assert frozen_v1.FROZEN_VERSION == 1
@@ -30,6 +31,7 @@ def test_frozen_v1_production_markers():
 
 
 def test_roles_mapping():
+    """Check that supported roles map to their default frozen prompt keys."""
     roles_map = roles()
     assert roles_map["sorter"] == "sorter_v1"
     assert roles_map["judge-classification"] == "judge-classification_v1"
@@ -48,6 +50,7 @@ def test_resolve_all_layers():
 
 
 def test_verify_lineage_matches():
+    """Check that lineage verification reports no drift and includes every role."""
     result = verify_lineage()
     assert result["ok"], f"drifted: {result['drifted']}"
     assert len(result["manifest"]["versions"]) == 15

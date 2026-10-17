@@ -392,6 +392,7 @@ def _intake_result(case: dict[str, Any], update: dict[str, Any]) -> dict[str, An
 
 
 def _specialist_for_class(doc_class: str) -> str | None:
+    """Return the specialist agent for a document class, or None if unknown."""
     return {
         "contract": "contracts_specialist",
         "merger_agreement": "merger_agreement_specialist",

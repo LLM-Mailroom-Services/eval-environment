@@ -30,10 +30,12 @@ DEFAULT_SANDBOX_SHA = "97c0f940194f030504db0b49443caf90ce749d79"
 
 
 def sha256(text: str) -> str:
+    """Return the hexadecimal SHA-256 digest of UTF-8 prompt text."""
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def fetch_sandbox_prompt(sha: str, stem: str) -> str:
+    """Fetch and decode a sandbox prompt at the specified Git revision."""
     url = (
         f"https://raw.githubusercontent.com/{SANDBOX_REPO}/{sha}"
         f"/config/prompts/{stem}.txt"
@@ -50,6 +52,11 @@ def promote_mutation(
     sandbox_stem: str,
     note: str,
 ) -> dict:
+    """Persist sandbox text as a prompt mutation and refresh Markdown mirrors.
+
+    Replace the full parent text through the mutation gates and return the
+    resulting mutation metadata.
+    """
     from evals.prompts.lineage import resolve
 
     new_text = fetch_sandbox_prompt(sandbox_sha, sandbox_stem)
@@ -67,6 +74,7 @@ def promote_mutation(
 
 
 def _safe_ident(role: str) -> str:
+    """Replace hyphens in a role name with underscores for catalog identifiers."""
     return role.replace("-", "_")
 
 
@@ -143,6 +151,11 @@ def promote_freeze_new(
     sandbox_stem: str,
     source_label: str,
 ) -> dict:
+    """Add a new sandbox role to the frozen catalog and return its metadata.
+
+    Preserve existing role texts and provenance, and exit if the role is
+    already frozen. Write the module, mirrors, and manifest for the catalog.
+    """
     new_text = fetch_sandbox_prompt(sandbox_sha, sandbox_stem)
     frozen: dict[str, tuple[str, str, str]] = {}
     for key, text in frozen_v1.VERSIONS.items():
@@ -167,6 +180,7 @@ def promote_freeze_new(
 
 
 def main() -> int:
+    """Run the selected promotion command, print JSON metadata, and return zero."""
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="cmd", required=True)
 

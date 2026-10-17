@@ -30,8 +30,8 @@ specialty skill:
    corporate label repair exists as untagged branch `0a2f8292`, pushed
    2026-10-17). Runtime resolves
    `FULL_CORPUS_REVISION` from the installed `mailroom` package — the cloud
-   install's `28cb4be` pin still resolves the GT-closure SHA, so confirm the
-   resolved revision before scoring. The v8 parent `mailroom-corpus` @
+   install pins `959bb0b`, which resolves this tag, so confirm the resolved
+   revision before scoring. The v8 parent `mailroom-corpus` @
    `eafe1ab4c0d330d8f9c7a5fb254155e75d290828` stays frozen
    for lineage reference. Join `ground_truth` ⇆ `default` on `filename`; never
    zip positionally; expand the nested `gt_fields` JSON payload before scoring.
@@ -63,11 +63,12 @@ specialty skill:
    or `prompts/*.md` by hand; mutations append via
    `evals.prompts.mutations.apply_mutation` (four gates, one rule per A/B).
    Drift-check with `scripts/freeze_prompts.py --check`.
-11. **Refresh the viewer snapshot.** When the experiment log changes,
-    re-run `scripts/export_site_snapshot.py` and commit
-    `web/data/snapshot.json` — the Vercel viewer reads only that file.
-    Then re-run `scripts/render_report_charts.py` and commit
-    `web/data/charts/` + `reports/charts/README.md` (CI checks both).
+11. **Refresh the viewer snapshot.** When the experiment log, corpus pin,
+    prompts, tasks, skills or tests change, re-run
+    `scripts/export_site_snapshot.py` and commit `web/data/snapshot.json` —
+    the Vercel viewer reads only that file. Then re-run
+    `scripts/render_report_charts.py` and commit `web/data/charts/` +
+    `reports/charts/README.md` (CI checks both).
 
 ## Commands
 
@@ -89,7 +90,7 @@ uv run python scripts/freeze_prompts.py --check      # prompt lineage drift chec
 uv run python scripts/export_site_snapshot.py        # refresh the Vercel viewer snapshot
 uv run python scripts/export_site_snapshot.py --check  # exit 1 if snapshot is stale
 node scripts/viewer_smoke.js                         # headless viewer regression check (needs node)
-uv run pytest tests/ -q                              # hermetic test suite (124 tests)
+uv run pytest tests/ -q                              # hermetic test suite
 uv run python scripts/render_experiment_log.py --validate
 uv run python scripts/render_experiment_log.py       # rebuild markdown
 ```
@@ -141,6 +142,15 @@ are not acceptable.
 ## Cursor Cloud specific instructions
 
 - Bootstrap with `bash scripts/cloud-agent-install.sh` (also the Cloud Agent `install` command). It installs `uv` into `/usr/local/bin` (no shell-profile edits), clones the gitignored pipeline path from `[tool.uv.sources] mailroom`, and runs `uv sync --extra dev --frozen`. Re-running it is safe.
-- This branch pins `Digital-Mailroom` at `e5eeac603edf27f9fe4f306cf086aa9c31965d9a` (`mailroom` 0.7.1, workspace `llm-dojo-scoring` 0.15.0). `main` uses `../llm-mailroom` and the script pins that clone at `28cb4be816fbb60e56cd3bb2ab72f8d9be1ab636`. On that standalone checkout the script removes `[tool.uv.sources]` so `uv run` uses the git pin instead of a workspace member that is not present. Do not rewrite `uv.lock` to follow a newer pipeline tip.
+- The pipeline resolves as a path source: `../llm-mailroom` (standalone
+  `Exios66/llm-mailroom` clone), pinned by `scripts/cloud-agent-install.sh`
+  and `scripts/ci_bootstrap_pipeline.sh` at
+  `959bb0bce1524aa4e0ee602ca37985664c6acbea` (`mailroom` 0.7.1, dojo git pin
+  v0.16.0, corpus pin `v9.1`). On that standalone checkout the script removes
+  `[tool.uv.sources]` so `uv run` uses the git pin instead of a workspace
+  member that is not present. `uv.lock` is refreshed in lockstep with the pin
+  (now dojo v0.16.0); do not float it to a newer pipeline tip. (The legacy
+  `Digital-Mailroom/packages/llm-mailroom` layout branch of the install
+  script remains for historical branches only.)
 - Hermetic checks: `uv run pytest tests/ -q`, `uv run python scripts/freeze_prompts.py --check`, `node scripts/viewer_smoke.js`. Product smoke: `uv run python scripts/run_evals.py --list`, then `uv run python scripts/run_evals.py --task eval:classification --mock --n 3`. `--mock` does not call an LLM. `--real` needs `OPENROUTER_API_KEY`.
 - The eval viewer is static. The environment terminal `eval-viewer` serves `web/` on port 4173 (`http://localhost:4173/`, snapshot at `data/snapshot.json`). Do not export `OBSERVABILITY_PROVIDER` or `MAILROOM_BASE_DIR`.

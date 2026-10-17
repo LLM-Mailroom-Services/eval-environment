@@ -10,7 +10,7 @@ local Arize Phoenix. Every run lands in one centralized, append-only
 experiment log — machine-readable JSONL, human-readable markdown tables.
 
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
-[![Pipeline under test](https://img.shields.io/badge/pipeline-llm--mailroom%20v0.7.0-4C8CBF)](https://github.com/LLM-Mailroom-Services/Digital-Mailroom)
+[![Pipeline under test](https://img.shields.io/badge/pipeline-llm--mailroom%20v0.7.1-4C8CBF)](https://github.com/LLM-Mailroom-Services/Digital-Mailroom)
 [![Dataset](https://img.shields.io/badge/dataset-Lucius--Morningstar%2Fmailroom--dataset%20v9-F5A623)](https://huggingface.co/datasets/Lucius-Morningstar/mailroom-dataset)
 [![Tracing](https://img.shields.io/badge/tracing-Braintrust%20%7C%20Phoenix-8A2BE2)](#trace-sinks)
 [![Tasks](https://img.shields.io/badge/tasks-31%20registered-2EA043)](#the-task-families)
@@ -183,7 +183,7 @@ standalone successor of the frozen v8 `mailroom-corpus`; supersedes GT-closure
 `670e8bc6`), with
 `content_sha256` verification. The effective runtime revision is
 `FULL_CORPUS_REVISION` from the installed `mailroom` package — the cloud
-install's `28cb4be` pin still resolves the GT-closure SHA, so confirm the
+install pins `959bb0b`, which resolves this tag; confirm the
 resolved revision before scoring. Never
 zip rows positionally — always join. The nested `gt_fields` JSON payload
 (13 insurance fields + `cuad_clause_labels` + `maud_clause_labels`) is expanded
@@ -555,7 +555,7 @@ eval-environment/
 │   ├── freeze_prompts.py              # freeze the lineage + drift check
 │   ├── prompt_engineer.py             # GEPA DRAFT tool (one surgical mutation per iteration)
 │   └── render_experiment_log.py       # rebuild/validate the markdown log
-├── tests/                             # hermetic pytest suite (124 tests)
+├── tests/                             # hermetic pytest suite
 ├── .opencode/skills/                  # project skills (router + specialties)
 └── .opencode/agents/                  # subagents (runner, corpus, traces, calibration, log, GEPA)
 ```

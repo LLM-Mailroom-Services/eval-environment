@@ -40,7 +40,7 @@ def test_build_snapshot_shape(logged_run):
     # environment sections populated
     env = snapshot["environment"]
     assert len(env["tasks"]) == 31
-    assert env["corpus"]["revision"] == "46a4d3c240a36671cde0182fff4960f6b8b73aca"
+    assert env["corpus"]["revision"] == "v9.1"  # pinned pipeline 959bb0b (scripts/cloud-agent-install.sh)
     assert len(env["prompts"]["versions"]) == 15
     assert isinstance(env["prompts"]["mutations"], list)
     mutations_path = Path(__file__).resolve().parents[1] / "prompts" / "mutations.json"
@@ -82,10 +82,56 @@ def test_check_mode_detects_stale(logged_run, tmp_path, monkeypatch):
     snapshot = snap.build_snapshot()
     (tmp_path / "snapshot.json").write_text(json.dumps(snapshot))
     assert _run_main(["--check"]) == 0
+    # stale environment surfaces (all previously ignored by the runs-only check)
+    for mutate in (
+        lambda s: s["environment"]["prompts"]["mutations"].pop(),
+        lambda s: s["environment"]["inventory"].__setitem__(
+            "test_count", s["environment"]["inventory"]["test_count"] + 1
+        ),
+        lambda s: s["environment"]["tasks"].pop(),
+        lambda s: s["health"].__setitem__(
+            "lineage_drift_free", not s["health"]["lineage_drift_free"]
+        ),
+    ):
+        tampered = json.loads(json.dumps(snapshot))
+        mutate(tampered)
+        (tmp_path / "snapshot.json").write_text(json.dumps(tampered))
+        assert _run_main(["--check"]) == 1
+    # benign drift stays green: clock, run order, empty embedded cases
+    benign = json.loads(json.dumps(snapshot))
+    benign["generated_at"] = "2000-01-01T00:00:00+00:00"
+    benign["runs"] = list(reversed(benign["runs"]))
+    for rows in benign["cases"].values():
+        rows.clear()
+    (tmp_path / "snapshot.json").write_text(json.dumps(benign))
+    assert _run_main(["--check"]) == 0
     # tampered runs -> stale
     snapshot["runs"] = []
     (tmp_path / "snapshot.json").write_text(json.dumps(snapshot))
     assert _run_main(["--check"]) == 1
+
+
+def test_check_reports_the_stale_path(logged_run, tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(snap, "SNAPSHOT_PATH", tmp_path / "snapshot.json")
+    snapshot = snap.build_snapshot()
+    snapshot["environment"]["prompts"]["mutations"].pop()
+    (tmp_path / "snapshot.json").write_text(json.dumps(snapshot))
+    assert _run_main(["--check"]) == 1
+    stderr = capsys.readouterr().err
+    assert "STALE:" in stderr
+    assert "environment.prompts.mutations" in stderr
+
+
+def test_check_reports_missing_pipeline(logged_run, tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(snap, "SNAPSHOT_PATH", tmp_path / "snapshot.json")
+    (tmp_path / "snapshot.json").write_text(json.dumps(snap.build_snapshot()))
+
+    def boom(*args, **kwargs):
+        raise ModuleNotFoundError("No module named 'pipeline'")
+
+    monkeypatch.setattr(snap, "build_snapshot", boom)
+    assert _run_main(["--check"]) == 2
+    assert "cannot probe the pipeline" in capsys.readouterr().err
 
 
 def _run_main(argv):

@@ -4,8 +4,16 @@
 The viewer (web/) is a zero-dependency static site: this script bakes the
 append-only experiment log, the task catalog, the corpus pin, the frozen
 prompt lineage, and environment health into ONE tracked JSON file that
-Vercel serves. Refresh discipline: run this whenever the experiment log
-changes, then commit `reports/` and the snapshot together.
+Vercel serves. Refresh discipline: run this whenever the experiment log,
+corpus pin, prompts, tasks, skills or tests change, then commit `reports/`
+and the snapshot together.
+
+`--check` compares every top-level section except `generated_at` (wall
+clock) and `cases` content (gitignored run artifacts; shape-checked only),
+so a stale environment/prompt/task surface fails CI instead of passing
+silently. The snapshot must be generated under the pipeline pin CI installs
+(see `scripts/cloud-agent-install.sh`); `environment.corpus` and
+`health.lineage_*` probe the installed `mailroom` package.
 
     uv run python scripts/export_site_snapshot.py            # write snapshot
     uv run python scripts/export_site_snapshot.py --check    # exit 1 if stale
@@ -278,7 +286,7 @@ def _totals(runs: list[dict]) -> dict:
     }
 
 
-def build_snapshot() -> dict:
+def build_snapshot(embed_cases: bool = True) -> dict:
     raw_runs = elog.load_runs()
     run_records = [r for r in raw_runs if r.get("record_kind") != "comparison_result"]
     runs = [_trim_run(r) for r in run_records]
@@ -298,8 +306,109 @@ def build_snapshot() -> dict:
         },
         "totals": _totals(runs),
         "runs": runs,
-        "cases": {run["run_id"]: _embed_cases(run) for run in runs},
+        # --check embeds no cases: data/experiments/ is gitignored and absent
+        # in CI. The committed file's case structure is shape-checked instead.
+        "cases": {run["run_id"]: _embed_cases(run) for run in runs} if embed_cases else {},
     }
+
+
+# --check compare set: everything except the wall clock and gitignored case
+# content. `runs` is compared as a canonical multiset (resume segments can
+# share a run_id); `cases` is shape-checked against the committed file.
+_CHECK_SECTIONS = ("schema", "version", "health", "environment", "totals")
+_MAX_PROBLEMS = 12
+
+
+def _clip(value: Any, limit: int = 90) -> str:
+    text = value if isinstance(value, str) else json.dumps(value, sort_keys=True)
+    return text if len(text) <= limit else text[: limit - 1] + "…"
+
+
+def _keys(items: list) -> list[str]:
+    out = []
+    for item in items:
+        if isinstance(item, dict):
+            out.append(str(item.get("key") or item.get("task_id") or item.get("agent") or item))
+        else:
+            out.append(str(item))
+    return out
+
+
+def _list_note(committed: list, fresh: list) -> str:
+    old = dict(zip(_keys(committed), committed))
+    new = dict(zip(_keys(fresh), fresh))
+    added, removed = sorted(set(new) - set(old)), sorted(set(old) - set(new))
+    changed = sorted(
+        key
+        for key in set(old) & set(new)
+        if json.dumps(old[key], sort_keys=True) != json.dumps(new[key], sort_keys=True)
+    )
+    parts = []
+    if added:
+        parts.append("added " + ", ".join(added[:5]) + ("…" if len(added) > 5 else ""))
+    if removed:
+        parts.append("removed " + ", ".join(removed[:5]) + ("…" if len(removed) > 5 else ""))
+    if changed:
+        parts.append("changed " + ", ".join(changed[:5]) + ("…" if len(changed) > 5 else ""))
+    return f" ({'; '.join(parts)})" if parts else ""
+
+
+def _walk_diffs(committed: Any, fresh: Any, path: str) -> list[str]:
+    if isinstance(committed, dict) and isinstance(fresh, dict):
+        diffs: list[str] = []
+        for key in sorted(set(committed) | set(fresh)):
+            child = f"{path}.{key}" if path else str(key)
+            if key not in committed:
+                diffs.append(f"{child}: missing in snapshot -> fresh {_clip(fresh[key])}")
+            elif key not in fresh:
+                diffs.append(f"{child}: snapshot {_clip(committed[key])} -> missing in fresh")
+            else:
+                diffs.extend(_walk_diffs(committed[key], fresh[key], child))
+        return diffs
+    if isinstance(committed, list) and isinstance(fresh, list):
+        if committed != fresh:
+            return [
+                f"{path}: snapshot {len(committed)} entries -> fresh {len(fresh)}"
+                f"{_list_note(committed, fresh)}"
+            ]
+        return []
+    if committed != fresh:
+        return [f"{path}: snapshot {_clip(committed)} -> fresh {_clip(fresh)}"]
+    return []
+
+
+def _run_diffs(committed: list, fresh: list) -> list[str]:
+    old = sorted(json.dumps(run, sort_keys=True) for run in committed)
+    new = sorted(json.dumps(run, sort_keys=True) for run in fresh)
+    if old == new:
+        return []
+    old_ids = [json.loads(row).get("run_id") for row in old]
+    new_ids = [json.loads(row).get("run_id") for row in new]
+    if old_ids == new_ids:
+        return ["runs: same run ids differ in content"]
+    return [
+        f"runs: snapshot {len(old)} rows -> fresh {len(new)} rows"
+        f" ({len(set(new_ids) - set(old_ids))} new, {len(set(old_ids) - set(new_ids))} removed)"
+    ]
+
+
+def _case_problems(cases: Any, runs: list) -> list[str]:
+    if not isinstance(cases, dict):
+        return ["cases: snapshot value is not an object"]
+    run_ids = {run.get("run_id") for run in runs}
+    missing = sorted(str(run_id) for run_id in run_ids - set(cases))
+    orphans = sorted(str(run_id) for run_id in set(cases) - run_ids)
+    problems: list[str] = []
+    if missing:
+        problems.append(f"cases: missing entries for {len(missing)} run(s), e.g. {missing[0]}")
+    if orphans:
+        problems.append(f"cases: {len(orphans)} orphan entry/entries, e.g. {orphans[0]}")
+    for run_id, rows in cases.items():
+        if not isinstance(rows, list):
+            problems.append(f"cases.{run_id}: not a list")
+        elif len(rows) > CASE_CAP:
+            problems.append(f"cases.{run_id}: {len(rows)} rows > cap {CASE_CAP}")
+    return problems
 
 
 def main() -> int:
@@ -308,22 +417,56 @@ def main() -> int:
                         help="exit 1 if the committed snapshot is stale vs the log")
     args = parser.parse_args()
 
-    snapshot = build_snapshot()
-    payload = json.dumps(snapshot, indent=1, sort_keys=False)
-
     if args.check:
         if not SNAPSHOT_PATH.exists():
             print(f"STALE: {SNAPSHOT_PATH} missing")
             return 1
-        current = SNAPSHOT_PATH.read_text()
-        # Staleness = log content differs (ignore the generated_at stamp).
-        current_runs = json.loads(current)["runs"] if current.strip() else []
-        if json.dumps(current_runs, sort_keys=True) != json.dumps(snapshot["runs"], sort_keys=True):
-            print("STALE: snapshot runs differ from the experiment log — re-run without --check")
+        try:
+            # JSON-normalize the fresh build (tuples -> lists) so it compares
+            # exactly like the committed file that is loaded from disk.
+            snapshot = json.loads(json.dumps(build_snapshot(embed_cases=False)))
+        except ModuleNotFoundError as exc:
+            print(
+                f"ERROR: cannot probe the pipeline ({exc}); run bash scripts/cloud-agent-install.sh",
+                file=sys.stderr,
+            )
+            return 2
+        try:
+            current = json.loads(SNAPSHOT_PATH.read_text())
+        except json.JSONDecodeError as exc:
+            print(f"STALE: {SNAPSHOT_PATH} is not valid JSON ({exc})")
+            return 1
+
+        problems: list[str] = []
+        for key in _CHECK_SECTIONS:
+            problems.extend(_walk_diffs(current.get(key), snapshot.get(key), key))
+        problems.extend(_run_diffs(current.get("runs") or [], snapshot["runs"]))
+        problems.extend(_case_problems(current.get("cases") or {}, snapshot["runs"]))
+
+        if problems:
+            print(f"STALE: {SNAPSHOT_PATH} is out of date:", file=sys.stderr)
+            for problem in problems[:_MAX_PROBLEMS]:
+                print(f"  - {problem}", file=sys.stderr)
+            if len(problems) > _MAX_PROBLEMS:
+                print(f"  … {len(problems) - _MAX_PROBLEMS} more problem(s)", file=sys.stderr)
+            if any(problem.startswith(("environment.corpus", "health.lineage")) for problem in problems):
+                print(
+                    "  NOTE: environment.corpus and health.lineage_* probe the installed mailroom;"
+                    " a difference means this machine's pipeline pin differs. Regenerate under the"
+                    " pinned pipeline (bash scripts/cloud-agent-install.sh) or bump the pin.",
+                    file=sys.stderr,
+                )
+            print(
+                "  Fix: uv run python scripts/export_site_snapshot.py &&"
+                " uv run python scripts/render_report_charts.py",
+                file=sys.stderr,
+            )
             return 1
         print(f"OK: snapshot current ({snapshot['health']['log_records']} runs)")
         return 0
 
+    snapshot = build_snapshot()
+    payload = json.dumps(snapshot, indent=1, sort_keys=False)
     SNAPSHOT_PATH.parent.mkdir(parents=True, exist_ok=True)
     SNAPSHOT_PATH.write_text(payload + "\n")
     size = SNAPSHOT_PATH.stat().st_size

@@ -12,7 +12,7 @@ dependencies = [
     # observability backends, and the HF corpus loader with it).
     "mailroom",
     # Scoring suite — resolved transitively via mailroom's own dependency pin
-    # (git+https://github.com/Exios66/llm-dojo-scoring.git@v0.15.0). v0.15.0
+    # (git+https://github.com/Exios66/llm-dojo-scoring.git@v0.16.0). v0.16.0
     # ships configure_from_taxonomy(): the harness wires the corpus taxonomy
     # once at process start (src/evals/dojo_wiring.py) so
     # field_scoring.get_field_types(doc_class) auto-resolves real field-type
@@ -40,7 +40,7 @@ dev = [
 mailroom = { path = "../llm-mailroom", editable = true }
 
 # llm-dojo-scoring is intentionally NOT listed here: it resolves transitively
-# from mailroom's own `llm-dojo-scoring @ git+...@v0.15.0` dependency pin.
+# from mailroom's own `llm-dojo-scoring @ git+...@v0.16.0` dependency pin.
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -6,7 +6,7 @@ description: Schema, configs, and subset selection for Lucius-Morningstar/mailro
 # mailroom-corpus (schema v9 — `mailroom-dataset`)
 
 The ONE loading path is `evals.cases` → `pipeline.hf_corpus_loader`
-(`Digital-Mailroom/packages/llm-mailroom/src/pipeline/hf_corpus_loader.py`).
+(sibling `../llm-mailroom/src/pipeline/hf_corpus_loader.py`).
 It joins the `ground_truth` config (labels) to `default` (blind text) on
 `filename`, pinned to revision `ed7576b676343e0b402ec5412cded301e629bdee`,
 with `content_sha256` verification. Never zip rows positionally — always join.

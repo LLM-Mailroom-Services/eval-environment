@@ -5,9 +5,11 @@ description: How to invoke llm-mailroom graph nodes and agents in isolation from
 
 # Pipeline internals (for eval invocation)
 
-Canonical code: `Digital-Mailroom/packages/llm-mailroom/src/` (installed
-editable as top-level modules: `agents`, `graph`, `pipeline`, `observability`,
-`llm`, `schemas`).
+Canonical code: the `mailroom` package installed in the env, resolved from
+the `../llm-mailroom` sibling clone (installed editable as top-level modules:
+`agents`, `graph`, `pipeline`, `observability`, `llm`, `schemas`; the
+retired `Digital-Mailroom/packages/llm-mailroom` monorepo layout is no
+longer probed).
 
 ## Graph nodes (build_graph.py:2487-2503)
 

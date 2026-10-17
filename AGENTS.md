@@ -142,15 +142,6 @@ are not acceptable.
 ## Cursor Cloud specific instructions
 
 - Bootstrap with `bash scripts/cloud-agent-install.sh` (also the Cloud Agent `install` command). It installs `uv` into `/usr/local/bin` (no shell-profile edits), clones the gitignored pipeline path from `[tool.uv.sources] mailroom`, and runs `uv sync --extra dev --frozen`. Re-running it is safe.
-- The pipeline resolves as a path source: `../llm-mailroom` (standalone
-  `Exios66/llm-mailroom` clone), pinned by `scripts/cloud-agent-install.sh`
-  and `scripts/ci_bootstrap_pipeline.sh` at
-  `959bb0bce1524aa4e0ee602ca37985664c6acbea` (`mailroom` 0.7.1, dojo git pin
-  v0.16.0, corpus pin `v9.1`). On that standalone checkout the script removes
-  `[tool.uv.sources]` so `uv run` uses the git pin instead of a workspace
-  member that is not present. `uv.lock` is refreshed in lockstep with the pin
-  (now dojo v0.16.0); do not float it to a newer pipeline tip. (The legacy
-  `Digital-Mailroom/packages/llm-mailroom` layout branch of the install
-  script remains for historical branches only.)
+- Pipeline source resolution (`scripts/freeze_prompts.py --check` and the prompt drift check): the `mailroom` package installed in the active environment first (this branch's `[tool.uv.sources]` maps `mailroom` to the standalone Exios66/llm-mailroom sibling clone at `../llm-mailroom`, currently 0.7.1 with llm-dojo-scoring git pin v0.16.0; override that mapping with a git source pin when the repo moves machines), then the editable source tree `../llm-mailroom/src` when the package is not importable. The old Digital-Mailroom monorepo layout (`../Digital-Mailroom/packages/llm-mailroom/src`) is retired and no longer probed. A partial install (some pipeline modules resolve, the rest do not) fails loudly; no source at all is an explicit documented skip. Do not rewrite `uv.lock` to follow a newer pipeline tip. Install pinning lives in `scripts/cloud-agent-install.sh`.
 - Hermetic checks: `uv run pytest tests/ -q`, `uv run python scripts/freeze_prompts.py --check`, `node scripts/viewer_smoke.js`. Product smoke: `uv run python scripts/run_evals.py --list`, then `uv run python scripts/run_evals.py --task eval:classification --mock --n 3`. `--mock` does not call an LLM. `--real` needs `OPENROUTER_API_KEY`.
 - The eval viewer is static. The environment terminal `eval-viewer` serves `web/` on port 4173 (`http://localhost:4173/`, snapshot at `data/snapshot.json`). Do not export `OBSERVABILITY_PROVIDER` or `MAILROOM_BASE_DIR`.

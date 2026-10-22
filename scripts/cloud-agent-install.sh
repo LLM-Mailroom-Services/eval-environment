@@ -28,8 +28,8 @@ with (root / "pyproject.toml").open("rb") as handle:
 rel = Path(spec["tool"]["uv"]["sources"]["mailroom"]["path"])
 
 # Two layouts are in tree history:
-# - this branch: Digital-Mailroom/packages/llm-mailroom (workspace member)
-# - main: ../llm-mailroom (standalone Exios66/llm-mailroom clone)
+# - historical: Digital-Mailroom/packages/llm-mailroom (workspace member)
+# - current (main and feature branches): ../llm-mailroom (standalone Exios66/llm-mailroom clone)
 if "Digital-Mailroom" in rel.parts:
     dest = root / "Digital-Mailroom"
     url = "https://github.com/LLM-Mailroom-Services/Digital-Mailroom.git"
